@@ -1,0 +1,2 @@
+Remove-Item "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\EarTrumpet.lnk" -ErrorAction Continue
+Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "EarTrumpet"
