@@ -1,13 +1,17 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace EarTrumpet.UI.Controls
 {
     public class VolumeSlider : Slider
     {
+        // Smoothing factor: higher = faster response, lower = smoother (0.0 - 1.0)
+        private const double SmoothingFactor = 0.15;
+        
         public float PeakValue1
         {
             get { return (float)this.GetValue(PeakValue1Property); }
@@ -28,6 +32,13 @@ namespace EarTrumpet.UI.Controls
         private Border _peakMeter2;
         private Thumb _thumb;
         private Point _lastMousePosition;
+        
+        // Smooth animation state
+        private double _currentWidth1;
+        private double _currentWidth2;
+        private double _targetWidth1;
+        private double _targetWidth2;
+        private bool _isAnimating;
 
         public VolumeSlider() : base()
         {
@@ -39,6 +50,7 @@ namespace EarTrumpet.UI.Controls
             MouseMove += OnMouseMove;
             MouseWheel += OnMouseWheel;
             Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
@@ -46,6 +58,59 @@ namespace EarTrumpet.UI.Controls
             _thumb = (Thumb)GetTemplateChild("SliderThumb");
             _peakMeter1 = (Border)GetTemplateChild("PeakMeter1");
             _peakMeter2 = (Border)GetTemplateChild("PeakMeter2");
+            
+            // Initialize current widths
+            _currentWidth1 = 0;
+            _currentWidth2 = 0;
+            
+            // Start the render loop for smooth animation
+            StartAnimation();
+        }
+        
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            StopAnimation();
+        }
+        
+        private void StartAnimation()
+        {
+            if (!_isAnimating)
+            {
+                _isAnimating = true;
+                CompositionTarget.Rendering += OnRendering;
+            }
+        }
+        
+        private void StopAnimation()
+        {
+            if (_isAnimating)
+            {
+                _isAnimating = false;
+                CompositionTarget.Rendering -= OnRendering;
+            }
+        }
+        
+        private void OnRendering(object sender, EventArgs e)
+        {
+            // Lerp current values toward target values
+            _currentWidth1 = Lerp(_currentWidth1, _targetWidth1, SmoothingFactor);
+            _currentWidth2 = Lerp(_currentWidth2, _targetWidth2, SmoothingFactor);
+            
+            // Apply smoothed values
+            if (_peakMeter1 != null)
+            {
+                _peakMeter1.Width = Math.Max(0, _currentWidth1);
+            }
+            
+            if (_peakMeter2 != null)
+            {
+                _peakMeter2.Width = Math.Max(0, _currentWidth2);
+            }
+        }
+        
+        private static double Lerp(double current, double target, double factor)
+        {
+            return current + (target - current) * factor;
         }
 
         protected override Size ArrangeOverride(Size arrangeBounds)
@@ -62,15 +127,11 @@ namespace EarTrumpet.UI.Controls
 
         private void SizeOrVolumeOrPeakValueChanged()
         {
-            if (_peakMeter1 != null)
-            {
-                _peakMeter1.Width = Math.Max(0, (ActualWidth - _thumb.ActualWidth) * PeakValue1 * (Value / 100f));
-            }
-
-            if (_peakMeter2 != null)
-            {
-                _peakMeter2.Width = Math.Max(0, (ActualWidth - _thumb.ActualWidth) * PeakValue2 * (Value / 100f));
-            }
+            if (_thumb == null) return;
+            
+            // Calculate target widths (the animation will smoothly interpolate toward these)
+            _targetWidth1 = (ActualWidth - _thumb.ActualWidth) * PeakValue1 * (Value / 100f);
+            _targetWidth2 = (ActualWidth - _thumb.ActualWidth) * PeakValue2 * (Value / 100f);
         }
 
         private void OnTouchDown(object sender, TouchEventArgs e)

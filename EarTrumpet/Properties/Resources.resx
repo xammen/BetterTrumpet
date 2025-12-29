@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -136,7 +136,7 @@
     <value>It doesn't look like you have any playback devices.</value>
   </data>
   <data name="NoDeviceTrayText" xml:space="preserve">
-    <value>EarTrumpet: No playback devices</value>
+    <value>BetterTrumpet: No playback devices</value>
   </data>
   <data name="PlaybackDevicesText" xml:space="preserve">
     <value>Playback devices</value>
@@ -196,7 +196,7 @@
     <value>Open Taskbar flyout</value>
   </data>
   <data name="SettingsUseLegacyEarTrumpetIcon" xml:space="preserve">
-    <value>Use legacy EarTrumpet icon</value>
+    <value>Use legacy icon</value>
   </data>
   <data name="MoreCommandsAccessibleText" xml:space="preserve">
     <value>More commands</value>
@@ -238,7 +238,7 @@
     <value>Configure shortcuts and get help</value>
   </data>
   <data name="SettingsTitle" xml:space="preserve">
-    <value>EarTrumpet Settings</value>
+    <value>BetterTrumpet Settings</value>
   </data>
   <data name="ShortcutsPageText" xml:space="preserve">
     <value>Shortcuts</value>
@@ -277,13 +277,13 @@
     <value>Close</value>
   </data>
   <data name="WelcomeDialogHeaderText" xml:space="preserve">
-    <value>Welcome to EarTrumpet</value>
+    <value>Welcome to BetterTrumpet</value>
   </data>
   <data name="CriticalFailureDialogHeaderText" xml:space="preserve">
-    <value>EarTrumpet couldn't start</value>
+    <value>BetterTrumpet couldn't start</value>
   </data>
   <data name="CriticalFailureFontLookupHelpText" xml:space="preserve">
-    <value>A broken font on your system is preventing EarTrumpet from starting.
+    <value>A broken font on your system is preventing BetterTrumpet from starting.
 
 Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
   </data>
@@ -294,7 +294,7 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
     <value>Privacy policy</value>
   </data>
   <data name="PrivacyCheckboxText" xml:space="preserve">
-    <value>Send crash data to the EarTrumpet team</value>
+    <value>Send crash data to help improve BetterTrumpet</value>
   </data>
   <data name="ActionAdditionalText" xml:space="preserve">
     <value>and</value>
@@ -402,13 +402,13 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
     <value>Edit</value>
   </data>
   <data name="EtaXmlFileText" xml:space="preserve">
-    <value>EarTrumpet Actions XML</value>
+    <value>BetterTrumpet Actions XML</value>
   </data>
   <data name="EventTrigger_AddText" xml:space="preserve">
-    <value>EarTrumpet starts or ends</value>
+    <value>BetterTrumpet starts or ends</value>
   </data>
   <data name="EventTrigger_LinkText" xml:space="preserve">
-    <value> EarTrumpet {Option}</value>
+    <value> BetterTrumpet {Option}</value>
   </data>
   <data name="EveryAppText" xml:space="preserve">
     <value>Every app</value>
@@ -654,7 +654,7 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
     <value>Mouse settings</value>
   </data>
   <data name="SettingsUseScrollWheelInTray" xml:space="preserve">
-    <value>Use the scroll wheel to change volume while hovering over the EarTrumpet icon</value>
+    <value>Use the scroll wheel to change volume while hovering over the tray icon</value>
   </data>
   <data name="SettingsUseGlobalMouseWheelHook" xml:space="preserve">
     <value>Use the scroll wheel to change volume while the flyout is open</value>
@@ -664,5 +664,11 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
   </data>
   <data name="SettingsUseLogarithmicVolume" xml:space="preserve">
     <value>Use logarithmic volume scale</value>
+  </data>
+  <data name="ForkAttributionText" xml:space="preserve">
+    <value>Fork of EarTrumpet by File-New-Project</value>
+  </data>
+  <data name="AppDisplayName" xml:space="preserve">
+    <value>BetterTrumpet</value>
   </data>
 </root>
