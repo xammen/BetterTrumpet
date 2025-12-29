@@ -1,4 +1,4 @@
-﻿using EarTrumpet.DataModel.Audio;
+using EarTrumpet.DataModel.Audio;
 using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.Extensions;
 using System;
@@ -241,7 +241,7 @@ namespace EarTrumpet.UI.ViewModels
             if (Default != null)
             {
                 var stateText = Default.IsMuted ? Properties.Resources.MutedText : $"{Default.Volume}%";
-                var prefixText = $"EarTrumpet: {stateText} - ";
+                var prefixText = $"BetterTrumpet: {stateText} - ";
                 var deviceName = $"{Default.DeviceDescription} ({Default.EnumeratorName})";
 
                 // Remote Audio devices may not contain an enumerator name or description.
