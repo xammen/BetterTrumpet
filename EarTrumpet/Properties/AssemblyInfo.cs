@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Windows;
 
-[assembly: AssemblyTitle("EarTrumpet")]
+[assembly: AssemblyTitle("BetterTrumpet")]
 [assembly: AssemblyCompany("File-New-Project")]
-[assembly: AssemblyProduct("EarTrumpet")]
+[assembly: AssemblyProduct("BetterTrumpet")]
 [assembly: ThemeInfo(ResourceDictionaryLocation.None, ResourceDictionaryLocation.SourceAssembly)]
