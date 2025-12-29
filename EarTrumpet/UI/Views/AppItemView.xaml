@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="EarTrumpet.UI.Views.AppItemView"
+<UserControl x:Class="EarTrumpet.UI.Views.AppItemView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:Theme="clr-namespace:EarTrumpet.UI.Themes"

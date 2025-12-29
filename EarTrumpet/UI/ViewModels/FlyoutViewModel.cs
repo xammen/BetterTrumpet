@@ -1,4 +1,4 @@
-﻿using EarTrumpet.UI.Helpers;
+using EarTrumpet.UI.Helpers;
 using EarTrumpet.Interop.Helpers;
 using System;
 using System.Collections.ObjectModel;
@@ -30,7 +30,7 @@ namespace EarTrumpet.UI.ViewModels
         private readonly DeviceCollectionViewModel _mainViewModel;
         private readonly DispatcherTimer _deBounceTimer;
         private readonly Dispatcher _currentDispatcher = Dispatcher.CurrentDispatcher;
-        private readonly Action _returnFocusToTray;
+private readonly Action _returnFocusToTray;
         private readonly AppSettings _settings;
         private bool _closedDuringOpen;
         private MouseHook _mh;
@@ -48,9 +48,9 @@ namespace EarTrumpet.UI.ViewModels
             _mainViewModel.AllDevices.CollectionChanged += AllDevices_CollectionChanged;
             AllDevices_CollectionChanged(null, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 
-            // This timer is used to enable clicking on the tray icon while the flyout is open, and not causing a
+// This timer is used to enable clicking on the tray icon while the flyout is open, and not causing a
             // rapid hide and show cycle.  This time represents the minimum time between which the flyout may be opened.
-            _deBounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
+            _deBounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
             _deBounceTimer.Tick += OnDeBounceTimerTick;
 
             ExpandCollapse = new RelayCommand(() =>
@@ -262,7 +262,7 @@ namespace EarTrumpet.UI.ViewModels
                 case FlyoutViewState.Closing_Stage2:
                     _deBounceTimer.Start();
                     break;
-                case FlyoutViewState.Hidden:
+case FlyoutViewState.Hidden:
                     if (IsExpandingOrCollapsing)
                     {
                         IsExpandingOrCollapsing = false;
@@ -359,7 +359,7 @@ namespace EarTrumpet.UI.ViewModels
             _mh.UnHook();
         }
 
-        public void OpenFlyout(InputType inputType)
+public void OpenFlyout(InputType inputType)
         {
             switch (State)
             {

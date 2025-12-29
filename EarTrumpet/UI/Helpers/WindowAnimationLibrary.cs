@@ -1,4 +1,4 @@
-﻿using EarTrumpet.DataModel;
+using EarTrumpet.DataModel;
 using EarTrumpet.Extensions;
 using EarTrumpet.Interop;
 using EarTrumpet.Interop.Helpers;
@@ -11,7 +11,10 @@ namespace EarTrumpet.UI.Helpers
 {
     public class WindowAnimationLibrary
     {
-        const int _animationOffset = 25;
+        // Windows 11 style: snappy, fluid animations
+        const int _animationOffset = 6;
+        const int _entranceDurationMs = 150;
+        const int _exitDurationMs = 100;
 
         public static void BeginFlyoutEntranceAnimation(Window window, WindowsTaskbar.State taskbar, Action completed)
         {
@@ -34,19 +37,22 @@ namespace EarTrumpet.UI.Helpers
                 return;
             }
 
+            // Snappy quadratic easing for fluid feel
+            var easingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+
             var moveAnimation = new DoubleAnimation
             {
-                Duration = new Duration(TimeSpan.FromMilliseconds(130)),
+                Duration = new Duration(TimeSpan.FromMilliseconds(_entranceDurationMs)),
                 FillBehavior = FillBehavior.Stop,
-                EasingFunction = new QuinticEase { EasingMode = EasingMode.EaseOut }
+                EasingFunction = easingFunction
             };
 
             var fadeAnimation = new DoubleAnimation
             {
-                Duration = new Duration(TimeSpan.FromMilliseconds(140)),
+                Duration = new Duration(TimeSpan.FromMilliseconds(_entranceDurationMs)),
                 FillBehavior = FillBehavior.Stop,
-                EasingFunction = new QuinticEase { EasingMode = EasingMode.EaseOut },
-                From = 0.8,
+                EasingFunction = easingFunction,
+                From = 0,
                 To = 1
             };
             fadeAnimation.Completed += (s, e) => { window.Opacity = 1; };
@@ -91,7 +97,7 @@ namespace EarTrumpet.UI.Helpers
 
             if (SystemSettings.IsTransparencyEnabled)
             {
-                window.Opacity = 0.8;
+                window.Opacity = 0;
             }
 
             window.Cloak(false);
@@ -137,20 +143,23 @@ namespace EarTrumpet.UI.Helpers
                 return;
             }
 
+            // Snappy quadratic easing for fluid feel
+            var easingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn };
+
             var moveAnimation = new DoubleAnimation
             {
-                Duration = new Duration(TimeSpan.FromMilliseconds(150)),
+                Duration = new Duration(TimeSpan.FromMilliseconds(_exitDurationMs)),
                 FillBehavior = FillBehavior.Stop,
-                EasingFunction = new QuinticEase { EasingMode = EasingMode.EaseOut }
+                EasingFunction = easingFunction
             };
 
             var fadeAnimation = new DoubleAnimation
             {
-                Duration = new Duration(TimeSpan.FromMilliseconds(150)),
+                Duration = new Duration(TimeSpan.FromMilliseconds(_exitDurationMs)),
                 FillBehavior = FillBehavior.Stop,
-                EasingFunction = new QuinticEase { EasingMode = EasingMode.EaseOut },
+                EasingFunction = easingFunction,
                 From = 1,
-                To = 0.75,
+                To = 0,
             };
             fadeAnimation.Completed += (s, e) => { window.Opacity = 0; };
 
@@ -221,11 +230,11 @@ namespace EarTrumpet.UI.Helpers
             {
                 var fadeAnimation = new DoubleAnimation
                 {
-                    Duration = new Duration(TimeSpan.FromMilliseconds(150)),
+                    Duration = new Duration(TimeSpan.FromMilliseconds(_exitDurationMs)),
                     FillBehavior = FillBehavior.Stop,
-                    EasingFunction = new ExponentialEase { EasingMode = EasingMode.EaseOut },
+                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn },
                     From = 1,
-                    To = 0.75,
+                    To = 0,
                 };
                 fadeAnimation.Completed += (s, e) => { window.Opacity = 0; };
 
@@ -240,7 +249,7 @@ namespace EarTrumpet.UI.Helpers
             }
         }
 
-        public static void BeginWindowEntranceAnimation(Window window, Action completed, double fromOpacity = 0.5)
+        public static void BeginWindowEntranceAnimation(Window window, Action completed, double fromOpacity = 0)
         {
             var onCompleted = new EventHandler((s, e) =>
             {
@@ -256,9 +265,9 @@ namespace EarTrumpet.UI.Helpers
 
             var fadeAnimation = new DoubleAnimation
             {
-                Duration = new Duration(TimeSpan.FromMilliseconds(250)),
+                Duration = new Duration(TimeSpan.FromMilliseconds(_entranceDurationMs)),
                 FillBehavior = FillBehavior.Stop,
-                EasingFunction = new ExponentialEase { EasingMode = EasingMode.EaseOut },
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut },
                 From = fromOpacity,
                 To = 1,
             };

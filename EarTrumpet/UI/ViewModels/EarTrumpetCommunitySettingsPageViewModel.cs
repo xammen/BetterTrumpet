@@ -1,8 +1,9 @@
-﻿namespace EarTrumpet.UI.ViewModels
+namespace EarTrumpet.UI.ViewModels
 {
     public class EarTrumpetCommunitySettingsPageViewModel : SettingsPageViewModel
     {
         private readonly AppSettings _settings;
+        
         public bool UseLogarithmicVolume
         {
             get => _settings.UseLogarithmicVolume;

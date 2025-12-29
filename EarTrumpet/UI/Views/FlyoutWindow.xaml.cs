@@ -1,4 +1,4 @@
-﻿using EarTrumpet.Extensions;
+using EarTrumpet.Extensions;
 using EarTrumpet.Interop;
 using EarTrumpet.Interop.Helpers;
 using EarTrumpet.UI.Helpers;
@@ -50,16 +50,13 @@ namespace EarTrumpet.UI.Views
                     EnableAcrylicIfApplicable(taskbar);
                     PositionWindowRelativeToTaskbar(taskbar);
 
-                    // Focus the first device if available.
+// Focus the first device if available.
                     DevicesList.FindVisualChild<DeviceView>()?.FocusAndRemoveFocusVisual();
 
-                    // Prevent showing stale adnorners.
-                    this.WaitForKeyboardVisuals(() =>
+                    // Start animation immediately for snappy feel
+                    WindowAnimationLibrary.BeginFlyoutEntranceAnimation(this, taskbar, () =>
                     {
-                        WindowAnimationLibrary.BeginFlyoutEntranceAnimation(this, taskbar, () =>
-                        {
-                            _viewModel.ChangeState(FlyoutViewState.Open);
-                        });
+                        _viewModel.ChangeState(FlyoutViewState.Open);
                     });
                     break;
 
@@ -78,15 +75,13 @@ namespace EarTrumpet.UI.Views
                             _viewModel.ChangeState(FlyoutViewState.Hidden);
                         });
                     }
-                    else
+else
                     {
-                        // No animation for normal exit.
-                        this.Cloak();
-                        AccentPolicyLibrary.DisableAcrylic(this);
-                
-                        // Prevent de-queueing partially on show and showing stale adnorners.
-                        this.WaitForKeyboardVisuals(() =>
+                        // Smooth exit animation
+                        WindowAnimationLibrary.BeginFlyoutExitanimation(this, () =>
                         {
+                            this.Cloak();
+                            AccentPolicyLibrary.DisableAcrylic(this);
                             Hide();
                             _viewModel.ChangeState(FlyoutViewState.Closing_Stage2);
                         });
