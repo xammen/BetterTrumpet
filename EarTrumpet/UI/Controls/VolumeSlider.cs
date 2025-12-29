@@ -9,8 +9,11 @@ namespace EarTrumpet.UI.Controls
 {
     public class VolumeSlider : Slider
     {
-        // Smoothing factor: higher = faster response, lower = smoother (0.0 - 1.0)
-        private const double SmoothingFactor = 0.15;
+        // Smoothing factor for peak meter: higher = faster response, lower = smoother (0.0 - 1.0)
+        private const double PeakSmoothingFactor = 0.15;
+        
+        // Smoothing factor for volume slider animation when clicking on track
+        private const double VolumeSmoothingFactor = 0.25;
         
         public float PeakValue1
         {
@@ -33,12 +36,17 @@ namespace EarTrumpet.UI.Controls
         private Thumb _thumb;
         private Point _lastMousePosition;
         
-        // Smooth animation state
+        // Smooth animation state for peak meters
         private double _currentWidth1;
         private double _currentWidth2;
         private double _targetWidth1;
         private double _targetWidth2;
         private bool _isAnimating;
+        
+        // Smooth animation state for volume slider
+        private double _targetValue;
+        private bool _isAnimatingValue;
+        private bool _isDragging;
 
         public VolumeSlider() : base()
         {
@@ -92,9 +100,9 @@ namespace EarTrumpet.UI.Controls
         
         private void OnRendering(object sender, EventArgs e)
         {
-            // Lerp current values toward target values
-            _currentWidth1 = Lerp(_currentWidth1, _targetWidth1, SmoothingFactor);
-            _currentWidth2 = Lerp(_currentWidth2, _targetWidth2, SmoothingFactor);
+            // Lerp current values toward target values for peak meters
+            _currentWidth1 = Lerp(_currentWidth1, _targetWidth1, PeakSmoothingFactor);
+            _currentWidth2 = Lerp(_currentWidth2, _targetWidth2, PeakSmoothingFactor);
             
             // Apply smoothed values
             if (_peakMeter1 != null)
@@ -105,6 +113,23 @@ namespace EarTrumpet.UI.Controls
             if (_peakMeter2 != null)
             {
                 _peakMeter2.Width = Math.Max(0, _currentWidth2);
+            }
+            
+            // Animate volume slider value when clicking on track (not dragging)
+            if (_isAnimatingValue && !_isDragging)
+            {
+                var newValue = Lerp(Value, _targetValue, VolumeSmoothingFactor);
+                
+                // Stop animating when close enough to target
+                if (Math.Abs(newValue - _targetValue) < 0.5)
+                {
+                    Value = _targetValue;
+                    _isAnimatingValue = false;
+                }
+                else
+                {
+                    Value = newValue;
+                }
             }
         }
         
@@ -138,7 +163,8 @@ namespace EarTrumpet.UI.Controls
         {
             VisualStateManager.GoToState((FrameworkElement)sender, "Pressed", true);
 
-            SetPositionByControlPoint(e.GetTouchPoint(this).Position);
+            // Touch behaves like click - animate smoothly
+            SetPositionByControlPoint(e.GetTouchPoint(this).Position, animate: true);
             CaptureTouch(e.TouchDevice);
 
             e.Handled = true;
@@ -153,7 +179,13 @@ namespace EarTrumpet.UI.Controls
 
                 if (!_thumb.IsMouseOver)
                 {
-                    SetPositionByControlPoint(_lastMousePosition);
+                    // Click on track (not thumb) - animate smoothly to target
+                    SetPositionByControlPoint(_lastMousePosition, animate: true);
+                }
+                else
+                {
+                    // Click on thumb - start dragging
+                    _isDragging = true;
                 }
 
                 CaptureMouse();
@@ -164,6 +196,7 @@ namespace EarTrumpet.UI.Controls
         private void OnTouchUp(object sender, TouchEventArgs e)
         {
             VisualStateManager.GoToState((FrameworkElement)sender, "Normal", true);
+            _isDragging = false;
 
             ReleaseTouchCapture(e.TouchDevice);
             e.Handled = true;
@@ -173,6 +206,8 @@ namespace EarTrumpet.UI.Controls
         {
             if (IsMouseCaptured)
             {
+                _isDragging = false;
+                
                 // If the point is outside of the control, clear the hover state.
                 Rect rcSlider = new Rect(0, 0, ActualWidth, ActualHeight);
                 if (!rcSlider.Contains(e.GetPosition(this)))
@@ -189,7 +224,10 @@ namespace EarTrumpet.UI.Controls
         {
             if (AreAnyTouchesCaptured)
             {
-                SetPositionByControlPoint(e.GetTouchPoint(this).Position);
+                // Touch move is like dragging - instant updates
+                _isDragging = true;
+                _isAnimatingValue = false;
+                SetPositionByControlPoint(e.GetTouchPoint(this).Position, animate: false);
                 e.Handled = true;
             }
         }
@@ -200,7 +238,12 @@ namespace EarTrumpet.UI.Controls
             if (IsMouseCaptured && mousePosition != _lastMousePosition)
             {
                 _lastMousePosition = mousePosition;
-                SetPositionByControlPoint(e.GetPosition(this));
+                
+                // When dragging, we want instant updates (no animation)
+                // Also stop any ongoing animation
+                _isDragging = true;
+                _isAnimatingValue = false;
+                SetPositionByControlPoint(e.GetPosition(this), animate: false);
             }
         }
 
@@ -211,10 +254,22 @@ namespace EarTrumpet.UI.Controls
             e.Handled = true;
         }
 
-        public void SetPositionByControlPoint(Point point)
+        public void SetPositionByControlPoint(Point point, bool animate = false)
         {
             var percent = point.X / ActualWidth;
-            Value = Bound((Maximum - Minimum) * percent);
+            var newValue = Bound((Maximum - Minimum) * percent);
+            
+            if (animate)
+            {
+                // Smooth animation to target value
+                _targetValue = newValue;
+                _isAnimatingValue = true;
+            }
+            else
+            {
+                // Instant update (for dragging)
+                Value = newValue;
+            }
         }
 
         public void ChangePositionByAmount(double amount)
