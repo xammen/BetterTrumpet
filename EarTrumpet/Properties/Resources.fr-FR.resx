@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -127,7 +127,7 @@
     <value>Envoyer des commentaires</value>
   </data>
   <data name="FullWindowTitleText" xml:space="preserve">
-    <value>Mélangeur de volume EarTrumpet</value>
+    <value>Mélangeur de volume BetterTrumpet</value>
   </data>
   <data name="LegacyVolumeMixerText" xml:space="preserve">
     <value>Mélangeur de volume classique</value>
@@ -136,7 +136,7 @@
     <value>Il semblerait que vous n’ayez aucun périphérique de lecture.</value>
   </data>
   <data name="NoDeviceTrayText" xml:space="preserve">
-    <value>EarTrumpet: Aucun périphérique de lecture</value>
+    <value>BetterTrumpet: Aucun périphérique de lecture</value>
   </data>
   <data name="PlaybackDevicesText" xml:space="preserve">
     <value>Périphériques de lecture</value>
@@ -145,7 +145,7 @@
     <value>Périphériques d'enregistrement</value>
   </data>
   <data name="SettingsWindowText" xml:space="preserve">
-    <value>EarTrumpet Paramètres / À propos</value>
+    <value>BetterTrumpet Paramètres</value>
   </data>
   <data name="SoundsControlPanelText" xml:space="preserve">
     <value>Sons</value>
@@ -193,10 +193,10 @@
     <value>Attribuer cette application à un périphérique de lecture</value>
   </data>
   <data name="SettingsOpenEarTrumpetText" xml:space="preserve">
-    <value>Ouvrir le menu déroulant d'EarTrumpet</value>
+    <value>Ouvrir le menu déroulant</value>
   </data>
   <data name="SettingsUseLegacyEarTrumpetIcon" xml:space="preserve">
-    <value>Utiliser l'icône originale d'EarTrumpet</value>
+    <value>Utiliser l'icône originale</value>
   </data>
   <data name="MoreCommandsAccessibleText" xml:space="preserve">
     <value>Plus de commandes</value>
@@ -238,7 +238,7 @@
     <value>Configurer les raccourcis et obtenir de l'aide</value>
   </data>
   <data name="SettingsTitle" xml:space="preserve">
-    <value>EarTrumpet</value>
+    <value>BetterTrumpet Paramètres</value>
   </data>
   <data name="ShortcutsPageText" xml:space="preserve">
     <value>Raccourcis</value>
@@ -277,13 +277,13 @@
     <value>Fermer</value>
   </data>
   <data name="WelcomeDialogHeaderText" xml:space="preserve">
-    <value>Bienvenue à EarTrumpet</value>
+    <value>Bienvenue à BetterTrumpet</value>
   </data>
   <data name="CriticalFailureDialogHeaderText" xml:space="preserve">
-    <value>EarTrumpet n'a pas pu démarrer</value>
+    <value>BetterTrumpet n'a pas pu démarrer</value>
   </data>
   <data name="CriticalFailureFontLookupHelpText" xml:space="preserve">
-    <value>Une police de caractères défectueuse empêche EarTrumpet de démarrer.
+    <value>Une police de caractères défectueuse empêche BetterTrumpet de démarrer.
 
 Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
   </data>
@@ -294,7 +294,7 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Politique de confidentialité</value>
   </data>
   <data name="PrivacyCheckboxText" xml:space="preserve">
-    <value>Envoyer les données de diagnostic à l'équipe EarTrumpet</value>
+    <value>Envoyer les données de diagnostic pour améliorer BetterTrumpet</value>
   </data>
   <data name="ActionAdditionalText" xml:space="preserve">
     <value>et</value>
@@ -402,13 +402,13 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Modifier</value>
   </data>
   <data name="EtaXmlFileText" xml:space="preserve">
-    <value>Action XML d'EarTrumpet</value>
+    <value>Action XML de BetterTrumpet</value>
   </data>
   <data name="EventTrigger_AddText" xml:space="preserve">
-    <value>EarTrumpet démarre ou se termine</value>
+    <value>BetterTrumpet démarre ou se termine</value>
   </data>
   <data name="EventTrigger_LinkText" xml:space="preserve">
-    <value> EarTrumpet {Option}</value>
+    <value> BetterTrumpet {Option}</value>
   </data>
   <data name="EveryAppText" xml:space="preserve">
     <value>Toutes les applications</value>
@@ -654,7 +654,7 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Paramètres de la souris</value>
   </data>
   <data name="SettingsUseScrollWheelInTray" xml:space="preserve">
-    <value>Utiliser la molette de la souris pour modifier le volume lorsque votre curseur survole l'icône de EarTrumpet</value>
+    <value>Utiliser la molette de la souris pour modifier le volume lorsque votre curseur survole l'icône</value>
   </data>
   <data name="SettingsUseGlobalMouseWheelHook" xml:space="preserve">
     <value>Utiliser la molette de la souris pour changer le volume quand l'interface est ouverte</value>

@@ -1,4 +1,4 @@
-﻿using EarTrumpet.Interop.Helpers;
+using EarTrumpet.Interop.Helpers;
 using EarTrumpet.UI.Helpers;
 using System;
 using System.Diagnostics;
@@ -29,7 +29,7 @@ namespace EarTrumpet.UI.ViewModels
             _openDiagnostics = openDiagnostics;
             Glyph = "\xE946";
             Title = Properties.Resources.AboutTitle;
-            AboutText = $"EarTrumpet {App.PackageVersion}";
+            AboutText = $"BetterTrumpet {App.PackageVersion}";
 
             OpenAboutCommand = new RelayCommand(OpenAbout);
             OpenDiagnosticsCommand = new RelayCommand(OpenDiagnostics);
