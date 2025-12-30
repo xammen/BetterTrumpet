@@ -15,6 +15,7 @@ namespace EarTrumpet
         public event Action SettingsHotkeyTyped;
         public event Action AbsoluteVolumeUpHotkeyTyped;
         public event Action AbsoluteVolumeDownHotkeyTyped;
+        public event Action CustomSliderColorsChanged;
 
         private ISettingsBag _settings = StorageFactory.GetSettings();
 
@@ -164,6 +165,164 @@ namespace EarTrumpet
         {
             get => _settings.Get("UseLogarithmicVolume", false);
             set => _settings.Set("UseLogarithmicVolume", value);
+        }
+
+        public bool UseSmoothVolumeAnimation
+        {
+            get => _settings.Get("UseSmoothVolumeAnimation", true);
+            set => _settings.Set("UseSmoothVolumeAnimation", value);
+        }
+
+        // Volume animation speed: 0.02 (very slow) to 0.5 (fast). Default 0.08
+        public double VolumeAnimationSpeed
+        {
+            get => _settings.Get("VolumeAnimationSpeed", 0.08);
+            set => _settings.Set("VolumeAnimationSpeed", value);
+        }
+
+        // Peak meter FPS: 20 (performance), 30, or 60 (smooth). Default 60
+        public int PeakMeterFps
+        {
+            get => _settings.Get("PeakMeterFps", 60);
+            set => _settings.Set("PeakMeterFps", value);
+        }
+
+        // Eco Mode: Reduces CPU usage by limiting animations and refresh rates
+        public bool EcoMode
+        {
+            get => _settings.Get("EcoMode", false);
+            set
+            {
+                _settings.Set("EcoMode", value);
+                EcoModeChanged?.Invoke();
+            }
+        }
+
+        // Auto Eco Mode: Automatically enable eco mode when on battery power
+        public bool AutoEcoMode
+        {
+            get => _settings.Get("AutoEcoMode", true);
+            set => _settings.Set("AutoEcoMode", value);
+        }
+
+        // Event fired when eco mode changes
+        public event Action EcoModeChanged;
+
+        // Helper to get effective eco mode (considering auto and battery)
+        public bool IsEffectiveEcoMode
+        {
+            get
+            {
+                if (EcoMode) return true;
+                if (AutoEcoMode && IsOnBatteryPower) return true;
+                return false;
+            }
+        }
+
+        // Check if running on battery power
+        public bool IsOnBatteryPower
+        {
+            get
+            {
+                try
+                {
+                    var status = System.Windows.Forms.SystemInformation.PowerStatus;
+                    return status.PowerLineStatus == System.Windows.Forms.PowerLineStatus.Offline;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
+        // Get effective FPS based on eco mode
+        public int EffectivePeakMeterFps
+        {
+            get
+            {
+                if (IsEffectiveEcoMode) return 20;
+                return PeakMeterFps;
+            }
+        }
+
+        // Custom slider colors
+        public bool UseCustomSliderColors
+        {
+            get => _settings.Get("UseCustomSliderColors", false);
+            set
+            {
+                _settings.Set("UseCustomSliderColors", value);
+                CustomSliderColorsChanged?.Invoke();
+            }
+        }
+
+        public System.Windows.Media.Color SliderThumbColor
+        {
+            get
+            {
+                var colorStr = _settings.Get("SliderThumbColor", "");
+                if (string.IsNullOrEmpty(colorStr))
+                    return System.Windows.Media.Colors.Transparent; // Will use SystemAccent
+                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
+                catch { return System.Windows.Media.Colors.Transparent; }
+            }
+            set
+            {
+                _settings.Set("SliderThumbColor", value.ToString());
+                CustomSliderColorsChanged?.Invoke();
+            }
+        }
+
+        public System.Windows.Media.Color SliderTrackFillColor
+        {
+            get
+            {
+                var colorStr = _settings.Get("SliderTrackFillColor", "");
+                if (string.IsNullOrEmpty(colorStr))
+                    return System.Windows.Media.Colors.Transparent; // Will use SystemAccent
+                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
+                catch { return System.Windows.Media.Colors.Transparent; }
+            }
+            set
+            {
+                _settings.Set("SliderTrackFillColor", value.ToString());
+                CustomSliderColorsChanged?.Invoke();
+            }
+        }
+
+        public System.Windows.Media.Color SliderTrackBackgroundColor
+        {
+            get
+            {
+                var colorStr = _settings.Get("SliderTrackBackgroundColor", "");
+                if (string.IsNullOrEmpty(colorStr))
+                    return System.Windows.Media.Colors.Transparent; // Will use default
+                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
+                catch { return System.Windows.Media.Colors.Transparent; }
+            }
+            set
+            {
+                _settings.Set("SliderTrackBackgroundColor", value.ToString());
+                CustomSliderColorsChanged?.Invoke();
+            }
+        }
+
+        public System.Windows.Media.Color PeakMeterColor
+        {
+            get
+            {
+                var colorStr = _settings.Get("PeakMeterColor", "");
+                if (string.IsNullOrEmpty(colorStr))
+                    return System.Windows.Media.Colors.Transparent; // Will use SystemAccent
+                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
+                catch { return System.Windows.Media.Colors.Transparent; }
+            }
+            set
+            {
+                _settings.Set("PeakMeterColor", value.ToString());
+                CustomSliderColorsChanged?.Invoke();
+            }
         }
 
         public WINDOWPLACEMENT? FullMixerWindowPlacement

@@ -1,4 +1,4 @@
-﻿using EarTrumpet.UI.Helpers;
+using EarTrumpet.UI.Helpers;
 
 
 namespace EarTrumpet.UI.ViewModels
@@ -53,7 +53,7 @@ namespace EarTrumpet.UI.ViewModels
             Header = new SettingsPageHeaderViewModel(this);
         }
 
-        public void NavigatedTo()
+        public virtual void NavigatedTo()
         {
 
         }
