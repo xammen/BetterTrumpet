@@ -668,4 +668,34 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <comment>Community setting: Changes the volume slider value scale to/from linear and logarithmic scale.
 </comment>
   </data>
+  <data name="SettingsUseSmoothAnimation" xml:space="preserve">
+    <value>Utiliser l'animation fluide du volume</value>
+  </data>
+  <data name="SettingsAnimationSpeed" xml:space="preserve">
+    <value>Vitesse d'animation :</value>
+  </data>
+  <data name="CustomizationSettingsPageText" xml:space="preserve">
+    <value>Personnalisation</value>
+  </data>
+  <data name="CustomizationCategoryTitle" xml:space="preserve">
+    <value>Personnalisation</value>
+  </data>
+  <data name="CustomizationCategoryDescription" xml:space="preserve">
+    <value>Personnaliser les animations et couleurs du curseur</value>
+  </data>
+  <data name="SettingsUseCustomSliderColors" xml:space="preserve">
+    <value>Utiliser des couleurs personnalisées</value>
+  </data>
+  <data name="SettingsSliderThumbColor" xml:space="preserve">
+    <value>Couleur du curseur :</value>
+  </data>
+  <data name="SettingsSliderTrackFillColor" xml:space="preserve">
+    <value>Couleur de remplissage :</value>
+  </data>
+  <data name="SettingsSliderTrackBackgroundColor" xml:space="preserve">
+    <value>Couleur de fond :</value>
+  </data>
+  <data name="SettingsPeakMeterColor" xml:space="preserve">
+    <value>Couleur du mètre de pic :</value>
+  </data>
 </root>

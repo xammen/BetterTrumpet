@@ -42,6 +42,11 @@ namespace EarTrumpet
 
         public static AppSettings Settings { get; private set; }
 
+        public void OpenMixerWindow()
+        {
+            _mixerWindow?.OpenOrBringToFront();
+        }
+
         private void OnAppStartup(object sender, StartupEventArgs e)
         {
             RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
@@ -251,8 +256,20 @@ namespace EarTrumpet
                         new EarTrumpetAboutPageViewModel(() => _errorReporter.DisplayDiagnosticData(), Settings)
                     });
 
+            var customizationCategory = new SettingsCategoryViewModel(
+                EarTrumpet.Properties.Resources.CustomizationCategoryTitle,
+                "\xE790", // Paintbrush icon
+                EarTrumpet.Properties.Resources.CustomizationCategoryDescription,
+                null,
+                new SettingsPageViewModel[]
+                    {
+                        new EarTrumpetAnimationSettingsPageViewModel(Settings),
+                        new EarTrumpetColorsSettingsPageViewModel(Settings)
+                    });
+
             var allCategories = new List<SettingsCategoryViewModel>();
             allCategories.Add(defaultCategory);
+            allCategories.Add(customizationCategory);
 
             if (AddonManager.Host.SettingsItems != null)
             {

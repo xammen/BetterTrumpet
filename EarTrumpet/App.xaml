@@ -351,7 +351,7 @@
                     </Setter.Value>
                 </Setter>
             </Style>
-<Style x:Key="SliderThumbStyle" TargetType="{x:Type Thumb}">
+            <Style x:Key="SliderThumbStyle" TargetType="{x:Type Thumb}">
                 <Setter Property="OverridesDefaultStyle" Value="True" />
                 <Setter Property="Height" Value="{DynamicResource Mutable_SliderThumbHeight}" />
                 <Setter Property="Width" Value="{DynamicResource Mutable_SliderThumbWidth}" />
@@ -398,10 +398,10 @@
                                         <Thumb Name="SliderThumb">
                                             <Thumb.Style>
                                                 <Style BasedOn="{StaticResource SliderThumbStyle}" TargetType="{x:Type Thumb}">
-                                                    <Setter Property="Theme:Brush.Foreground" Value=":Theme=Control{Theme}SliderTrackFillRest, Flyout:Theme=SystemAccent, :HighContrast=ControlText, Flyout:HighContrast=ControlText" />
+                                                    <Setter Property="Theme:Brush.Foreground" Value="Theme=SystemAccent, HighContrast=ControlText" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding Path=IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
-                                                            <Setter Property="Theme:Brush.Foreground" Value="Theme=Control{Theme}SliderThumbHover, HighContrast=Highlight" />
+                                                            <Setter Property="Theme:Brush.Foreground" Value="Theme=SystemAccent{Theme}1, HighContrast=Highlight" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -436,6 +436,84 @@
                                 <Trigger Property="IsEnabled" Value="False">
                                     <Setter Property="Opacity" Value="0.5" />
                                 </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <!-- VolumeSlider style with custom color support -->
+            <Style TargetType="{x:Type ctl:VolumeSlider}" BasedOn="{StaticResource {x:Type Slider}}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ctl:VolumeSlider}">
+                            <Grid>
+                                <Border Name="TrackBackground" Height="4" CornerRadius="2" />
+                                <Track Name="PART_Track">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Name="SliderLeft"
+                                                      Theme:Brush.Foreground="SystemAccent"
+                                                      Command="Slider.DecreaseLarge"
+                                                      Style="{StaticResource SliderButtonStyle}" />
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Name="SliderThumb">
+                                            <Thumb.Style>
+                                                <Style BasedOn="{StaticResource SliderThumbStyle}" TargetType="{x:Type Thumb}">
+                                                    <Setter Property="Theme:Brush.Foreground" Value="Theme=SystemAccent, HighContrast=ControlText" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
+                                                            <Setter Property="Theme:Brush.Foreground" Value="Theme=SystemAccent{Theme}1, HighContrast=Highlight" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Thumb.Style>
+                                        </Thumb>
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Name="SliderRight"
+                                                      Theme:Brush.Foreground=":Theme=Control{Theme}SliderTrackFillDisabled, :HighContrast=ControlText, Flyout:Theme=FlyoutThemeTrackRightBackground, Flyout:HighContrast=ControlText"
+                                                      Command="Slider.IncreaseLarge"
+                                                      Style="{StaticResource SliderButtonStyle}" />
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+
+                                <Border Name="PeakMeter1"
+                                        Height="4"
+                                        Margin="0,-3,0,0"
+                                        HorizontalAlignment="Left"
+                                        CornerRadius="2"
+                                        Opacity="0.6"
+                                        Theme:Brush.Background="Theme=ApplicationText{Theme}Theme, HighContrast=HotTrack" />
+
+                                <Border Name="PeakMeter2"
+                                        Height="4"
+                                        Margin="0,2,0,0"
+                                        HorizontalAlignment="Left"
+                                        CornerRadius="2"
+                                        Opacity="0.6"
+                                        Theme:Brush.Background="Theme=ApplicationText{Theme}Theme, HighContrast=HotTrack" />
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.5" />
+                                </Trigger>
+                                <!-- Custom thumb color -->
+                                <DataTrigger Binding="{Binding CustomThumbBrush, RelativeSource={RelativeSource Self}, Converter={x:Static local:NullToBoolConverter.Instance}}" Value="False">
+                                    <Setter TargetName="SliderThumb" Property="Foreground" Value="{Binding CustomThumbBrush, RelativeSource={RelativeSource TemplatedParent}}" />
+                                </DataTrigger>
+                                <!-- Custom track fill color -->
+                                <DataTrigger Binding="{Binding CustomTrackFillBrush, RelativeSource={RelativeSource Self}, Converter={x:Static local:NullToBoolConverter.Instance}}" Value="False">
+                                    <Setter TargetName="SliderLeft" Property="Foreground" Value="{Binding CustomTrackFillBrush, RelativeSource={RelativeSource TemplatedParent}}" />
+                                </DataTrigger>
+                                <!-- Custom track background color -->
+                                <DataTrigger Binding="{Binding CustomTrackBackgroundBrush, RelativeSource={RelativeSource Self}, Converter={x:Static local:NullToBoolConverter.Instance}}" Value="False">
+                                    <Setter TargetName="SliderRight" Property="Foreground" Value="{Binding CustomTrackBackgroundBrush, RelativeSource={RelativeSource TemplatedParent}}" />
+                                </DataTrigger>
+                                <!-- Custom peak meter color -->
+                                <DataTrigger Binding="{Binding CustomPeakMeterBrush, RelativeSource={RelativeSource Self}, Converter={x:Static local:NullToBoolConverter.Instance}}" Value="False">
+                                    <Setter TargetName="PeakMeter1" Property="Background" Value="{Binding CustomPeakMeterBrush, RelativeSource={RelativeSource TemplatedParent}}" />
+                                    <Setter TargetName="PeakMeter2" Property="Background" Value="{Binding CustomPeakMeterBrush, RelativeSource={RelativeSource TemplatedParent}}" />
+                                </DataTrigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>

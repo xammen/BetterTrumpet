@@ -9,6 +9,7 @@
         xmlns:local="clr-namespace:EarTrumpet"
         xmlns:resx="clr-namespace:EarTrumpet.Properties"
         xmlns:vm="clr-namespace:EarTrumpet.UI.ViewModels"
+        xmlns:helpers="clr-namespace:EarTrumpet.UI.Helpers"
         Name="WindowRoot"
         Title="{Binding Title}"
         Width="800"
@@ -27,6 +28,7 @@
         UseLayoutRounding="True"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
+        <helpers:IntToBoolConverter x:Key="IntToBoolConverter" />
         <DataTemplate DataType="{x:Type vm:EarTrumpetShortcutsPageViewModel}">
             <StackPanel Orientation="Vertical">
                 <TextBlock Style="{StaticResource BodyText}" Text="{x:Static resx:Resources.SettingsOpenEarTrumpetText}" />
@@ -176,6 +178,184 @@
                 <CheckBox HorizontalAlignment="Left"
                           Content="{x:Static resx:Resources.SettingsUseLogarithmicVolume}"
                           IsChecked="{Binding UseLogarithmicVolume, Mode=TwoWay}" />
+            </StackPanel>
+        </DataTemplate>
+        <!-- Animation Settings Page -->
+        <DataTemplate DataType="{x:Type vm:EarTrumpetAnimationSettingsPageViewModel}">
+            <StackPanel Orientation="Vertical">
+                <!-- Eco Mode Section -->
+                <Border Margin="0,0,0,20" Padding="12" CornerRadius="6" 
+                        Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <TextBlock Text="&#xEC0A;" FontFamily="Segoe MDL2 Assets" FontSize="20" 
+                                       VerticalAlignment="Center" Margin="0,0,10,0"
+                                       Theme:Brush.Foreground="Theme=LimeGreen, HighContrast=Text" />
+                            <TextBlock Text="Eco Mode" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Reduces CPU usage by limiting peak meter updates to 20 FPS. Recommended for laptops on battery."
+                                   TextWrapping="Wrap" Margin="0,0,0,12" Style="{StaticResource BodySubText}" />
+                        <CheckBox Content="Enable Eco Mode" IsChecked="{Binding EcoMode, Mode=TwoWay}" Margin="0,0,0,8" />
+                        <CheckBox Content="Auto-enable on battery power" IsChecked="{Binding AutoEcoMode, Mode=TwoWay}" />
+                        <TextBlock Margin="0,12,0,0" Style="{StaticResource BodySubText}">
+                            <Run Text="Current: " />
+                            <Run Text="{Binding EffectiveFpsText, Mode=OneWay}" FontWeight="SemiBold" />
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Performance Mode -->
+                <CheckBox HorizontalAlignment="Left" Margin="0,0,0,16"
+                          Content="Performance Mode (no animations, 20 FPS peak meter)"
+                          IsChecked="{Binding PerformanceMode, Mode=TwoWay}" />
+                
+                <!-- Smooth Animation -->
+                <CheckBox HorizontalAlignment="Left"
+                          Content="{x:Static resx:Resources.SettingsUseSmoothAnimation}"
+                          IsChecked="{Binding UseSmoothVolumeAnimation, Mode=TwoWay}" />
+                
+                <!-- Animation Speed -->
+                <StackPanel Margin="0,12,0,0" Orientation="Horizontal"
+                            IsEnabled="{Binding UseSmoothVolumeAnimation}">
+                    <TextBlock VerticalAlignment="Center" 
+                               Text="{x:Static resx:Resources.SettingsAnimationSpeed}" 
+                               Margin="0,0,12,0" />
+                    <TextBlock VerticalAlignment="Center" Text="Slow" Margin="0,0,8,0" 
+                               Style="{StaticResource BodySubText}" />
+                    <Slider Width="150" Minimum="1" Maximum="10" 
+                            Value="{Binding VolumeAnimationSpeed, Mode=TwoWay}"
+                            TickFrequency="1" IsSnapToTickEnabled="True" />
+                    <TextBlock VerticalAlignment="Center" Text="Fast" Margin="8,0,0,0"
+                               Style="{StaticResource BodySubText}" />
+                </StackPanel>
+                
+                <!-- Peak Meter FPS -->
+                <StackPanel Margin="0,20,0,0" Orientation="Vertical">
+                    <TextBlock Text="Peak Meter Refresh Rate" Margin="0,0,0,8" />
+                    <TextBlock Text="(Overridden by Eco Mode when active)" Margin="0,0,0,8" 
+                               Style="{StaticResource BodySubText}" FontStyle="Italic" />
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="20 FPS (Performance)" Margin="0,0,16,0" GroupName="PeakFps"
+                                     IsChecked="{Binding PeakMeterFps, Converter={StaticResource IntToBoolConverter}, ConverterParameter=20}" />
+                        <RadioButton Content="30 FPS" Margin="0,0,16,0" GroupName="PeakFps"
+                                     IsChecked="{Binding PeakMeterFps, Converter={StaticResource IntToBoolConverter}, ConverterParameter=30}" />
+                        <RadioButton Content="60 FPS (Smooth)" GroupName="PeakFps"
+                                     IsChecked="{Binding PeakMeterFps, Converter={StaticResource IntToBoolConverter}, ConverterParameter=60}" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+        
+        <!-- Colors Settings Page -->
+        <DataTemplate DataType="{x:Type vm:EarTrumpetColorsSettingsPageViewModel}">
+            <StackPanel Orientation="Vertical">
+                <!-- Enable Custom Colors -->
+                <CheckBox HorizontalAlignment="Left" Margin="0,0,0,16"
+                          Content="{x:Static resx:Resources.SettingsUseCustomSliderColors}"
+                          IsChecked="{Binding UseCustomSliderColors, Mode=TwoWay}" />
+                
+                <StackPanel IsEnabled="{Binding UseCustomSliderColors}">
+                    <!-- Theme Selector -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                        <TextBlock VerticalAlignment="Center" Text="Theme:" Width="60" />
+                        <ComboBox Width="200" 
+                                  ItemsSource="{Binding AvailableThemes}"
+                                  SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
+                                  DisplayMemberPath="Name" />
+                        <Button Content="Reset" Margin="12,0,0,0" Padding="16,4"
+                                Command="{Binding ResetToDefaultCommand}" />
+                    </StackPanel>
+                    
+                    <!-- Info text -->
+                    <TextBlock Text="Click a color square to open the color picker" Margin="0,0,0,12"
+                               FontStyle="Italic" Style="{StaticResource BodySubText}" />
+                    
+                    <!-- 4 Color Boxes Side by Side -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <!-- Thumb Color -->
+                        <StackPanel Margin="0,0,20,0">
+                            <TextBlock Text="Thumb" Margin="0,0,0,4" FontSize="11" Style="{StaticResource BodySubText}" />
+                            <Border x:Name="ThumbColorBox" Width="50" Height="50" CornerRadius="6" BorderThickness="2" BorderBrush="#60808080" Cursor="Hand"
+                                    MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="Thumb">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding SliderThumbColor}" />
+                                </Border.Background>
+                            </Border>
+                            <TextBox Width="70" Margin="0,4,0,0" FontSize="11" 
+                                     Text="{Binding SliderThumbColorHex, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
+                                     HorizontalContentAlignment="Center" />
+                        </StackPanel>
+                        
+                        <!-- Track Fill Color -->
+                        <StackPanel Margin="0,0,20,0">
+                            <TextBlock Text="Fill" Margin="0,0,0,4" FontSize="11" Style="{StaticResource BodySubText}" />
+                            <Border x:Name="TrackFillColorBox" Width="50" Height="50" CornerRadius="6" BorderThickness="2" BorderBrush="#60808080" Cursor="Hand"
+                                    MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="TrackFill">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding SliderTrackFillColor}" />
+                                </Border.Background>
+                            </Border>
+                            <TextBox Width="70" Margin="0,4,0,0" FontSize="11" 
+                                     Text="{Binding SliderTrackFillColorHex, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
+                                     HorizontalContentAlignment="Center" />
+                        </StackPanel>
+                        
+                        <!-- Track Background Color -->
+                        <StackPanel Margin="0,0,20,0">
+                            <TextBlock Text="Background" Margin="0,0,0,4" FontSize="11" Style="{StaticResource BodySubText}" />
+                            <Border x:Name="TrackBackgroundColorBox" Width="50" Height="50" CornerRadius="6" BorderThickness="2" BorderBrush="#60808080" Cursor="Hand"
+                                    MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="TrackBackground">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding SliderTrackBackgroundColor}" />
+                                </Border.Background>
+                            </Border>
+                            <TextBox Width="70" Margin="0,4,0,0" FontSize="11" 
+                                     Text="{Binding SliderTrackBackgroundColorHex, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
+                                     HorizontalContentAlignment="Center" />
+                        </StackPanel>
+                        
+                        <!-- Peak Meter Color -->
+                        <StackPanel>
+                            <TextBlock Text="Peak" Margin="0,0,0,4" FontSize="11" Style="{StaticResource BodySubText}" />
+                            <Border x:Name="PeakMeterColorBox" Width="50" Height="50" CornerRadius="6" BorderThickness="2" BorderBrush="#60808080" Cursor="Hand"
+                                    MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="PeakMeter">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding PeakMeterColor}" />
+                                </Border.Background>
+                            </Border>
+                            <TextBox Width="70" Margin="0,4,0,0" FontSize="11" 
+                                     Text="{Binding PeakMeterColorHex, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
+                                     HorizontalContentAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <!-- Preview Bar -->
+                    <TextBlock Text="Preview:" Margin="0,0,0,4" Style="{StaticResource BodySubText}" />
+                    <Border Width="280" Height="28" CornerRadius="4" BorderThickness="1" BorderBrush="#40808080" HorizontalAlignment="Left">
+                        <Grid>
+                            <Border CornerRadius="4">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding SliderTrackBackgroundColor}" />
+                                </Border.Background>
+                            </Border>
+                            <Border Width="160" HorizontalAlignment="Left" CornerRadius="4">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding SliderTrackFillColor}" />
+                                </Border.Background>
+                            </Border>
+                            <Border Width="18" Height="18" CornerRadius="9" HorizontalAlignment="Left" Margin="151,0,0,0">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding SliderThumbColor}" />
+                                </Border.Background>
+                            </Border>
+                            <Border Width="6" Height="20" CornerRadius="2" HorizontalAlignment="Left" Margin="100,0,0,0" Opacity="0.7">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding PeakMeterColor}" />
+                                </Border.Background>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </StackPanel>
             </StackPanel>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:EarTrumpetLegacySettingsPageViewModel}">

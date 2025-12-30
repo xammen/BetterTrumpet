@@ -671,4 +671,34 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
   <data name="AppDisplayName" xml:space="preserve">
     <value>BetterTrumpet</value>
   </data>
+  <data name="SettingsUseSmoothAnimation" xml:space="preserve">
+    <value>Use smooth volume animation</value>
+  </data>
+  <data name="SettingsAnimationSpeed" xml:space="preserve">
+    <value>Animation speed:</value>
+  </data>
+  <data name="CustomizationSettingsPageText" xml:space="preserve">
+    <value>Customization</value>
+  </data>
+  <data name="CustomizationCategoryTitle" xml:space="preserve">
+    <value>Customization</value>
+  </data>
+  <data name="CustomizationCategoryDescription" xml:space="preserve">
+    <value>Customize slider animations and colors</value>
+  </data>
+  <data name="SettingsUseCustomSliderColors" xml:space="preserve">
+    <value>Use custom slider colors</value>
+  </data>
+  <data name="SettingsSliderThumbColor" xml:space="preserve">
+    <value>Thumb color:</value>
+  </data>
+  <data name="SettingsSliderTrackFillColor" xml:space="preserve">
+    <value>Track fill color:</value>
+  </data>
+  <data name="SettingsSliderTrackBackgroundColor" xml:space="preserve">
+    <value>Track background color:</value>
+  </data>
+  <data name="SettingsPeakMeterColor" xml:space="preserve">
+    <value>Peak meter color:</value>
+  </data>
 </root>

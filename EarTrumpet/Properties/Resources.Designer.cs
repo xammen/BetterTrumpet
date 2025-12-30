@@ -1467,6 +1467,96 @@ namespace EarTrumpet.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use smooth volume animation.
+        /// </summary>
+        public static string SettingsUseSmoothAnimation {
+            get {
+                return ResourceManager.GetString("SettingsUseSmoothAnimation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Animation speed:.
+        /// </summary>
+        public static string SettingsAnimationSpeed {
+            get {
+                return ResourceManager.GetString("SettingsAnimationSpeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customization.
+        /// </summary>
+        public static string CustomizationSettingsPageText {
+            get {
+                return ResourceManager.GetString("CustomizationSettingsPageText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customization.
+        /// </summary>
+        public static string CustomizationCategoryTitle {
+            get {
+                return ResourceManager.GetString("CustomizationCategoryTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customize slider animations and colors.
+        /// </summary>
+        public static string CustomizationCategoryDescription {
+            get {
+                return ResourceManager.GetString("CustomizationCategoryDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use custom slider colors.
+        /// </summary>
+        public static string SettingsUseCustomSliderColors {
+            get {
+                return ResourceManager.GetString("SettingsUseCustomSliderColors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Thumb color:.
+        /// </summary>
+        public static string SettingsSliderThumbColor {
+            get {
+                return ResourceManager.GetString("SettingsSliderThumbColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Track fill color:.
+        /// </summary>
+        public static string SettingsSliderTrackFillColor {
+            get {
+                return ResourceManager.GetString("SettingsSliderTrackFillColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Track background color:.
+        /// </summary>
+        public static string SettingsSliderTrackBackgroundColor {
+            get {
+                return ResourceManager.GetString("SettingsSliderTrackBackgroundColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Peak meter color:.
+        /// </summary>
+        public static string SettingsPeakMeterColor {
+            get {
+                return ResourceManager.GetString("SettingsPeakMeterColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Use the scroll wheel to change volume while hovering over the tray icon.
         /// </summary>
         public static string SettingsUseScrollWheelInTray {

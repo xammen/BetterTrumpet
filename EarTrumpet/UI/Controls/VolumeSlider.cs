@@ -1,9 +1,11 @@
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace EarTrumpet.UI.Controls
 {
@@ -12,8 +14,15 @@ namespace EarTrumpet.UI.Controls
         // Smoothing factor for peak meter: higher = faster response, lower = smoother (0.0 - 1.0)
         private const double PeakSmoothingFactor = 0.15;
         
-        // Smoothing factor for volume slider animation when clicking on track
-        private const double VolumeSmoothingFactor = 0.25;
+        // Default smoothing factor for volume slider animation when clicking on track
+        // Lower = slower/smoother animation, Higher = faster (0.0 - 1.0)
+        private const double DefaultVolumeSmoothingFactor = 0.08;
+        
+        // Get the smoothing factor from settings (or use default)
+        private double VolumeSmoothingFactor => App.Settings?.VolumeAnimationSpeed ?? DefaultVolumeSmoothingFactor;
+        
+        // Check if smooth animation is enabled in settings
+        private bool IsSmoothAnimationEnabled => App.Settings?.UseSmoothVolumeAnimation ?? true;
         
         public float PeakValue1
         {
@@ -31,9 +40,44 @@ namespace EarTrumpet.UI.Controls
         public static readonly DependencyProperty PeakValue2Property = DependencyProperty.Register(
           "PeakValue2", typeof(float), typeof(VolumeSlider), new PropertyMetadata(0f, new PropertyChangedCallback(PeakValueChanged)));
 
+        // Custom color brushes - bindable from XAML
+        public Brush CustomThumbBrush
+        {
+            get { return (Brush)GetValue(CustomThumbBrushProperty); }
+            set { SetValue(CustomThumbBrushProperty, value); }
+        }
+        public static readonly DependencyProperty CustomThumbBrushProperty = DependencyProperty.Register(
+            "CustomThumbBrush", typeof(Brush), typeof(VolumeSlider), new PropertyMetadata(null));
+
+        public Brush CustomTrackFillBrush
+        {
+            get { return (Brush)GetValue(CustomTrackFillBrushProperty); }
+            set { SetValue(CustomTrackFillBrushProperty, value); }
+        }
+        public static readonly DependencyProperty CustomTrackFillBrushProperty = DependencyProperty.Register(
+            "CustomTrackFillBrush", typeof(Brush), typeof(VolumeSlider), new PropertyMetadata(null));
+
+        public Brush CustomTrackBackgroundBrush
+        {
+            get { return (Brush)GetValue(CustomTrackBackgroundBrushProperty); }
+            set { SetValue(CustomTrackBackgroundBrushProperty, value); }
+        }
+        public static readonly DependencyProperty CustomTrackBackgroundBrushProperty = DependencyProperty.Register(
+            "CustomTrackBackgroundBrush", typeof(Brush), typeof(VolumeSlider), new PropertyMetadata(null));
+
+        public Brush CustomPeakMeterBrush
+        {
+            get { return (Brush)GetValue(CustomPeakMeterBrushProperty); }
+            set { SetValue(CustomPeakMeterBrushProperty, value); }
+        }
+        public static readonly DependencyProperty CustomPeakMeterBrushProperty = DependencyProperty.Register(
+            "CustomPeakMeterBrush", typeof(Brush), typeof(VolumeSlider), new PropertyMetadata(null));
+
         private Border _peakMeter1;
         private Border _peakMeter2;
         private Thumb _thumb;
+        private RepeatButton _sliderLeft;
+        private RepeatButton _sliderRight;
         private Point _lastMousePosition;
         
         // Smooth animation state for peak meters
@@ -47,6 +91,12 @@ namespace EarTrumpet.UI.Controls
         private double _targetValue;
         private bool _isAnimatingValue;
         private bool _isDragging;
+        private bool _clickedOnTrack; // Track if initial click was on track (not thumb)
+        
+        // FPS limiting for eco mode
+        private DateTime _lastFrameTime = DateTime.MinValue;
+        private int _targetFps = 60;
+        private double _frameInterval = 1000.0 / 60.0; // milliseconds between frames
 
         public VolumeSlider() : base()
         {
@@ -66,18 +116,167 @@ namespace EarTrumpet.UI.Controls
             _thumb = (Thumb)GetTemplateChild("SliderThumb");
             _peakMeter1 = (Border)GetTemplateChild("PeakMeter1");
             _peakMeter2 = (Border)GetTemplateChild("PeakMeter2");
+            _sliderLeft = (RepeatButton)GetTemplateChild("SliderLeft");
+            _sliderRight = (RepeatButton)GetTemplateChild("SliderRight");
             
             // Initialize current widths
             _currentWidth1 = 0;
             _currentWidth2 = 0;
             
+            // Apply custom colors if enabled
+            ApplyCustomColors();
+            
+            // Subscribe to settings changes for live preview
+            if (App.Settings != null)
+            {
+                App.Settings.CustomSliderColorsChanged += OnCustomSliderColorsChanged;
+                App.Settings.EcoModeChanged += OnEcoModeChanged;
+            }
+            
+            // Initialize FPS limiting
+            UpdateTargetFps();
+            
             // Start the render loop for smooth animation
             StartAnimation();
+        }
+        
+        private void UpdateTargetFps()
+        {
+            if (App.Settings != null)
+            {
+                _targetFps = App.Settings.EffectivePeakMeterFps;
+            }
+            else
+            {
+                _targetFps = 60;
+            }
+            _frameInterval = 1000.0 / _targetFps;
+        }
+        
+        private void OnEcoModeChanged()
+        {
+            // Update FPS target when eco mode changes
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(UpdateTargetFps);
+                return;
+            }
+            UpdateTargetFps();
         }
         
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
             StopAnimation();
+            
+            // Unsubscribe from settings changes
+            if (App.Settings != null)
+            {
+                App.Settings.CustomSliderColorsChanged -= OnCustomSliderColorsChanged;
+                App.Settings.EcoModeChanged -= OnEcoModeChanged;
+            }
+        }
+        
+        private void OnCustomSliderColorsChanged()
+        {
+            // Ensure we're on the UI thread
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(ApplyCustomColors);
+                return;
+            }
+            ApplyCustomColors();
+        }
+        
+        private void ApplyCustomColors()
+        {
+            var settings = App.Settings;
+            if (settings == null) return;
+            
+            if (settings.UseCustomSliderColors)
+            {
+                // Set custom brushes via DependencyProperties
+                var thumbColor = settings.SliderThumbColor;
+                CustomThumbBrush = thumbColor != Colors.Transparent ? new SolidColorBrush(thumbColor) : null;
+                
+                var trackFillColor = settings.SliderTrackFillColor;
+                CustomTrackFillBrush = trackFillColor != Colors.Transparent ? new SolidColorBrush(trackFillColor) : null;
+                
+                var trackBgColor = settings.SliderTrackBackgroundColor;
+                CustomTrackBackgroundBrush = trackBgColor != Colors.Transparent ? new SolidColorBrush(trackBgColor) : null;
+                
+                var peakColor = settings.PeakMeterColor;
+                CustomPeakMeterBrush = peakColor != Colors.Transparent ? new SolidColorBrush(peakColor) : null;
+                
+                // Apply colors directly to visual elements (bypassing theme system)
+                ApplyColorsToVisualElements();
+            }
+            else
+            {
+                // Clear custom brushes
+                CustomThumbBrush = null;
+                CustomTrackFillBrush = null;
+                CustomTrackBackgroundBrush = null;
+                CustomPeakMeterBrush = null;
+                
+                // Reset visual elements to use theme colors
+                ResetVisualElementColors();
+            }
+        }
+        
+        private void ApplyColorsToVisualElements()
+        {
+            // Apply thumb color directly
+            if (_thumb != null && CustomThumbBrush != null)
+            {
+                _thumb.Foreground = CustomThumbBrush;
+            }
+            
+            // Apply track fill color (left part)
+            if (_sliderLeft != null && CustomTrackFillBrush != null)
+            {
+                _sliderLeft.Foreground = CustomTrackFillBrush;
+            }
+            
+            // Apply track background color (right part)
+            if (_sliderRight != null && CustomTrackBackgroundBrush != null)
+            {
+                _sliderRight.Foreground = CustomTrackBackgroundBrush;
+            }
+            
+            // Apply peak meter color
+            if (_peakMeter1 != null && CustomPeakMeterBrush != null)
+            {
+                _peakMeter1.Background = CustomPeakMeterBrush;
+            }
+            if (_peakMeter2 != null && CustomPeakMeterBrush != null)
+            {
+                _peakMeter2.Background = CustomPeakMeterBrush;
+            }
+        }
+        
+        private void ResetVisualElementColors()
+        {
+            // Reset to default by clearing local values - let theme system take over
+            if (_thumb != null)
+            {
+                _thumb.ClearValue(Control.ForegroundProperty);
+            }
+            if (_sliderLeft != null)
+            {
+                _sliderLeft.ClearValue(Control.ForegroundProperty);
+            }
+            if (_sliderRight != null)
+            {
+                _sliderRight.ClearValue(Control.ForegroundProperty);
+            }
+            if (_peakMeter1 != null)
+            {
+                _peakMeter1.ClearValue(Border.BackgroundProperty);
+            }
+            if (_peakMeter2 != null)
+            {
+                _peakMeter2.ClearValue(Border.BackgroundProperty);
+            }
         }
         
         private void StartAnimation()
@@ -100,22 +299,36 @@ namespace EarTrumpet.UI.Controls
         
         private void OnRendering(object sender, EventArgs e)
         {
-            // Lerp current values toward target values for peak meters
-            _currentWidth1 = Lerp(_currentWidth1, _targetWidth1, PeakSmoothingFactor);
-            _currentWidth2 = Lerp(_currentWidth2, _targetWidth2, PeakSmoothingFactor);
+            // FPS limiting: skip frames if we're updating too fast
+            var now = DateTime.Now;
+            var elapsed = (now - _lastFrameTime).TotalMilliseconds;
             
-            // Apply smoothed values
-            if (_peakMeter1 != null)
-            {
-                _peakMeter1.Width = Math.Max(0, _currentWidth1);
-            }
+            // For peak meter updates, respect FPS limit
+            // But always process volume animation for responsiveness
+            bool shouldUpdatePeakMeter = elapsed >= _frameInterval;
             
-            if (_peakMeter2 != null)
+            if (shouldUpdatePeakMeter)
             {
-                _peakMeter2.Width = Math.Max(0, _currentWidth2);
+                _lastFrameTime = now;
+                
+                // Lerp current values toward target values for peak meters
+                _currentWidth1 = Lerp(_currentWidth1, _targetWidth1, PeakSmoothingFactor);
+                _currentWidth2 = Lerp(_currentWidth2, _targetWidth2, PeakSmoothingFactor);
+                
+                // Apply smoothed values
+                if (_peakMeter1 != null)
+                {
+                    _peakMeter1.Width = Math.Max(0, _currentWidth1);
+                }
+                
+                if (_peakMeter2 != null)
+                {
+                    _peakMeter2.Width = Math.Max(0, _currentWidth2);
+                }
             }
             
             // Animate volume slider value when clicking on track (not dragging)
+            // This always runs for responsive feel
             if (_isAnimatingValue && !_isDragging)
             {
                 var newValue = Lerp(Value, _targetValue, VolumeSmoothingFactor);
@@ -130,6 +343,12 @@ namespace EarTrumpet.UI.Controls
                 {
                     Value = newValue;
                 }
+            }
+            
+            // Force custom colors every frame to override theme system hover effects
+            if (CustomThumbBrush != null && _thumb != null && _thumb.Foreground != CustomThumbBrush)
+            {
+                _thumb.Foreground = CustomThumbBrush;
             }
         }
         
@@ -163,7 +382,18 @@ namespace EarTrumpet.UI.Controls
         {
             VisualStateManager.GoToState((FrameworkElement)sender, "Pressed", true);
 
-            // Touch behaves like click - animate smoothly
+            // Ensure we have the thumb reference
+            if (_thumb == null)
+            {
+                _thumb = GetTemplateChild("SliderThumb") as Thumb;
+            }
+            
+            // Ensure animation loop is running
+            StartAnimation();
+            
+            // Touch down on track - animate smoothly
+            _clickedOnTrack = true;
+            _isDragging = false;
             SetPositionByControlPoint(e.GetTouchPoint(this).Position, animate: true);
             CaptureTouch(e.TouchDevice);
 
@@ -177,15 +407,29 @@ namespace EarTrumpet.UI.Controls
                 _lastMousePosition = e.GetPosition(this);
                 VisualStateManager.GoToState((FrameworkElement)sender, "Pressed", true);
 
-                if (!_thumb.IsMouseOver)
+                // Ensure we have the thumb reference (may not be set if template applied late)
+                if (_thumb == null)
                 {
-                    // Click on track (not thumb) - animate smoothly to target
-                    SetPositionByControlPoint(_lastMousePosition, animate: true);
+                    _thumb = GetTemplateChild("SliderThumb") as Thumb;
+                }
+                
+                // Ensure animation loop is running
+                StartAnimation();
+
+                // Only start dragging if we KNOW we clicked on the thumb
+                // Otherwise (clicked on track, or thumb not found), animate smoothly
+                if (_thumb != null && _thumb.IsMouseOver)
+                {
+                    // Click on thumb - start dragging immediately
+                    _clickedOnTrack = false;
+                    _isDragging = true;
                 }
                 else
                 {
-                    // Click on thumb - start dragging
-                    _isDragging = true;
+                    // Click on track (or thumb not found) - animate smoothly to target
+                    _clickedOnTrack = true;
+                    _isDragging = false;
+                    SetPositionByControlPoint(_lastMousePosition, animate: true);
                 }
 
                 CaptureMouse();
@@ -207,6 +451,7 @@ namespace EarTrumpet.UI.Controls
             if (IsMouseCaptured)
             {
                 _isDragging = false;
+                _clickedOnTrack = false;
                 
                 // If the point is outside of the control, clear the hover state.
                 Rect rcSlider = new Rect(0, 0, ActualWidth, ActualHeight);
@@ -239,11 +484,20 @@ namespace EarTrumpet.UI.Controls
             {
                 _lastMousePosition = mousePosition;
                 
-                // When dragging, we want instant updates (no animation)
-                // Also stop any ongoing animation
-                _isDragging = true;
-                _isAnimatingValue = false;
-                SetPositionByControlPoint(e.GetPosition(this), animate: false);
+                if (_clickedOnTrack)
+                {
+                    // User clicked on track - they're now dragging after the initial click
+                    // Stop animation and switch to instant updates
+                    _clickedOnTrack = false;
+                    _isDragging = true;
+                    _isAnimatingValue = false;
+                }
+                
+                if (_isDragging)
+                {
+                    // When dragging, we want instant updates (no animation)
+                    SetPositionByControlPoint(mousePosition, animate: false);
+                }
             }
         }
 
@@ -259,15 +513,19 @@ namespace EarTrumpet.UI.Controls
             var percent = point.X / ActualWidth;
             var newValue = Bound((Maximum - Minimum) * percent);
             
-            if (animate)
+            // Only animate if requested AND smooth animation is enabled in settings
+            if (animate && IsSmoothAnimationEnabled)
             {
+                // Ensure animation loop is running
+                StartAnimation();
+                
                 // Smooth animation to target value
                 _targetValue = newValue;
                 _isAnimatingValue = true;
             }
             else
             {
-                // Instant update (for dragging)
+                // Instant update (for dragging or when animation is disabled)
                 Value = newValue;
             }
         }
