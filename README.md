@@ -1,10 +1,10 @@
 <p align="center">
-  <code>( ) ) )</code>
+  <code>♬⋆.˚ ✩°｡⋆⸜ 🎺</code>
 </p>
 
 ---
 
-<h1 align="center">( ) ) ) BetterTrumpet</h1>
+<h1 align="center">✩°｡⋆⸜ BetterTrumpet ⸝⋆｡°✩</h1>
 
 <p align="center">
   <a href="#">
@@ -21,12 +21,12 @@
 <p align="center">
   <i>windows volume control that doesn't suck</i>
   <br/>
-  <i>fork of eartrumpet with extra customization</i>
+  <i>fork of eartrumpet with extra customization ˚ʚ♡ɞ˚</i>
 </p>
 
 ---
 
-## what is this?
+## ✦ what is this?
 
 windows volume mixer is ugly and limited. eartrumpet fixed that. we made it better.
 
@@ -34,58 +34,58 @@ custom themes. smooth animations. eco mode. all the things you didn't know you w
 
 ```
                     ┌─────────────────┐
-   system tray  ──► │  ( ) ) )        │  ──►  per-app volume
+   system tray  ──► │  ♬⋆.˚ 🎺 ˚.⋆♬   │  ──►  per-app volume
                     │  BetterTrumpet  │  ──►  custom colors
                     └─────────────────┘  ──►  smooth vibes
 ```
 
 ---
 
-## features
+## ⋆˚✿˖° features
 
 | feature | |
 |---------|---|
-| per-app volume control | |
-| move apps between devices | |
-| default device management | |
-| multi-channel peak metering | |
-| light/dark mode support | |
-| configurable hotkeys | |
-| multilingual (20+ languages) | |
+| per-app volume control | ✓ |
+| move apps between devices | ✓ |
+| default device management | ✓ |
+| multi-channel peak metering | ✓ |
+| light/dark mode support | ✓ |
+| configurable hotkeys | ✓ |
+| multilingual (20+ languages) | ✓ |
 
-### new in bettertrumpet
+### ˚₊‧꒰ა new in bettertrumpet ໒꒱ ‧₊˚
 
 | feature | |
 |---------|---|
-| custom color themes | |
-| smooth volume animations | |
-| eco mode (battery saver) | |
-| adjustable peak meter fps | |
-| predefined color presets | |
+| custom color themes | ✓ |
+| smooth volume animations | ✓ |
+| eco mode (battery saver) | ✓ |
+| adjustable peak meter fps | ✓ |
+| predefined color presets | ✓ |
 
 ---
 
-## installation
+## ✩₊˚.⋆ installation
 
 ```
   ┌────────────────────────────────────────────────────┐
   │                                                    │
-  │   option 1: download release                       │
+  │   ✦ option 1: download release                     │
   │      github.com/xammen/BetterTrumpet/releases      │
   │                                                    │
-  │   option 2: build from source                      │
+  │   ✦ option 2: build from source                    │
   │      git clone https://github.com/xammen/BetterTrumpet │
   │      open EarTrumpet.vs15.sln in visual studio     │
   │      build & run                                   │
   │                                                    │
-  │   done ( ) ) )                                     │
+  │   done ♬⋆.˚ ✩°｡⋆⸜ 🎺                               │
   │                                                    │
   └────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## usage
+## ₊˚⊹♡ usage
 
 1. launch bettertrumpet
 2. click the tray icon
@@ -94,21 +94,21 @@ custom themes. smooth animations. eco mode. all the things you didn't know you w
 
 ```
   ╭─────────────────────╮
-  │   spotify      ████░░ │
-  │   discord      ██████ │
-  │   chrome       ███░░░ │
+  │ ♪ spotify     ████░░ │
+  │ ♪ discord     ██████ │
+  │ ♪ chrome      ███░░░ │
   ├─────────────────────┤
-  │   master       █████░ │
+  │ ♬ master      █████░ │
   ╰─────────────────────╯
 ```
 
 ---
 
-## settings
+## ⸝⸝˚⋆ settings
 
 right-click tray icon → settings
 
-### colors
+### ✧˖°. colors
 
 | setting | description |
 |---------|-------------|
@@ -118,7 +118,7 @@ right-click tray icon → settings
 | track background | color of the empty portion |
 | peak meter | color of the audio level indicator |
 
-### animations
+### ˚˖𓍢ִ໋🎧✧ animations
 
 | setting | default | description |
 |---------|---------|-------------|
@@ -129,34 +129,34 @@ right-click tray icon → settings
 
 ---
 
-## color themes
+## ⋆｡°✩ color themes
 
 ```
   ┌─────────────────────────────────────────────────────┐
   │                                                     │
-  │   cyberpunk     #ff0080  #00ffff  #1a1a2e          │
-  │   ocean         #00d4ff  #0077b6  #023e8a          │
-  │   sunset        #ff6b35  #f7c59f  #2d132c          │
-  │   forest        #2d6a4f  #40916c  #1b4332          │
-  │   neon          #39ff14  #ff073a  #0d0d0d          │
-  │   monochrome    #ffffff  #888888  #222222          │
-  │   custom        pick your own colors               │
+  │   ✦ cyberpunk     #ff0080  #00ffff  #1a1a2e        │
+  │   ✦ ocean         #00d4ff  #0077b6  #023e8a        │
+  │   ✦ sunset        #ff6b35  #f7c59f  #2d132c        │
+  │   ✦ forest        #2d6a4f  #40916c  #1b4332        │
+  │   ✦ neon          #39ff14  #ff073a  #0d0d0d        │
+  │   ✦ monochrome    #ffffff  #888888  #222222        │
+  │   ✦ custom        pick your own colors ˚ʚ♡ɞ˚       │
   │                                                     │
   └─────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## supported systems
+## ♪₊˚.⋆ supported systems
 
 | os | |
 |---|---|
-| windows 10 (1803+) | |
-| windows 11 | |
+| windows 10 (1803+) | ✓ |
+| windows 11 | ✓ |
 
 ---
 
-## tech stack
+## ⋆˙⟡ tech stack
 
 | | |
 |---|---|
@@ -167,7 +167,7 @@ right-click tray icon → settings
 
 ---
 
-## credits
+## ✩°｡⋆ credits
 
 based on [eartrumpet](https://github.com/File-New-Project/EarTrumpet) by:
 - david golden
@@ -176,7 +176,7 @@ based on [eartrumpet](https://github.com/File-New-Project/EarTrumpet) by:
 
 ---
 
-## license
+## ⋆.˚ license
 
 [mit license](./LICENSE)
 
@@ -184,10 +184,10 @@ based on [eartrumpet](https://github.com/File-New-Project/EarTrumpet) by:
 
 <p align="center">
   <br/>
-  <code>( ) ) )</code>
+  <code>♬⋆.˚ ✩°｡⋆⸜ 🎺 ⸝⋆｡°✩ ˚.⋆♬</code>
   <br/>
   <br/>
-  <i>made with volume</i>
+  <i>made with volume ˚ʚ♡ɞ˚</i>
   <br/>
   <br/>
 </p>
