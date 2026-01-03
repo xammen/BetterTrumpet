@@ -77,7 +77,7 @@ namespace EarTrumpet.UI.Controls
 
         public ColorPickerPopup()
         {
-            StaysOpen = false;
+            StaysOpen = true; // Keep open, close via button or palette click
             AllowsTransparency = true;
             PopupAnimation = PopupAnimation.Fade;
             Placement = PlacementMode.Bottom;
@@ -104,16 +104,48 @@ namespace EarTrumpet.UI.Controls
 
             var mainStack = new StackPanel { Orientation = Orientation.Vertical };
 
-            // Title
+            // Header with title and close button
+            var headerGrid = new Grid { Margin = new Thickness(0, 0, 0, 12) };
+            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            
             var title = new TextBlock
             {
                 Text = "Pick a Color",
                 Foreground = Brushes.White,
                 FontWeight = FontWeights.SemiBold,
                 FontSize = 14,
-                Margin = new Thickness(0, 0, 0, 12)
+                VerticalAlignment = VerticalAlignment.Center
             };
-            mainStack.Children.Add(title);
+            Grid.SetColumn(title, 0);
+            headerGrid.Children.Add(title);
+            
+            // Close button as a styled border
+            var closeButton = new Border
+            {
+                Width = 28,
+                Height = 28,
+                CornerRadius = new CornerRadius(14),
+                Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255)),
+                Cursor = Cursors.Hand,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            var closeIcon = new TextBlock
+            {
+                Text = "✕",
+                Foreground = Brushes.White,
+                FontSize = 14,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            closeButton.Child = closeIcon;
+            closeButton.MouseEnter += (s, e) => closeButton.Background = new SolidColorBrush(Color.FromArgb(80, 255, 80, 80));
+            closeButton.MouseLeave += (s, e) => closeButton.Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255));
+            closeButton.MouseLeftButtonDown += (s, e) => { IsOpen = false; e.Handled = true; };
+            Grid.SetColumn(closeButton, 1);
+            headerGrid.Children.Add(closeButton);
+            
+            mainStack.Children.Add(headerGrid);
 
             // Color palette grid
             var paletteGrid = new UniformGrid

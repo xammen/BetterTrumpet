@@ -168,6 +168,7 @@
     <Compile Include="DataModel\WindowsAudio\Internal\AudioDeviceSessionChannelCollection.cs" />
     <Compile Include="DataModel\WindowsAudio\Internal\AudioDeviceSessionChannelMultiplexer.cs" />
     <Compile Include="DataModel\FilteredCollectionChain.cs" />
+    <Compile Include="DataModel\MediaSessionService.cs" />
     <Compile Include="DataModel\WindowsAudio\IAudioDeviceChannel.cs" />
     <Compile Include="DataModel\WindowsAudio\IAudioDeviceSessionChannel.cs" />
     <Compile Include="DataModel\WindowsAudio\Internal\IAudioDeviceInternal.cs" />
@@ -237,6 +238,8 @@
     <Compile Include="UI\Themes\Rule.cs" />
     <Compile Include="UI\Themes\ThemeBindingInfo.cs" />
     <Compile Include="UI\Helpers\TaskbarIconSource.cs" />
+    <Compile Include="UI\Helpers\GifFrameExtractor.cs" />
+    <Compile Include="UI\Helpers\VolumeIconGenerator.cs" />
     <Compile Include="UI\ViewModels\BackstackViewModel.cs" />
     <Compile Include="UI\ViewModels\EarTrumpetCommunitySettingsPageViewModel.cs" />
     <Compile Include="UI\ViewModels\EarTrumpetMouseSettingsPageViewModel.cs" />

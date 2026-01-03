@@ -98,5 +98,22 @@ namespace EarTrumpet.UI.Views
                 colorsVm.ApplyPickedColor(_colorPicker.SelectedColor, _activeColorProperty);
             }
         }
+
+        /// <summary>
+        /// Handle click on theme cards to apply the theme
+        /// </summary>
+        private void ThemeCard_Click(object sender, MouseButtonEventArgs e)
+        {
+            var border = sender as Border;
+            if (border?.Tag is ColorTheme theme)
+            {
+                var viewModel = DataContext as SettingsViewModel;
+                if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
+                {
+                    colorsVm.SelectedTheme = theme;
+                }
+            }
+            e.Handled = true;
+        }
     }
 }
