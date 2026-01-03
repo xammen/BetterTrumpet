@@ -681,10 +681,10 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
     <value>Customization</value>
   </data>
   <data name="CustomizationCategoryTitle" xml:space="preserve">
-    <value>Customization</value>
+    <value>BetterSettings</value>
   </data>
   <data name="CustomizationCategoryDescription" xml:space="preserve">
-    <value>Customize slider animations and colors</value>
+    <value>Performance, appearance, and media controls</value>
   </data>
   <data name="SettingsUseCustomSliderColors" xml:space="preserve">
     <value>Use custom slider colors</value>

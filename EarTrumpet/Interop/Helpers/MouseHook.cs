@@ -4,8 +4,9 @@ using System.Runtime.InteropServices;
 
 namespace EarTrumpet.Interop.Helpers
 {
-    public class MouseHook
+    public class MouseHook : IDisposable
     {
+        private bool _disposed = false;
         [StructLayout(LayoutKind.Sequential)]
         internal struct POINT
         {
@@ -64,6 +65,26 @@ namespace EarTrumpet.Interop.Helpers
                 return User32.CallNextHookEx(_hHook, nCode, wParam, lParam);
             }
             return result;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                UnHook();
+                _disposed = true;
+            }
+        }
+
+        ~MouseHook()
+        {
+            Dispose(false);
         }
     }
 }

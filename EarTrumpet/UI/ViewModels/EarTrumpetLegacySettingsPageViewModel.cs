@@ -10,6 +10,12 @@ namespace EarTrumpet.UI.ViewModels
             set => _settings.UseLegacyIcon = value;
         }
 
+        public bool RunAtStartup
+        {
+            get => _settings.RunAtStartup;
+            set => _settings.RunAtStartup = value;
+        }
+
         private readonly AppSettings _settings;
 
         public EarTrumpetLegacySettingsPageViewModel(AppSettings settings) : base(null)

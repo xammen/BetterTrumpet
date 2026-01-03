@@ -678,10 +678,10 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Personnalisation</value>
   </data>
   <data name="CustomizationCategoryTitle" xml:space="preserve">
-    <value>Personnalisation</value>
+    <value>BetterSettings</value>
   </data>
   <data name="CustomizationCategoryDescription" xml:space="preserve">
-    <value>Personnaliser les animations et couleurs du curseur</value>
+    <value>Performance, apparence et contrôles média</value>
   </data>
   <data name="SettingsUseCustomSliderColors" xml:space="preserve">
     <value>Utiliser des couleurs personnalisées</value>

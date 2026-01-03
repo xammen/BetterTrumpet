@@ -337,6 +337,110 @@ namespace EarTrumpet
             set => _settings.Set("SettingsWindowPlacement", value);
         }
 
+        // Media Popup Settings
+        public event Action MediaPopupSettingsChanged;
+
+        public bool MediaPopupEnabled
+        {
+            get => _settings.Get("MediaPopupEnabled", true);
+            set
+            {
+                _settings.Set("MediaPopupEnabled", value);
+                MediaPopupSettingsChanged?.Invoke();
+            }
+        }
+
+        // Hover delay in seconds (0.5 to 5 seconds)
+        public double MediaPopupHoverDelay
+        {
+            get => _settings.Get("MediaPopupHoverDelay", 2.0);
+            set
+            {
+                _settings.Set("MediaPopupHoverDelay", Math.Max(0.5, Math.Min(5.0, value)));
+                MediaPopupSettingsChanged?.Invoke();
+            }
+        }
+
+        // Background blur radius (0 to 30)
+        public double MediaPopupBlurRadius
+        {
+            get => _settings.Get("MediaPopupBlurRadius", 15.0);
+            set
+            {
+                _settings.Set("MediaPopupBlurRadius", Math.Max(0, Math.Min(30, value)));
+                MediaPopupSettingsChanged?.Invoke();
+            }
+        }
+
+        // Only show popup when media is playing
+        public bool MediaPopupShowOnlyWhenPlaying
+        {
+            get => _settings.Get("MediaPopupShowOnlyWhenPlaying", false);
+            set
+            {
+                _settings.Set("MediaPopupShowOnlyWhenPlaying", value);
+                MediaPopupSettingsChanged?.Invoke();
+            }
+        }
+
+        // Remember expanded state between sessions
+        public bool MediaPopupRememberExpanded
+        {
+            get => _settings.Get("MediaPopupRememberExpanded", true);
+            set => _settings.Set("MediaPopupRememberExpanded", value);
+        }
+
+        // Expanded state (stored if RememberExpanded is true)
+        public bool MediaPopupIsExpanded
+        {
+            get => _settings.Get("MediaPopupIsExpanded", false);
+            set => _settings.Set("MediaPopupIsExpanded", value);
+        }
+
+        // Run at Windows startup
+        private const string StartupRegistryKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
+        private const string StartupValueName = "BetterTrumpet";
+
+        public bool RunAtStartup
+        {
+            get
+            {
+                try
+                {
+                    using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(StartupRegistryKey, false))
+                    {
+                        return key?.GetValue(StartupValueName) != null;
+                    }
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            set
+            {
+                try
+                {
+                    using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(StartupRegistryKey, true))
+                    {
+                        if (value)
+                        {
+                            var exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                            key?.SetValue(StartupValueName, $"\"{exePath}\"");
+                        }
+                        else
+                        {
+                            key?.DeleteValue(StartupValueName, false);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"Failed to set RunAtStartup: {ex.Message}");
+                }
+            }
+        }
+
         private bool IsTelemetryEnabledByDefault()
         {
             // Discussion on what to include:

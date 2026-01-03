@@ -161,7 +161,7 @@ namespace EarTrumpet.UI.ViewModels
         public EarTrumpetColorsSettingsPageViewModel(AppSettings settings) : base(null)
         {
             _settings = settings;
-            Title = "Colors"; // TODO: Add to Resources
+            Title = "Appearance";
             Glyph = "\xE790"; // Paintbrush icon
 
             AvailableThemes = new ObservableCollection<ColorTheme>

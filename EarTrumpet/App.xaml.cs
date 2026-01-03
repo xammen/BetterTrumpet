@@ -1,3 +1,4 @@
+using EarTrumpet.DataModel;
 using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.Diagnosis;
 using EarTrumpet.Extensibility;
@@ -39,6 +40,8 @@ namespace EarTrumpet
         private WindowHolder _mixerWindow;
         private WindowHolder _settingsWindow;
         private ErrorReporter _errorReporter;
+        private MediaPopupWindow _mediaPopup;
+        private System.Windows.Threading.DispatcherTimer _mediaPopupDelayTimer;
 
         public static AppSettings Settings { get; private set; }
 
@@ -122,6 +125,66 @@ namespace EarTrumpet
             _trayIcon.Scrolled += trayIconScrolled;
             _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
             _trayIcon.IsVisible = true;
+
+            // Media popup on hover with configurable delay
+            _mediaPopup = new MediaPopupWindow(Settings);
+            _mediaPopupDelayTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(Settings.MediaPopupHoverDelay)
+            };
+
+            // Update timer interval when settings change
+            Settings.MediaPopupSettingsChanged += () =>
+            {
+                _mediaPopupDelayTimer.Interval = TimeSpan.FromSeconds(Settings.MediaPopupHoverDelay);
+            };
+
+            _mediaPopupDelayTimer.Tick += (s, e) =>
+            {
+                _mediaPopupDelayTimer.Stop();
+
+                // Check if we should only show when playing
+                if (Settings.MediaPopupShowOnlyWhenPlaying && !DataModel.MediaSessionService.Instance.IsMediaPlaying)
+                {
+                    return;
+                }
+
+                _mediaPopup.ShowPopup(_trayIcon.IconBounds);
+            };
+            _mediaPopup.PopupHidden += (_, __) =>
+            {
+                _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip()); // Restore tooltip when popup closes
+            };
+            _trayIcon.MouseHoverChanged += (_, isOver) =>
+            {
+                // Skip if media popup is disabled
+                if (!Settings.MediaPopupEnabled)
+                {
+                    return;
+                }
+
+                if (isOver)
+                {
+                    // Hide tooltip immediately when hovering
+                    _trayIcon.SetTooltip("");
+                    // Start delay timer
+                    if (!_mediaPopup.IsShowing)
+                    {
+                        _mediaPopupDelayTimer.Start();
+                    }
+                }
+                else
+                {
+                    // Cancel delay timer if mouse leaves before delay
+                    _mediaPopupDelayTimer.Stop();
+                    // Restore tooltip when leaving (if popup not showing)
+                    if (!_mediaPopup.IsShowing)
+                    {
+                        _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
+                    }
+                    _mediaPopup.StartHideTimer();
+                }
+            };
 
             DisplayFirstRunExperience();
         }
@@ -264,7 +327,8 @@ namespace EarTrumpet
                 new SettingsPageViewModel[]
                     {
                         new EarTrumpetAnimationSettingsPageViewModel(Settings),
-                        new EarTrumpetColorsSettingsPageViewModel(Settings)
+                        new EarTrumpetColorsSettingsPageViewModel(Settings),
+                        new EarTrumpetMediaPopupSettingsPageViewModel(Settings)
                     });
 
             var allCategories = new List<SettingsCategoryViewModel>();

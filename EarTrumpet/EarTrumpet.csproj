@@ -21,7 +21,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <TargetFrameworkProfile />
-    <ApplicationIcon>Assets\Icon-Light.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\Icon-Speaker-Light.ico</ApplicationIcon>
     <ApplicationManifest>App.manifest</ApplicationManifest>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -306,6 +306,7 @@
     <Compile Include="UI\ViewModels\EarTrumpetCustomizationSettingsPageViewModel.cs" />
     <Compile Include="UI\ViewModels\EarTrumpetAnimationSettingsPageViewModel.cs" />
     <Compile Include="UI\ViewModels\EarTrumpetColorsSettingsPageViewModel.cs" />
+    <Compile Include="UI\ViewModels\EarTrumpetMediaPopupSettingsPageViewModel.cs" />
     <Compile Include="UI\ViewModels\HotkeyViewModel.cs" />
     <Compile Include="UI\ViewModels\IFlyoutViewModel.cs" />
     <Compile Include="UI\ViewModels\IPopupHostViewModel.cs" />
@@ -438,12 +439,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="UI\Views\MediaPopupWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UI\Views\FlyoutWindow.xaml.cs">
       <DependentUpon>FlyoutWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Views\MediaPopupWindow.xaml.cs">
+      <DependentUpon>MediaPopupWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Page Include="UI\Views\AppItemView.xaml">
@@ -466,6 +475,8 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\Icon-Light.ico" />
+    <Resource Include="Assets\Icon-Speaker.ico" />
+    <Resource Include="Assets\Icon-Speaker-Light.ico" />
     <Resource Include="Assets\Logo-Dark.png" />
     <Resource Include="Assets\Logo-Light.png" />
     <Resource Include="Assets\Icon-Dark.ico" />

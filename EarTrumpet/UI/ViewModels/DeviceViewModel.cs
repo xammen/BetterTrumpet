@@ -1,4 +1,4 @@
-﻿using EarTrumpet.DataModel.Audio;
+using EarTrumpet.DataModel.Audio;
 using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.Extensions;
 using System;
@@ -191,7 +191,6 @@ namespace EarTrumpet.UI.ViewModels
             {
                 if (app.DoesGroupWith(newSession))
                 {
-                    // Remove the fake app entry after copying any changes the user did.
                     newSession.Volume = app.Volume;
                     newSession.IsMuted = app.IsMuted;
                     Apps.Remove(app);
