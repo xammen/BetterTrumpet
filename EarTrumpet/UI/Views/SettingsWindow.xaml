@@ -249,112 +249,100 @@
         <!-- Colors Settings Page -->
         <DataTemplate DataType="{x:Type vm:EarTrumpetColorsSettingsPageViewModel}">
             <StackPanel Orientation="Vertical">
-                <!-- Enable Custom Colors -->
-                <CheckBox HorizontalAlignment="Left" Margin="0,0,0,16"
+                
+                <!-- Enable toggle -->
+                <CheckBox HorizontalAlignment="Left" Margin="0,0,0,20"
                           Content="{x:Static resx:Resources.SettingsUseCustomSliderColors}"
                           IsChecked="{Binding UseCustomSliderColors, Mode=TwoWay}" />
                 
                 <StackPanel IsEnabled="{Binding UseCustomSliderColors}">
-                    <!-- Theme Selector -->
+                    
+                    <!-- Theme Presets - Simple buttons -->
+                    <TextBlock Text="Presets" Margin="0,0,0,8" FontWeight="SemiBold" />
+                    <ItemsControl ItemsSource="{Binding AvailableThemes}" Margin="0,0,0,20">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Height="32" MinWidth="90" Margin="0,0,8,8" Padding="12,0" CornerRadius="4" 
+                                        Cursor="Hand" BorderThickness="1" VerticalAlignment="Center"
+                                        MouseLeftButtonDown="ThemeCard_Click" Tag="{Binding}">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="#40808080" />
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="BorderBrush" Value="#FFFFFFFF" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Border.Background>
+                                        <SolidColorBrush Color="{Binding TrackFillColor}" />
+                                    </Border.Background>
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" 
+                                               FontSize="12" Foreground="White">
+                                        <TextBlock.Effect>
+                                            <DropShadowEffect ShadowDepth="0" BlurRadius="3" Opacity="0.8" />
+                                        </TextBlock.Effect>
+                                    </TextBlock>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    
+                    <!-- Custom Colors - Click to edit -->
+                    <TextBlock Text="Custom (click to edit)" Margin="0,0,0,8" FontWeight="SemiBold" />
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                        <TextBlock VerticalAlignment="Center" Text="Theme:" Width="60" />
-                        <ComboBox Width="200" 
-                                  ItemsSource="{Binding AvailableThemes}"
-                                  SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
-                                  DisplayMemberPath="Name" />
-                        <Button Content="Reset" Margin="12,0,0,0" Padding="16,4"
-                                Command="{Binding ResetToDefaultCommand}" />
-                    </StackPanel>
-                    
-                    <!-- Info text -->
-                    <TextBlock Text="Click a color square to open the color picker" Margin="0,0,0,12"
-                               FontStyle="Italic" Style="{StaticResource BodySubText}" />
-                    
-                    <!-- 4 Color Boxes Side by Side -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                        <!-- Thumb Color -->
-                        <StackPanel Margin="0,0,20,0">
-                            <TextBlock Text="Thumb" Margin="0,0,0,4" FontSize="11" Style="{StaticResource BodySubText}" />
-                            <Border x:Name="ThumbColorBox" Width="50" Height="50" CornerRadius="6" BorderThickness="2" BorderBrush="#60808080" Cursor="Hand"
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="Thumb" FontSize="11" Margin="0,0,0,4" Style="{StaticResource BodySubText}" />
+                            <Border x:Name="ThumbColorBox" Width="50" Height="50" CornerRadius="6" 
+                                    BorderThickness="1" BorderBrush="#60808080" Cursor="Hand"
                                     MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="Thumb">
                                 <Border.Background>
                                     <SolidColorBrush Color="{Binding SliderThumbColor}" />
                                 </Border.Background>
                             </Border>
-                            <TextBox Width="70" Margin="0,4,0,0" FontSize="11" 
-                                     Text="{Binding SliderThumbColorHex, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
-                                     HorizontalContentAlignment="Center" />
                         </StackPanel>
-                        
-                        <!-- Track Fill Color -->
-                        <StackPanel Margin="0,0,20,0">
-                            <TextBlock Text="Fill" Margin="0,0,0,4" FontSize="11" Style="{StaticResource BodySubText}" />
-                            <Border x:Name="TrackFillColorBox" Width="50" Height="50" CornerRadius="6" BorderThickness="2" BorderBrush="#60808080" Cursor="Hand"
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="Fill" FontSize="11" Margin="0,0,0,4" Style="{StaticResource BodySubText}" />
+                            <Border x:Name="TrackFillColorBox" Width="50" Height="50" CornerRadius="6" 
+                                    BorderThickness="1" BorderBrush="#60808080" Cursor="Hand"
                                     MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="TrackFill">
                                 <Border.Background>
                                     <SolidColorBrush Color="{Binding SliderTrackFillColor}" />
                                 </Border.Background>
                             </Border>
-                            <TextBox Width="70" Margin="0,4,0,0" FontSize="11" 
-                                     Text="{Binding SliderTrackFillColorHex, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
-                                     HorizontalContentAlignment="Center" />
                         </StackPanel>
-                        
-                        <!-- Track Background Color -->
-                        <StackPanel Margin="0,0,20,0">
-                            <TextBlock Text="Background" Margin="0,0,0,4" FontSize="11" Style="{StaticResource BodySubText}" />
-                            <Border x:Name="TrackBackgroundColorBox" Width="50" Height="50" CornerRadius="6" BorderThickness="2" BorderBrush="#60808080" Cursor="Hand"
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="Background" FontSize="11" Margin="0,0,0,4" Style="{StaticResource BodySubText}" />
+                            <Border x:Name="TrackBackgroundColorBox" Width="50" Height="50" CornerRadius="6" 
+                                    BorderThickness="1" BorderBrush="#60808080" Cursor="Hand"
                                     MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="TrackBackground">
                                 <Border.Background>
                                     <SolidColorBrush Color="{Binding SliderTrackBackgroundColor}" />
                                 </Border.Background>
                             </Border>
-                            <TextBox Width="70" Margin="0,4,0,0" FontSize="11" 
-                                     Text="{Binding SliderTrackBackgroundColorHex, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
-                                     HorizontalContentAlignment="Center" />
                         </StackPanel>
-                        
-                        <!-- Peak Meter Color -->
                         <StackPanel>
-                            <TextBlock Text="Peak" Margin="0,0,0,4" FontSize="11" Style="{StaticResource BodySubText}" />
-                            <Border x:Name="PeakMeterColorBox" Width="50" Height="50" CornerRadius="6" BorderThickness="2" BorderBrush="#60808080" Cursor="Hand"
+                            <TextBlock Text="Peak" FontSize="11" Margin="0,0,0,4" Style="{StaticResource BodySubText}" />
+                            <Border x:Name="PeakMeterColorBox" Width="50" Height="50" CornerRadius="6" 
+                                    BorderThickness="1" BorderBrush="#60808080" Cursor="Hand"
                                     MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="PeakMeter">
                                 <Border.Background>
                                     <SolidColorBrush Color="{Binding PeakMeterColor}" />
                                 </Border.Background>
                             </Border>
-                            <TextBox Width="70" Margin="0,4,0,0" FontSize="11" 
-                                     Text="{Binding PeakMeterColorHex, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
-                                     HorizontalContentAlignment="Center" />
                         </StackPanel>
                     </StackPanel>
                     
-                    <!-- Preview Bar -->
-                    <TextBlock Text="Preview:" Margin="0,0,0,4" Style="{StaticResource BodySubText}" />
-                    <Border Width="280" Height="28" CornerRadius="4" BorderThickness="1" BorderBrush="#40808080" HorizontalAlignment="Left">
-                        <Grid>
-                            <Border CornerRadius="4">
-                                <Border.Background>
-                                    <SolidColorBrush Color="{Binding SliderTrackBackgroundColor}" />
-                                </Border.Background>
-                            </Border>
-                            <Border Width="160" HorizontalAlignment="Left" CornerRadius="4">
-                                <Border.Background>
-                                    <SolidColorBrush Color="{Binding SliderTrackFillColor}" />
-                                </Border.Background>
-                            </Border>
-                            <Border Width="18" Height="18" CornerRadius="9" HorizontalAlignment="Left" Margin="151,0,0,0">
-                                <Border.Background>
-                                    <SolidColorBrush Color="{Binding SliderThumbColor}" />
-                                </Border.Background>
-                            </Border>
-                            <Border Width="6" Height="20" CornerRadius="2" HorizontalAlignment="Left" Margin="100,0,0,0" Opacity="0.7">
-                                <Border.Background>
-                                    <SolidColorBrush Color="{Binding PeakMeterColor}" />
-                                </Border.Background>
-                            </Border>
-                        </Grid>
-                    </Border>
+                    <!-- Reset -->
+                    <Button Content="Reset" Margin="0,20,0,0" Padding="16,6" HorizontalAlignment="Left"
+                            Command="{Binding ResetToDefaultCommand}" />
+                    
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
