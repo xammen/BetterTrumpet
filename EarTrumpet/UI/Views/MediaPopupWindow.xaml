@@ -1,0 +1,458 @@
+<Window x:Class="EarTrumpet.UI.Views.MediaPopupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Theme="clr-namespace:EarTrumpet.UI.Themes"
+        Title="Media Controls"
+        Width="300"
+        Height="160"
+        MinHeight="160"
+        MaxHeight="420"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Topmost="True"
+        WindowStyle="None"
+        Opacity="0">
+
+    <Window.Resources>
+        <!-- Smooth pop-in animation -->
+        <Storyboard x:Key="SlideIn">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             From="0" To="1" Duration="0:0:0.25">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="MainBorder"
+                             Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(TranslateTransform.Y)"
+                             From="20" To="0" Duration="0:0:0.35">
+                <DoubleAnimation.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="MainBorder"
+                             Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[1].(ScaleTransform.ScaleX)"
+                             From="0.8" To="1" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="MainBorder"
+                             Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[1].(ScaleTransform.ScaleY)"
+                             From="0.8" To="1" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <!-- Smooth fade-out animation -->
+        <Storyboard x:Key="SlideOut">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             From="1" To="0" Duration="0:0:0.15">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="MainBorder"
+                             Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(TranslateTransform.Y)"
+                             From="0" To="8" Duration="0:0:0.15">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="MainBorder"
+                             Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[1].(ScaleTransform.ScaleX)"
+                             From="1" To="0.95" Duration="0:0:0.15">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="MainBorder"
+                             Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[1].(ScaleTransform.ScaleY)"
+                             From="1" To="0.95" Duration="0:0:0.15">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <!-- Track change transition -->
+        <Storyboard x:Key="TrackChangeOut">
+            <DoubleAnimation Storyboard.TargetName="ContentGrid"
+                             Storyboard.TargetProperty="(Grid.RenderTransform).(ScaleTransform.ScaleX)"
+                             From="1" To="0.92" Duration="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ContentGrid"
+                             Storyboard.TargetProperty="(Grid.RenderTransform).(ScaleTransform.ScaleY)"
+                             From="1" To="0.92" Duration="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ContentGrid"
+                             Storyboard.TargetProperty="Opacity"
+                             From="1" To="0.3" Duration="0:0:0.15"/>
+            <DoubleAnimation Storyboard.TargetName="TransitionFlash"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="0.6" Duration="0:0:0.15"/>
+        </Storyboard>
+
+        <Storyboard x:Key="TrackChangeIn">
+            <DoubleAnimation Storyboard.TargetName="ContentGrid"
+                             Storyboard.TargetProperty="(Grid.RenderTransform).(ScaleTransform.ScaleX)"
+                             From="0.92" To="1" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ContentGrid"
+                             Storyboard.TargetProperty="(Grid.RenderTransform).(ScaleTransform.ScaleY)"
+                             From="0.92" To="1" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ContentGrid"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0.3" To="1" Duration="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="TransitionFlash"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0.6" To="0" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="AlbumArtBackground"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0.4" To="0.85" Duration="0:0:0.4">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <!-- Subtle shimmer animation -->
+        <Storyboard x:Key="PulseAnimation" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetName="GlowOverlay"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0.15" To="0.25" Duration="0:0:2.3"
+                             AutoReverse="True">
+                <DoubleAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ShimmerOverlay"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="0.12" Duration="0:0:1.7"
+                             AutoReverse="True" BeginTime="0:0:0.5">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ShimmerTransform"
+                             Storyboard.TargetProperty="X"
+                             From="-0.3" To="0.3" Duration="0:0:3.1"
+                             AutoReverse="True">
+                <DoubleAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ShimmerTransform"
+                             Storyboard.TargetProperty="Y"
+                             From="-0.2" To="0.2" Duration="0:0:2.7"
+                             AutoReverse="True" BeginTime="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Style x:Key="MediaButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}"
+                                CornerRadius="6" Padding="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#30FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#50FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SmallMediaButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#80FFFFFF"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}"
+                                CornerRadius="4" Padding="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#20FFFFFF"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#40FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border x:Name="MainBorder" CornerRadius="12" Margin="8" ClipToBounds="True" RenderTransformOrigin="0.5,1">
+        <Border.RenderTransform>
+            <TransformGroup>
+                <TranslateTransform X="0" Y="0"/>
+                <ScaleTransform ScaleX="1" ScaleY="1"/>
+            </TransformGroup>
+        </Border.RenderTransform>
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="3" Opacity="0.5" Color="Black"/>
+        </Border.Effect>
+        <Border.Background>
+            <SolidColorBrush Color="#F0181818"/>
+        </Border.Background>
+
+        <Grid>
+            <!-- Background album art -->
+            <Image x:Name="AlbumArtBackground" Stretch="UniformToFill" Opacity="0.85">
+                <Image.Effect>
+                    <BlurEffect x:Name="AlbumArtBlur" Radius="15"/>
+                </Image.Effect>
+            </Image>
+
+            <!-- Dark gradient for readability -->
+            <Rectangle>
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#40000000" Offset="0"/>
+                        <GradientStop Color="#25000000" Offset="0.5"/>
+                        <GradientStop Color="#50000000" Offset="1"/>
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <!-- Glow overlay -->
+            <Rectangle x:Name="GlowOverlay" Opacity="0.2">
+                <Rectangle.Fill>
+                    <RadialGradientBrush x:Name="GlowBrush" GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.8" RadiusY="0.8">
+                        <GradientStop x:Name="GlowColor" Color="#FF6B4DE6" Offset="0"/>
+                        <GradientStop Color="Transparent" Offset="1"/>
+                    </RadialGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <!-- Shimmer overlay -->
+            <Rectangle x:Name="ShimmerOverlay" Opacity="0">
+                <Rectangle.Fill>
+                    <RadialGradientBrush GradientOrigin="0.5,0.5" RadiusX="0.5" RadiusY="0.6">
+                        <RadialGradientBrush.RelativeTransform>
+                            <TranslateTransform x:Name="ShimmerTransform" X="0" Y="0"/>
+                        </RadialGradientBrush.RelativeTransform>
+                        <GradientStop Color="#FFFFFFFF" Offset="0"/>
+                        <GradientStop Color="#40FFFFFF" Offset="0.3"/>
+                        <GradientStop Color="Transparent" Offset="0.7"/>
+                    </RadialGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <!-- Transition flash overlay -->
+            <Rectangle x:Name="TransitionFlash" Opacity="0" IsHitTestVisible="False">
+                <Rectangle.Fill>
+                    <RadialGradientBrush GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="1" RadiusY="1">
+                        <GradientStop x:Name="FlashColor" Color="#FFFFFFFF" Offset="0"/>
+                        <GradientStop Color="#80FFFFFF" Offset="0.5"/>
+                        <GradientStop Color="Transparent" Offset="1"/>
+                    </RadialGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <!-- Content -->
+            <Grid x:Name="ContentGrid" Margin="16,8,16,12" RenderTransformOrigin="0.5,0.5" Panel.ZIndex="100">
+                <Grid.RenderTransform>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Grid.RenderTransform>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Expand Arrow -->
+                <Button x:Name="ExpandButton" Grid.Row="0" Width="50" Height="18"
+                        HorizontalAlignment="Center" Margin="0,0,0,4"
+                        Background="#20FFFFFF" BorderThickness="0" Cursor="Hand"
+                        Click="ExpandButton_Click">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="border" Background="{TemplateBinding Background}"
+                                                CornerRadius="9" Padding="4,2">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="#40FFFFFF"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock x:Name="ExpandArrow" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                               Text="&#xE70E;" Foreground="White" RenderTransformOrigin="0.5,0.5">
+                        <TextBlock.RenderTransform>
+                            <RotateTransform Angle="0"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                </Button>
+
+                <!-- Expanded Cover Art (hidden by default) -->
+                <Border x:Name="ExpandedCover" Grid.Row="1" Width="200" Height="200"
+                        CornerRadius="8" Margin="0,4,0,10" Opacity="0" Visibility="Collapsed"
+                        HorizontalAlignment="Center" ClipToBounds="True">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.5" Color="Black"/>
+                    </Border.Effect>
+                    <Grid>
+                        <Image x:Name="ExpandedCoverImage" Stretch="UniformToFill"/>
+                        <Border CornerRadius="8">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#20000000" Offset="0"/>
+                                    <GradientStop Color="Transparent" Offset="0.3"/>
+                                    <GradientStop Color="Transparent" Offset="0.7"/>
+                                    <GradientStop Color="#30000000" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Marquee Title -->
+                <Canvas Grid.Row="2" Height="20" ClipToBounds="True" Margin="0,0,0,2">
+                    <TextBlock x:Name="MarqueeText"
+                               Text="No media playing"
+                               Foreground="White"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Canvas.Left="0"/>
+                </Canvas>
+
+                <!-- Progress Bar -->
+                <Grid Grid.Row="3" Margin="0,4,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock x:Name="PositionText" Grid.Column="0" Text="0:00"
+                               Foreground="#80FFFFFF" FontSize="10" VerticalAlignment="Center"
+                               Margin="0,0,8,0"/>
+
+                    <!-- Custom Progress Bar -->
+                    <Border Grid.Column="1" Height="4" CornerRadius="2" Background="#30FFFFFF"
+                            VerticalAlignment="Center" x:Name="ProgressBarContainer"
+                            MouseLeftButtonDown="ProgressBar_MouseLeftButtonDown"
+                            Cursor="Hand">
+                        <Border x:Name="ProgressBarFill" HorizontalAlignment="Left" Width="0"
+                                Height="4" CornerRadius="2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop x:Name="ProgressGradient1" Color="#FF6B4DE6" Offset="0"/>
+                                    <GradientStop x:Name="ProgressGradient2" Color="#FF9B7AFF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                    </Border>
+
+                    <TextBlock x:Name="DurationText" Grid.Column="2" Text="0:00"
+                               Foreground="#80FFFFFF" FontSize="10" VerticalAlignment="Center"
+                               Margin="8,0,0,0"/>
+                </Grid>
+
+                <!-- Shuffle/Repeat and Control Buttons -->
+                <Grid Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Shuffle Button -->
+                    <Button x:Name="ShuffleButton" Grid.Column="0" Width="32" Height="32"
+                            Style="{StaticResource SmallMediaButtonStyle}"
+                            HorizontalAlignment="Right" Margin="0,0,8,0"
+                            Click="ShuffleButton_Click" ToolTip="Shuffle">
+                        <TextBlock x:Name="ShuffleIcon" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                   Text="&#xE8B1;" Foreground="#80FFFFFF"/>
+                    </Button>
+
+                    <!-- Main Controls -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button x:Name="PrevButton" Width="40" Height="40" Style="{StaticResource MediaButtonStyle}"
+                                Click="PrevButton_Click">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE100;" Foreground="White"/>
+                        </Button>
+
+                        <Button x:Name="PlayPauseButton" Width="48" Height="48" Style="{StaticResource MediaButtonStyle}"
+                                Margin="8,0" Click="PlayPauseButton_Click">
+                            <TextBlock x:Name="PlayPauseIcon" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       Text="&#xE102;" Foreground="White"/>
+                        </Button>
+
+                        <Button x:Name="NextButton" Width="40" Height="40" Style="{StaticResource MediaButtonStyle}"
+                                Click="NextButton_Click">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE101;" Foreground="White"/>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Repeat Button -->
+                    <Button x:Name="RepeatButton" Grid.Column="2" Width="32" Height="32"
+                            Style="{StaticResource SmallMediaButtonStyle}"
+                            HorizontalAlignment="Left" Margin="8,0,0,0"
+                            Click="RepeatButton_Click" ToolTip="Repeat">
+                        <TextBlock x:Name="RepeatIcon" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                   Text="&#xE8EE;" Foreground="#80FFFFFF"/>
+                    </Button>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

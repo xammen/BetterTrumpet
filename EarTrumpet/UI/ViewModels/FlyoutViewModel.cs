@@ -1,3 +1,4 @@
+using EarTrumpet.DataModel;
 using EarTrumpet.UI.Helpers;
 using EarTrumpet.Interop.Helpers;
 using System;
@@ -11,8 +12,9 @@ using System.Windows.Threading;
 
 namespace EarTrumpet.UI.ViewModels
 {
-    public class FlyoutViewModel : BindableBase, IPopupHostViewModel, IFlyoutViewModel
+    public class FlyoutViewModel : BindableBase, IPopupHostViewModel, IFlyoutViewModel, IDisposable
     {
+        private bool _disposed = false;
         public event EventHandler<object> WindowSizeInvalidated;
         public event EventHandler<object> StateChanged;
 
@@ -411,6 +413,40 @@ public void OpenFlyout(InputType inputType)
         {
             Dialog.IsVisible = false;
             e.Handled = true;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // Dispose managed resources
+                    _mh?.Dispose();
+                    _deBounceTimer?.Stop();
+
+                    // Unsubscribe events
+                    _mainViewModel.DefaultChanged -= OnDefaultPlaybackDeviceChanged;
+                    _mainViewModel.AllDevices.CollectionChanged -= AllDevices_CollectionChanged;
+
+                    foreach (var device in Devices)
+                    {
+                        device.Apps.CollectionChanged -= Apps_CollectionChanged;
+                    }
+                }
+                _disposed = true;
+            }
+        }
+
+        ~FlyoutViewModel()
+        {
+            Dispose(false);
         }
     }
 }

@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="#">
-    <img src="https://img.shields.io/badge/version-2.1.0-trumpet?labelColor=0a0a0a&color=4a9&style=for-the-badge" alt="Version"/>
+    <img src="https://img.shields.io/badge/version-2.2.0-trumpet?labelColor=0a0a0a&color=4a9&style=for-the-badge" alt="Version"/>
   </a>
   <a href="https://github.com/xammen/BetterTrumpet/releases">
     <img src="https://img.shields.io/badge/download-releases-trumpet?labelColor=0a0a0a&color=888&style=for-the-badge" alt="Releases"/>
@@ -30,13 +30,13 @@
 
 windows volume mixer is ugly and limited. eartrumpet fixed that. we made it better.
 
-custom themes. smooth animations. eco mode. all the things you didn't know you wanted.
+custom themes. smooth animations. media popup. all the things you didn't know you wanted.
 
 ```
                     ┌─────────────────┐
    system tray  ──► │  ♬⋆.˚ 🎺 ˚.⋆♬   │  ──►  per-app volume
                     │  BetterTrumpet  │  ──►  custom colors
-                    └─────────────────┘  ──►  smooth vibes
+                    └─────────────────┘  ──►  media controls
 ```
 
 ---
@@ -62,6 +62,63 @@ custom themes. smooth animations. eco mode. all the things you didn't know you w
 | eco mode (battery saver) | ✓ |
 | adjustable peak meter fps | ✓ |
 | predefined color presets | ✓ |
+
+---
+
+## ✩₊˚.⋆ NEW: media popup ˚˖𓍢ִ໋🎧✧
+
+hover over the tray icon → beautiful floating media player appears
+
+```
+  ╭─────────────────────────────────────╮
+  │                                     │
+  │   ┌─────────────────────────────┐   │
+  │   │     ┌───────────────┐       │   │
+  │   │     │   ♪ ♫ ♪ ♫     │       │   │
+  │   │     │   album art   │       │   │
+  │   │     │   (blurred)   │       │   │
+  │   │     └───────────────┘       │   │
+  │   │                             │   │
+  │   │     ♪ song title ♪          │   │
+  │   │     ━━━━━━━━━━━○────────    │   │
+  │   │     0:42 / 3:21             │   │
+  │   │                             │   │
+  │   │      ⟲   ⏮  ▶  ⏭   ⟳       │   │
+  │   └─────────────────────────────┘   │
+  │                                     │
+  ╰─────────────────────────────────────╯
+```
+
+### features:
+- album art background with blur effect
+- track progress bar (clickable seek!)
+- shuffle & repeat controls
+- smooth pop-in/pop-out animations
+- expandable cover art view
+- color glow that adapts to album art
+- shimmer animation while playing
+
+---
+
+## ✩₊˚.⋆ NEW: animated tray icon 🎵
+
+the tray icon comes alive when music is playing!
+
+```
+  ┌────────────────────────────────────┐
+  │                                    │
+  │     static     →    animated       │
+  │                                    │
+  │      🔊        →    🎵 ♪ ♫         │
+  │                                    │
+  │   (no audio)   →  (music playing)  │
+  │                                    │
+  └────────────────────────────────────┘
+```
+
+- dynamic vector-based speaker icon
+- sound waves animate with audio peaks
+- seamlessly toggles based on media state
 
 ---
 
@@ -91,6 +148,7 @@ custom themes. smooth animations. eco mode. all the things you didn't know you w
 2. click the tray icon
 3. adjust volume per app
 4. right-click for settings
+5. **hover** for media controls
 
 ```
   ╭─────────────────────╮
@@ -126,6 +184,16 @@ right-click tray icon → settings
 | peak meter fps | 30 | animation framerate (20-60) |
 | eco mode | off | reduce cpu usage |
 | auto eco | off | enable eco on battery |
+
+### 🎵 media popup
+
+| setting | default | description |
+|---------|---------|-------------|
+| enabled | on | show media popup on hover |
+| hover delay | 1.5s | delay before popup appears |
+| blur radius | 15px | album art background blur |
+| show only when playing | off | hide when paused |
+| remember expanded | off | keep cover art expanded |
 
 ---
 
@@ -163,6 +231,7 @@ right-click tray icon → settings
 | language | c# / wpf |
 | framework | .net framework 4.8 |
 | audio api | windows core audio |
+| media api | windows media session |
 | packaging | msix |
 
 ---

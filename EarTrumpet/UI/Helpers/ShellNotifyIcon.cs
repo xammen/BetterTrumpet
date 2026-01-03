@@ -27,9 +27,11 @@ namespace EarTrumpet.UI.Helpers
         public event EventHandler<SecondaryInvokeArgs> SecondaryInvoke;
         public event EventHandler<InputType> TertiaryInvoke;
         public event EventHandler<int> Scrolled;
+        public event EventHandler<bool> MouseHoverChanged;
 
         public IShellNotifyIconSource IconSource { get; private set; }
         public bool IsMouseOver { get; private set; }
+        public Rect IconBounds => new Rect(_iconLocation.Left, _iconLocation.Top, _iconLocation.Right - _iconLocation.Left, _iconLocation.Bottom - _iconLocation.Top);
 
         public bool IsVisible
         {
@@ -260,6 +262,7 @@ namespace EarTrumpet.UI.Helpers
             if (isChanged)
             {
                 IconSource.OnMouseOverChanged(IsMouseOver);
+                MouseHoverChanged?.Invoke(this, IsMouseOver);
             }
 
             return isInBounds;

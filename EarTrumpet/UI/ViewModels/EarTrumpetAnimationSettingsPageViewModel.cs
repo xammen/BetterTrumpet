@@ -108,8 +108,8 @@ namespace EarTrumpet.UI.ViewModels
         public EarTrumpetAnimationSettingsPageViewModel(AppSettings settings) : base(null)
         {
             _settings = settings;
-            Title = "Animation"; // TODO: Add to Resources
-            Glyph = "\xE916"; // Play icon
+            Title = "Performance";
+            Glyph = "\xE945"; // Speedometer icon
         }
     }
 }
