@@ -7,8 +7,8 @@
 <h1 align="center">✩°｡⋆⸜ BetterTrumpet ⸝⋆｡°✩</h1>
 
 <p align="center">
-  <a href="#">
-    <img src="https://img.shields.io/badge/version-2.2.0-trumpet?labelColor=0a0a0a&color=4a9&style=for-the-badge" alt="Version"/>
+  <a href="https://bettertrumpet.hiii.boo">
+    <img src="https://img.shields.io/badge/official%20site-bettertrumpet.hiii.boo-trumpet?labelColor=0a0a0a&color=4a9&style=for-the-badge" alt="Official Site"/>
   </a>
   <a href="https://github.com/xammen/BetterTrumpet/releases">
     <img src="https://img.shields.io/badge/download-releases-trumpet?labelColor=0a0a0a&color=888&style=for-the-badge" alt="Releases"/>
