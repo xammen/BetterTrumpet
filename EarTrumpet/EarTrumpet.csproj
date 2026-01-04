@@ -21,7 +21,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <TargetFrameworkProfile />
-    <ApplicationIcon>Assets\Icon-Speaker-Light.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\BetterTrumpet.ico</ApplicationIcon>
     <ApplicationManifest>App.manifest</ApplicationManifest>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -474,9 +474,10 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Assets\Icon-Light.ico" />
+<Resource Include="Assets\Icon-Light.ico" />
     <Resource Include="Assets\Icon-Speaker.ico" />
     <Resource Include="Assets\Icon-Speaker-Light.ico" />
+    <Resource Include="Assets\BetterTrumpet.ico" />
     <Resource Include="Assets\Logo-Dark.png" />
     <Resource Include="Assets\Logo-Light.png" />
     <Resource Include="Assets\Icon-Dark.ico" />
