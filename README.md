@@ -16,6 +16,9 @@
   <a href="https://github.com/xammen/BetterTrumpet">
     <img src="https://img.shields.io/badge/github-xammen/BetterTrumpet-trumpet?labelColor=0a0a0a&color=666&style=for-the-badge&logo=github&logoColor=888" alt="GitHub"/>
   </a>
+  <a href="https://www.producthunt.com/posts/bettertrumpet">
+    <img src="https://img.shields.io/badge/product%20hunt-bettertrumpet-da552f?labelColor=0a0a0a&style=for-the-badge&logo=producthunt&logoColor=da552f" alt="Product Hunt"/>
+  </a>
 </p>
 
 <p align="center">
