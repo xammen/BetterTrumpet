@@ -115,5 +115,57 @@ namespace EarTrumpet.UI.Views
             }
             e.Handled = true;
         }
+
+        /// <summary>
+        /// Handle click on reset button (custom styled border instead of Button)
+        /// </summary>
+        private void ResetButton_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
+            {
+                if (colorsVm.ResetToDefaultCommand?.CanExecute(null) == true)
+                {
+                    colorsVm.ResetToDefaultCommand.Execute(null);
+                }
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Handle FPS card clicks
+        /// </summary>
+        private void Fps5Card_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetPeakMeterFps(5);
+            e.Handled = true;
+        }
+
+        private void Fps20Card_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetPeakMeterFps(20);
+            e.Handled = true;
+        }
+
+        private void Fps30Card_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetPeakMeterFps(30);
+            e.Handled = true;
+        }
+
+        private void Fps60Card_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetPeakMeterFps(60);
+            e.Handled = true;
+        }
+
+        private void SetPeakMeterFps(int fps)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetAnimationSettingsPageViewModel animVm)
+            {
+                animVm.PeakMeterFps = fps;
+            }
+        }
     }
 }

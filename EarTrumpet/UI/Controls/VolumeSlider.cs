@@ -93,6 +93,11 @@ namespace EarTrumpet.UI.Controls
         private bool _isDragging;
         private bool _clickedOnTrack; // Track if initial click was on track (not thumb)
         
+        // Conditional rendering - only animate when there's actual work to do
+        private bool _hasPeakActivity; // True when peak values are non-zero
+        private DateTime _lastPeakActivity = DateTime.MinValue;
+        private const double PeakIdleTimeoutMs = 500; // Stop rendering after 500ms of silence
+        
         // FPS limiting for eco mode
         private DateTime _lastFrameTime = DateTime.MinValue;
         private int _targetFps = 60;
@@ -136,8 +141,9 @@ namespace EarTrumpet.UI.Controls
             // Initialize FPS limiting
             UpdateTargetFps();
             
-            // Start the render loop for smooth animation
-            StartAnimation();
+            // DON'T start animation loop on load - only start when there's actual activity
+            // This saves CPU when the slider is idle (most of the time)
+            // Animation will auto-start when peak values change or volume animation is triggered
         }
         
         private void UpdateTargetFps()
@@ -307,23 +313,45 @@ namespace EarTrumpet.UI.Controls
             // But always process volume animation for responsiveness
             bool shouldUpdatePeakMeter = elapsed >= _frameInterval;
             
+            // Track if we're actually doing any work this frame
+            bool didWork = false;
+            
             if (shouldUpdatePeakMeter)
             {
                 _lastFrameTime = now;
                 
-                // Lerp current values toward target values for peak meters
-                _currentWidth1 = Lerp(_currentWidth1, _targetWidth1, PeakSmoothingFactor);
-                _currentWidth2 = Lerp(_currentWidth2, _targetWidth2, PeakSmoothingFactor);
+                // Check if peak meters need updating (non-zero targets or current values still animating down)
+                bool peakNeedsUpdate = _targetWidth1 > 0.1 || _targetWidth2 > 0.1 || 
+                                       _currentWidth1 > 0.1 || _currentWidth2 > 0.1;
                 
-                // Apply smoothed values
-                if (_peakMeter1 != null)
+                if (peakNeedsUpdate)
                 {
-                    _peakMeter1.Width = Math.Max(0, _currentWidth1);
+                    _lastPeakActivity = now;
+                    _hasPeakActivity = true;
+                    didWork = true;
+                    
+                    // Lerp current values toward target values for peak meters
+                    _currentWidth1 = Lerp(_currentWidth1, _targetWidth1, PeakSmoothingFactor);
+                    _currentWidth2 = Lerp(_currentWidth2, _targetWidth2, PeakSmoothingFactor);
+                    
+                    // Apply smoothed values
+                    if (_peakMeter1 != null)
+                    {
+                        _peakMeter1.Width = Math.Max(0, _currentWidth1);
+                    }
+                    
+                    if (_peakMeter2 != null)
+                    {
+                        _peakMeter2.Width = Math.Max(0, _currentWidth2);
+                    }
                 }
-                
-                if (_peakMeter2 != null)
+                else if (_hasPeakActivity)
                 {
-                    _peakMeter2.Width = Math.Max(0, _currentWidth2);
+                    // Check if we've been idle long enough to stop the render loop
+                    if ((now - _lastPeakActivity).TotalMilliseconds > PeakIdleTimeoutMs)
+                    {
+                        _hasPeakActivity = false;
+                    }
                 }
             }
             
@@ -331,6 +359,7 @@ namespace EarTrumpet.UI.Controls
             // This always runs for responsive feel
             if (_isAnimatingValue && !_isDragging)
             {
+                didWork = true;
                 var newValue = Lerp(Value, _targetValue, VolumeSmoothingFactor);
                 
                 // Stop animating when close enough to target
@@ -349,6 +378,13 @@ namespace EarTrumpet.UI.Controls
             if (CustomThumbBrush != null && _thumb != null && _thumb.Foreground != CustomThumbBrush)
             {
                 _thumb.Foreground = CustomThumbBrush;
+            }
+            
+            // Auto-stop animation loop when nothing needs animating
+            // This saves significant CPU when the slider is idle
+            if (!didWork && !_isAnimatingValue && !_hasPeakActivity)
+            {
+                StopAnimation();
             }
         }
         
@@ -376,6 +412,12 @@ namespace EarTrumpet.UI.Controls
             // Calculate target widths (the animation will smoothly interpolate toward these)
             _targetWidth1 = (ActualWidth - _thumb.ActualWidth) * PeakValue1 * (Value / 100f);
             _targetWidth2 = (ActualWidth - _thumb.ActualWidth) * PeakValue2 * (Value / 100f);
+            
+            // Auto-start animation loop when peak values change (conditional rendering optimization)
+            if (_targetWidth1 > 0.1 || _targetWidth2 > 0.1)
+            {
+                StartAnimation();
+            }
         }
 
         private void OnTouchDown(object sender, TouchEventArgs e)

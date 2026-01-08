@@ -349,6 +349,9 @@
     <Compile Include="Interop\Helpers\SingleInstanceAppMutex.cs" />
     <Compile Include="UI\Controls\VolumeSlider.cs" />
     <Compile Include="UI\Controls\ColorPickerPopup.cs" />
+    <Compile Include="UI\Controls\ColorWheel.cs" />
+    <Compile Include="UI\Controls\EyedropperTool.cs" />
+    <Compile Include="DataModel\AlbumArtCache.cs" />
     <Compile Include="DataModel\WindowsAudio\Internal\AudioDeviceSessionGroup.cs" />
     <Compile Include="Interop\MMDeviceAPI\AudioSessionDisconnectReason.cs" />
     <Compile Include="Interop\MMDeviceAPI\AudioSessionState.cs" />
