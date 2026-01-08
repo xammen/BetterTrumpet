@@ -248,82 +248,41 @@ namespace EarTrumpet.UI.ViewModels
             // Initialize predefined themes
             AvailableThemes = new ObservableCollection<ColorTheme>
             {
-                // Default Windows Accent
-                new ColorTheme("Default (Windows Accent)",
-                    DefaultAccentColor,
-                    DefaultAccentColor,
-                    DefaultTrackBackground,
-                    DefaultPeakMeter),
+                // === DEFAULT ===
+                new ColorTheme("Default (Windows Accent)", DefaultAccentColor, DefaultAccentColor, DefaultTrackBackground, DefaultPeakMeter),
                 
-                // OLED - Pure black with white accents
-                new ColorTheme("OLED Dark",
-                    Color.FromRgb(255, 255, 255),
-                    Color.FromRgb(255, 255, 255),
-                    Color.FromRgb(30, 30, 30),
-                    Color.FromRgb(100, 100, 100)),
+                // === OLED OPTIMIZED - Minimal bright pixels ===
+                new ColorTheme("OLED Pure", Color.FromRgb(0, 200, 200), Color.FromRgb(0, 150, 150), Color.FromRgb(0, 0, 0), Color.FromRgb(0, 80, 80)),
+                new ColorTheme("OLED Amber", Color.FromRgb(255, 176, 0), Color.FromRgb(200, 140, 0), Color.FromRgb(0, 0, 0), Color.FromRgb(120, 80, 0)),
                 
-                // Fallout - Pip-Boy green
-                new ColorTheme("Fallout Pip-Boy",
-                    Color.FromRgb(16, 255, 16),
-                    Color.FromRgb(16, 255, 16),
-                    Color.FromRgb(20, 40, 20),
-                    Color.FromRgb(10, 180, 10)),
+                // === BRAND INSPIRED ===
+                new ColorTheme("Spotify", Color.FromRgb(30, 215, 96), Color.FromRgb(29, 185, 84), Color.FromRgb(18, 18, 18), Color.FromRgb(20, 120, 60)),
+                new ColorTheme("Discord", Color.FromRgb(88, 101, 242), Color.FromRgb(71, 82, 196), Color.FromRgb(30, 31, 34), Color.FromRgb(60, 70, 150)),
+                new ColorTheme("YouTube", Color.FromRgb(255, 0, 0), Color.FromRgb(200, 0, 0), Color.FromRgb(15, 15, 15), Color.FromRgb(150, 0, 0)),
                 
-                // Cyberpunk - Neon pink/cyan
-                new ColorTheme("Cyberpunk",
-                    Color.FromRgb(255, 0, 128),
-                    Color.FromRgb(0, 255, 255),
-                    Color.FromRgb(20, 20, 40),
-                    Color.FromRgb(255, 0, 255)),
+                // === RETRO / AESTHETIC ===
+                new ColorTheme("Synthwave", Color.FromRgb(255, 0, 128), Color.FromRgb(0, 255, 255), Color.FromRgb(20, 0, 40), Color.FromRgb(180, 0, 255)),
+                new ColorTheme("Matrix", Color.FromRgb(0, 255, 65), Color.FromRgb(0, 200, 50), Color.FromRgb(0, 10, 0), Color.FromRgb(0, 120, 30)),
+                new ColorTheme("Amber CRT", Color.FromRgb(255, 180, 0), Color.FromRgb(200, 140, 0), Color.FromRgb(20, 15, 0), Color.FromRgb(150, 100, 0)),
+                new ColorTheme("Pip-Boy", Color.FromRgb(16, 255, 16), Color.FromRgb(16, 220, 16), Color.FromRgb(10, 25, 10), Color.FromRgb(10, 150, 10)),
                 
-                // Sunset - Warm orange/red
-                new ColorTheme("Sunset",
-                    Color.FromRgb(255, 100, 50),
-                    Color.FromRgb(255, 150, 50),
-                    Color.FromRgb(60, 30, 30),
-                    Color.FromRgb(255, 200, 100)),
+                // === DEV THEMES ===
+                new ColorTheme("Dracula", Color.FromRgb(189, 147, 249), Color.FromRgb(255, 121, 198), Color.FromRgb(40, 42, 54), Color.FromRgb(139, 233, 253)),
+                new ColorTheme("Nord", Color.FromRgb(136, 192, 208), Color.FromRgb(129, 161, 193), Color.FromRgb(46, 52, 64), Color.FromRgb(94, 129, 172)),
+                new ColorTheme("Monokai", Color.FromRgb(249, 38, 114), Color.FromRgb(166, 226, 46), Color.FromRgb(39, 40, 34), Color.FromRgb(102, 217, 239)),
                 
-                // Ocean - Blue tones
-                new ColorTheme("Ocean",
-                    Color.FromRgb(0, 150, 255),
-                    Color.FromRgb(0, 100, 200),
-                    Color.FromRgb(20, 40, 60),
-                    Color.FromRgb(100, 200, 255)),
+                // === NATURE ===
+                new ColorTheme("Aurora", Color.FromRgb(0, 255, 170), Color.FromRgb(120, 0, 255), Color.FromRgb(10, 20, 30), Color.FromRgb(0, 180, 120)),
+                new ColorTheme("Sunset", Color.FromRgb(255, 95, 109), Color.FromRgb(255, 195, 113), Color.FromRgb(30, 20, 25), Color.FromRgb(200, 100, 80)),
+                new ColorTheme("Ocean Deep", Color.FromRgb(0, 180, 216), Color.FromRgb(0, 119, 182), Color.FromRgb(3, 4, 30), Color.FromRgb(0, 100, 130)),
                 
-                // Forest - Green tones
-                new ColorTheme("Forest",
-                    Color.FromRgb(50, 180, 80),
-                    Color.FromRgb(40, 150, 60),
-                    Color.FromRgb(20, 40, 25),
-                    Color.FromRgb(100, 200, 120)),
+                // === PREMIUM ===
+                new ColorTheme("Rose Gold", Color.FromRgb(183, 110, 121), Color.FromRgb(150, 90, 100), Color.FromRgb(30, 25, 27), Color.FromRgb(220, 150, 160)),
+                new ColorTheme("Midnight Blue", Color.FromRgb(100, 149, 237), Color.FromRgb(65, 105, 225), Color.FromRgb(15, 20, 35), Color.FromRgb(70, 100, 180)),
                 
-                // Monochrome - Gray scale
-                new ColorTheme("Monochrome",
-                    Color.FromRgb(200, 200, 200),
-                    Color.FromRgb(150, 150, 150),
-                    Color.FromRgb(50, 50, 50),
-                    Color.FromRgb(100, 100, 100)),
-                
-                // Blood Red - Dark red theme
-                new ColorTheme("Blood Red",
-                    Color.FromRgb(200, 0, 0),
-                    Color.FromRgb(180, 0, 0),
-                    Color.FromRgb(40, 15, 15),
-                    Color.FromRgb(255, 50, 50)),
-                
-                // Purple Haze
-                new ColorTheme("Purple Haze",
-                    Color.FromRgb(150, 50, 255),
-                    Color.FromRgb(120, 40, 200),
-                    Color.FromRgb(30, 20, 50),
-                    Color.FromRgb(180, 100, 255)),
-                
-                // Gold Luxury
-                new ColorTheme("Gold Luxury",
-                    Color.FromRgb(255, 215, 0),
-                    Color.FromRgb(218, 165, 32),
-                    Color.FromRgb(40, 35, 20),
-                    Color.FromRgb(255, 230, 100)),
+                // === ACCESSIBILITY ===
+                new ColorTheme("High Contrast", Color.FromRgb(255, 255, 255), Color.FromRgb(255, 255, 0), Color.FromRgb(0, 0, 0), Color.FromRgb(0, 255, 255)),
+                new ColorTheme("Grayscale", Color.FromRgb(220, 220, 220), Color.FromRgb(160, 160, 160), Color.FromRgb(35, 35, 35), Color.FromRgb(100, 100, 100)),
             };
 
             // Commands

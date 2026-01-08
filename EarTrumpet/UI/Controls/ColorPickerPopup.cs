@@ -30,6 +30,9 @@ namespace EarTrumpet.UI.Controls
         private Slider _blueSlider;
         private TextBox _hexTextBox;
         private bool _isUpdating;
+        private Border _eyedropperButton;
+        private ColorWheel _colorWheel;
+        private Slider _brightnessSlider;
 
         // Predefined color palette
         private static readonly Color[] PaletteColors = new[]
@@ -191,6 +194,63 @@ namespace EarTrumpet.UI.Controls
             // Separator
             mainStack.Children.Add(new Border { Height = 1, Background = new SolidColorBrush(Color.FromRgb(80, 80, 80)), Margin = new Thickness(0, 12, 0, 12) });
 
+            // Color Wheel and Brightness Slider section
+            var wheelSection = new Grid { Margin = new Thickness(0, 0, 0, 12) };
+            wheelSection.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(180) });
+            wheelSection.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(30) });
+            
+            // Color Wheel
+            _colorWheel = new ColorWheel
+            {
+                Width = 160,
+                Height = 160,
+                SelectedColor = SelectedColor,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            _colorWheel.ColorChanged += OnColorWheelChanged;
+            Grid.SetColumn(_colorWheel, 0);
+            wheelSection.Children.Add(_colorWheel);
+            
+            // Brightness (Value) Slider - vertical
+            var brightnessPanel = new StackPanel 
+            { 
+                Orientation = Orientation.Vertical,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                Margin = new Thickness(8, 0, 0, 0)
+            };
+            
+            var brightnessLabel = new TextBlock
+            {
+                Text = "V",
+                Foreground = Brushes.White,
+                FontSize = 10,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 4)
+            };
+            brightnessPanel.Children.Add(brightnessLabel);
+            
+            _brightnessSlider = new Slider
+            {
+                Orientation = Orientation.Vertical,
+                Minimum = 0,
+                Maximum = 100,
+                Value = 100,
+                Height = 140,
+                Width = 20
+            };
+            _brightnessSlider.ValueChanged += OnBrightnessSliderChanged;
+            brightnessPanel.Children.Add(_brightnessSlider);
+            
+            Grid.SetColumn(brightnessPanel, 1);
+            wheelSection.Children.Add(brightnessPanel);
+            
+            mainStack.Children.Add(wheelSection);
+
+            // Separator
+            mainStack.Children.Add(new Border { Height = 1, Background = new SolidColorBrush(Color.FromRgb(80, 80, 80)), Margin = new Thickness(0, 0, 0, 12) });
+
             // Preview and sliders
             var controlsGrid = new Grid();
             controlsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(60) });
@@ -231,7 +291,7 @@ namespace EarTrumpet.UI.Controls
             controlsGrid.Children.Add(slidersStack);
             mainStack.Children.Add(controlsGrid);
 
-            // Hex input
+            // Hex input and eyedropper button
             var hexPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 12, 0, 0) };
             hexPanel.Children.Add(new TextBlock { Text = "Hex:", Foreground = Brushes.White, VerticalAlignment = VerticalAlignment.Center, Width = 35 });
             _hexTextBox = new TextBox
@@ -247,6 +307,33 @@ namespace EarTrumpet.UI.Controls
             _hexTextBox.LostFocus += OnHexTextBoxLostFocus;
             _hexTextBox.KeyDown += (s, e) => { if (e.Key == Key.Enter) OnHexTextBoxLostFocus(s, e); };
             hexPanel.Children.Add(_hexTextBox);
+
+            // Eyedropper button
+            _eyedropperButton = new Border
+            {
+                Width = 32,
+                Height = 24,
+                Margin = new Thickness(8, 0, 0, 0),
+                CornerRadius = new CornerRadius(4),
+                Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255)),
+                Cursor = Cursors.Hand,
+                ToolTip = "Pick color from screen"
+            };
+            var eyedropperIcon = new TextBlock
+            {
+                Text = "\uEF3C", // Eyedropper icon from Segoe MDL2 Assets
+                FontFamily = new System.Windows.Media.FontFamily("Segoe MDL2 Assets"),
+                FontSize = 14,
+                Foreground = Brushes.White,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            _eyedropperButton.Child = eyedropperIcon;
+            _eyedropperButton.MouseEnter += (s, e) => _eyedropperButton.Background = new SolidColorBrush(Color.FromArgb(80, 100, 180, 255));
+            _eyedropperButton.MouseLeave += (s, e) => _eyedropperButton.Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255));
+            _eyedropperButton.MouseLeftButtonDown += OnEyedropperClick;
+            hexPanel.Children.Add(_eyedropperButton);
+
             mainStack.Children.Add(hexPanel);
 
             mainBorder.Child = mainStack;
@@ -324,6 +411,19 @@ namespace EarTrumpet.UI.Controls
             _redSlider.Value = SelectedColor.R;
             _greenSlider.Value = SelectedColor.G;
             _blueSlider.Value = SelectedColor.B;
+            
+            // Update color wheel
+            if (_colorWheel != null)
+            {
+                _colorWheel.SelectedColor = SelectedColor;
+            }
+            
+            // Update brightness slider
+            if (_brightnessSlider != null)
+            {
+                _brightnessSlider.Value = _colorWheel?.Value * 100 ?? 100;
+            }
+            
             _isUpdating = false;
             
             UpdatePreviewAndHex();
@@ -335,6 +435,50 @@ namespace EarTrumpet.UI.Controls
                 _previewBorder.Background = new SolidColorBrush(SelectedColor);
             if (_hexTextBox != null)
                 _hexTextBox.Text = $"#{SelectedColor.R:X2}{SelectedColor.G:X2}{SelectedColor.B:X2}";
+        }
+
+        private void OnColorWheelChanged(object sender, EventArgs e)
+        {
+            if (_isUpdating) return;
+            
+            _isUpdating = true;
+            SelectedColor = _colorWheel.SelectedColor;
+            _isUpdating = false;
+            
+            UpdateUIFromColor();
+        }
+
+        private void OnBrightnessSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (_isUpdating || _colorWheel == null) return;
+            
+            _isUpdating = true;
+            _colorWheel.Value = _brightnessSlider.Value / 100.0;
+            SelectedColor = _colorWheel.SelectedColor;
+            _isUpdating = false;
+            
+            UpdateUIFromColor();
+        }
+
+        private void OnEyedropperClick(object sender, MouseButtonEventArgs e)
+        {
+            // Temporarily close popup while picking
+            IsOpen = false;
+            
+            // Launch eyedropper tool
+            EyedropperTool.PickColor(
+                onColorPicked: (color) =>
+                {
+                    SelectedColor = color;
+                    IsOpen = true; // Reopen popup with new color
+                },
+                onCancelled: () =>
+                {
+                    IsOpen = true; // Just reopen popup
+                }
+            );
+            
+            e.Handled = true;
         }
     }
 }

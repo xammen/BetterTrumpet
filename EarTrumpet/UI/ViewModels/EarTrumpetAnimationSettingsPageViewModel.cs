@@ -92,7 +92,7 @@ namespace EarTrumpet.UI.ViewModels
             }
         }
 
-        // Peak meter FPS: 20, 30, 60
+        // Peak meter FPS: 5, 20, 30, 60
         public int PeakMeterFps
         {
             get => _settings.PeakMeterFps;

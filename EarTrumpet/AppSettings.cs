@@ -180,10 +180,12 @@ namespace EarTrumpet
             set => _settings.Set("VolumeAnimationSpeed", value);
         }
 
-        // Peak meter FPS: 20 (performance), 30, or 60 (smooth). Default 60
+        // Peak meter FPS: 20 (performance), 30 (balanced), or 60 (smooth). Default 30
+        // Note: 30fps is a good balance between smoothness and CPU usage
+        // Most users won't notice the difference from 60fps for peak meters
         public int PeakMeterFps
         {
-            get => _settings.Get("PeakMeterFps", 60);
+            get => _settings.Get("PeakMeterFps", 30);
             set => _settings.Set("PeakMeterFps", value);
         }
 
