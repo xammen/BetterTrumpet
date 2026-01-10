@@ -42,6 +42,7 @@ namespace EarTrumpet.DataModel
         private bool _isInitialized;
         private bool _isMediaPlaying;
         private readonly Dispatcher _dispatcher;
+        private LegacyMediaPlayerService _legacyService;
 
         /// <summary>
         /// Event fired when media playback state changes (play/pause/stop)
@@ -72,7 +73,67 @@ namespace EarTrumpet.DataModel
         {
             _dispatcher = Dispatcher.CurrentDispatcher;
             Initialize();
+            InitializeLegacyService();
         }
+
+        private void InitializeLegacyService()
+        {
+            try
+            {
+                _legacyService = LegacyMediaPlayerService.Instance;
+                _legacyService.PlaybackChanged += OnLegacyPlaybackChanged;
+                _legacyService.TrackChanged += OnLegacyTrackChanged;
+                Trace.WriteLine("MediaSessionService: Legacy service initialized");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"MediaSessionService: Failed to init legacy service - {ex.Message}");
+            }
+        }
+
+        private void OnLegacyPlaybackChanged(bool isPlaying)
+        {
+            Trace.WriteLine($"MediaSessionService: Legacy playback changed - isPlaying={isPlaying}");
+            
+            // Only use legacy if SMTC has no playing session
+            if (!CheckIfAnyMediaPlaying())
+            {
+                bool wasPlaying = _isMediaPlaying;
+                _isMediaPlaying = isPlaying;
+
+                if (wasPlaying != _isMediaPlaying)
+                {
+                    Trace.WriteLine($"MediaSessionService: Using legacy player state: {_isMediaPlaying}");
+                    _dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        MediaPlaybackChanged?.Invoke(_isMediaPlaying);
+                    }));
+                }
+            }
+        }
+
+        private void OnLegacyTrackChanged()
+        {
+            // Only use legacy if SMTC has no playing session
+            if (!CheckIfAnyMediaPlaying())
+            {
+                Trace.WriteLine("MediaSessionService: Legacy track changed");
+                _dispatcher.BeginInvoke(new Action(() =>
+                {
+                    MediaTrackChanged?.Invoke();
+                }));
+            }
+        }
+
+        /// <summary>
+        /// Check if using legacy player (for fallback UI)
+        /// </summary>
+        public bool IsUsingLegacyPlayer => _legacyService?.IsPlaying == true && !CheckIfAnyMediaPlaying();
+
+        /// <summary>
+        /// Get legacy player name
+        /// </summary>
+        public string LegacyPlayerName => _legacyService?.CurrentPlayerName;
 
         private void Initialize()
         {
@@ -282,7 +343,12 @@ namespace EarTrumpet.DataModel
             try
             {
                 var session = GetCurrentSession();
-                if (session == null) return;
+                if (session == null)
+                {
+                    // Fallback to legacy WMP
+                    _legacyService?.PlayPause();
+                    return;
+                }
 
                 var playbackInfo = session.GetPlaybackInfo();
                 if (playbackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
@@ -297,6 +363,8 @@ namespace EarTrumpet.DataModel
             catch (Exception ex)
             {
                 Trace.WriteLine($"MediaSessionService: PlayPause failed - {ex.Message}");
+                // Try legacy fallback
+                _legacyService?.PlayPause();
             }
         }
 
@@ -340,11 +408,19 @@ namespace EarTrumpet.DataModel
             try
             {
                 var session = GetCurrentSession();
-                if (session != null) { var _ = session.TrySkipNextAsync(); }
+                if (session != null) 
+                { 
+                    var _ = session.TrySkipNextAsync(); 
+                }
+                else
+                {
+                    _legacyService?.Next();
+                }
             }
             catch (Exception ex)
             {
                 Trace.WriteLine($"MediaSessionService: Next failed - {ex.Message}");
+                _legacyService?.Next();
             }
         }
 
@@ -356,11 +432,19 @@ namespace EarTrumpet.DataModel
             try
             {
                 var session = GetCurrentSession();
-                if (session != null) { var _ = session.TrySkipPreviousAsync(); }
+                if (session != null) 
+                { 
+                    var _ = session.TrySkipPreviousAsync(); 
+                }
+                else
+                {
+                    _legacyService?.Previous();
+                }
             }
             catch (Exception ex)
             {
                 Trace.WriteLine($"MediaSessionService: Previous failed - {ex.Message}");
+                _legacyService?.Previous();
             }
         }
 
@@ -372,7 +456,11 @@ namespace EarTrumpet.DataModel
             try
             {
                 var session = GetCurrentSession();
-                if (session == null) return null;
+                if (session == null)
+                {
+                    // Try legacy WMP
+                    return _legacyService?.GetCurrentMediaInfo();
+                }
 
                 GlobalSystemMediaTransportControlsSessionMediaProperties mediaProps = null;
                 var operation = session.TryGetMediaPropertiesAsync();
@@ -416,8 +504,8 @@ namespace EarTrumpet.DataModel
                 var session = GetCurrentSession();
                 if (session == null)
                 {
-                    Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - No session");
-                    return null;
+                    Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - No SMTC session, trying legacy...");
+                    return GetLegacyPlayerIcon();
                 }
 
                 // Get media properties
@@ -428,20 +516,20 @@ namespace EarTrumpet.DataModel
                 if (propsOp.Status != AsyncStatus.Completed)
                 {
                     Trace.WriteLine($"MediaSessionService: GetCurrentThumbnail - Props failed: {propsOp.Status}");
-                    return null;
+                    return GetLegacyPlayerIcon();
                 }
 
                 var mediaProps = propsOp.GetResults();
                 if (mediaProps == null)
                 {
                     Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - No media props");
-                    return null;
+                    return GetLegacyPlayerIcon();
                 }
 
                 if (mediaProps.Thumbnail == null)
                 {
-                    Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - No thumbnail in props");
-                    return null;
+                    Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - No thumbnail in props, trying legacy...");
+                    return GetLegacyPlayerIcon();
                 }
 
                 Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - Opening thumbnail stream...");
@@ -454,14 +542,14 @@ namespace EarTrumpet.DataModel
                 if (streamOp.Status != AsyncStatus.Completed)
                 {
                     Trace.WriteLine($"MediaSessionService: GetCurrentThumbnail - Stream open failed: {streamOp.Status}");
-                    return null;
+                    return GetLegacyPlayerIcon();
                 }
 
                 var stream = streamOp.GetResults();
                 if (stream == null || stream.Size == 0)
                 {
                     Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - Stream is null or empty");
-                    return null;
+                    return GetLegacyPlayerIcon();
                 }
 
                 Trace.WriteLine($"MediaSessionService: GetCurrentThumbnail - Stream size: {stream.Size}");
@@ -477,14 +565,14 @@ namespace EarTrumpet.DataModel
                 if (readOp.Status != AsyncStatus.Completed)
                 {
                     Trace.WriteLine($"MediaSessionService: GetCurrentThumbnail - Read failed: {readOp.Status}");
-                    return null;
+                    return GetLegacyPlayerIcon();
                 }
 
                 var readBuffer = readOp.GetResults();
                 if (readBuffer == null || readBuffer.Length == 0)
                 {
                     Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - readBuffer is null or empty");
-                    return null;
+                    return GetLegacyPlayerIcon();
                 }
 
                 Trace.WriteLine($"MediaSessionService: GetCurrentThumbnail - Read {readBuffer.Length} bytes");
@@ -509,6 +597,86 @@ namespace EarTrumpet.DataModel
             {
                 Trace.WriteLine($"MediaSessionService: GetCurrentThumbnail failed - {ex.Message}");
             }
+            return GetLegacyPlayerIcon();
+        }
+
+        /// <summary>
+        /// Gets the icon for a media player as fallback cover art when SMTC thumbnail is not available
+        /// </summary>
+        private BitmapImage GetLegacyPlayerIcon()
+        {
+            try
+            {
+                // Get player name from SMTC session's SourceAppUserModelId
+                var session = GetCurrentSession();
+                if (session == null)
+                {
+                    // No SMTC session - try to find any running media player
+                    var playerPath = _legacyService?.FindRunningMediaPlayerPath();
+                    if (!string.IsNullOrEmpty(playerPath))
+                    {
+                        return ExtractIconFromPath(playerPath);
+                    }
+                    return null;
+                }
+
+                var sourceAppId = session.SourceAppUserModelId;
+                if (string.IsNullOrEmpty(sourceAppId))
+                    return null;
+
+                Trace.WriteLine($"MediaSessionService: GetLegacyPlayerIcon - SourceAppId: {sourceAppId}");
+
+                // Try to get executable path from legacy service
+                var exePath = _legacyService?.GetPlayerExecutablePath(sourceAppId);
+                if (!string.IsNullOrEmpty(exePath))
+                {
+                    return ExtractIconFromPath(exePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"MediaSessionService: GetLegacyPlayerIcon failed - {ex.Message}");
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Extract icon from executable path and return as BitmapImage
+        /// </summary>
+        private BitmapImage ExtractIconFromPath(string exePath)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(exePath) || !System.IO.File.Exists(exePath))
+                    return null;
+
+                var icon = System.Drawing.Icon.ExtractAssociatedIcon(exePath);
+                if (icon != null)
+                {
+                    using (var bmp = icon.ToBitmap())
+                    using (var memStream = new MemoryStream())
+                    {
+                        bmp.Save(memStream, System.Drawing.Imaging.ImageFormat.Png);
+                        memStream.Position = 0;
+
+                        var bitmap = new BitmapImage();
+                        bitmap.BeginInit();
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.StreamSource = memStream;
+                        bitmap.EndInit();
+                        bitmap.Freeze();
+
+                        Trace.WriteLine($"MediaSessionService: ExtractIconFromPath - Got icon from {exePath}");
+                        return bitmap;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"MediaSessionService: ExtractIconFromPath failed - {ex.Message}");
+            }
+
             return null;
         }
 
@@ -523,7 +691,12 @@ namespace EarTrumpet.DataModel
             try
             {
                 var session = GetCurrentSession();
-                if (session == null) return;
+                if (session == null)
+                {
+                    // Try legacy WMP
+                    _legacyService?.GetTimelineInfo(out position, out duration);
+                    return;
+                }
 
                 var timeline = session.GetTimelineProperties();
                 if (timeline == null) return;
@@ -663,14 +836,24 @@ namespace EarTrumpet.DataModel
             try
             {
                 var session = GetCurrentSession();
-                if (session == null) return;
+                if (session == null)
+                {
+                    _legacyService?.SeekTo(position);
+                    return;
+                }
 
                 var _ = session.TryChangePlaybackPositionAsync(position.Ticks);
             }
             catch (Exception ex)
             {
                 Trace.WriteLine($"MediaSessionService: SeekTo failed - {ex.Message}");
+                _legacyService?.SeekTo(position);
             }
         }
+
+        /// <summary>
+        /// Check if legacy WMP is playing (for fallback)
+        /// </summary>
+        public bool IsLegacyMediaPlaying => _legacyService?.IsPlaying ?? false;
     }
 }
