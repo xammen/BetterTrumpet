@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bettertrumpet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --hover: #333;
+            --lines: #555;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        ::selection {
+            background: var(--hover);
+            color: var(--text-primary);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 300;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            padding-top: 20vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        /* Animations */
+        .anim-fade {
+            opacity: 0;
+            animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                filter: blur(4px);
+                transform: translateX(5px);
+            }
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateX(0);
+            }
+        }
+
+        /* Components */
+        #face {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            white-space: pre;
+            cursor: default;
+            user-select: none;
+            color: var(--text-primary);
+        }
+
+        h1 {
+            font-weight: 400;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            text-transform: lowercase;
+            letter-spacing: -0.02em;
+        }
+
+        p {
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+        }
+
+        .features {
+            list-style: none;
+            margin-bottom: 3rem;
+            border-left: 1px solid var(--lines);
+            padding-left: 1.5rem;
+        }
+
+        .features li {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .features li::before {
+            content: "- ";
+            color: var(--lines);
+            margin-right: 0.5rem;
+        }
+
+        .download-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        a.download-link {
+            display: inline-block;
+            color: var(--text-primary);
+            text-decoration: none;
+            border-bottom: 1px solid var(--lines);
+            padding-bottom: 2px;
+            transition: all 0.2s ease;
+        }
+
+        a.download-link:hover {
+            color: #fff;
+            border-bottom-color: #fff;
+            background: var(--hover);
+        }
+
+        .platform-tag {
+            color: var(--lines);
+            font-size: 0.75rem;
+        }
+
+        .footer {
+            margin-top: 5rem;
+            font-size: 0.75rem;
+            color: var(--lines);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="face" class="anim-fade delay-1">༼ つ ╹ ╹ ༽つ</div>
+        
+        <h1 class="anim-fade delay-2">bettertrumpet</h1>
+        
+        <p class="anim-fade delay-3">
+            a fork of eartrumpet. because the original was almost perfect.
+        </p>
+        
+        <ul class="features anim-fade delay-3">
+            <li>enhanced volume control</li>
+            <li>cleaner interface</li>
+            <li>small improvements that matter</li>
+        </ul>
+        
+        <div class="download-wrapper anim-fade delay-4">
+            <a href="#" class="download-link">/download <span style="font-size: 0.8em;">▼</span></a>
+            <span class="platform-tag">windows 10/11</span>
+        </div>
+        
+        <div class="footer anim-fade delay-4">
+            fork of eartrumpet by file-new-project
+        </div>
+    </div>
+
+    <script>
+        const face = document.getElementById('face');
+        const openEyes = '༼ つ ╹ ╹ ༽つ';
+        const closedEyes = '༼ つ - - ༽つ';
+        
+        function blink() {
+            face.innerText = closedEyes;
+            setTimeout(() => {
+                face.innerText = openEyes;
+            }, 120);
+        }
+        
+        function scheduleBlink() {
+            // Random delay between 3000ms and 8000ms
+            const delay = 3000 + Math.random() * 5000;
+            
+            setTimeout(() => {
+                blink();
+                
+                // 30% chance of double blink with 250ms delay
+                if (Math.random() < 0.3) {
+                    setTimeout(blink, 250);
+                }
+                
+                scheduleBlink();
+            }, delay);
+        }
+        
+        // Start blinking loop
+        scheduleBlink();
+    </script>
+</body>
+</html>
