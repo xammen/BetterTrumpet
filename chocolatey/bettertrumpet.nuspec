@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>bettertrumpet</id>
+    <version>2.3.0</version>
+    <title>BetterTrumpet</title>
+    <authors>xmn</authors>
+    <owners>xmn</owners>
+    <licenseUrl>https://github.com/xammen/BetterTrumpet/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://bettertrumpet.hiii.boo</projectUrl>
+    <iconUrl>https://cdn.jsdelivr.net/gh/xammen/BetterTrumpet@master/EarTrumpet/Assets/icon.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A refined fork of EarTrumpet with enhanced volume control and music overlay. Features include enhanced volume control, a slick music overlay, fully customizable colors, and a cleaner interface.</description>
+    <summary>A refined fork of EarTrumpet, the beloved Windows volume mixer.</summary>
+    <releaseNotes>https://github.com/xammen/BetterTrumpet/releases</releaseNotes>
+    <tags>audio volume mixer sound music eartrumpet windows</tags>
+    <packageSourceUrl>https://github.com/xammen/BetterTrumpet</packageSourceUrl>
+    <projectSourceUrl>https://github.com/xammen/BetterTrumpet</projectSourceUrl>
+    <bugTrackerUrl>https://github.com/xammen/BetterTrumpet/issues</bugTrackerUrl>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
