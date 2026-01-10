@@ -1,4 +1,4 @@
-next-version: 2.2.0
+next-version: 2.3.0
 assembly-versioning-scheme: MajorMinorPatchTag
 branches:
   feature:
