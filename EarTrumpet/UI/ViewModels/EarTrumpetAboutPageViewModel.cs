@@ -48,8 +48,8 @@ namespace EarTrumpet.UI.ViewModels
             _openDiagnostics.Invoke();
         }
 
-        private void OpenGitHubIssueChooser() => ProcessHelper.StartNoThrow("https://github.com/File-New-Project/EarTrumpet/issues/new/choose");
-        private void OpenAbout() => ProcessHelper.StartNoThrow("https://github.com/File-New-Project/EarTrumpet");
-        private void OpenPrivacyPolicy() => ProcessHelper.StartNoThrow("https://github.com/File-New-Project/EarTrumpet/blob/master/PRIVACY.md");
+        private void OpenGitHubIssueChooser() => ProcessHelper.StartNoThrow("https://github.com/xammen/BetterTrumpet/issues/new/choose");
+        private void OpenAbout() => ProcessHelper.StartNoThrow("https://bettertrumpet.hiii.boo");
+        private void OpenPrivacyPolicy() => ProcessHelper.StartNoThrow("https://github.com/xammen/BetterTrumpet/blob/master/PRIVACY.md");
     }
 }

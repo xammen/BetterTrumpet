@@ -486,6 +486,7 @@
     <Resource Include="Assets\Logo-Light.png" />
     <Resource Include="Assets\Icon-Dark.ico" />
     <Resource Include="Assets\Welcome.gif" />
+    <Resource Include="Assets\icon.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.af-ZA.resx" />
