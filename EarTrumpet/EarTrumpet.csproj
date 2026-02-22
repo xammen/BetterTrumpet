@@ -228,6 +228,7 @@
     <Compile Include="UI\Helpers\WindowHolder.cs" />
     <Compile Include="UI\Helpers\WindowViewState.cs" />
     <Compile Include="UI\Helpers\NullToBoolConverter.cs" />
+    <Compile Include="UI\Helpers\PreviewConverters.cs" />
     <Compile Include="UI\Helpers\IntToBoolConverter.cs" />
     <Compile Include="UI\Themes\AcrylicBrush.cs" />
     <Compile Include="UI\Themes\Brush.cs" />
@@ -303,10 +304,12 @@
     <Compile Include="UI\ViewModels\AdvertisedCategorySettingsViewModel.cs" />
     <Compile Include="UI\ViewModels\EarTrumpetAboutPageViewModel.cs" />
     <Compile Include="UI\ViewModels\EarTrumpetLegacySettingsPageViewModel.cs" />
-    <Compile Include="UI\ViewModels\EarTrumpetCustomizationSettingsPageViewModel.cs" />
+    <Compile Include="UI\ViewModels\ColorTheme.cs" />
     <Compile Include="UI\ViewModels\EarTrumpetAnimationSettingsPageViewModel.cs" />
     <Compile Include="UI\ViewModels\EarTrumpetColorsSettingsPageViewModel.cs" />
     <Compile Include="UI\ViewModels\EarTrumpetMediaPopupSettingsPageViewModel.cs" />
+    <Compile Include="UI\ViewModels\EarTrumpetVolumeProfilesSettingsPageViewModel.cs" />
+    <Compile Include="UI\ViewModels\ThemeRegistry.cs" />
     <Compile Include="UI\ViewModels\HotkeyViewModel.cs" />
     <Compile Include="UI\ViewModels\IFlyoutViewModel.cs" />
     <Compile Include="UI\ViewModels\IPopupHostViewModel.cs" />
@@ -353,6 +356,7 @@
     <Compile Include="UI\Controls\EyedropperTool.cs" />
     <Compile Include="DataModel\AlbumArtCache.cs" />
     <Compile Include="DataModel\LegacyMediaPlayerService.cs" />
+    <Compile Include="DataModel\VolumeProfileService.cs" />
     <Compile Include="DataModel\WindowsAudio\Internal\AudioDeviceSessionGroup.cs" />
     <Compile Include="Interop\MMDeviceAPI\AudioSessionDisconnectReason.cs" />
     <Compile Include="Interop\MMDeviceAPI\AudioSessionState.cs" />

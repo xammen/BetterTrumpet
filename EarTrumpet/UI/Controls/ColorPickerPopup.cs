@@ -392,7 +392,7 @@ namespace EarTrumpet.UI.Controls
                     byte b = Convert.ToByte(hex.Substring(4, 2), 16);
                     SelectedColor = Color.FromRgb(r, g, b);
                 }
-                catch { }
+                catch (FormatException) { /* Invalid hex input - ignore */ }
             }
         }
 

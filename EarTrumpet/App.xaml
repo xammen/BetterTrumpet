@@ -399,11 +399,6 @@
                                             <Thumb.Style>
                                                 <Style BasedOn="{StaticResource SliderThumbStyle}" TargetType="{x:Type Thumb}">
                                                     <Setter Property="Theme:Brush.Foreground" Value="Theme=SystemAccent, HighContrast=ControlText" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Path=IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
-                                                            <Setter Property="Theme:Brush.Foreground" Value="Theme=SystemAccent{Theme}1, HighContrast=Highlight" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
                                                 </Style>
                                             </Thumb.Style>
                                         </Thumb>
@@ -460,11 +455,6 @@
                                             <Thumb.Style>
                                                 <Style BasedOn="{StaticResource SliderThumbStyle}" TargetType="{x:Type Thumb}">
                                                     <Setter Property="Theme:Brush.Foreground" Value="Theme=SystemAccent, HighContrast=ControlText" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Path=IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
-                                                            <Setter Property="Theme:Brush.Foreground" Value="Theme=SystemAccent{Theme}1, HighContrast=Highlight" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
                                                 </Style>
                                             </Thumb.Style>
                                         </Thumb>

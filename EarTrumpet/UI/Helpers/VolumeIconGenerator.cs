@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace EarTrumpet.UI.Helpers
 {
@@ -11,6 +12,9 @@ namespace EarTrumpet.UI.Helpers
     /// </summary>
     public class VolumeIconGenerator : IDisposable
     {
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool DestroyIcon(IntPtr hIcon);
+
         private readonly int _iconSize;
         private readonly int _renderSize; // 4x supersampling
         private readonly int _totalFrames;
@@ -113,7 +117,11 @@ namespace EarTrumpet.UI.Helpers
                         g.DrawImage(highRes, 0, 0, _iconSize, _iconSize);
                     }
 
-                    return Icon.FromHandle(final.GetHicon());
+                    IntPtr hIcon = final.GetHicon();
+                    Icon icon = Icon.FromHandle(hIcon);
+                    Icon ownedIcon = (Icon)icon.Clone();
+                    DestroyIcon(hIcon);
+                    return ownedIcon;
                 }
             }
         }
@@ -258,7 +266,11 @@ namespace EarTrumpet.UI.Helpers
                         g.DrawImage(highRes, 0, 0, _iconSize, _iconSize);
                     }
 
-                    return Icon.FromHandle(final.GetHicon());
+                    IntPtr hIcon = final.GetHicon();
+                    Icon icon = Icon.FromHandle(hIcon);
+                    Icon ownedIcon = (Icon)icon.Clone();
+                    DestroyIcon(hIcon);
+                    return ownedIcon;
                 }
             }
         }

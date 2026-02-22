@@ -121,13 +121,161 @@ namespace EarTrumpet.UI.Views
         /// </summary>
         private void ResetButton_Click(object sender, MouseButtonEventArgs e)
         {
+            var result = System.Windows.MessageBox.Show(
+                "Reset all colors to Windows defaults?", "Reset Theme",
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                var viewModel = DataContext as SettingsViewModel;
+                if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
+                {
+                    if (colorsVm.ResetToDefaultCommand?.CanExecute(null) == true)
+                    {
+                        colorsVm.ResetToDefaultCommand.Execute(null);
+                    }
+                }
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Handle save custom theme
+        /// </summary>
+        private void SaveCustomTheme_Click(object sender, MouseButtonEventArgs e)
+        {
             var viewModel = DataContext as SettingsViewModel;
             if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
             {
-                if (colorsVm.ResetToDefaultCommand?.CanExecute(null) == true)
+                colorsVm.SaveCustomThemeCommand?.Execute(null);
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Handle delete custom theme
+        /// </summary>
+        private void DeleteCustomTheme_Click(object sender, MouseButtonEventArgs e)
+        {
+            var border = sender as Border;
+            if (border?.Tag is ColorTheme theme)
+            {
+                var result = System.Windows.MessageBox.Show(
+                    $"Delete \"{theme.Name}\"?", "Delete Theme",
+                    MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
                 {
-                    colorsVm.ResetToDefaultCommand.Execute(null);
+                    var viewModel = DataContext as SettingsViewModel;
+                    if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
+                    {
+                        colorsVm.DeleteCustomThemeCommand?.Execute(theme);
+                    }
                 }
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Handle export theme to clipboard
+        /// </summary>
+        private void ExportTheme_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
+            {
+                colorsVm.ExportThemeCommand?.Execute(null);
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Handle import theme from clipboard
+        /// </summary>
+        private void ImportTheme_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
+            {
+                colorsVm.ImportThemeCommand?.Execute(null);
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Handle export theme to .bttheme file
+        /// </summary>
+        private void ExportThemeToFile_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
+            {
+                colorsVm.ExportThemeToFileCommand?.Execute(null);
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Handle import theme from .bttheme file
+        /// </summary>
+        private void ImportThemeFromFile_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
+            {
+                colorsVm.ImportThemeFromFileCommand?.Execute(null);
+            }
+            e.Handled = true;
+        }
+
+        // ═══════════════════════════════════
+        // Volume Profile handlers
+        // ═══════════════════════════════════
+
+        private void SaveProfile_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetVolumeProfilesSettingsPageViewModel profilesVm)
+            {
+                profilesVm.SaveCurrentCommand?.Execute(null);
+            }
+            e.Handled = true;
+        }
+
+        private void ApplyProfile_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetVolumeProfilesSettingsPageViewModel profilesVm)
+            {
+                profilesVm.ApplyProfileCommand?.Execute(null);
+            }
+            e.Handled = true;
+        }
+
+        private void DeleteProfile_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetVolumeProfilesSettingsPageViewModel profilesVm)
+            {
+                profilesVm.DeleteProfileCommand?.Execute(null);
+            }
+            e.Handled = true;
+        }
+
+        private void ExportProfile_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetVolumeProfilesSettingsPageViewModel profilesVm)
+            {
+                profilesVm.ExportProfileCommand?.Execute(null);
+            }
+            e.Handled = true;
+        }
+
+        private void ImportProfile_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetVolumeProfilesSettingsPageViewModel profilesVm)
+            {
+                profilesVm.ImportProfileCommand?.Execute(null);
             }
             e.Handled = true;
         }
