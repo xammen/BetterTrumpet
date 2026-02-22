@@ -5,8 +5,8 @@ $toolsDir = "$(Split-Path -Parent $MyInvocation.MyCommand.Definition)"
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   fileFullPath   = "$toolsDir\BetterTrumpet.exe"
-  url64bit       = 'https://github.com/xammen/BetterTrumpet/releases/download/v2.3.1/BetterTrumpet-2.3.1-Portable.exe'
-  checksum64     = '6C73C1580A42E795425520293DEBB7BC92026AE0598F43DBBD236CF4449DBF17'
+  url64bit       = 'https://github.com/xammen/BetterTrumpet/releases/download/v2.4.0/BetterTrumpet-2.4.0-Portable.exe'
+  checksum64     = 'EEBA677140BD87088572E7F2A5D38471A2D9DB062AEB713D15E70337A0A756E7'
   checksumType64 = 'sha256'
 }
 
