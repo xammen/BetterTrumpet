@@ -248,6 +248,15 @@ namespace EarTrumpet
             }
         }
 
+        // Batch mode: suppress individual change events during animated transitions
+        private bool _batchMode;
+        public void BeginBatch() { _batchMode = true; }
+        public void EndBatch()
+        {
+            _batchMode = false;
+            CustomSliderColorsChanged?.Invoke();
+        }
+
         // Custom slider colors
         public bool UseCustomSliderColors
         {
@@ -265,14 +274,14 @@ namespace EarTrumpet
             {
                 var colorStr = _settings.Get("SliderThumbColor", "");
                 if (string.IsNullOrEmpty(colorStr))
-                    return System.Windows.Media.Colors.Transparent; // Will use SystemAccent
+                    return System.Windows.Media.Colors.Transparent;
                 try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
                 catch { return System.Windows.Media.Colors.Transparent; }
             }
             set
             {
                 _settings.Set("SliderThumbColor", value.ToString());
-                CustomSliderColorsChanged?.Invoke();
+                if (!_batchMode) CustomSliderColorsChanged?.Invoke();
             }
         }
 
@@ -282,14 +291,14 @@ namespace EarTrumpet
             {
                 var colorStr = _settings.Get("SliderTrackFillColor", "");
                 if (string.IsNullOrEmpty(colorStr))
-                    return System.Windows.Media.Colors.Transparent; // Will use SystemAccent
+                    return System.Windows.Media.Colors.Transparent;
                 try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
                 catch { return System.Windows.Media.Colors.Transparent; }
             }
             set
             {
                 _settings.Set("SliderTrackFillColor", value.ToString());
-                CustomSliderColorsChanged?.Invoke();
+                if (!_batchMode) CustomSliderColorsChanged?.Invoke();
             }
         }
 
@@ -299,14 +308,14 @@ namespace EarTrumpet
             {
                 var colorStr = _settings.Get("SliderTrackBackgroundColor", "");
                 if (string.IsNullOrEmpty(colorStr))
-                    return System.Windows.Media.Colors.Transparent; // Will use default
+                    return System.Windows.Media.Colors.Transparent;
                 try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
                 catch { return System.Windows.Media.Colors.Transparent; }
             }
             set
             {
                 _settings.Set("SliderTrackBackgroundColor", value.ToString());
-                CustomSliderColorsChanged?.Invoke();
+                if (!_batchMode) CustomSliderColorsChanged?.Invoke();
             }
         }
 
@@ -316,13 +325,101 @@ namespace EarTrumpet
             {
                 var colorStr = _settings.Get("PeakMeterColor", "");
                 if (string.IsNullOrEmpty(colorStr))
-                    return System.Windows.Media.Colors.Transparent; // Will use SystemAccent
+                    return System.Windows.Media.Colors.Transparent;
                 try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
                 catch { return System.Windows.Media.Colors.Transparent; }
             }
             set
             {
                 _settings.Set("PeakMeterColor", value.ToString());
+                if (!_batchMode) CustomSliderColorsChanged?.Invoke();
+            }
+        }
+
+        // Custom saved themes (JSON array)
+        public string CustomThemesJson
+        {
+            get => _settings.Get("CustomThemesJson", "[]");
+            set
+            {
+                _settings.Set("CustomThemesJson", value);
+                CustomSliderColorsChanged?.Invoke();
+            }
+        }
+
+        // Active theme name (to restore selected state)
+        public string ActiveThemeName
+        {
+            get => _settings.Get("ActiveThemeName", "");
+            set => _settings.Set("ActiveThemeName", value);
+        }
+
+        // Extended theme colors (Window Background, Text, Accent Glow)
+        public System.Windows.Media.Color WindowBackgroundColor
+        {
+            get
+            {
+                var colorStr = _settings.Get("WindowBackgroundColor", "");
+                if (string.IsNullOrEmpty(colorStr))
+                    return System.Windows.Media.Colors.Transparent;
+                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
+                catch { return System.Windows.Media.Colors.Transparent; }
+            }
+            set
+            {
+                _settings.Set("WindowBackgroundColor", value.ToString());
+                if (!_batchMode) CustomSliderColorsChanged?.Invoke();
+            }
+        }
+
+        public System.Windows.Media.Color TextColor
+        {
+            get
+            {
+                var colorStr = _settings.Get("TextColor", "");
+                if (string.IsNullOrEmpty(colorStr))
+                    return System.Windows.Media.Colors.Transparent;
+                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
+                catch { return System.Windows.Media.Colors.Transparent; }
+            }
+            set
+            {
+                _settings.Set("TextColor", value.ToString());
+                if (!_batchMode) CustomSliderColorsChanged?.Invoke();
+            }
+        }
+
+        public System.Windows.Media.Color AccentGlowColor
+        {
+            get
+            {
+                var colorStr = _settings.Get("AccentGlowColor", "");
+                if (string.IsNullOrEmpty(colorStr))
+                    return System.Windows.Media.Colors.Transparent;
+                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
+                catch { return System.Windows.Media.Colors.Transparent; }
+            }
+            set
+            {
+                _settings.Set("AccentGlowColor", value.ToString());
+                if (!_batchMode) CustomSliderColorsChanged?.Invoke();
+            }
+        }
+
+        // Volume profiles JSON storage
+        public string VolumeProfilesJson
+        {
+            get => _settings.Get("VolumeProfilesJson", "[]");
+            set => _settings.Set("VolumeProfilesJson", value);
+        }
+
+        // Dynamic album art theme mode
+        public bool UseDynamicAlbumArtTheme
+        {
+            get => _settings.Get("UseDynamicAlbumArtTheme", false);
+            set
+            {
+                _settings.Set("UseDynamicAlbumArtTheme", value);
                 CustomSliderColorsChanged?.Invoke();
             }
         }

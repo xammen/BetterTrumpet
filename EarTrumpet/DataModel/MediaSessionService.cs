@@ -464,19 +464,16 @@ namespace EarTrumpet.DataModel
 
                 GlobalSystemMediaTransportControlsSessionMediaProperties mediaProps = null;
                 var operation = session.TryGetMediaPropertiesAsync();
+                var waitHandle = new System.Threading.ManualResetEventSlim(false);
                 operation.Completed = (info, status) =>
                 {
                     if (status == AsyncStatus.Completed)
                         mediaProps = info.GetResults();
+                    waitHandle.Set();
                 };
 
-                // Wait briefly for result
-                int timeout = 100;
-                while (operation.Status == AsyncStatus.Started && timeout > 0)
-                {
-                    System.Threading.Thread.Sleep(10);
-                    timeout -= 10;
-                }
+                // Wait briefly for result with proper signaling
+                waitHandle.Wait(TimeSpan.FromMilliseconds(100));
 
                 if (mediaProps != null)
                 {
@@ -510,8 +507,10 @@ namespace EarTrumpet.DataModel
 
                 // Get media properties
                 var propsOp = session.TryGetMediaPropertiesAsync();
-                while (propsOp.Status == AsyncStatus.Started)
-                    System.Threading.Thread.Sleep(5);
+                var propsWait = new System.Threading.ManualResetEventSlim(false);
+                propsOp.Completed = (_, __) => propsWait.Set();
+                if (propsOp.Status == AsyncStatus.Started)
+                    propsWait.Wait(TimeSpan.FromMilliseconds(2000));
 
                 if (propsOp.Status != AsyncStatus.Completed)
                 {
@@ -536,8 +535,10 @@ namespace EarTrumpet.DataModel
 
                 // Open the thumbnail stream
                 var streamOp = mediaProps.Thumbnail.OpenReadAsync();
-                while (streamOp.Status == AsyncStatus.Started)
-                    System.Threading.Thread.Sleep(5);
+                var streamWait = new System.Threading.ManualResetEventSlim(false);
+                streamOp.Completed = (_, __) => streamWait.Set();
+                if (streamOp.Status == AsyncStatus.Started)
+                    streamWait.Wait(TimeSpan.FromMilliseconds(2000));
 
                 if (streamOp.Status != AsyncStatus.Completed)
                 {
@@ -559,8 +560,10 @@ namespace EarTrumpet.DataModel
                 var buffer = new Windows.Storage.Streams.Buffer(size);
 
                 var readOp = stream.ReadAsync(buffer, size, InputStreamOptions.None);
-                while (readOp.Status == AsyncStatus.Started)
-                    System.Threading.Thread.Sleep(5);
+                var readWait = new System.Threading.ManualResetEventSlim(false);
+                readOp.Completed = (_, __) => readWait.Set();
+                if (readOp.Status == AsyncStatus.Started)
+                    readWait.Wait(TimeSpan.FromMilliseconds(2000));
 
                 if (readOp.Status != AsyncStatus.Completed)
                 {

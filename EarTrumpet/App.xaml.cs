@@ -328,7 +328,8 @@ namespace EarTrumpet
                     {
                         new EarTrumpetAnimationSettingsPageViewModel(Settings),
                         new EarTrumpetColorsSettingsPageViewModel(Settings),
-                        new EarTrumpetMediaPopupSettingsPageViewModel(Settings)
+                        new EarTrumpetMediaPopupSettingsPageViewModel(Settings),
+                        new EarTrumpetVolumeProfilesSettingsPageViewModel(Settings)
                     });
 
             var allCategories = new List<SettingsCategoryViewModel>();
