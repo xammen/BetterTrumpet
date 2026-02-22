@@ -29,6 +29,57 @@
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <helpers:IntToBoolConverter x:Key="IntToBoolConverter" />
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <local:PercentWidthConverter x:Key="PercentWidthConverter" />
+        <local:ThumbMarginConverter x:Key="ThumbMarginConverter" />
+
+        <!-- Named brushes: replaces 90+ hardcoded alpha-white colors -->
+        <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#15FFFFFF"/>
+        <SolidColorBrush x:Key="BorderSubtleBrush" Color="#20FFFFFF"/>
+        <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#25FFFFFF"/>
+        <SolidColorBrush x:Key="HoverBorderBrush" Color="#30FFFFFF"/>
+        <SolidColorBrush x:Key="ActiveBorderBrush" Color="#60FFFFFF"/>
+        <SolidColorBrush x:Key="PressedBackgroundBrush" Color="#40FFFFFF"/>
+        <SolidColorBrush x:Key="DimTextBrush" Color="#80FFFFFF"/>
+        <SolidColorBrush x:Key="FaintTextBrush" Color="#60FFFFFF"/>
+        <SolidColorBrush x:Key="ListItemBackgroundBrush" Color="#08FFFFFF"/>
+        <SolidColorBrush x:Key="ListItemHoverBrush" Color="#12FFFFFF"/>
+        <SolidColorBrush x:Key="SelectedBorderBrush" Color="#50FFFFFF"/>
+        <SolidColorBrush x:Key="DeleteBackgroundBrush" Color="#20FF4444"/>
+        <SolidColorBrush x:Key="DeleteTextBrush" Color="#FFFF6666"/>
+        <SolidColorBrush x:Key="SuccessAccentBrush" Color="#FF7ED321"/>
+
+        <!-- Reusable action button style (replaces ~20 identical Border+Trigger patterns) -->
+        <Style x:Key="ActionButtonBorder" TargetType="Border">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderSubtleBrush}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Section card style -->
+        <Style x:Key="SectionCardBorder" TargetType="Border">
+            <Setter Property="Margin" Value="0,0,0,24"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+
+        <!-- Section icon style -->
+        <Style x:Key="SectionIconBorder" TargetType="Border">
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+            <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}"/>
+        </Style>
         <DataTemplate DataType="{x:Type vm:EarTrumpetShortcutsPageViewModel}">
             <StackPanel Orientation="Vertical">
                 <TextBlock Style="{StaticResource BodyText}" Text="{x:Static resx:Resources.SettingsOpenEarTrumpetText}" />
@@ -442,7 +493,188 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- SECTION: Theme Presets -->
+                    <!-- SECTION: Mini Slider Preview -->
+                    <Border Margin="0,0,0,24" Padding="16" CornerRadius="8"
+                            Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window"
+                            IsEnabled="{Binding UseCustomSliderColors}">
+                        <StackPanel>
+                            <TextBlock Text="Preview" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,10"
+                                       Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                            <!-- Realistic flyout preview mimicking the actual app layout -->
+                            <Border CornerRadius="8" Padding="0" BorderThickness="1" BorderBrush="#20FFFFFF" ClipToBounds="True">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding WindowBackgroundColor}" />
+                                </Border.Background>
+                                <StackPanel>
+                                    <!-- Row 1: App with slider at ~70% -->
+                                    <Grid Height="38" Margin="12,6,12,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="32" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="36" />
+                                        </Grid.ColumnDefinitions>
+                                        <!-- App icon -->
+                                        <Border Grid.Column="0" Width="20" Height="20" CornerRadius="4"
+                                                VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <Border.Background>
+                                                <SolidColorBrush Color="{Binding SliderTrackFillColor}" Opacity="0.6" />
+                                            </Border.Background>
+                                            <TextBlock Text="&#xE767;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock.Foreground>
+                                                    <SolidColorBrush Color="{Binding TextColorValue}" />
+                                                </TextBlock.Foreground>
+                                            </TextBlock>
+                                        </Border>
+                                        <!-- Slider track -->
+                                        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="4,0">
+                                            <!-- Track background (full width) -->
+                                            <Border Height="4" CornerRadius="2">
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{Binding SliderTrackBackgroundColor}" />
+                                                </Border.Background>
+                                            </Border>
+                                            <!-- Track fill at 70% -->
+                                            <Border Height="4" CornerRadius="2" HorizontalAlignment="Left">
+                                                <Border.Width>
+                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" 
+                                                             Converter="{StaticResource PercentWidthConverter}" ConverterParameter="0.70" FallbackValue="140" />
+                                                </Border.Width>
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{Binding SliderTrackFillColor}" />
+                                                </Border.Background>
+                                            </Border>
+                                            <!-- Peak meter above track -->
+                                            <Border Height="3" CornerRadius="1.5" HorizontalAlignment="Left" Margin="0,-5,0,0" Opacity="0.5">
+                                                <Border.Width>
+                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" 
+                                                             Converter="{StaticResource PercentWidthConverter}" ConverterParameter="0.55" FallbackValue="110" />
+                                                </Border.Width>
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{Binding PeakMeterColor}" />
+                                                </Border.Background>
+                                            </Border>
+                                            <!-- Thumb -->
+                                            <Border Width="14" Height="14" CornerRadius="7" HorizontalAlignment="Left">
+                                                <Border.Margin>
+                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" 
+                                                             Converter="{StaticResource ThumbMarginConverter}" ConverterParameter="0.70" />
+                                                </Border.Margin>
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{Binding SliderThumbColor}" />
+                                                </Border.Background>
+                                            </Border>
+                                        </Grid>
+                                        <!-- Volume number -->
+                                        <TextBlock Grid.Column="2" Text="70" FontSize="13" 
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock.Foreground>
+                                                <SolidColorBrush Color="{Binding TextColorValue}" />
+                                            </TextBlock.Foreground>
+                                        </TextBlock>
+                                    </Grid>
+
+                                    <!-- Row 2: App with slider at ~33% -->
+                                    <Grid Height="38" Margin="12,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="32" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="36" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" Width="20" Height="20" CornerRadius="4"
+                                                VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <Border.Background>
+                                                <SolidColorBrush Color="{Binding SliderThumbColor}" Opacity="0.5" />
+                                            </Border.Background>
+                                            <TextBlock Text="&#xE8D6;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock.Foreground>
+                                                    <SolidColorBrush Color="{Binding TextColorValue}" />
+                                                </TextBlock.Foreground>
+                                            </TextBlock>
+                                        </Border>
+                                        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="4,0">
+                                            <Border Height="4" CornerRadius="2">
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{Binding SliderTrackBackgroundColor}" />
+                                                </Border.Background>
+                                            </Border>
+                                            <Border Height="4" CornerRadius="2" HorizontalAlignment="Left">
+                                                <Border.Width>
+                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" 
+                                                             Converter="{StaticResource PercentWidthConverter}" ConverterParameter="0.33" FallbackValue="66" />
+                                                </Border.Width>
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{Binding SliderTrackFillColor}" />
+                                                </Border.Background>
+                                            </Border>
+                                            <Border Width="14" Height="14" CornerRadius="7" HorizontalAlignment="Left">
+                                                <Border.Margin>
+                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" 
+                                                             Converter="{StaticResource ThumbMarginConverter}" ConverterParameter="0.33" />
+                                                </Border.Margin>
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{Binding SliderThumbColor}" />
+                                                </Border.Background>
+                                            </Border>
+                                        </Grid>
+                                        <TextBlock Grid.Column="2" Text="33" FontSize="13"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock.Foreground>
+                                                <SolidColorBrush Color="{Binding TextColorValue}" />
+                                            </TextBlock.Foreground>
+                                        </TextBlock>
+                                    </Grid>
+
+                                    <!-- Row 3: Muted app at 100% -->
+                                    <Grid Height="38" Margin="12,0,12,6" Opacity="0.45">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="32" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="36" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" Width="20" Height="20" CornerRadius="4"
+                                                VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <Border.Background>
+                                                <SolidColorBrush Color="{Binding PeakMeterColor}" Opacity="0.4" />
+                                            </Border.Background>
+                                            <TextBlock Text="&#xE74F;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock.Foreground>
+                                                    <SolidColorBrush Color="{Binding TextColorValue}" />
+                                                </TextBlock.Foreground>
+                                            </TextBlock>
+                                        </Border>
+                                        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="4,0">
+                                            <Border Height="4" CornerRadius="2">
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{Binding SliderTrackBackgroundColor}" />
+                                                </Border.Background>
+                                            </Border>
+                                            <Border Height="4" CornerRadius="2" HorizontalAlignment="Stretch">
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{Binding SliderTrackFillColor}" />
+                                                </Border.Background>
+                                            </Border>
+                                            <Border Width="14" Height="14" CornerRadius="7" HorizontalAlignment="Right">
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{Binding SliderThumbColor}" />
+                                                </Border.Background>
+                                            </Border>
+                                        </Grid>
+                                        <TextBlock Grid.Column="2" Text="100" FontSize="13"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock.Foreground>
+                                                <SolidColorBrush Color="{Binding TextColorValue}" />
+                                            </TextBlock.Foreground>
+                                        </TextBlock>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- SECTION: Theme Presets (Grouped by Category) -->
                     <Border Margin="0,0,0,24" Padding="16" CornerRadius="8"
                             Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window"
                             IsEnabled="{Binding UseCustomSliderColors}">
@@ -456,12 +688,100 @@
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="Theme Presets" FontSize="15" FontWeight="SemiBold" />
-                                    <TextBlock Text="Quick color schemes"
+                                    <TextBlock Text="Grouped color schemes with live preview"
                                                Style="{StaticResource BodySubText}" FontSize="12" />
                                 </StackPanel>
                             </StackPanel>
 
-                            <ItemsControl ItemsSource="{Binding AvailableThemes}" Margin="0,8,0,0">
+                            <ItemsControl ItemsSource="{Binding GroupedThemes}" Margin="0,8,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,0,0,12">
+                                            <!-- Category header -->
+                                            <TextBlock Text="{Binding Key}" FontSize="12" FontWeight="SemiBold" 
+                                                       Margin="0,0,0,8" Opacity="0.5"
+                                                       Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                                            <!-- Theme pills in this category -->
+                                            <ItemsControl ItemsSource="{Binding}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel Orientation="Horizontal" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Height="36" MinWidth="110" Margin="0,0,6,6" CornerRadius="18"
+                                                                Cursor="Hand" MouseLeftButtonDown="ThemeCard_Click" Tag="{Binding}"
+                                                                Background="#18FFFFFF" BorderThickness="1.5" BorderBrush="#25FFFFFF">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Style.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter Property="Background" Value="#28FFFFFF" />
+                                                                            <Setter Property="BorderBrush" Value="#50FFFFFF" />
+                                                                        </Trigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,12,0">
+                                                                <Grid Width="22" Height="22" Margin="0,0,8,0">
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="*" />
+                                                                        <RowDefinition Height="*" />
+                                                                    </Grid.RowDefinitions>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <Border Grid.Row="0" Grid.Column="0" Width="9" Height="9" CornerRadius="4.5">
+                                                                        <Border.Background><SolidColorBrush Color="{Binding ThumbColor}" /></Border.Background>
+                                                                    </Border>
+                                                                    <Border Grid.Row="0" Grid.Column="1" Width="9" Height="9" CornerRadius="4.5">
+                                                                        <Border.Background><SolidColorBrush Color="{Binding TrackFillColor}" /></Border.Background>
+                                                                    </Border>
+                                                                    <Border Grid.Row="1" Grid.Column="0" Width="9" Height="9" CornerRadius="4.5">
+                                                                        <Border.Background><SolidColorBrush Color="{Binding TrackBackgroundColor}" /></Border.Background>
+                                                                    </Border>
+                                                                    <Border Grid.Row="1" Grid.Column="1" Width="9" Height="9" CornerRadius="4.5">
+                                                                        <Border.Background><SolidColorBrush Color="{Binding PeakMeterColor}" /></Border.Background>
+                                                                    </Border>
+                                                                </Grid>
+                                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                                                                           FontSize="12" FontWeight="Medium"
+                                                                           Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- SECTION: My Themes (Custom saved) -->
+                    <Border Margin="0,0,0,24" Padding="16" CornerRadius="8"
+                            Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window"
+                            IsEnabled="{Binding UseCustomSliderColors}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
+                                        Background="#15FFFFFF">
+                                    <TextBlock Text="&#xE1F6;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="White" />
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="My Themes" FontSize="15" FontWeight="SemiBold" />
+                                    <TextBlock Text="Save, import and export custom themes"
+                                               Style="{StaticResource BodySubText}" FontSize="12" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Custom themes list -->
+                            <ItemsControl ItemsSource="{Binding CustomThemes}" Margin="0,0,0,12">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <WrapPanel Orientation="Horizontal" />
@@ -469,37 +789,208 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <!-- Modern pill-style preset button with color swatch -->
-                                        <Border Height="36" MinWidth="110" Margin="0,0,10,10" CornerRadius="18"
+                                        <Border Height="40" MinWidth="120" Margin="0,0,8,8" CornerRadius="20"
                                                 Cursor="Hand" MouseLeftButtonDown="ThemeCard_Click" Tag="{Binding}"
-                                                Background="#18FFFFFF" BorderThickness="1" BorderBrush="#25FFFFFF">
+                                                Background="#20FFFFFF" BorderThickness="1.5" BorderBrush="#30FFFFFF">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Style.Triggers>
                                                         <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#28FFFFFF" />
-                                                            <Setter Property="BorderBrush" Value="#40FFFFFF" />
+                                                            <Setter Property="Background" Value="#30FFFFFF" />
+                                                            <Setter Property="BorderBrush" Value="#50FFFFFF" />
                                                         </Trigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,14,0">
-                                                <!-- Color swatch circle -->
-                                                <Border Width="24" Height="24" CornerRadius="12" Margin="0,0,10,0"
-                                                        BorderThickness="2" BorderBrush="#30FFFFFF">
-                                                    <Border.Background>
-                                                        <SolidColorBrush Color="{Binding TrackFillColor}" />
-                                                    </Border.Background>
-                                                </Border>
-                                                <!-- Theme name with proper contrast -->
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,10,0">
+                                                <!-- 4-color swatch -->
+                                                <Grid Width="24" Height="24" Margin="0,0,10,0">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="*" />
+                                                        <RowDefinition Height="*" />
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Grid.Row="0" Grid.Column="0" Width="10" Height="10" CornerRadius="5">
+                                                        <Border.Background><SolidColorBrush Color="{Binding ThumbColor}" /></Border.Background>
+                                                    </Border>
+                                                    <Border Grid.Row="0" Grid.Column="1" Width="10" Height="10" CornerRadius="5">
+                                                        <Border.Background><SolidColorBrush Color="{Binding TrackFillColor}" /></Border.Background>
+                                                    </Border>
+                                                    <Border Grid.Row="1" Grid.Column="0" Width="10" Height="10" CornerRadius="5">
+                                                        <Border.Background><SolidColorBrush Color="{Binding TrackBackgroundColor}" /></Border.Background>
+                                                    </Border>
+                                                    <Border Grid.Row="1" Grid.Column="1" Width="10" Height="10" CornerRadius="5">
+                                                        <Border.Background><SolidColorBrush Color="{Binding PeakMeterColor}" /></Border.Background>
+                                                    </Border>
+                                                </Grid>
                                                 <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
-                                                           FontSize="13" FontWeight="Medium"
+                                                           FontSize="12.5" FontWeight="Medium"
                                                            Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                                                <!-- Delete icon -->
+                                                <Border Width="20" Height="20" CornerRadius="10" Margin="8,0,0,0"
+                                                        Background="#20FF4444" Cursor="Hand"
+                                                        MouseLeftButtonDown="DeleteCustomTheme_Click" Tag="{Binding}">
+                                                    <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="#FF6666" />
+                                                </Border>
                                             </StackPanel>
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+
+                            <!-- Save current as new theme -->
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
+                                <Grid Width="160" Height="30">
+                                    <TextBox Padding="6,4" FontSize="12"
+                                             Text="{Binding NewThemeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="#15FFFFFF" Foreground="White" BorderBrush="#30FFFFFF"
+                                             x:Name="ThemeNameBox" />
+                                    <TextBlock Text="Theme name..." FontSize="12" Padding="8,6" IsHitTestVisible="False"
+                                               Foreground="#50FFFFFF" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=ThemeNameBox}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                                <Border Height="30" Margin="8,0,0,0" CornerRadius="6" Cursor="Hand" Padding="12,0"
+                                        Background="#20FFFFFF" BorderThickness="1" BorderBrush="#25FFFFFF"
+                                        MouseLeftButtonDown="SaveCustomTheme_Click">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#30FFFFFF" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#xE105;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                                   VerticalAlignment="Center" Margin="0,0,6,0" Foreground="#7ED321" />
+                                        <TextBlock Text="Save Theme" FontSize="12" VerticalAlignment="Center"
+                                                   Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Import / Export buttons -->
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <Border Height="30" CornerRadius="6" Cursor="Hand" Padding="12,0"
+                                        Background="#15FFFFFF" BorderThickness="1" BorderBrush="#20FFFFFF"
+                                        MouseLeftButtonDown="ExportTheme_Click">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#25FFFFFF" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                                   VerticalAlignment="Center" Margin="0,0,6,0"
+                                                   Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
+                                        <TextBlock Text="Copy" FontSize="12" VerticalAlignment="Center"
+                                                   Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Height="30" Margin="8,0,0,0" CornerRadius="6" Cursor="Hand" Padding="12,0"
+                                        Background="#15FFFFFF" BorderThickness="1" BorderBrush="#20FFFFFF"
+                                        MouseLeftButtonDown="ImportTheme_Click">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#25FFFFFF" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#xE77F;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                                   VerticalAlignment="Center" Margin="0,0,6,0"
+                                                   Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
+                                        <TextBlock Text="Paste" FontSize="12" VerticalAlignment="Center"
+                                                   Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Height="30" Margin="8,0,0,0" CornerRadius="6" Cursor="Hand" Padding="12,0"
+                                        Background="#15FFFFFF" BorderThickness="1" BorderBrush="#20FFFFFF"
+                                        MouseLeftButtonDown="ExportThemeToFile_Click">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#25FFFFFF" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#xEDE1;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                                   VerticalAlignment="Center" Margin="0,0,6,0"
+                                                   Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
+                                        <TextBlock Text="Save .bttheme" FontSize="12" VerticalAlignment="Center"
+                                                   Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Height="30" Margin="8,0,0,0" CornerRadius="6" Cursor="Hand" Padding="12,0"
+                                        Background="#15FFFFFF" BorderThickness="1" BorderBrush="#20FFFFFF"
+                                        MouseLeftButtonDown="ImportThemeFromFile_Click">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#25FFFFFF" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                                   VerticalAlignment="Center" Margin="0,0,6,0"
+                                                   Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
+                                        <TextBlock Text="Load .bttheme" FontSize="12" VerticalAlignment="Center"
+                                                   Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- SECTION: Dynamic Album Art Theme -->
+                    <Border Margin="0,0,0,24" Padding="16" CornerRadius="8"
+                            Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window"
+                            IsEnabled="{Binding UseCustomSliderColors}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
+                                        Background="#15FFFFFF">
+                                    <TextBlock Text="&#xE8D6;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="White" />
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Dynamic Theme" FontSize="15" FontWeight="SemiBold" />
+                                    <TextBlock Text="Slider colors adapt to album art of playing music"
+                                               Style="{StaticResource BodySubText}" FontSize="12" />
+                                </StackPanel>
+                            </StackPanel>
+                            <CheckBox Content="Enable dynamic album art colors"
+                                      IsChecked="{Binding UseDynamicAlbumArtTheme, Mode=TwoWay}" Margin="0,4,0,0" />
                         </StackPanel>
                     </Border>
 
@@ -522,8 +1013,10 @@
                                 </StackPanel>
                             </StackPanel>
 
-                            <!-- Modern Color Swatches Grid -->
-                            <Grid Margin="0,0,0,20">
+                            <!-- Slider Color Swatches -->
+                            <TextBlock Text="Slider Colors" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,8"
+                                       Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
+                            <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="*" />
@@ -533,7 +1026,7 @@
 
                                 <!-- Thumb Color -->
                                 <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                                    <Border Width="64" Height="64" CornerRadius="12" Cursor="Hand"
+                                    <Border Width="56" Height="56" CornerRadius="12" Cursor="Hand"
                                             MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="Thumb">
                                         <Border.Style>
                                             <Style TargetType="Border">
@@ -560,16 +1053,15 @@
                                         <Border.Background>
                                             <SolidColorBrush Color="{Binding SliderThumbColor}" />
                                         </Border.Background>
-                                        <!-- Inner highlight -->
                                         <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
                                     </Border>
-                                    <TextBlock Text="Thumb" FontSize="12" Margin="0,8,0,0" FontWeight="Medium"
+                                    <TextBlock Text="Thumb" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
                                                HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
                                 </StackPanel>
 
                                 <!-- Fill Color -->
                                 <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                    <Border Width="64" Height="64" CornerRadius="12" Cursor="Hand"
+                                    <Border Width="56" Height="56" CornerRadius="12" Cursor="Hand"
                                             MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="TrackFill">
                                         <Border.Style>
                                             <Style TargetType="Border">
@@ -598,13 +1090,13 @@
                                         </Border.Background>
                                         <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
                                     </Border>
-                                    <TextBlock Text="Fill" FontSize="12" Margin="0,8,0,0" FontWeight="Medium"
+                                    <TextBlock Text="Fill" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
                                                HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
                                 </StackPanel>
 
                                 <!-- Background Color -->
                                 <StackPanel Grid.Column="2" HorizontalAlignment="Center">
-                                    <Border Width="64" Height="64" CornerRadius="12" Cursor="Hand"
+                                    <Border Width="56" Height="56" CornerRadius="12" Cursor="Hand"
                                             MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="TrackBackground">
                                         <Border.Style>
                                             <Style TargetType="Border">
@@ -633,13 +1125,13 @@
                                         </Border.Background>
                                         <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
                                     </Border>
-                                    <TextBlock Text="Background" FontSize="12" Margin="0,8,0,0" FontWeight="Medium"
+                                    <TextBlock Text="Track BG" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
                                                HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
                                 </StackPanel>
 
                                 <!-- Peak Meter Color -->
                                 <StackPanel Grid.Column="3" HorizontalAlignment="Center">
-                                    <Border Width="64" Height="64" CornerRadius="12" Cursor="Hand"
+                                    <Border Width="56" Height="56" CornerRadius="12" Cursor="Hand"
                                             MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="PeakMeter">
                                         <Border.Style>
                                             <Style TargetType="Border">
@@ -668,7 +1160,124 @@
                                         </Border.Background>
                                         <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
                                     </Border>
-                                    <TextBlock Text="Peak Meter" FontSize="12" Margin="0,8,0,0" FontWeight="Medium"
+                                    <TextBlock Text="Peak Meter" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
+                                               HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Window Theme Colors -->
+                            <TextBlock Text="Window Colors" FontSize="12" FontWeight="SemiBold" Margin="0,4,0,8"
+                                       Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Window Background -->
+                                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                    <Border Width="56" Height="56" CornerRadius="12" Cursor="Hand"
+                                            MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="WindowBackground">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="BorderThickness" Value="3" />
+                                                <Setter Property="BorderBrush" Value="#30FFFFFF" />
+                                                <Setter Property="Effect">
+                                                    <Setter.Value>
+                                                        <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.3" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#60FFFFFF" />
+                                                        <Setter Property="RenderTransform">
+                                                            <Setter.Value>
+                                                                <ScaleTransform ScaleX="1.05" ScaleY="1.05" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Border.RenderTransformOrigin>0.5,0.5</Border.RenderTransformOrigin>
+                                        <Border.Background>
+                                            <SolidColorBrush Color="{Binding WindowBackgroundColor}" />
+                                        </Border.Background>
+                                        <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
+                                    </Border>
+                                    <TextBlock Text="Window BG" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
+                                               HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
+                                </StackPanel>
+
+                                <!-- Text Color -->
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                    <Border Width="56" Height="56" CornerRadius="12" Cursor="Hand"
+                                            MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="TextColor">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="BorderThickness" Value="3" />
+                                                <Setter Property="BorderBrush" Value="#30FFFFFF" />
+                                                <Setter Property="Effect">
+                                                    <Setter.Value>
+                                                        <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.3" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#60FFFFFF" />
+                                                        <Setter Property="RenderTransform">
+                                                            <Setter.Value>
+                                                                <ScaleTransform ScaleX="1.05" ScaleY="1.05" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Border.RenderTransformOrigin>0.5,0.5</Border.RenderTransformOrigin>
+                                        <Border.Background>
+                                            <SolidColorBrush Color="{Binding TextColorValue}" />
+                                        </Border.Background>
+                                        <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
+                                    </Border>
+                                    <TextBlock Text="Text" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
+                                               HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
+                                </StackPanel>
+
+                                <!-- Accent Glow -->
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                    <Border Width="56" Height="56" CornerRadius="12" Cursor="Hand"
+                                            MouseLeftButtonDown="ColorBox_MouseLeftButtonDown" Tag="AccentGlow">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="BorderThickness" Value="3" />
+                                                <Setter Property="BorderBrush" Value="#30FFFFFF" />
+                                                <Setter Property="Effect">
+                                                    <Setter.Value>
+                                                        <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.3" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#60FFFFFF" />
+                                                        <Setter Property="RenderTransform">
+                                                            <Setter.Value>
+                                                                <ScaleTransform ScaleX="1.05" ScaleY="1.05" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Border.RenderTransformOrigin>0.5,0.5</Border.RenderTransformOrigin>
+                                        <Border.Background>
+                                            <SolidColorBrush Color="{Binding AccentGlowColor}" />
+                                        </Border.Background>
+                                        <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
+                                    </Border>
+                                    <TextBlock Text="Glow" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
                                                HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
                                 </StackPanel>
                             </Grid>
@@ -849,6 +1458,188 @@
                                       IsChecked="{Binding RememberExpanded, Mode=TwoWay}" />
                         </StackPanel>
                     </Border>
+
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Volume Profiles Settings Page -->
+        <DataTemplate DataType="{x:Type vm:EarTrumpetVolumeProfilesSettingsPageViewModel}">
+            <StackPanel Orientation="Vertical" Margin="0,0,16,0">
+
+                <!-- SECTION: Save Current Volumes -->
+                <Border Margin="0,0,0,24" Padding="16" CornerRadius="8"
+                        Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Style="{StaticResource SectionIconBorder}">
+                                <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="White" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Save Current Volumes" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="Snapshot device and app volumes"
+                                           Style="{StaticResource BodySubText}" FontSize="12" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding NewProfileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="8,6" FontSize="13" VerticalContentAlignment="Center"
+                                     Theme:Brush.Foreground="Theme=Text, HighContrast=Text"
+                                     Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="BorderBrush" Value="#30FFFFFF" />
+                                        <Setter Property="BorderThickness" Value="1" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsFocused" Value="True">
+                                                <Setter Property="BorderBrush" Value="#60FFFFFF" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                            <Border Grid.Column="1" Height="32" Margin="8,0,0,0" CornerRadius="6" Cursor="Hand" Padding="16,0"
+                                    Background="#20FFFFFF" BorderThickness="1" BorderBrush="#30FFFFFF"
+                                    MouseLeftButtonDown="SaveProfile_Click">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#30FFFFFF" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                               VerticalAlignment="Center" Margin="0,0,6,0"
+                                               Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
+                                    <TextBlock Text="Save" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"
+                                               Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- SECTION: Saved Profiles -->
+                <Border Margin="0,0,0,24" Padding="16" CornerRadius="8"
+                        Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Style="{StaticResource SectionIconBorder}">
+                                <TextBlock Text="&#xE9CE;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="White" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Saved Profiles" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="Select a profile to apply or manage"
+                                           Style="{StaticResource BodySubText}" FontSize="12" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Profile list -->
+                        <ListBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}"
+                                 MaxHeight="200" Margin="0,8,0,0"
+                                 Background="Transparent" BorderThickness="0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="4">
+                                        <TextBlock Text="&#xE9CE;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                   VerticalAlignment="Center" Margin="0,0,8,0" Foreground="#80FFFFFF" />
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" />
+                                            <TextBlock FontSize="11" Foreground="#80FFFFFF">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0} device(s) | {1}">
+                                                        <Binding Path="Devices.Count" />
+                                                        <Binding Path="CreatedAt" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="6,4" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="Foreground" Value="White" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                                        Padding="{TemplateBinding Padding}" CornerRadius="4" Margin="0,1">
+                                                    <ContentPresenter />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Bd" Property="Background" Value="#15FFFFFF" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="Bd" Property="Background" Value="#25FFFFFF" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+
+                        <!-- Selected profile details -->
+                        <TextBlock Text="{Binding SelectedProfileDetails}" FontSize="11" Foreground="#60FFFFFF"
+                                   Margin="0,8,0,0" Visibility="{Binding HasSelectedProfile, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                        <!-- Action buttons -->
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <Border Style="{StaticResource ActionButtonBorder}" MouseLeftButtonDown="ApplyProfile_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                               VerticalAlignment="Center" Margin="0,0,6,0"
+                                               Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
+                                    <TextBlock Text="Apply" FontSize="12" VerticalAlignment="Center"
+                                               Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource ActionButtonBorder}" Margin="8,0,0,0" MouseLeftButtonDown="DeleteProfile_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                               VerticalAlignment="Center" Margin="0,0,6,0"
+                                               Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
+                                    <TextBlock Text="Delete" FontSize="12" VerticalAlignment="Center"
+                                               Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource ActionButtonBorder}" Margin="8,0,0,0" MouseLeftButtonDown="ExportProfile_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xEDE1;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                               VerticalAlignment="Center" Margin="0,0,6,0"
+                                               Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
+                                    <TextBlock Text="Export" FontSize="12" VerticalAlignment="Center"
+                                               Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource ActionButtonBorder}" Margin="8,0,0,0" MouseLeftButtonDown="ImportProfile_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                               VerticalAlignment="Center" Margin="0,0,6,0"
+                                               Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
+                                    <TextBlock Text="Import" FontSize="12" VerticalAlignment="Center"
+                                               Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
 
             </StackPanel>
         </DataTemplate>

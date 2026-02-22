@@ -61,6 +61,10 @@ namespace EarTrumpet.DataModel
             }
         }
 
+        private static readonly TimeSpan PollIntervalActive = TimeSpan.FromMilliseconds(500);
+        private static readonly TimeSpan PollIntervalIdle = TimeSpan.FromSeconds(5);
+        private int _idlePollCount;
+
         private readonly DispatcherTimer _pollTimer;
         private IAudioDeviceManager _playbackDeviceManager;
         private bool _isPlaying;
@@ -80,7 +84,7 @@ namespace EarTrumpet.DataModel
         {
             _pollTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(500)
+                Interval = PollIntervalIdle // Start slow, speed up when player found
             };
             _pollTimer.Tick += PollTimer_Tick;
 
@@ -126,6 +130,27 @@ namespace EarTrumpet.DataModel
 
                 // Find active legacy media player
                 FindActiveLegacyPlayer(out _isPlaying, out _currentPlayerExeName, out _currentPlayerDisplayName);
+
+                // Adaptive polling: fast when active, slow when idle
+                if (_isPlaying)
+                {
+                    _idlePollCount = 0;
+                    if (_pollTimer.Interval != PollIntervalActive)
+                    {
+                        _pollTimer.Interval = PollIntervalActive;
+                        Trace.WriteLine("LegacyMediaPlayerService: Switched to active polling (500ms)");
+                    }
+                }
+                else
+                {
+                    _idlePollCount++;
+                    // After 6 idle polls at active rate (3s), switch to slow polling
+                    if (_idlePollCount > 6 && _pollTimer.Interval != PollIntervalIdle)
+                    {
+                        _pollTimer.Interval = PollIntervalIdle;
+                        Trace.WriteLine("LegacyMediaPlayerService: Switched to idle polling (5s)");
+                    }
+                }
 
                 // Playback state changed
                 if (wasPlaying != _isPlaying)
@@ -229,7 +254,7 @@ namespace EarTrumpet.DataModel
                         if (!string.IsNullOrEmpty(path))
                             return path;
                     }
-                    catch { }
+                    catch (Exception ex) { Trace.WriteLine($"LegacyMediaPlayerService: MainModule access denied - {ex.Message}"); }
                 }
 
                 // Try known paths
@@ -303,7 +328,7 @@ namespace EarTrumpet.DataModel
                     }
                 }
             }
-            catch { }
+                catch (Exception ex) { Trace.WriteLine($"LegacyMediaPlayerService: GetCurrentMediaInfo failed - {ex.Message}"); }
 
             return _currentPlayerDisplayName ?? _currentPlayerExeName;
         }

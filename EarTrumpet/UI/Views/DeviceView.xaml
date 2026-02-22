@@ -118,7 +118,6 @@
                         <ctl:VolumeSlider Grid.Column="1"
                                           PeakValue1="{Binding Device.PeakValue1}"
                                           PeakValue2="{Binding Device.PeakValue2}"
-                                          Style="{StaticResource {x:Type Slider}}"
                                           Value="{Binding Device.Volume, Mode=TwoWay}" />
                         <TextBlock Grid.Column="2"
                                    Style="{StaticResource DeviceVolumeTextStyle}"

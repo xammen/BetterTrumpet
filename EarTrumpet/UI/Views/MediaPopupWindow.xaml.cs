@@ -1,5 +1,6 @@
 using EarTrumpet.DataModel;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -30,10 +31,12 @@ namespace EarTrumpet.UI.Views
         private BitmapImage _cachedThumbnail;
         private Color _cachedDominantColor = Color.FromRgb(107, 77, 230);
         private CancellationTokenSource _thumbnailCts;
+        private CancellationTokenSource _trackChangeCts;
+        private CancellationTokenSource _albumArtCts;
         private Action _pendingAction;
 
-        private const double CollapsedHeight = 160;
-        private const double ExpandedHeight = 380;
+        private const double CollapsedHeight = 185;
+        private const double ExpandedHeight = 405;
         private const double ContainerWidth = 268;
 
         public MediaPopupWindow(AppSettings settings)
@@ -96,8 +99,13 @@ namespace EarTrumpet.UI.Views
             _progressTimer.Stop();
             _delayedActionTimer.Stop();
 
-            // Cancel any pending thumbnail load
+            // Cancel and dispose any pending operations
             _thumbnailCts?.Cancel();
+            _thumbnailCts?.Dispose();
+            _trackChangeCts?.Cancel();
+            _trackChangeCts?.Dispose();
+            _albumArtCts?.Cancel();
+            _albumArtCts?.Dispose();
         }
 
         private void OnSettingsChanged()
@@ -145,7 +153,7 @@ namespace EarTrumpet.UI.Views
                         }
                     }
                 }
-                catch { }
+                catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: PreloadThumbnail failed - {ex.Message}"); }
             }, token);
         }
 
@@ -173,6 +181,7 @@ namespace EarTrumpet.UI.Views
             UpdateAlbumArt();
             UpdateProgress();
             UpdateShuffleRepeatState();
+            UpdateVolumeState();
             StartMarqueeIfNeeded();
         }
 
@@ -197,13 +206,16 @@ namespace EarTrumpet.UI.Views
                 StartMarqueeIfNeeded();
 
                 // Update album art on background thread
-                var cts = new CancellationTokenSource();
+                _trackChangeCts?.Cancel();
+                _trackChangeCts?.Dispose();
+                _trackChangeCts = new CancellationTokenSource();
+                var token = _trackChangeCts.Token;
                 Task.Run(() =>
                 {
                     try
                     {
                         var thumbnail = MediaSessionService.Instance.GetCurrentThumbnail();
-                        if (cts.Token.IsCancellationRequested) return;
+                        if (token.IsCancellationRequested) return;
 
                         Dispatcher.BeginInvoke((Action)(() =>
                         {
@@ -212,8 +224,7 @@ namespace EarTrumpet.UI.Views
                                 if (thumbnail != null)
                                 {
                                     _cachedThumbnail = thumbnail;
-                                    AlbumArtBackground.Source = thumbnail;
-                                    ExpandedCoverImage.Source = thumbnail;
+                                    ApplyThumbnail(thumbnail);
 
                                     var color = GetDominantColor(thumbnail);
                                     _cachedDominantColor = color;
@@ -223,13 +234,13 @@ namespace EarTrumpet.UI.Views
                                 var inStoryboard = (Storyboard)FindResource("TrackChangeIn");
                                 inStoryboard.Begin(this, true);
                             }
-                            catch { }
+                            catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: TrackChange UI update failed - {ex.Message}"); }
                         }));
                     }
-                    catch { }
-                }, cts.Token);
+                    catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: TrackChange thumbnail load failed - {ex.Message}"); }
+                }, token);
             }
-            catch { }
+            catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: OnTrackChangeOutCompleted failed - {ex.Message}"); }
         }
 
         private void UpdateColors(Color color)
@@ -247,18 +258,20 @@ namespace EarTrumpet.UI.Views
         {
             if (_cachedThumbnail != null)
             {
-                AlbumArtBackground.Source = _cachedThumbnail;
-                ExpandedCoverImage.Source = _cachedThumbnail;
+                ApplyThumbnail(_cachedThumbnail);
                 UpdateColors(_cachedDominantColor);
             }
 
-            var cts = new CancellationTokenSource();
+            _albumArtCts?.Cancel();
+            _albumArtCts?.Dispose();
+            _albumArtCts = new CancellationTokenSource();
+            var albumToken = _albumArtCts.Token;
             Task.Run(() =>
             {
                 try
                 {
                     var thumbnail = MediaSessionService.Instance.GetCurrentThumbnail();
-                    if (cts.Token.IsCancellationRequested) return;
+                    if (albumToken.IsCancellationRequested) return;
 
                     Dispatcher.BeginInvoke((Action)(() =>
                     {
@@ -267,8 +280,7 @@ namespace EarTrumpet.UI.Views
                             if (thumbnail != null)
                             {
                                 _cachedThumbnail = thumbnail;
-                                AlbumArtBackground.Source = thumbnail;
-                                ExpandedCoverImage.Source = thumbnail;
+                                ApplyThumbnail(thumbnail);
 
                                 var color = GetDominantColor(thumbnail);
                                 _cachedDominantColor = color;
@@ -278,15 +290,39 @@ namespace EarTrumpet.UI.Views
                             {
                                 AlbumArtBackground.Source = null;
                                 ExpandedCoverImage.Source = null;
+                                ExpandedCoverBlur.Source = null;
                                 UpdateColors(Color.FromRgb(107, 77, 230));
                             }
                         }
-                        catch { }
+                        catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: UpdateAlbumArt UI failed - {ex.Message}"); }
                     }));
                 }
-                catch { }
-            }, cts.Token);
+                catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: UpdateAlbumArt load failed - {ex.Message}"); }
+            }, albumToken);
         }
+
+        private void ApplyThumbnail(BitmapImage thumbnail)
+        {
+            AlbumArtBackground.Source = thumbnail;
+
+            bool isLowRes = Math.Max(thumbnail.PixelWidth, thumbnail.PixelHeight) < 300;
+            if (isLowRes)
+            {
+                // Low-res: show blurred base + hide sharp overlay
+                ExpandedCoverBlur.Source = thumbnail;
+                ExpandedCoverImage.Source = null;
+                ExpandedCoverBlurEffect.Radius = 2;
+            }
+            else
+            {
+                // High-res: show sharp image, hide blur layer
+                ExpandedCoverBlur.Source = null;
+                ExpandedCoverImage.Source = thumbnail;
+                ExpandedCoverBlurEffect.Radius = 0;
+            }
+        }
+
+
 
         private Color GetDominantColor(BitmapImage bitmap)
         {
@@ -332,7 +368,7 @@ namespace EarTrumpet.UI.Views
                     return Color.FromRgb(avgR, avgG, avgB);
                 }
             }
-            catch { }
+            catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: GetDominantColor failed - {ex.Message}"); }
 
             return Color.FromRgb(107, 77, 230);
         }
@@ -396,7 +432,7 @@ namespace EarTrumpet.UI.Views
                     ProgressBarFill.Width = 0;
                 }
             }
-            catch { }
+            catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: UpdateProgress failed - {ex.Message}"); }
         }
 
         private string FormatTime(TimeSpan time)
@@ -439,7 +475,7 @@ namespace EarTrumpet.UI.Views
                         break;
                 }
             }
-            catch { }
+            catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: UpdateShuffleRepeatState failed - {ex.Message}"); }
         }
 
         public void ShowPopup(Rect iconBounds)
@@ -459,7 +495,7 @@ namespace EarTrumpet.UI.Views
                 Height = ExpandedHeight;
                 ExpandedCover.Visibility = Visibility.Visible;
                 ExpandedCover.Opacity = 1;
-                ExpandedCoverImage.Source = AlbumArtBackground.Source;
+                if (_cachedThumbnail != null) ApplyThumbnail(_cachedThumbnail);
                 ExpandArrow.RenderTransform = new RotateTransform(180);
             }
             else
@@ -608,7 +644,7 @@ namespace EarTrumpet.UI.Views
                     UpdateProgress();
                 }
             }
-            catch { }
+            catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: ProgressBar seek failed - {ex.Message}"); }
         }
 
         private void PrevButton_Click(object sender, RoutedEventArgs e)
@@ -671,7 +707,7 @@ namespace EarTrumpet.UI.Views
                 _settings.MediaPopupIsExpanded = true;
             }
 
-            ExpandedCoverImage.Source = AlbumArtBackground.Source;
+            if (_cachedThumbnail != null) ApplyThumbnail(_cachedThumbnail);
             ExpandedCover.Opacity = 0;
             ExpandedCover.Visibility = Visibility.Visible;
 
@@ -758,6 +794,216 @@ namespace EarTrumpet.UI.Views
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
             };
             BeginAnimation(TopProperty, posAnim);
+        }
+
+        // ═══════════════════════════════════
+        // Volume Control
+        // ═══════════════════════════════════
+
+        private int _currentVolume = 100;
+        private bool _isDraggingVolume;
+
+        private void VolumeButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var app = FindCurrentMediaApp();
+                if (app != null)
+                {
+                    app.IsMuted = !app.IsMuted;
+                    UpdateVolumeVisual(app.Volume, app.IsMuted);
+                }
+                else
+                {
+                    var collection = ((App)Application.Current).CollectionViewModel;
+                    if (collection?.Default != null)
+                    {
+                        collection.Default.IsMuted = !collection.Default.IsMuted;
+                        UpdateVolumeVisual(collection.Default.Volume, collection.Default.IsMuted);
+                    }
+                }
+            }
+            catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: VolumeButton_Click failed - {ex.Message}"); }
+        }
+
+        private void VolumeTrack_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _isDraggingVolume = true;
+            ((System.Windows.IInputElement)sender).CaptureMouse();
+            ApplyVolumeFromMouse(e);
+            e.Handled = true;
+        }
+
+        private void VolumeTrack_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isDraggingVolume && e.LeftButton == MouseButtonState.Pressed)
+            {
+                ApplyVolumeFromMouse(e);
+            }
+        }
+
+        private void VolumeTrack_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            _isDraggingVolume = false;
+            ((System.Windows.IInputElement)sender).ReleaseMouseCapture();
+            e.Handled = true;
+        }
+
+        private void ApplyVolumeFromMouse(MouseEventArgs e)
+        {
+            try
+            {
+                var pos = e.GetPosition(VolumeTrackContainer);
+                var ratio = Math.Max(0, Math.Min(1, pos.X / VolumeTrackContainer.ActualWidth));
+                var volume = (int)(ratio * 100);
+
+                _currentVolume = volume;
+                UpdateVolumeVisual(volume, false);
+
+                var app = FindCurrentMediaApp();
+                if (app != null)
+                {
+                    app.Volume = volume;
+                    if (app.IsMuted && volume > 0) app.IsMuted = false;
+                }
+                else
+                {
+                    var collection = ((App)Application.Current).CollectionViewModel;
+                    if (collection?.Default != null)
+                    {
+                        collection.Default.Volume = volume;
+                        if (collection.Default.IsMuted && volume > 0) collection.Default.IsMuted = false;
+                    }
+                }
+            }
+            catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: ApplyVolumeFromMouse failed - {ex.Message}"); }
+        }
+
+        private void UpdateVolumeState()
+        {
+            try
+            {
+                var app = FindCurrentMediaApp();
+                if (app != null)
+                {
+                    _currentVolume = app.Volume;
+                    UpdateVolumeVisual(app.Volume, app.IsMuted);
+                }
+                else
+                {
+                    var collection = ((App)Application.Current).CollectionViewModel;
+                    if (collection?.Default != null)
+                    {
+                        _currentVolume = collection.Default.Volume;
+                        UpdateVolumeVisual(collection.Default.Volume, collection.Default.IsMuted);
+                    }
+                }
+            }
+            catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: UpdateVolumeState failed - {ex.Message}"); }
+        }
+
+        private void UpdateVolumeVisual(int volume, bool isMuted)
+        {
+            // Update fill width + thumb position
+            var containerWidth = VolumeTrackContainer.ActualWidth;
+            if (containerWidth > 0)
+            {
+                var ratio = volume / 100.0;
+                VolumeTrackFill.Width = containerWidth * ratio;
+                System.Windows.Controls.Canvas.SetLeft(VolumeThumb, containerWidth * ratio - 5);
+            }
+
+            // Update text
+            VolumeText.Text = volume.ToString();
+
+            // Update icon
+            if (isMuted || volume == 0)
+                VolumeIcon.Text = "\uE74F"; // Mute
+            else if (volume < 33)
+                VolumeIcon.Text = "\uE993"; // Low
+            else if (volume < 66)
+                VolumeIcon.Text = "\uE994"; // Medium
+            else
+                VolumeIcon.Text = "\uE995"; // High
+
+            // Update fill color to match accent
+            VolGradient1.Color = _cachedDominantColor;
+            VolGradient2.Color = Color.FromArgb(255,
+                (byte)Math.Min(255, _cachedDominantColor.R + 50),
+                (byte)Math.Min(255, _cachedDominantColor.G + 50),
+                (byte)Math.Min(255, _cachedDominantColor.B + 50));
+        }
+
+        /// <summary>
+        /// Find the audio session for the currently playing media app.
+        /// Matches by SMTC source app ID or legacy player exe name.
+        /// </summary>
+        private ViewModels.IAppItemViewModel FindCurrentMediaApp()
+        {
+            try
+            {
+                var collection = ((App)Application.Current).CollectionViewModel;
+                if (collection == null) return null;
+
+                // Try to get the source app ID from SMTC
+                string sourceApp = null;
+                try
+                {
+                    var sessions = Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager.RequestAsync();
+                    // Use cached info from MediaSessionService
+                    if (MediaSessionService.Instance.IsUsingLegacyPlayer)
+                    {
+                        sourceApp = MediaSessionService.Instance.LegacyPlayerName;
+                    }
+                }
+                catch { }
+
+                // Search through all devices and apps
+                foreach (var device in collection.AllDevices)
+                {
+                    foreach (var app in device.Apps)
+                    {
+                        // Match by ExeName
+                        if (!string.IsNullOrEmpty(sourceApp) && 
+                            !string.IsNullOrEmpty(app.ExeName) &&
+                            app.ExeName.IndexOf(sourceApp, StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            return app;
+                        }
+
+                        // Match common media apps by name
+                        var exeLower = (app.ExeName ?? "").ToLowerInvariant();
+                        if (exeLower.Contains("spotify") || exeLower.Contains("chrome") || 
+                            exeLower.Contains("firefox") || exeLower.Contains("msedge") ||
+                            exeLower.Contains("vlc") || exeLower.Contains("musicbee") ||
+                            exeLower.Contains("foobar") || exeLower.Contains("winamp") ||
+                            exeLower.Contains("aimp") || exeLower.Contains("itunes") ||
+                            exeLower.Contains("groove") || exeLower.Contains("wmplayer"))
+                        {
+                            // Only return if it's the active (non-zero peak) session
+                            if (app.PeakValue1 > 0 || app.PeakValue2 > 0)
+                            {
+                                return app;
+                            }
+                        }
+                    }
+                }
+
+                // Fallback: find any app with audio activity (skip system sounds)
+                foreach (var device in collection.AllDevices)
+                {
+                    foreach (var app in device.Apps)
+                    {
+                        if ((app.PeakValue1 > 0 || app.PeakValue2 > 0) && !string.IsNullOrEmpty(app.ExeName))
+                        {
+                            return app;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: FindCurrentMediaApp failed - {ex.Message}"); }
+
+            return null;
         }
 
         public bool IsShowing => _isShowing;

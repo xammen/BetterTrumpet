@@ -4,9 +4,9 @@
         xmlns:Theme="clr-namespace:EarTrumpet.UI.Themes"
         Title="Media Controls"
         Width="300"
-        Height="160"
-        MinHeight="160"
-        MaxHeight="420"
+        Height="185"
+        MinHeight="185"
+        MaxHeight="445"
         AllowsTransparency="True"
         Background="Transparent"
         ResizeMode="NoResize"
@@ -244,7 +244,8 @@
 
         <Grid>
             <!-- Background album art -->
-            <Image x:Name="AlbumArtBackground" Stretch="UniformToFill" Opacity="0.85">
+            <Image x:Name="AlbumArtBackground" Stretch="UniformToFill" Opacity="0.85"
+                   RenderOptions.BitmapScalingMode="HighQuality">
                 <Image.Effect>
                     <BlurEffect x:Name="AlbumArtBlur" Radius="15"/>
                 </Image.Effect>
@@ -307,6 +308,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
@@ -350,7 +352,16 @@
                         <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.5" Color="Black"/>
                     </Border.Effect>
                     <Grid>
-                        <Image x:Name="ExpandedCoverImage" Stretch="UniformToFill"/>
+                        <!-- Blurred low-res base layer -->
+                        <Image x:Name="ExpandedCoverBlur" Stretch="UniformToFill"
+                               RenderOptions.BitmapScalingMode="HighQuality" Opacity="1">
+                            <Image.Effect>
+                                <BlurEffect x:Name="ExpandedCoverBlurEffect" Radius="0"/>
+                            </Image.Effect>
+                        </Image>
+                        <!-- Sharp high-res overlay (used when HD thumbnail available) -->
+                        <Image x:Name="ExpandedCoverImage" Stretch="UniformToFill"
+                               RenderOptions.BitmapScalingMode="HighQuality"/>
                         <Border CornerRadius="8">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -407,8 +418,55 @@
                                Margin="8,0,0,0"/>
                 </Grid>
 
+                <!-- Mini Volume Slider -->
+                <Grid Grid.Row="4" Margin="0,2,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="VolumeButton" Grid.Column="0" Width="28" Height="28"
+                            Style="{StaticResource SmallMediaButtonStyle}"
+                            Click="VolumeButton_Click" ToolTip="Mute/Unmute" VerticalAlignment="Center">
+                        <TextBlock x:Name="VolumeIcon" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                   Text="&#xE995;" Foreground="#AAFFFFFF"/>
+                    </Button>
+                    <!-- Custom volume track (same style as progress bar) -->
+                    <Grid Grid.Column="1" VerticalAlignment="Center" Margin="6,0"
+                          x:Name="VolumeTrackContainer" Height="20"
+                          MouseLeftButtonDown="VolumeTrack_MouseDown"
+                          MouseMove="VolumeTrack_MouseMove"
+                          MouseLeftButtonUp="VolumeTrack_MouseUp"
+                          Cursor="Hand">
+                        <!-- Track background -->
+                        <Border Height="4" CornerRadius="2" Background="#30FFFFFF" VerticalAlignment="Center"/>
+                        <!-- Track fill -->
+                        <Border x:Name="VolumeTrackFill" HorizontalAlignment="Left" Width="0"
+                                Height="4" CornerRadius="2" VerticalAlignment="Center">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop x:Name="VolGradient1" Color="#FF6B4DE6" Offset="0"/>
+                                    <GradientStop x:Name="VolGradient2" Color="#FF9B7AFF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <!-- Thumb -->
+                        <Canvas ClipToBounds="False" VerticalAlignment="Center" Height="12">
+                            <Ellipse x:Name="VolumeThumb" Width="10" Height="10" Fill="White"
+                                     Canvas.Top="1" Canvas.Left="0" IsHitTestVisible="False">
+                                <Ellipse.Effect>
+                                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Opacity="0.4" Color="White"/>
+                                </Ellipse.Effect>
+                            </Ellipse>
+                        </Canvas>
+                    </Grid>
+                    <TextBlock x:Name="VolumeText" Grid.Column="2" Text="100" FontSize="11"
+                               Foreground="#80FFFFFF" VerticalAlignment="Center" Width="24"
+                               TextAlignment="Right"/>
+                </Grid>
+
                 <!-- Shuffle/Repeat and Control Buttons -->
-                <Grid Grid.Row="4">
+                <Grid Grid.Row="5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>

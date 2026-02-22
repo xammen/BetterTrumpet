@@ -1,4 +1,4 @@
-﻿using EarTrumpet.DataModel;
+using EarTrumpet.DataModel;
 using EarTrumpet.Extensions;
 using EarTrumpet.Interop.Helpers;
 using System;
@@ -67,6 +67,16 @@ namespace EarTrumpet.UI.Themes
         public void Load()
         {
             // This method needs to be called from App to get us loaded otherwise XAML will lazy-load us.
+        }
+
+        /// <summary>
+        /// Force a theme refresh from external code (e.g., when custom theme colors change Refs).
+        /// </summary>
+        public void NotifyThemeChanged()
+        {
+            ThemeChanged?.Invoke();
+            RaisePropertyChanged(nameof(IsLightTheme));
+            RaisePropertyChanged(nameof(IsSystemLightTheme));
         }
 
         public Color ResolveRef(DependencyObject target, string key)

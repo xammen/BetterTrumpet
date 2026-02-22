@@ -95,11 +95,11 @@ namespace EarTrumpet.UI.Controls
         
         // Conditional rendering - only animate when there's actual work to do
         private bool _hasPeakActivity; // True when peak values are non-zero
-        private DateTime _lastPeakActivity = DateTime.MinValue;
+        private TimeSpan _lastPeakActivity = TimeSpan.Zero;
         private const double PeakIdleTimeoutMs = 500; // Stop rendering after 500ms of silence
         
         // FPS limiting for eco mode
-        private DateTime _lastFrameTime = DateTime.MinValue;
+        private TimeSpan _lastRenderTime = TimeSpan.Zero;
         private int _targetFps = 60;
         private double _frameInterval = 1000.0 / 60.0; // milliseconds between frames
 
@@ -136,6 +136,13 @@ namespace EarTrumpet.UI.Controls
             {
                 App.Settings.CustomSliderColorsChanged += OnCustomSliderColorsChanged;
                 App.Settings.EcoModeChanged += OnEcoModeChanged;
+            }
+            
+            // Re-apply custom colors after any theme change (the theme system
+            // re-sets Foreground via local values, so we must re-override)
+            if (UI.Themes.Manager.Current != null)
+            {
+                UI.Themes.Manager.Current.ThemeChanged += OnThemeChangedReapplyColors;
             }
             
             // Initialize FPS limiting
@@ -180,6 +187,22 @@ namespace EarTrumpet.UI.Controls
                 App.Settings.CustomSliderColorsChanged -= OnCustomSliderColorsChanged;
                 App.Settings.EcoModeChanged -= OnEcoModeChanged;
             }
+            if (UI.Themes.Manager.Current != null)
+            {
+                UI.Themes.Manager.Current.ThemeChanged -= OnThemeChangedReapplyColors;
+            }
+        }
+        
+        private void OnThemeChangedReapplyColors()
+        {
+            // After the theme system re-paints all elements, re-apply custom colors
+            // Use BeginInvoke so we run AFTER the theme system finishes its updates
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action(ApplyCustomColors));
+                return;
+            }
+            Dispatcher.BeginInvoke(new Action(ApplyCustomColors), System.Windows.Threading.DispatcherPriority.Loaded);
         }
         
         private void OnCustomSliderColorsChanged()
@@ -200,7 +223,7 @@ namespace EarTrumpet.UI.Controls
             
             if (settings.UseCustomSliderColors)
             {
-                // Set custom brushes via DependencyProperties
+                // Update DependencyProperties (for DataTrigger bindings)
                 var thumbColor = settings.SliderThumbColor;
                 CustomThumbBrush = thumbColor != Colors.Transparent ? new SolidColorBrush(thumbColor) : null;
                 
@@ -213,7 +236,9 @@ namespace EarTrumpet.UI.Controls
                 var peakColor = settings.PeakMeterColor;
                 CustomPeakMeterBrush = peakColor != Colors.Transparent ? new SolidColorBrush(peakColor) : null;
                 
-                // Apply colors directly to visual elements (bypassing theme system)
+                // Also apply directly to visual elements — the Theme:Brush system sets local
+                // values (priority 11) which override DataTrigger setters (priority 5), so we
+                // must set local values ourselves to win the priority battle.
                 ApplyColorsToVisualElements();
             }
             else
@@ -224,65 +249,32 @@ namespace EarTrumpet.UI.Controls
                 CustomTrackBackgroundBrush = null;
                 CustomPeakMeterBrush = null;
                 
-                // Reset visual elements to use theme colors
+                // Clear local values so theme system can take over again
                 ResetVisualElementColors();
             }
         }
         
         private void ApplyColorsToVisualElements()
         {
-            // Apply thumb color directly
             if (_thumb != null && CustomThumbBrush != null)
-            {
                 _thumb.Foreground = CustomThumbBrush;
-            }
-            
-            // Apply track fill color (left part)
             if (_sliderLeft != null && CustomTrackFillBrush != null)
-            {
                 _sliderLeft.Foreground = CustomTrackFillBrush;
-            }
-            
-            // Apply track background color (right part)
             if (_sliderRight != null && CustomTrackBackgroundBrush != null)
-            {
                 _sliderRight.Foreground = CustomTrackBackgroundBrush;
-            }
-            
-            // Apply peak meter color
             if (_peakMeter1 != null && CustomPeakMeterBrush != null)
-            {
                 _peakMeter1.Background = CustomPeakMeterBrush;
-            }
             if (_peakMeter2 != null && CustomPeakMeterBrush != null)
-            {
                 _peakMeter2.Background = CustomPeakMeterBrush;
-            }
         }
         
         private void ResetVisualElementColors()
         {
-            // Reset to default by clearing local values - let theme system take over
-            if (_thumb != null)
-            {
-                _thumb.ClearValue(Control.ForegroundProperty);
-            }
-            if (_sliderLeft != null)
-            {
-                _sliderLeft.ClearValue(Control.ForegroundProperty);
-            }
-            if (_sliderRight != null)
-            {
-                _sliderRight.ClearValue(Control.ForegroundProperty);
-            }
-            if (_peakMeter1 != null)
-            {
-                _peakMeter1.ClearValue(Border.BackgroundProperty);
-            }
-            if (_peakMeter2 != null)
-            {
-                _peakMeter2.ClearValue(Border.BackgroundProperty);
-            }
+            if (_thumb != null) _thumb.ClearValue(Control.ForegroundProperty);
+            if (_sliderLeft != null) _sliderLeft.ClearValue(Control.ForegroundProperty);
+            if (_sliderRight != null) _sliderRight.ClearValue(Control.ForegroundProperty);
+            if (_peakMeter1 != null) _peakMeter1.ClearValue(Border.BackgroundProperty);
+            if (_peakMeter2 != null) _peakMeter2.ClearValue(Border.BackgroundProperty);
         }
         
         private void StartAnimation()
@@ -305,9 +297,11 @@ namespace EarTrumpet.UI.Controls
         
         private void OnRendering(object sender, EventArgs e)
         {
-            // FPS limiting: skip frames if we're updating too fast
-            var now = DateTime.Now;
-            var elapsed = (now - _lastFrameTime).TotalMilliseconds;
+            // FPS limiting: use vsync timestamp for accurate frame timing
+            var renderArgs = e as System.Windows.Media.RenderingEventArgs;
+            var now = renderArgs != null ? renderArgs.RenderingTime : TimeSpan.FromTicks(DateTime.UtcNow.Ticks);
+            var elapsed = (now - _lastRenderTime).TotalMilliseconds;
+            _lastRenderTime = now;
             
             // For peak meter updates, respect FPS limit
             // But always process volume animation for responsiveness
@@ -318,7 +312,7 @@ namespace EarTrumpet.UI.Controls
             
             if (shouldUpdatePeakMeter)
             {
-                _lastFrameTime = now;
+                // _lastRenderTime already updated above
                 
                 // Check if peak meters need updating (non-zero targets or current values still animating down)
                 bool peakNeedsUpdate = _targetWidth1 > 0.1 || _targetWidth2 > 0.1 || 
@@ -372,12 +366,6 @@ namespace EarTrumpet.UI.Controls
                 {
                     Value = newValue;
                 }
-            }
-            
-            // Force custom colors every frame to override theme system hover effects
-            if (CustomThumbBrush != null && _thumb != null && _thumb.Foreground != CustomThumbBrush)
-            {
-                _thumb.Foreground = CustomThumbBrush;
             }
             
             // Auto-stop animation loop when nothing needs animating
