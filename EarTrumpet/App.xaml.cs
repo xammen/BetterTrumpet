@@ -62,6 +62,7 @@ namespace EarTrumpet
 
             Settings = new AppSettings();
             _errorReporter = new ErrorReporter(Settings);
+            CrashHandler.Initialize();
 
             if (SingleInstanceAppMutex.TakeExclusivity())
             {
