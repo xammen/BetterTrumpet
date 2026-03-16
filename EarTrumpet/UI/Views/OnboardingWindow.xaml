@@ -1,0 +1,444 @@
+<Window x:Class="EarTrumpet.UI.Views.OnboardingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Theme="clr-namespace:EarTrumpet.UI.Themes"
+        xmlns:b="clr-namespace:EarTrumpet.UI.Behaviors"
+        Title="BetterTrumpet"
+        Width="560" Height="640"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Theme:Options.Source="App">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVis" />
+
+        <!-- Accent brush -->
+        <SolidColorBrush x:Key="AccentBrush" Color="#FFC857"/>
+        <SolidColorBrush x:Key="AccentDimBrush" Color="#40FFC857"/>
+        <SolidColorBrush x:Key="SubtleBgBrush" Color="#15FFFFFF"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#20FFFFFF"/>
+        <SolidColorBrush x:Key="DimTextBrush" Color="#80FFFFFF"/>
+
+        <!-- Dot indicator style -->
+        <Style x:Key="DotStyle" TargetType="Ellipse">
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="Height" Value="8"/>
+            <Setter Property="Fill" Value="#30FFFFFF"/>
+            <Setter Property="Margin" Value="4,0"/>
+        </Style>
+        <Style x:Key="DotActiveStyle" TargetType="Ellipse">
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="Height" Value="8"/>
+            <Setter Property="Fill" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Margin" Value="4,0"/>
+        </Style>
+
+        <!-- Device card style -->
+        <Style x:Key="DeviceCardBorder" TargetType="Border">
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="#08FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#15FFFFFF"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#15FFFFFF"/>
+                    <Setter Property="BorderBrush" Value="#30FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <!-- Main container with rounded corners -->
+    <Border CornerRadius="16" ClipToBounds="True"
+            Background="#E6181818" BorderBrush="#30FFFFFF" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Draggable title bar -->
+            <Grid Grid.Row="0" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <!-- Skip button top right -->
+                <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center"
+                           Margin="0,0,16,0" Cursor="Hand"
+                           MouseLeftButtonDown="Skip_Click"
+                           Foreground="{StaticResource DimTextBrush}"
+                           FontSize="12" Text="Passer"/>
+            </Grid>
+
+            <!-- Content area -->
+            <Grid Grid.Row="1" Margin="48,0,48,0">
+
+                <!-- ═══ PAGE 0: Welcome ═══ -->
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                            Visibility="{Binding IsPage0, Converter={StaticResource BoolVis}}">
+                    <!-- Logo -->
+                    <Image Width="80" Height="80" Margin="0,0,0,24"
+                           HorizontalAlignment="Center"
+                           Source="/BetterTrumpet;component/Assets/icon.png"
+                           RenderOptions.BitmapScalingMode="Fant"/>
+                    <!-- Title -->
+                    <TextBlock Text="BetterTrumpet" FontSize="32" FontWeight="Bold"
+                               HorizontalAlignment="Center" Foreground="White"/>
+                    <!-- Subtitle -->
+                    <TextBlock Text="{Binding SubtitleText}" FontSize="15"
+                               HorizontalAlignment="Center" Margin="0,8,0,0"
+                               Foreground="{StaticResource DimTextBrush}"/>
+                    <!-- Version -->
+                    <TextBlock x:Name="VersionText"
+                               FontSize="12" HorizontalAlignment="Center" Margin="0,24,0,0"
+                               Foreground="#40FFFFFF"/>
+                </StackPanel>
+
+                <!-- ═══ PAGE 1: Audio Setup ═══ -->
+                <StackPanel Visibility="{Binding IsPage1, Converter={StaticResource BoolVis}}">
+                    <!-- Header -->
+                    <TextBlock Text="&#xE767;" FontFamily="Segoe MDL2 Assets" FontSize="32"
+                               HorizontalAlignment="Center" Margin="0,20,0,12"
+                               Foreground="{StaticResource AccentBrush}"/>
+                    <TextBlock Text="Audio" FontSize="24" FontWeight="SemiBold"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding SubtitleText}" FontSize="13"
+                               HorizontalAlignment="Center" Margin="0,4,0,24"
+                               Foreground="{StaticResource DimTextBrush}"/>
+
+                    <!-- Device list -->
+                    <ItemsControl ItemsSource="{Binding AudioDevices}" Margin="0,0,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource DeviceCardBorder}"
+                                        MouseLeftButtonDown="DeviceCard_Click"
+                                        Tag="{Binding}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="&#xE7F5;"
+                                                   FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                                   VerticalAlignment="Center" Margin="0,0,12,0"
+                                                   Foreground="#99FFFFFF"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding DisplayName}"
+                                                   FontSize="13" VerticalAlignment="Center"
+                                                   Foreground="White"/>
+                                        <TextBlock Grid.Column="2" Text="&#xE73E;"
+                                                   FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{StaticResource AccentBrush}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsDefault}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <!-- ═══ PAGE 2: Appearance ═══ -->
+                <StackPanel Visibility="{Binding IsPage2, Converter={StaticResource BoolVis}}">
+                    <TextBlock Text="&#xE790;" FontFamily="Segoe MDL2 Assets" FontSize="32"
+                               HorizontalAlignment="Center" Margin="0,20,0,12"
+                               Foreground="{StaticResource AccentBrush}"/>
+                    <TextBlock Text="Apparence" FontSize="24" FontWeight="SemiBold"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding SubtitleText}" FontSize="13"
+                               HorizontalAlignment="Center" Margin="0,4,0,32"
+                               Foreground="{StaticResource DimTextBrush}"/>
+
+                    <!-- Theme cards -->
+                    <Grid HorizontalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="200"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- System default -->
+                        <Border Grid.Column="0" Padding="16" CornerRadius="10" Cursor="Hand"
+                                MouseLeftButtonDown="Theme0_Click">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#08FFFFFF"/>
+                                    <Setter Property="BorderThickness" Value="2"/>
+                                    <Setter Property="BorderBrush" Value="#15FFFFFF"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedThemeIndex}" Value="0">
+                                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                            <Setter Property="Background" Value="#15FFC857"/>
+                                        </DataTrigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#12FFFFFF"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="&#xE770;" FontFamily="Segoe MDL2 Assets" FontSize="28"
+                                           HorizontalAlignment="Center" Margin="0,0,0,10"
+                                           Foreground="White"/>
+                                <TextBlock Text="Syst&#232;me" FontSize="14" FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Couleurs Windows" FontSize="11" Opacity="0.5"
+                                           HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Custom colors -->
+                        <Border Grid.Column="2" Padding="16" CornerRadius="10" Cursor="Hand"
+                                MouseLeftButtonDown="Theme1_Click">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#08FFFFFF"/>
+                                    <Setter Property="BorderThickness" Value="2"/>
+                                    <Setter Property="BorderBrush" Value="#15FFFFFF"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedThemeIndex}" Value="1">
+                                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                            <Setter Property="Background" Value="#15FFC857"/>
+                                        </DataTrigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#12FFFFFF"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="&#xE2B1;" FontFamily="Segoe MDL2 Assets" FontSize="28"
+                                           HorizontalAlignment="Center" Margin="0,0,0,10"
+                                           Foreground="{StaticResource AccentBrush}"/>
+                                <TextBlock Text="Personnalis&#233;" FontSize="14" FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Th&#232;mes et couleurs" FontSize="11" Opacity="0.5"
+                                           HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+
+                <!-- ═══ PAGE 3: Privacy ═══ -->
+                <StackPanel Visibility="{Binding IsPage3, Converter={StaticResource BoolVis}}">
+                    <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" FontSize="32"
+                               HorizontalAlignment="Center" Margin="0,20,0,12"
+                               Foreground="{StaticResource AccentBrush}"/>
+                    <TextBlock Text="Confidentialit&#233;" FontSize="24" FontWeight="SemiBold"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding SubtitleText}" FontSize="13"
+                               HorizontalAlignment="Center" Margin="0,4,0,32"
+                               Foreground="{StaticResource DimTextBrush}"/>
+
+                    <!-- Telemetry card -->
+                    <Border Padding="20" CornerRadius="10" Background="#10FFFFFF"
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Rapports de crash anonymes" FontSize="14" FontWeight="SemiBold"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock TextWrapping="Wrap" FontSize="12" Opacity="0.6" Margin="0,0,0,16"
+                                       Text="Envoyer des rapports de crash et des statistiques d'utilisation pour am&#233;liorer BetterTrumpet. Aucune donn&#233;e personnelle n'est collect&#233;e."/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Column="0" IsChecked="{Binding IsTelemetryEnabled, Mode=TwoWay}"
+                                          VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="{Binding TelemetryStatusText}"
+                                           VerticalAlignment="Center" Margin="10,0,0,0" FontSize="13"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Startup card -->
+                    <Border Padding="20" CornerRadius="10" Background="#10FFFFFF" Margin="0,12,0,0"
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="Lancer au d&#233;marrage" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock Text="BetterTrumpet d&#233;marre avec Windows" FontSize="12"
+                                           Opacity="0.5" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <CheckBox Grid.Column="1" IsChecked="{Binding RunAtStartup, Mode=TwoWay}"
+                                      VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- ═══ PAGE 4: Ready ═══ -->
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                            Visibility="{Binding IsPage4, Converter={StaticResource BoolVis}}">
+                    <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="48"
+                               HorizontalAlignment="Center" Margin="0,0,0,20"
+                               Foreground="{StaticResource AccentBrush}"/>
+                    <TextBlock Text="Tout est pr&#234;t !" FontSize="28" FontWeight="Bold"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="BetterTrumpet est configur&#233;. Cliquez sur l'ic&#244;ne dans la barre des t&#226;ches pour commencer."
+                               FontSize="13" TextWrapping="Wrap" TextAlignment="Center"
+                               HorizontalAlignment="Center" Margin="0,8,0,32" MaxWidth="350"
+                               Foreground="{StaticResource DimTextBrush}"/>
+
+                    <!-- Recap -->
+                    <Border Padding="16" CornerRadius="8" Background="#08FFFFFF" MaxWidth="320">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="&#xE73E;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="11" Foreground="{StaticResource AccentBrush}"
+                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Grid.Column="1" Text="P&#233;riph&#233;rique audio configur&#233;"
+                                           FontSize="12" Opacity="0.7"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="&#xE73E;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="11" Foreground="{StaticResource AccentBrush}"
+                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Grid.Column="1" Text="Apparence choisie"
+                                           FontSize="12" Opacity="0.7"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="&#xE73E;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="11" Foreground="{StaticResource AccentBrush}"
+                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Grid.Column="1" Text="Confidentialit&#233; r&#233;gl&#233;e"
+                                           FontSize="12" Opacity="0.7"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!-- Bottom bar: dots + buttons -->
+            <Grid Grid.Row="2" Margin="48,0,48,32">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Back button -->
+                <Border Grid.Column="0" Padding="16,8" CornerRadius="8" Cursor="Hand"
+                        MouseLeftButtonDown="Back_Click"
+                        Visibility="{Binding CanGoBack, Converter={StaticResource BoolVis}}">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#12FFFFFF"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="Retour" FontSize="13" Foreground="{StaticResource DimTextBrush}"/>
+                </Border>
+
+                <!-- Dot indicators -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <Ellipse>
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse" BasedOn="{StaticResource DotStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPage0}" Value="True">
+                                        <Setter Property="Fill" Value="{StaticResource AccentBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <Ellipse>
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse" BasedOn="{StaticResource DotStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPage1}" Value="True">
+                                        <Setter Property="Fill" Value="{StaticResource AccentBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <Ellipse>
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse" BasedOn="{StaticResource DotStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPage2}" Value="True">
+                                        <Setter Property="Fill" Value="{StaticResource AccentBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <Ellipse>
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse" BasedOn="{StaticResource DotStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPage3}" Value="True">
+                                        <Setter Property="Fill" Value="{StaticResource AccentBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <Ellipse>
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse" BasedOn="{StaticResource DotStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPage4}" Value="True">
+                                        <Setter Property="Fill" Value="{StaticResource AccentBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                </StackPanel>
+
+                <!-- Next button -->
+                <Border Grid.Column="2" Padding="24,10" CornerRadius="8" Cursor="Hand"
+                        MouseLeftButtonDown="Next_Click">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FFD980"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="{Binding NextButtonText}" FontSize="13" FontWeight="SemiBold"
+                               Foreground="#1A1A1A"/>
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
