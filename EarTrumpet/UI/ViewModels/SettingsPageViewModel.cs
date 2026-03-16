@@ -26,6 +26,11 @@ namespace EarTrumpet.UI.ViewModels
             }
         }
 
+        /// <summary>
+        /// Descriptive subtitle shown below the page title in the header.
+        /// </summary>
+        public string Subtitle { get; protected set; }
+
         private bool _isSelected;
         public bool IsSelected
         {

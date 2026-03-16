@@ -64,6 +64,7 @@ namespace EarTrumpet.UI.ViewModels
         {
             _settings = settings;
             Title = "Volume Profiles";
+            Subtitle = "Save and restore device volume snapshots.";
             Glyph = "\xE9CE"; // Save icon
 
             _profileService = new VolumeProfileService(settings);

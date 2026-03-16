@@ -109,6 +109,7 @@ namespace EarTrumpet.UI.ViewModels
         {
             _settings = settings;
             Title = "Performance";
+            Subtitle = "Tune refresh rates, animations, and battery usage.";
             Glyph = "\xE945"; // Speedometer icon
         }
     }

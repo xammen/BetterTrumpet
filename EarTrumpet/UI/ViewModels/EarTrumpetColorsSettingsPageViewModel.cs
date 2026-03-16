@@ -48,6 +48,61 @@ namespace EarTrumpet.UI.ViewModels
             }
         }
 
+        // ═══════════════════════════════════
+        // Tab system (0=Dynamic, 1=Presets, 2=Custom)
+        // ═══════════════════════════════════
+        private int _selectedTab = 1; // Default to Presets
+        public int SelectedTab
+        {
+            get => _selectedTab;
+            set
+            {
+                if (_selectedTab != value)
+                {
+                    _selectedTab = value;
+                    RaisePropertyChanged(nameof(SelectedTab));
+                }
+            }
+        }
+
+        // Category filter for presets tab
+        private string _selectedCategory = "All";
+        public string SelectedCategory
+        {
+            get => _selectedCategory;
+            set
+            {
+                if (_selectedCategory != value)
+                {
+                    _selectedCategory = value;
+                    RaisePropertyChanged(nameof(SelectedCategory));
+                    RaisePropertyChanged(nameof(FilteredThemes));
+                }
+            }
+        }
+
+        public IEnumerable<ColorTheme> FilteredThemes
+        {
+            get
+            {
+                if (_selectedCategory == "All")
+                    return ThemeRegistry.AllThemes;
+                return ThemeRegistry.AllThemes.Where(t => t.Category == _selectedCategory);
+            }
+        }
+
+        // Overflow menu for import/export
+        private bool _isOverflowOpen;
+        public bool IsOverflowOpen
+        {
+            get => _isOverflowOpen;
+            set
+            {
+                _isOverflowOpen = value;
+                RaisePropertyChanged(nameof(IsOverflowOpen));
+            }
+        }
+
         // Commands
         public ICommand ResetToDefaultCommand { get; }
         public ICommand SaveCustomThemeCommand { get; }
@@ -56,6 +111,8 @@ namespace EarTrumpet.UI.ViewModels
         public ICommand ImportThemeCommand { get; }
         public ICommand ExportThemeToFileCommand { get; }
         public ICommand ImportThemeFromFileCommand { get; }
+        public ICommand RandomizeColorsCommand { get; }
+        public ICommand ToggleOverflowCommand { get; }
 
         // Enable custom colors
         public bool UseCustomSliderColors
@@ -465,6 +522,7 @@ namespace EarTrumpet.UI.ViewModels
         {
             _settings = settings;
             Title = "Appearance";
+            Subtitle = "Customize how BetterTrumpet looks on your desktop.";
             Glyph = "\xE790"; // Paintbrush icon
 
             AvailableThemes = new ObservableCollection<ColorTheme>(ThemeRegistry.AllThemes);
@@ -487,6 +545,8 @@ namespace EarTrumpet.UI.ViewModels
             ImportThemeCommand = new RelayCommand(ImportThemeFromClipboard);
             ExportThemeToFileCommand = new RelayCommand(ExportThemeToFile);
             ImportThemeFromFileCommand = new RelayCommand(ImportThemeFromFile);
+            RandomizeColorsCommand = new RelayCommand(RandomizeColors);
+            ToggleOverflowCommand = new RelayCommand(() => IsOverflowOpen = !IsOverflowOpen);
 
             // Start album art monitoring if enabled
             if (_settings.UseDynamicAlbumArtTheme)
@@ -644,6 +704,54 @@ namespace EarTrumpet.UI.ViewModels
                 (byte)(from.R + (to.R - from.R) * t),
                 (byte)(from.G + (to.G - from.G) * t),
                 (byte)(from.B + (to.B - from.B) * t));
+        }
+
+        // ═══════════════════════════════════
+        // Randomize colors
+        // ═══════════════════════════════════
+        private static readonly Random _random = new Random();
+
+        private void RandomizeColors()
+        {
+            if (!UseCustomSliderColors)
+            {
+                UseCustomSliderColors = true;
+            }
+
+            // Pick a random base hue, then build a coherent palette around it
+            double baseHue = _random.NextDouble();
+            double baseSat = 0.5 + _random.NextDouble() * 0.4; // 0.5-0.9
+            double baseVal = 0.6 + _random.NextDouble() * 0.35; // 0.6-0.95
+
+            // Thumb: vibrant base color
+            var thumb = HsvToColor(baseHue, baseSat, baseVal);
+
+            // Fill: slight hue shift, similar brightness
+            double fillHue = (baseHue + 0.05 + _random.NextDouble() * 0.1) % 1.0;
+            var fill = HsvToColor(fillHue, baseSat * 0.85, baseVal * 0.9);
+
+            // Track BG: very dark version of base
+            var trackBg = HsvToColor(baseHue, baseSat * 0.6, 0.08 + _random.NextDouble() * 0.08);
+
+            // Peak: complementary hue for contrast
+            double peakHue = (baseHue + 0.4 + _random.NextDouble() * 0.2) % 1.0;
+            var peak = HsvToColor(peakHue, 0.4 + _random.NextDouble() * 0.3, 0.5 + _random.NextDouble() * 0.3);
+
+            // Window BG: very dark
+            var windowBg = HsvToColor(baseHue, baseSat * 0.5, 0.05 + _random.NextDouble() * 0.06);
+
+            // Text: desaturated light tint of base hue
+            var text = HsvToColor(baseHue, Math.Max(0.05, baseSat * 0.12), 0.85 + _random.NextDouble() * 0.12);
+
+            // Glow: same as fill
+            var glow = fill;
+
+            // Build a theme and apply it with animation
+            var theme = new ColorTheme("Random", "Custom", thumb, fill, trackBg, peak, windowBg, text, glow);
+            _selectedTheme = null; // Clear selection so any card gets deselected
+            _settings.ActiveThemeName = "";
+            RaisePropertyChanged(nameof(SelectedTheme));
+            ApplyTheme(theme);
         }
 
         private void ResetToDefault()
