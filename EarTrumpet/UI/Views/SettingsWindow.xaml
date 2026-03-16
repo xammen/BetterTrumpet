@@ -1645,51 +1645,84 @@
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type vm:EarTrumpetAboutPageViewModel}">
-            <StackPanel>
-                <StackPanel Margin="12,24" Orientation="Horizontal">
+            <StackPanel Margin="0,0,0,24">
+                <!-- App identity header -->
+                <StackPanel Margin="12,24,12,16" Orientation="Horizontal">
                     <Image Width="48"
                            Height="48"
-                           Margin="0,0,12,0"
+                           Margin="0,0,16,0"
                            Source="/BetterTrumpet;component/Assets/icon.png"
                            RenderOptions.BitmapScalingMode="NearestNeighbor" />
-                    <TextBlock FontSize="24" VerticalAlignment="Center" Text="BetterTrumpet" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <StackPanel>
-                        <TextBlock VerticalAlignment="Center"
-                                   Style="{StaticResource BodyText}"
-                                   Text="{Binding AboutText}" />
-                        <TextBlock VerticalAlignment="Center"
-                                   Style="{StaticResource BodyText}"
-                                   Text="{x:Static resx:Resources.ForkAttributionText}" />
-                        <TextBlock VerticalAlignment="Center"
-                                   Style="{StaticResource BodyText}"
-                                   Text="© 2025 xmn" />
-                        <CheckBox Margin="12,24,12,-6"
-                                  HorizontalAlignment="Left"
-                                  Content="{x:Static resx:Resources.PrivacyCheckboxText}"
-                                  IsChecked="{Binding IsTelemetryEnabled, Mode=TwoWay}" />
-                        <TextBlock Style="{StaticResource HyperlinkBlock}">
-                            <Hyperlink Command="{Binding OpenPrivacyPolicyCommand}">
-                                <Run Text="{x:Static resx:Resources.PrivacyPolicyText}" />
-                            </Hyperlink>
-                        </TextBlock>
-                        <TextBlock Style="{StaticResource HyperlinkBlock}"><Hyperlink Command="{Binding OpenAboutCommand}">
-                                <Run Text="{x:Static resx:Resources.WebsiteText}" />
-                            </Hyperlink>
-                        </TextBlock>
-                        <TextBlock Style="{StaticResource HyperlinkBlock}">
-                            <Hyperlink Command="{Binding OpenFeedbackCommand}">
-                                <Run Text="{x:Static resx:Resources.ContextMenuSendFeedback}" />
-                            </Hyperlink>
-                        </TextBlock>
-                        <TextBlock Style="{StaticResource HyperlinkBlock}">
-                            <Hyperlink Command="{Binding OpenDiagnosticsCommand}">
-                                <Run Text="{x:Static resx:Resources.TroubleshootEarTrumpetText}" />
-                            </Hyperlink>
-                        </TextBlock>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock FontSize="24" FontWeight="SemiBold" Text="BetterTrumpet" />
+                        <TextBlock FontSize="12" Opacity="0.5" Text="{Binding AboutText}" />
                     </StackPanel>
                 </StackPanel>
+
+                <!-- Attribution -->
+                <StackPanel Margin="12,0,12,20">
+                    <TextBlock Style="{StaticResource BodyText}"
+                               Text="{x:Static resx:Resources.ForkAttributionText}" />
+                    <TextBlock Style="{StaticResource BodyText}"
+                               Opacity="0.5"
+                               Text="&#169; 2026 xmn" />
+                </StackPanel>
+
+                <!-- Telemetry card -->
+                <Border Margin="12,0,12,20"
+                        Padding="16"
+                        CornerRadius="8"
+                        Background="#1AFFFFFF">
+                    <StackPanel>
+                        <TextBlock FontSize="14" FontWeight="SemiBold"
+                                   Margin="0,0,0,4"
+                                   Text="{x:Static resx:Resources.PrivacyCheckboxText}" />
+                        <TextBlock FontSize="12" Opacity="0.5" TextWrapping="Wrap"
+                                   Margin="0,0,0,10"
+                                   Text="{Binding TelemetryDescription}" />
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox IsChecked="{Binding IsTelemetryEnabled, Mode=TwoWay}"
+                                      VerticalAlignment="Center" />
+                            <TextBlock Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="12"
+                                       Text="{Binding TelemetryStatusText}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Links -->
+                <StackPanel Margin="12,0,12,0">
+                    <TextBlock Style="{StaticResource HyperlinkBlock}" Margin="0,0,0,4">
+                        <Hyperlink Command="{Binding OpenPrivacyPolicyCommand}">
+                            <Run Text="{x:Static resx:Resources.PrivacyPolicyText}" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource HyperlinkBlock}" Margin="0,0,0,4">
+                        <Hyperlink Command="{Binding OpenAboutCommand}">
+                            <Run Text="{x:Static resx:Resources.WebsiteText}" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource HyperlinkBlock}" Margin="0,0,0,4">
+                        <Hyperlink Command="{Binding OpenFeedbackCommand}">
+                            <Run Text="{x:Static resx:Resources.ContextMenuSendFeedback}" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource HyperlinkBlock}" Margin="0,0,0,4">
+                        <Hyperlink Command="{Binding OpenDiagnosticsCommand}">
+                            <Run Text="{x:Static resx:Resources.TroubleshootEarTrumpetText}" />
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- Health info (for power users) -->
+                <Border Margin="12,20,12,0"
+                        Padding="12"
+                        CornerRadius="6"
+                        Background="#0DFFFFFF">
+                    <TextBlock FontSize="11" Opacity="0.4" FontFamily="Consolas"
+                               Text="{Binding HealthSummary}" />
+                </Border>
             </StackPanel>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:SettingsPageHeaderViewModel}">
