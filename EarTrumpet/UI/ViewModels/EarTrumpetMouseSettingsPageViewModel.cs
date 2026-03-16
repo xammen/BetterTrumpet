@@ -1,4 +1,4 @@
-﻿
+
 
 namespace EarTrumpet.UI.ViewModels
 {
@@ -22,6 +22,7 @@ namespace EarTrumpet.UI.ViewModels
         {
             _settings = settings;
             Title = Properties.Resources.MouseSettingsPageText;
+            Subtitle = "Adjust scroll wheel and mouse behavior.";
             Glyph = "\xE962";
         }
     }

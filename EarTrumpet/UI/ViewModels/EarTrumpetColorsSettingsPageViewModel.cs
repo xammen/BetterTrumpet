@@ -465,6 +465,7 @@ namespace EarTrumpet.UI.ViewModels
         {
             _settings = settings;
             Title = "Appearance";
+            Subtitle = "Customize how BetterTrumpet looks on your desktop.";
             Glyph = "\xE790"; // Paintbrush icon
 
             AvailableThemes = new ObservableCollection<ColorTheme>(ThemeRegistry.AllThemes);
