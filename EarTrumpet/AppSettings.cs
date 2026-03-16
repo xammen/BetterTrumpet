@@ -1,3 +1,4 @@
+using EarTrumpet.DataModel;
 using EarTrumpet.DataModel.Storage;
 using EarTrumpet.Interop.Helpers;
 using System;
@@ -464,6 +465,26 @@ namespace EarTrumpet
         {
             get => _settings.Get("MediaPopupIsExpanded", false);
             set => _settings.Set("MediaPopupIsExpanded", value);
+        }
+
+        // Auto-check for updates
+        public bool AutoCheckForUpdates
+        {
+            get => _settings.Get("AutoCheckForUpdates", true);
+            set => _settings.Set("AutoCheckForUpdates", value);
+        }
+
+        /// <summary>
+        /// Which updates to notify about: All (patch+minor+major), MinorAndMajor, MajorOnly, None.
+        /// </summary>
+        public UpdateChannel UpdateNotifyChannel
+        {
+            get
+            {
+                var val = _settings.Get("UpdateNotifyChannel", (int)UpdateChannel.All);
+                return Enum.IsDefined(typeof(UpdateChannel), val) ? (UpdateChannel)val : UpdateChannel.All;
+            }
+            set => _settings.Set("UpdateNotifyChannel", (int)value);
         }
 
         // Run at Windows startup

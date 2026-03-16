@@ -30,6 +30,7 @@ namespace EarTrumpet.UI.Helpers
         private readonly DeviceCollectionViewModel _collection;
         private readonly AppSettings _settings;
         private bool _isMouseOver;
+        private bool _showUpdateBadge;
         private string _hash;
         private IconKind _kind;
 
@@ -64,10 +65,10 @@ namespace EarTrumpet.UI.Helpers
                 _volumeIconGenerator = new VolumeIconGenerator(iconSize, 16);
                 Trace.WriteLine($"TaskbarIconSource: VolumeIconGenerator created with {_volumeIconGenerator.FrameCount} frames");
 
-                // Use Render priority for smooth animation
-                _animationTimer = new DispatcherTimer(DispatcherPriority.Render)
+                // Use Background priority so peak meters and UI input aren't starved
+                _animationTimer = new DispatcherTimer(DispatcherPriority.Background)
                 {
-                    Interval = TimeSpan.FromMilliseconds(50) // ~20 fps for smooth animation
+                    Interval = TimeSpan.FromMilliseconds(80) // ~12 fps — sufficient for tray icon, saves UI thread
                 };
                 _animationTimer.Tick += OnAnimationTick;
 
@@ -157,6 +158,20 @@ namespace EarTrumpet.UI.Helpers
             }
         }
 
+        public bool ShowUpdateBadge
+        {
+            get => _showUpdateBadge;
+            set
+            {
+                if (_showUpdateBadge != value)
+                {
+                    _showUpdateBadge = value;
+                    _hash = null; // Force icon refresh
+                    if (!_isAnimating) CheckForUpdate();
+                }
+            }
+        }
+
         public void OnMouseOverChanged(bool isMouseOver)
         {
             _isMouseOver = isMouseOver;
@@ -178,7 +193,7 @@ namespace EarTrumpet.UI.Helpers
                 _hash = nextHash;
                 using (var old = Current)
                 {
-                    Current = SelectAndLoadIcon(_kind);
+                    Current = ApplyUpdateBadge(SelectAndLoadIcon(_kind));
                     Changed?.Invoke(this);
                 }
             }
@@ -289,7 +304,8 @@ namespace EarTrumpet.UI.Helpers
             $"{(System.Windows.SystemParameters.HighContrast ? $"hc=true mouse={_isMouseOver} " : "")}" +
             $"dpi={WindowsTaskbar.Dpi} " +
             $"isSysLight={SystemSettings.IsSystemLightTheme} " +
-            $"isLegacy={_settings.UseLegacyIcon}";
+            $"isLegacy={_settings.UseLegacyIcon} " +
+            $"badge={_showUpdateBadge}";
 
         // Only fill part of the icon, so we can preserve the red X.
         private static double GetIconFillPercent(IconKind kind) => kind == IconKind.NoDevice ? 0.4 : 1;
@@ -303,6 +319,37 @@ namespace EarTrumpet.UI.Helpers
         {
             return IconHelper.ColorIcon(darkIcon, GetIconFillPercent(kind),
                 isMouseOver ? System.Windows.SystemColors.HighlightTextColor : System.Windows.SystemColors.WindowTextColor);
+        }
+
+        private Icon ApplyUpdateBadge(Icon icon)
+        {
+            if (!_showUpdateBadge || icon == null) return icon;
+
+            try
+            {
+                using (var bmp = icon.ToBitmap())
+                {
+                    using (var g = System.Drawing.Graphics.FromImage(bmp))
+                    {
+                        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                        int dotSize = Math.Max(4, bmp.Width / 4);
+                        int x = bmp.Width - dotSize - 1;
+                        int y = 1;
+                        using (var brush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(255, 220, 50, 50)))
+                        {
+                            g.FillEllipse(brush, x, y, dotSize, dotSize);
+                        }
+                    }
+                    var newIcon = System.Drawing.Icon.FromHandle(bmp.GetHicon());
+                    icon.Dispose();
+                    return newIcon;
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"TaskbarIconSource: Badge overlay failed — {ex.Message}");
+                return icon;
+            }
         }
 
         private static IconKind IconKindFromDeviceCollection(DeviceCollectionViewModel collectionViewModel)
