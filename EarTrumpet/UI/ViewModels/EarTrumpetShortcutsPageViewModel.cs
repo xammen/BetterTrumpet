@@ -1,4 +1,4 @@
-﻿using EarTrumpet.Interop.Helpers;
+using EarTrumpet.Interop.Helpers;
 
 namespace EarTrumpet.UI.ViewModels
 {
@@ -24,6 +24,7 @@ namespace EarTrumpet.UI.ViewModels
         public EarTrumpetShortcutsPageViewModel(AppSettings settings) : base(null)
         {
             Title = Properties.Resources.ShortcutsPageText;
+            Subtitle = "Assign global hotkeys to quickly control audio.";
             Glyph = "\xE765";
 
             OpenFlyoutHotkey = new HotkeyViewModel(settings.FlyoutHotkey, (newHotkey) => settings.FlyoutHotkey = newHotkey);
