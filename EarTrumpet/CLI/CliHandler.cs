@@ -121,6 +121,12 @@ namespace EarTrumpet.CLI
                     case "check-update":
                         return DispatchToUI(() => CheckUpdate());
 
+                    case "export-settings":
+                        return ExportSettings(args);
+
+                    case "import-settings":
+                        return ImportSettings(args);
+
                     default:
                         return Error($"unknown command: {cmd}");
                 }
@@ -605,6 +611,42 @@ namespace EarTrumpet.CLI
             {
                 return Error($"failed to apply profile: {ex.Message}");
             }
+        }
+
+        private string ExportSettings(List<string> args)
+        {
+            var settings = _getSettings();
+            if (settings == null) return Error("settings not available");
+
+            string filePath;
+            if (args.Count > 0)
+            {
+                filePath = args[0];
+            }
+            else
+            {
+                filePath = System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                    $"BetterTrumpet_Settings_{DateTime.Now:yyyy-MM-dd}.btsettings");
+            }
+
+            var success = DataModel.SettingsExportService.ExportToFile(settings, filePath);
+            return JsonConvert.SerializeObject(new { ok = success, path = filePath });
+        }
+
+        private string ImportSettings(List<string> args)
+        {
+            if (args.Count == 0) return Error("usage: import-settings <path>");
+
+            var filePath = args[0];
+            if (!System.IO.File.Exists(filePath))
+                return Error($"file not found: {filePath}");
+
+            var settings = _getSettings();
+            if (settings == null) return Error("settings not available");
+
+            var success = DataModel.SettingsExportService.ImportFromFile(settings, filePath);
+            return JsonConvert.SerializeObject(new { ok = success, path = filePath });
         }
 
         // ═══════════════════════════════════

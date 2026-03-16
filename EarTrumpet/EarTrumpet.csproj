@@ -237,9 +237,13 @@
     <Compile Include="Interop\Helpers\PipeClient.cs" />
     <Compile Include="DataModel\VolumeUndoService.cs" />
     <Compile Include="DataModel\UpdateService.cs" />
+    <Compile Include="DataModel\SettingsExportService.cs" />
     <Compile Include="UI\ViewModels\OnboardingViewModel.cs" />
     <Compile Include="UI\Views\OnboardingWindow.xaml.cs">
       <DependentUpon>OnboardingWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Views\ChangelogWindow.xaml.cs">
+      <DependentUpon>ChangelogWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\Helpers\UndoRedoHelper.cs" />
     <Compile Include="UI\Helpers\CommandPaletteHelper.cs" />
@@ -523,6 +527,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\Views\OnboardingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Views\ChangelogWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

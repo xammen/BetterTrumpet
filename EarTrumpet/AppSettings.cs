@@ -16,6 +16,7 @@ namespace EarTrumpet
         public event Action SettingsHotkeyTyped;
         public event Action AbsoluteVolumeUpHotkeyTyped;
         public event Action AbsoluteVolumeDownHotkeyTyped;
+        public event Action SwitchDeviceHotkeyTyped;
         public event Action CustomSliderColorsChanged;
 
         private ISettingsBag _settings = StorageFactory.GetSettings();
@@ -40,6 +41,7 @@ namespace EarTrumpet
             HotkeyManager.Current.Register(SettingsHotkey);
             HotkeyManager.Current.Register(AbsoluteVolumeUpHotkey);
             HotkeyManager.Current.Register(AbsoluteVolumeDownHotkey);
+            HotkeyManager.Current.Register(SwitchDeviceHotkey);
 
             HotkeyManager.Current.KeyPressed += (hotkey) =>
             {
@@ -67,6 +69,11 @@ namespace EarTrumpet
                 {
                     Trace.WriteLine("AppSettings AbsoluteVolumeDownHotkeyTyped");
                     AbsoluteVolumeDownHotkeyTyped?.Invoke();
+                }
+                else if (hotkey.Equals(SwitchDeviceHotkey))
+                {
+                    Trace.WriteLine("AppSettings SwitchDeviceHotkeyTyped");
+                    SwitchDeviceHotkeyTyped?.Invoke();
                 }
             };
         }
@@ -123,6 +130,17 @@ namespace EarTrumpet
                 HotkeyManager.Current.Unregister(AbsoluteVolumeDownHotkey);
                 _settings.Set("AbsoluteVolumeDownHotkey", value);
                 HotkeyManager.Current.Register(AbsoluteVolumeDownHotkey);
+            }
+        }
+
+        public HotkeyData SwitchDeviceHotkey
+        {
+            get => _settings.Get("SwitchDeviceHotkey", new HotkeyData { });
+            set
+            {
+                HotkeyManager.Current.Unregister(SwitchDeviceHotkey);
+                _settings.Set("SwitchDeviceHotkey", value);
+                HotkeyManager.Current.Register(SwitchDeviceHotkey);
             }
         }
 
@@ -344,6 +362,13 @@ namespace EarTrumpet
         {
             get => _settings.Get("ActiveThemeName", "");
             set => _settings.Set("ActiveThemeName", value);
+        }
+
+        // Last seen version (for changelog display)
+        public string LastSeenVersion
+        {
+            get => _settings.Get("LastSeenVersion", "");
+            set => _settings.Set("LastSeenVersion", value);
         }
 
         // Extended theme colors (Window Background, Text, Accent Glow)
