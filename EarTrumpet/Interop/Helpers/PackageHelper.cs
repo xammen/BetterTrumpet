@@ -36,15 +36,11 @@ namespace EarTrumpet.Interop.Helpers
             {
                 return Package.Current.Id != null;
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                System.Diagnostics.Trace.WriteLine($"AppExtensions HasIdentity Failed: {ex.Message}");
-
-                // We do not expect this to occur in production when the app is packaged.
-                // Async so that the HasIdentity bit is properly set.
-#if !DEBUG
-                System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke((Action)(() => Diagnosis.ErrorReporter.LogWarning(ex)));
-#endif
+                // Expected in non-packaged mode (portable / classic installer).
+                // Not an error — just means we're not running as MSIX.
+                System.Diagnostics.Trace.WriteLine("PackageHelper: No package identity (portable/installer mode)");
                 return false;
             }
         }
