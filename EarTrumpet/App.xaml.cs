@@ -56,7 +56,11 @@ namespace EarTrumpet
             // STARTUP PHASE 1: Core (fatal if fails — crash report + exit)
             // ══════════════════════════════════════════════════════════════
 
-            Exit += (_, __) => IsShuttingDown = true;
+            Exit += (_, __) =>
+            {
+                IsShuttingDown = true;
+                ErrorReporter.Shutdown(); // Flush Sentry events before exit
+            };
             HasIdentity = PackageHelper.CheckHasIdentity();
             HasDevIdentity = PackageHelper.HasDevIdentity();
             PackageVersion = PackageHelper.GetVersion(HasIdentity);
