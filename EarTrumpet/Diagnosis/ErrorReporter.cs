@@ -48,6 +48,13 @@ namespace EarTrumpet.Diagnosis
 
             // Initialize Sentry if user has opted in (GDPR)
             InitializeSentry();
+
+            // Re-initialize when user toggles telemetry consent in Settings
+            settings.TelemetryConsentChanged += () =>
+            {
+                Trace.WriteLine($"Sentry: Telemetry consent changed to {settings.IsTelemetryEnabled}");
+                InitializeSentry();
+            };
         }
 
         /// <summary>
