@@ -340,41 +340,51 @@ namespace EarTrumpet.UI.ViewModels
         {
             if (!_settings.UseDynamicAlbumArtTheme || !_settings.UseCustomSliderColors) return;
 
-            try
+            // GetCurrentThumbnail() blocks for up to 6s (SMTC async waits) — must run off UI thread
+            System.Threading.Tasks.Task.Run(() =>
             {
-                var thumbnail = MediaSessionService.Instance.GetCurrentThumbnail();
-                if (thumbnail == null) return;
+                try
+                {
+                    var thumbnail = MediaSessionService.Instance.GetCurrentThumbnail();
+                    if (thumbnail == null) return;
 
-                var dominant = GetDominantColorFromBitmap(thumbnail);
-                if (dominant == Colors.Transparent) return;
+                    var dominant = GetDominantColorFromBitmap(thumbnail);
+                    if (dominant == Colors.Transparent) return;
 
-                // Create complementary colors from dominant
-                var hsv = ColorToHsv(dominant);
-                var lighter = HsvToColor(hsv.H, Math.Max(0.3, hsv.S * 0.6), Math.Min(1.0, hsv.V * 1.4));
-                var darker = HsvToColor(hsv.H, Math.Min(1.0, hsv.S * 1.2), hsv.V * 0.4);
-                var muted = HsvToColor(hsv.H, hsv.S * 0.5, hsv.V * 0.6);
+                    // Create complementary colors from dominant
+                    var hsv = ColorToHsv(dominant);
+                    var lighter = HsvToColor(hsv.H, Math.Max(0.3, hsv.S * 0.6), Math.Min(1.0, hsv.V * 1.4));
+                    var darker = HsvToColor(hsv.H, Math.Min(1.0, hsv.S * 1.2), hsv.V * 0.4);
+                    var muted = HsvToColor(hsv.H, hsv.S * 0.5, hsv.V * 0.6);
+                    var veryDark = HsvToColor(hsv.H, Math.Min(1.0, hsv.S * 0.8), hsv.V * 0.15);
+                    var textLight = HsvToColor(hsv.H, Math.Max(0.05, hsv.S * 0.15), Math.Min(1.0, hsv.V * 0.3 + 0.75));
 
-                // Apply as slider colors
-                SliderThumbColor = dominant;
-                SliderTrackFillColor = lighter;
-                SliderTrackBackgroundColor = darker;
-                PeakMeterColor = muted;
+                    // Apply on UI thread
+                    System.Windows.Application.Current?.Dispatcher?.BeginInvoke((Action)(() =>
+                    {
+                        try
+                        {
+                            SliderThumbColor = dominant;
+                            SliderTrackFillColor = lighter;
+                            SliderTrackBackgroundColor = darker;
+                            PeakMeterColor = muted;
 
-                // Also apply extended colors from album art
-                var veryDark = HsvToColor(hsv.H, Math.Min(1.0, hsv.S * 0.8), hsv.V * 0.15);
-                var textLight = HsvToColor(hsv.H, Math.Max(0.05, hsv.S * 0.15), Math.Min(1.0, hsv.V * 0.3 + 0.75));
-                _settings.WindowBackgroundColor = veryDark;
-                _settings.TextColor = textLight;
-                _settings.AccentGlowColor = lighter;
-                RaisePropertyChanged(nameof(WindowBackgroundColor));
-                RaisePropertyChanged(nameof(TextColorValue));
-                RaisePropertyChanged(nameof(AccentGlowColor));
-                ApplyExtendedThemeColors();
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine($"EarTrumpetColorsSettingsPageViewModel: Album art theme tick failed - {ex.Message}");
-            }
+                            _settings.WindowBackgroundColor = veryDark;
+                            _settings.TextColor = textLight;
+                            _settings.AccentGlowColor = lighter;
+                            RaisePropertyChanged(nameof(WindowBackgroundColor));
+                            RaisePropertyChanged(nameof(TextColorValue));
+                            RaisePropertyChanged(nameof(AccentGlowColor));
+                            ApplyExtendedThemeColors();
+                        }
+                        catch (Exception ex) { Trace.WriteLine($"Album art theme UI update failed - {ex.Message}"); }
+                    }));
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"EarTrumpetColorsSettingsPageViewModel: Album art theme tick failed - {ex.Message}");
+                }
+            });
         }
 
         private Color GetDominantColorFromBitmap(System.Windows.Media.Imaging.BitmapImage bitmap)

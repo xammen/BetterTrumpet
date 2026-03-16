@@ -30,6 +30,7 @@ namespace EarTrumpet.UI.Views
         private double _collapsedTop;
         private BitmapImage _cachedThumbnail;
         private Color _cachedDominantColor = Color.FromRgb(107, 77, 230);
+        private string _cachedTitle;
         private CancellationTokenSource _thumbnailCts;
         private CancellationTokenSource _trackChangeCts;
         private CancellationTokenSource _albumArtCts;
@@ -188,6 +189,7 @@ namespace EarTrumpet.UI.Views
         private void PlayTrackChangeAnimation()
         {
             var outStoryboard = (Storyboard)FindResource("TrackChangeOut");
+            outStoryboard.Completed -= OnTrackChangeOutCompleted; // Prevent duplicate handlers
             outStoryboard.Completed += OnTrackChangeOutCompleted;
             outStoryboard.Begin(this, true);
         }
@@ -584,8 +586,30 @@ namespace EarTrumpet.UI.Views
 
         private void UpdateTitle()
         {
-            var title = MediaSessionService.Instance.GetCurrentMediaInfo();
-            MarqueeText.Text = string.IsNullOrEmpty(title) ? "No media playing" : title;
+            // Show cached title immediately if available
+            if (!string.IsNullOrEmpty(_cachedTitle))
+            {
+                MarqueeText.Text = _cachedTitle;
+            }
+
+            // Fetch fresh title on background thread (GetCurrentMediaInfo blocks up to 100ms)
+            Task.Run(() =>
+            {
+                try
+                {
+                    var title = MediaSessionService.Instance.GetCurrentMediaInfo();
+                    Dispatcher.BeginInvoke((Action)(() =>
+                    {
+                        _cachedTitle = string.IsNullOrEmpty(title) ? "No media playing" : title;
+                        MarqueeText.Text = _cachedTitle;
+                        _marqueePosition = 0;
+                        MarqueeText.SetValue(System.Windows.Controls.Canvas.LeftProperty, 0.0);
+                        _cachedTextWidth = -1;
+                    }));
+                }
+                catch { }
+            });
+
             _marqueePosition = 0;
             MarqueeText.SetValue(System.Windows.Controls.Canvas.LeftProperty, 0.0);
             _cachedTextWidth = -1;
