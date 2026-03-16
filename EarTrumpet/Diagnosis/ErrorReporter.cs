@@ -17,8 +17,7 @@ namespace EarTrumpet.Diagnosis
             Trace.Listeners.Clear();
             Trace.Listeners.Add(_listener);
 
-            // Bugsnag telemetry is disabled for BetterTrumpet fork
-            // The original EarTrumpet API key is not available
+            // Telemetry: Sentry will be initialized here in v3 (Phase 3)
         }
 
         public void DisplayDiagnosticData()
