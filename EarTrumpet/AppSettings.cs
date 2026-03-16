@@ -165,13 +165,19 @@ namespace EarTrumpet
             set => _settings.Set("hasShownFirstRun", value);
         }
 
+        public event Action TelemetryConsentChanged;
+
         public bool IsTelemetryEnabled
         {
             get
             {
                 return _settings.Get("IsTelemetryEnabled", IsTelemetryEnabledByDefault());
             }
-            set => _settings.Set("IsTelemetryEnabled", value);
+            set
+            {
+                _settings.Set("IsTelemetryEnabled", value);
+                TelemetryConsentChanged?.Invoke();
+            }
         }
 
         public bool UseLogarithmicVolume
