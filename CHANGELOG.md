@@ -1,196 +1,231 @@
 # Changelog
 
+## 3.0.0.0
+
+### ✦ Onboarding premium
+- Assistant de configuration en 5 pages (Bienvenue, Audio, Apparence, Confidentialité, Prêt)
+- Prévisualisation audio en temps réel, choix de périphérique, personnalisation du thème
+- Animations décalées, barres de progression, confettis
+
+### ✦ Contrôle audio
+- Ajout du système undo/redo — Ctrl+Z / Ctrl+Y sur les volumes, mute et profils
+- Ajout du raccourci de changement rapide de périphérique
+- Ajout des profils volume (sauvegarder, restaurer, exporter)
+- Ajout du pin flyout — garder le flyout ouvert en permanence
+
+### ✦ Expérience
+- Refonte complète du moteur de thèmes (7 canaux de couleur)
+- Ajout du media popup au survol de l'icône tray
+- Ajout des notifications de mise à jour (API GitHub, badge tray, filtre de canal)
+- Fenêtre « Quoi de neuf » avec effet shimmer
+- Ajout de l'export/import de tous les réglages
+- Refonte de la page Apparence — Visual First avec onglets, preview hero, grille de thèmes
+- Refonte UX des paramètres — rythme, aération, cohérence
+- Refonte de la page À propos — carte télémétrie, résumé santé
+
+### ✦ Sous le capot
+- CLI avec 19 commandes via named pipe IPC
+- Scaffolding palette de commandes (pour futur plugin Raycast)
+- Crash reporting Sentry avec opt-in GDPR (réinitialisation en temps réel)
+- Health monitoring — mémoire, handles GDI/User, uptime
+- Logging structuré avec rotation (5 fichiers × 5 Mo)
+- Démarrage en 3 phases — Core/UI/Features avec isolation
+- Mode éco (économie batterie)
+- Animations configurables (vitesse et FPS)
+
+---
+
 ## 2.3.0.0
-- Added setting to turn on/off ability to change volume with the scroll wheel anywhere (thanks @Tester798!)
-- Added setting to turn on/off ability to change volume with the scroll wheel when hovering over the EarTrumpet icon (thanks @Tester798!)
-- Added new community settings area
-- Added new community setting to turn on/off use of a logarithmic volume scale (thanks @yonatan-mitmit!)
-- Added legacy shortcuts to the context menu pointing to [App volume and device preferences] / [Volume mixer]
-- Added ability to use the Windows key in shortcuts (thanks @iamevn!)
-- Added linguistic display name sorting for audio devices (thanks @Tester798!)
-- Added a workaround for Windows Search (CortanaUI) showing a default asset (X) icon
-- Fixed an issue where installation of EarTrumpet via AppInstaller would fail if the Visual C++ libs package was not installed
-- Fixed an issue where EarTrumpet tooltips were not updating live while scrolling the mouse wheel on Windows 10 (thanks @krlvm!)
-- Forced EarTrumpet to render in software-only mode to keep it off power hungry GPUs.
-- Improved the flyout animation (thanks @krlvm!)
+- Ajout d'un réglage pour activer/désactiver le changement de volume avec la molette n'importe où (merci @Tester798 !)
+- Ajout d'un réglage pour activer/désactiver le changement de volume avec la molette au survol de l'icône EarTrumpet (merci @Tester798 !)
+- Ajout d'une nouvelle zone de réglages communautaires
+- Ajout d'un réglage communautaire pour activer/désactiver l'échelle de volume logarithmique (merci @yonatan-mitmit !)
+- Ajout de raccourcis legacy dans le menu contextuel vers [Préférences volume et périphériques] / [Mélangeur de volume]
+- Ajout de la possibilité d'utiliser la touche Windows dans les raccourcis (merci @iamevn !)
+- Ajout du tri linguistique des noms de périphériques audio (merci @Tester798 !)
+- Ajout d'un contournement pour Windows Search (CortanaUI) affichant une icône par défaut (X)
+- Correction d'un problème où l'installation d'EarTrumpet via AppInstaller échouait si les libs Visual C++ n'étaient pas installées
+- Correction d'un problème où les infobulles EarTrumpet ne se mettaient pas à jour en temps réel lors du défilement à la molette sur Windows 10 (merci @krlvm !)
+- Forçage du rendu logiciel uniquement pour éviter les GPU énergivores
+- Amélioration de l'animation du flyout (merci @krlvm !)
 
 ## 2.2.2.0
-- Fixed an issue with the volume changing when scrolling in certain scenarios (e.g. virtual reality)
-- Updated Japanese translations
-- Cleaned up old language resources
+- Correction d'un problème de changement de volume lors du défilement dans certains scénarios (ex : réalité virtuelle)
+- Mise à jour des traductions japonaises
+- Nettoyage des anciennes ressources de langue
 
 ## 2.2.1.0
-- Fixed touch context menu behavior on Windows 11 machines with future "ShyTaskbar" enabled
-- Fixed appearance of flyout on Windows 10 with light mode enabled (thanks @xmha97)
-- Fixed flyout animation not respecting correct system settings on Windows 10 and Windows 11
-- Upgraded GIF playback library to reduce memory usage (thanks @rocksdanister)
-- Reduced use of a workaround for Acrylic slowdowns for most builds of Windows (thanks @krlvm)
-- Updated translations from Crowdin contributors
-- Updated Microsoft Store Product Detail Page metadata to correct localization issues
+- Correction du comportement du menu contextuel tactile sur Windows 11 avec le futur « ShyTaskbar » activé
+- Correction de l'apparence du flyout sur Windows 10 avec le mode clair activé (merci @xmha97)
+- Correction de l'animation du flyout ne respectant pas les bons réglages système sur Windows 10 et Windows 11
+- Mise à jour de la bibliothèque de lecture GIF pour réduire l'utilisation mémoire (merci @rocksdanister)
+- Réduction de l'utilisation d'un contournement pour les ralentissements Acrylic sur la plupart des builds de Windows (merci @krlvm)
+- Mise à jour des traductions par les contributeurs Crowdin
+- Mise à jour des métadonnées de la page produit Microsoft Store pour corriger les problèmes de localisation
 
 ## 2.2.0.0
-- Added hotkeys to control volume of multiple devices at once (thanks @Taknok!)
-- Adjusted how application data is stored to increase reliability
-- Fixed crash that could occur when the flyout Acrylic was toggled on/off in certain scenarios
-- Fixed an issue with the expanded flyout becoming too tall on Windows 11
-- Updated Japanese, Greek, Croatian, and Russian translations (thank you Crowdin contributors!)
+- Ajout de raccourcis clavier pour contrôler le volume de plusieurs périphériques à la fois (merci @Taknok !)
+- Ajustement du stockage des données de l'application pour améliorer la fiabilité
+- Correction d'un crash qui pouvait survenir en activant/désactivant l'Acrylic du flyout dans certains scénarios
+- Correction d'un problème avec le flyout étendu devenant trop grand sur Windows 11
+- Mise à jour des traductions japonaises, grecques, croates et russes (merci aux contributeurs Crowdin !)
 
 ## 2.1.10.0
-- Flyout now remembers if it was expanded/collapsed between launches (thanks @Tester798!)
-- Fixed an issue with the flyout open animation behaving erratically with some mice
-- Fixed an issue where devices without certain characteristics would interfere with mute and other actions
-- Fixed an issue with device names not appearing correctly if they contained underscores
-- Fixed an issue with the flyout opening outside the working area in additional cases
-- Adjusted the flyout position from the edge of the screen to match Windows 11 look and feel
-- Removed solid color plating behind application icons
-- Updated Finnish, German, and other translations
+- Le flyout se souvient maintenant s'il était étendu/réduit entre les lancements (merci @Tester798 !)
+- Correction d'un problème avec l'animation d'ouverture du flyout se comportant de manière erratique avec certaines souris
+- Correction d'un problème où des périphériques sans certaines caractéristiques interféraient avec le mute et d'autres actions
+- Correction d'un problème avec les noms de périphériques ne s'affichant pas correctement s'ils contenaient des underscores
+- Correction d'un problème avec le flyout s'ouvrant en dehors de la zone de travail dans des cas supplémentaires
+- Ajustement de la position du flyout par rapport au bord de l'écran pour correspondre au look Windows 11
+- Suppression du fond de couleur unie derrière les icônes d'application
+- Mise à jour des traductions finnois, allemand et autres
 
 ## 2.1.9.0
-- Added basic support for Windows 11
-- Added/updated Italian, Hungarian, Spanish, Portuguese, Turkish, Chinese, Norwegian, Arabic, Czech, Polish, Swedish, Romanian, and Russian translations
-- Fixed an issue with the flyout opening outside the working area
-- Fixed an issue with slow window movement when dragging
+- Ajout du support basique de Windows 11
+- Ajout/mise à jour des traductions italien, hongrois, espagnol, portugais, turc, chinois, norvégien, arabe, tchèque, polonais, suédois, roumain et russe
+- Correction d'un problème avec le flyout s'ouvrant en dehors de la zone de travail
+- Correction d'un problème avec le déplacement lent des fenêtres lors du glisser
 
 ## 2.1.8.0
-- Added Hungarian, Swedish, Korean, and Tamil translations
-- Updated Japanese translations
-- Added a fluent icon
-- Fixed an issue with missing Czech and Afrikaans translations 
-- Fixed an issue with icons not appearing for packaged desktop applications (e.g. Microsoft Flight Simulator)
-- Fixed an issue with the [Windows Legacy > Sound settings] menu item opening the wrong panel
-- Fixed an issue with notification area icon handling
-- Fixed an issue that prevented the use of system keys in keyboard shortcuts
+- Ajout des traductions hongrois, suédois, coréen et tamoul
+- Mise à jour des traductions japonaises
+- Ajout d'une icône fluent
+- Correction d'un problème avec les traductions tchèques et afrikaans manquantes
+- Correction d'un problème avec les icônes n'apparaissant pas pour les applications de bureau packagées (ex : Microsoft Flight Simulator)
+- Correction d'un problème avec l'élément de menu [Windows Legacy > Paramètres de son] ouvrant le mauvais panneau
+- Correction d'un problème de gestion des icônes de la zone de notification
+- Correction d'un problème empêchant l'utilisation des touches système dans les raccourcis clavier
 
 ## 2.1.7.0
-- Fixed crash when retrieving region info for GDPR compliance on some machines
+- Correction d'un crash lors de la récupération des infos de région pour la conformité RGPD sur certaines machines
 
 ## 2.1.6.0
-- Added ability to turn on/off crash reporting
-- Added missing translations
-- Added privacy policy link
-- Fixed an icon display issue with libmpv-based apps (e.g. Plex)
-- Fixed an issue that made volume sliders difficult to manipulate with a mouse at high DPI
-- Restored pre-2.1.2.0 tray icon behavior until we can address icon duplication issues
+- Ajout de la possibilité d'activer/désactiver le rapport de crash
+- Ajout de traductions manquantes
+- Ajout d'un lien vers la politique de confidentialité
+- Correction d'un problème d'affichage d'icône avec les apps basées sur libmpv (ex : Plex)
+- Correction d'un problème rendant les sliders de volume difficiles à manipuler à la souris en haute résolution
+- Restauration du comportement de l'icône tray pré-2.1.2.0 en attendant de résoudre les problèmes de duplication d'icônes
 
 ## 2.1.5.0
-- Fixed an issue with line in icon not appearing
-- Fixed an issue with context menu submenus disappearing unexpectedly
+- Correction d'un problème avec l'icône « line in » n'apparaissant pas
+- Correction d'un problème avec les sous-menus contextuels disparaissant de manière inattendue
 
 ## 2.1.4.0
-- Fixed various bugs with the search textbox in Settings
-- Fixed tray icon disappearing when the Windows Shell crashes/restarts
-- Fixed master volume slider dimming on mute
-- Fixed flyout track color in light theme
-- Fixed mute icon when at zero volume
-- Added mixer window width constraints when a high number of audio devices are present
-- Added Slovenian language support
-- Added hover states to buttons
-- Additional crash bugfixes
+- Correction de divers bugs avec la zone de recherche dans les Paramètres
+- Correction de la disparition de l'icône tray quand le Shell Windows crash/redémarre
+- Correction de l'atténuation du slider de volume principal au mute
+- Correction de la couleur de la piste du flyout en thème clair
+- Correction de l'icône mute à volume zéro
+- Ajout de contraintes de largeur de la fenêtre mélangeur quand un grand nombre de périphériques audio sont présents
+- Ajout du support de la langue slovène
+- Ajout d'états de survol sur les boutons
+- Corrections de crash supplémentaires
 
 ## 2.1.3.0
-- Fixed a crash causing EarTrumpet disappear on startup
-- Fixed various potential leaks
-- Added a help dialog to assist when EarTrumpet can't start due to broken fonts
+- Correction d'un crash causant la disparition d'EarTrumpet au démarrage
+- Correction de diverses fuites potentielles
+- Ajout d'un dialogue d'aide en cas de polices cassées empêchant le démarrage
 
 ## 2.1.2.0
-- Fixed icon handle leak that caused a crash
-- Fixed hotkeys not being properly unregistered
-- Fixed arrow keys changing the default device volume
-- Fixed High Contrast theme colors
-- Fixed settings window covering the Taskbar when maximized
-- Tray icon should remain in place after updates going forward
-- Tray and app icons will now scale correctly
-- Tray icon supports scrolling without opening the flyout
-- Removed unwanted metadata from telemetry
+- Correction d'une fuite de handle d'icône causant un crash
+- Correction des raccourcis clavier non correctement désenregistrés
+- Correction des touches fléchées changeant le volume du périphérique par défaut
+- Correction des couleurs du thème Contraste élevé
+- Correction de la fenêtre des paramètres couvrant la barre des tâches en maximisé
+- L'icône tray devrait rester en place après les mises à jour désormais
+- Les icônes tray et app se mettent correctement à l'échelle
+- L'icône tray supporte le défilement sans ouvrir le flyout
+- Suppression de métadonnées indésirables de la télémétrie
 
 ## 2.1.1.0
-- Fixed a crash when parsing numbers on non-English systems
+- Correction d'un crash lors du parsing de nombres sur les systèmes non-anglais
 
 ## 2.1.0.0
-- Added new settings experience
-- Added support for Windows light mode
-- Added keyboard shortcuts for opening the mixer and settings windows
-- Reduced clutter in the context menu
-- Fixed various display issues when using RTL writing systems
-- Changed app naming behavior to align with Windows
-- Added mute text to the notification area icon
-- Added 'Open sound settings' link to context menu
-- Added text to notification area icon tooltip to indicate mute state
-- Re-added flyout window shadow and borders
-- Added additional telemetry points
-- Removed Arabic, Hungarian, Korean, Norwegian Bokm�l, Portuguese, Romanian, and Turkish until we complete localization
-- Additional bugfixes
+- Ajout d'une nouvelle expérience de paramètres
+- Ajout du support du mode clair Windows
+- Ajout de raccourcis clavier pour ouvrir les fenêtres mélangeur et paramètres
+- Réduction de l'encombrement du menu contextuel
+- Correction de divers problèmes d'affichage avec les systèmes d'écriture RTL
+- Changement du comportement de nommage des apps pour s'aligner avec Windows
+- Ajout du texte mute à l'icône de la zone de notification
+- Ajout du lien « Ouvrir les paramètres de son » dans le menu contextuel
+- Ajout de texte dans l'infobulle de l'icône pour indiquer l'état mute
+- Ré-ajout de l'ombre et des bordures de la fenêtre flyout
+- Ajout de points de télémétrie supplémentaires
+- Suppression de l'arabe, hongrois, coréen, norvégien bokmål, portugais, roumain et turc en attendant la fin de la localisation
+- Corrections de bugs supplémentaires
 
 ## 2.0.8.0
-- Changed grouping behavior to key off app install path vs. executable name
-- Disabled flyout window blur when not visible to ensure it doesn't appear in task switcher
-- Fixed an issue where the Enhancements tab was missing in playback devices dialog
-- Fixed an issue where the flyout was too tall when the taskbar is configured to auto-hide
-- Fixed an issue where disabled or unplugged devices would unexpectedly appear
-- Fixed a crash when no default audio endpoint was present
-- Fixed a crash when right-clicking an audio session after moving it
+- Changement du comportement de regroupement pour se baser sur le chemin d'installation vs. le nom de l'exécutable
+- Désactivation du flou de la fenêtre flyout quand elle n'est pas visible pour éviter qu'elle apparaisse dans l'alt-tab
+- Correction d'un problème où l'onglet Améliorations manquait dans le dialogue des périphériques de lecture
+- Correction d'un problème où le flyout était trop grand quand la barre des tâches est en masquage auto
+- Correction d'un problème où les périphériques désactivés ou débranchés apparaissaient de manière inattendue
+- Correction d'un crash quand aucun endpoint audio par défaut n'était présent
+- Correction d'un crash lors du clic droit sur une session audio après l'avoir déplacée
 
 ## 2.0.7.0
-- Added additional support for high contrast themes
-- Added per-monitor DPI support
-- Added internal diagnostic logging buffer limit
-- Disabled Alt+Space on the flyout window
-- Fixed a rendering issue when the DPI was greater than 100% and there were more devices than would fit in the flyout without a scrollbar
-- Fixed a rendering issue where the Notification Area icon becomes blurry at DPIs geater than 100%
-- Fixed the icon and name of recording devices in 'Listen' mode
-- Fixed Notification Area icon scaling
-- Fixed overflow flyout at greater than 100% DPI
+- Ajout du support supplémentaire des thèmes contraste élevé
+- Ajout du support DPI par moniteur
+- Ajout d'une limite de tampon de logging de diagnostic interne
+- Désactivation d'Alt+Espace sur la fenêtre flyout
+- Correction d'un problème de rendu quand le DPI était supérieur à 100% et qu'il y avait plus de périphériques que ce que le flyout pouvait afficher sans scrollbar
+- Correction d'un problème de rendu où l'icône de la zone de notification devenait floue au-dessus de 100% de DPI
+- Correction de l'icône et du nom des périphériques d'enregistrement en mode « Écoute »
+- Correction de la mise à l'échelle de l'icône de la zone de notification
+- Correction du flyout de débordement au-dessus de 100% de DPI
 
 ## 2.0.6.0
-- Fixed an issue that affected localization on non-English systems
+- Correction d'un problème affectant la localisation sur les systèmes non-anglais
 
 ## 2.0.5.0
-- Fixed System Sounds icon on ARM64
-- High Contrast colors updated
-- Added collection of debug information when device enumeration fails
+- Correction de l'icône Sons système sur ARM64
+- Mise à jour des couleurs Contraste élevé
+- Ajout de la collecte d'infos de debug quand l'énumération des périphériques échoue
 
 ## 2.0.4.0
-- Scoped the mouse wheel scrolling to only over the Notification Area icon.
-- Added support for RS3.
-- Fixed a bug that caused the flyout to show 'It doesn't look like you have any playback devices.' when removing the default device.
-- Fixed a crash during adding/removing devices.
-- Removed non-fatal errors from telemetry.
+- Limitation du défilement à la molette uniquement au-dessus de l'icône de la zone de notification
+- Ajout du support de RS3
+- Correction d'un bug qui affichait « Il n'y a aucun périphérique de lecture » lors de la suppression du périphérique par défaut
+- Correction d'un crash lors de l'ajout/suppression de périphériques
+- Suppression des erreurs non-fatales de la télémétrie
 
 ## 2.0.3.0
-- Fixed an issue with certain apps (e.g. Sea of Thieves) not appearing correctly
-- Added additional languages (Arabic, Spanish, Hungarian, Korean, Turkish, and Ukrainian)
+- Correction d'un problème avec certaines apps (ex : Sea of Thieves) ne s'affichant pas correctement
+- Ajout de langues supplémentaires (arabe, espagnol, hongrois, coréen, turc et ukrainien)
 
 ## 2.0.2.0
-- Changes to telemetry 
+- Changements de télémétrie
 
 ## 2.0.1.0
-- Fixed a crash when a device is quickly added/removed
-- Fixed a crash with multi-process audio sessions
-- Fixed a crash launching web links
-- Fixed a crash when closing EarTrumpet windows
-- Fixed a crash when expanding/collapsing the main window
-- Fixed a crash when Taskbar auto-hide is in use
-- Fixed a crash when the registry has invalid personalization data
-- Fixed a crash when calling application data storage APIs
+- Correction d'un crash lors de l'ajout/suppression rapide d'un périphérique
+- Correction d'un crash avec les sessions audio multi-processus
+- Correction d'un crash lors du lancement de liens web
+- Correction d'un crash à la fermeture des fenêtres EarTrumpet
+- Correction d'un crash lors de l'expansion/réduction de la fenêtre principale
+- Correction d'un crash quand le masquage auto de la barre des tâches est activé
+- Correction d'un crash quand le registre contient des données de personnalisation invalides
+- Correction d'un crash lors de l'appel aux APIs de stockage de données de l'application
 
 ## 2.0.0.0
-- Added middle click on notification area icon to mute
-- Added ability to use mouse wheel to change device volume when window is open
-- Added multi-channel peak metering
-- Added ability to move apps between devices
-- Added ability to view multiple devices
-- Added volume mixer window
-- Enhanced app session grouping
-- Enhanced keyboarding
-- Added keyboard shortcut to open flyout
-- Added support for Windows light/dark mode
-- Added Sounds, Recording, etc. links to context menu
-- Enhanced animations and detail work
-- Additional fixes for RTL, Accessibility, and apps without icons
+- Ajout du clic milieu sur l'icône de la zone de notification pour couper le son
+- Ajout de la possibilité d'utiliser la molette pour changer le volume quand la fenêtre est ouverte
+- Ajout du peak metering multi-canaux
+- Ajout de la possibilité de déplacer les apps entre périphériques
+- Ajout de la possibilité de voir plusieurs périphériques
+- Ajout de la fenêtre mélangeur de volume
+- Amélioration du regroupement de sessions d'apps
+- Amélioration de la navigation clavier
+- Ajout d'un raccourci clavier pour ouvrir le flyout
+- Ajout du support des modes clair/sombre de Windows
+- Ajout des liens Sons, Enregistrement, etc. dans le menu contextuel
+- Amélioration des animations et des détails
+- Corrections supplémentaires pour RTL, accessibilité et apps sans icônes
 
 ## 1.5.3.0
-- Improved slider performance
-- Fixed Acrylic Blur compatibility for Windows 10 1803
+- Amélioration des performances des sliders
+- Correction de la compatibilité Acrylic Blur pour Windows 10 1803
 
 ## 1.5.2.0
 
@@ -209,40 +244,40 @@
 ## 1.4.0.0
 
 ## 1.3.2.0
-- Fixed changing audio devices in Windows 10 (RS1)
+- Correction du changement de périphériques audio dans Windows 10 (RS1)
 
 ## 1.3.1.0
-- Fixed DWM scaling issue where window appeared in the wrong position
-- Fixed UI issues when no audio devices found
-- Fixed changing audio devices in Windows 10 (TH1) and Windows 10 November Update (TH2)
-- Fixed multiple sessions not appearing for some applications
-- Added company metadata for Task Manager
+- Correction d'un problème de mise à l'échelle DWM où la fenêtre apparaissait à la mauvaise position
+- Correction de problèmes d'interface quand aucun périphérique audio n'est trouvé
+- Correction du changement de périphériques audio dans Windows 10 (TH1) et Windows 10 November Update (TH2)
+- Correction de sessions multiples n'apparaissant pas pour certaines applications
+- Ajout des métadonnées de l'éditeur pour le Gestionnaire des tâches
 
 ## 1.3.0.0
-- Fixed Speech Runtime display
-- Fixed positioning when Taskbar auto-hide is enabled
-- Installer/uninstaller now checks if the app is running
-- Added ability to change default audio device (right-click the tray icon)
-- Added ability to mute apps/audio device
-- Added default audio device master volume slider
+- Correction de l'affichage du Speech Runtime
+- Correction du positionnement quand le masquage auto de la barre des tâches est activé
+- L'installateur/désinstallateur vérifie maintenant si l'app est en cours d'exécution
+- Ajout de la possibilité de changer le périphérique audio par défaut (clic droit sur l'icône tray)
+- Ajout de la possibilité de couper le son des apps/périphérique audio
+- Ajout du slider de volume principal du périphérique par défaut
 
 ## 1.2.0.0
-- Fixed issue with a number of apps not appearing in Ear Trumpet when using background audio services (e.g. iHeartRadio)
-- Fixed issue with a number of apps not appearing in Ear Trumpet when playing protected media (e.g. Netflix)
-- Fixed issue with apps not showing due to unexpected logo/icon paths (e.g. Skype Translator)
-- Added base localization to Ear Trumpet (defaults to English for now - feel free to provide translations as pull requests)
+- Correction d'un problème avec certaines apps n'apparaissant pas dans Ear Trumpet lors de l'utilisation de services audio en arrière-plan (ex : iHeartRadio)
+- Correction d'un problème avec certaines apps n'apparaissant pas dans Ear Trumpet lors de la lecture de médias protégés (ex : Netflix)
+- Correction d'un problème avec les apps ne s'affichant pas à cause de chemins de logo/icône inattendus (ex : Skype Translator)
+- Ajout de la localisation de base dans Ear Trumpet (anglais par défaut pour l'instant — n'hésitez pas à proposer des traductions via pull requests)
 
 ## 1.1.1.0
 
 ## 1.1.0.0
-- Fixed DPI scaling issue
-- Fixed Ear Trumpet not displaying correctly when the Taskbar was in a different location or not on the primary monitor
-- Initial fix for modern app missing extracted logo
-- Ear Trumpet will now only allow one open instance
-- GitHub readme updated with details and minimum versions
-- Installer no longer allows installs on Windows versions before Windows 10
-- Fixed issue with Windows 10 tablet mode
-- Fixed Ear Trumpet window not having the correct border and drop shadow 
+- Correction d'un problème de mise à l'échelle DPI
+- Correction d'Ear Trumpet ne s'affichant pas correctement quand la barre des tâches était à un autre emplacement ou pas sur le moniteur principal
+- Correction initiale pour les logos d'apps modernes manquants
+- Ear Trumpet n'autorisera désormais qu'une seule instance ouverte
+- Readme GitHub mis à jour avec les détails et versions minimales
+- L'installateur n'autorise plus l'installation sur les versions de Windows antérieures à Windows 10
+- Correction d'un problème avec le mode tablette de Windows 10
+- Correction de la fenêtre Ear Trumpet n'ayant pas la bordure et l'ombre correctes
 
 ## 1.0.0.0
-- Initial release
+- Version initiale
