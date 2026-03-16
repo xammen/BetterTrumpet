@@ -1,37 +1,163 @@
 # Changelog
 
-## 3.0.0.0
+```
+  ╔══════════════════════════════════════════════════╗
+  ║                                                  ║
+  ║         ♬⋆.˚  BetterTrumpet  v3.0.0  ˚.⋆♬      ║
+  ║                                                  ║
+  ║         59 fichiers · +8000 lignes               ║
+  ║         14 nouvelles features                    ║
+  ║                                                  ║
+  ╚══════════════════════════════════════════════════╝
+```
 
-### ✦ Onboarding premium
-- Assistant de configuration en 5 pages (Bienvenue, Audio, Apparence, Confidentialité, Prêt)
-- Prévisualisation audio en temps réel, choix de périphérique, personnalisation du thème
-- Animations décalées, barres de progression, confettis
+### Fonctionnalités
 
-### ✦ Contrôle audio
-- Ajout du système undo/redo — Ctrl+Z / Ctrl+Y sur les volumes, mute et profils
-- Ajout du raccourci de changement rapide de périphérique
-- Ajout des profils volume (sauvegarder, restaurer, exporter)
-- Ajout du pin flyout — garder le flyout ouvert en permanence
+```
+  ┌─────────────────────────────────────────────────┐
+  │  🎓  ONBOARDING PREMIUM                        │
+  │                                                 │
+  │  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐      │
+  │  │  1  │→│  2  │→│  3  │→│  4  │→│  5  │      │
+  │  │Bien-│ │Audio│ │Appa-│ │Confi│ │Prêt!│      │
+  │  │venue│ │     │ │rence│ │dent.│ │ 🎉  │      │
+  │  └─────┘ └─────┘ └─────┘ └─────┘ └─────┘      │
+  │  ████████████████████████░░░░░░░  80%           │
+  └─────────────────────────────────────────────────┘
+```
+Assistant de configuration en 5 pages avec prévisualisation audio en temps réel, choix de périphérique, personnalisation du thème. Animations décalées, barres de progression, confettis sur la dernière page.
 
-### ✦ Expérience
-- Refonte complète du moteur de thèmes (7 canaux de couleur)
-- Ajout du media popup au survol de l'icône tray
-- Ajout des notifications de mise à jour (API GitHub, badge tray, filtre de canal)
-- Fenêtre « Quoi de neuf » avec effet shimmer
-- Ajout de l'export/import de tous les réglages
-- Refonte de la page Apparence — Visual First avec onglets, preview hero, grille de thèmes
-- Refonte UX des paramètres — rythme, aération, cohérence
-- Refonte de la page À propos — carte télémétrie, résumé santé
+```
+  ┌─────────────────────────────────────────────────┐
+  │  ↩️  UNDO / REDO                                │
+  │                                                 │
+  │   Ctrl+Z  ◄────────────►  Ctrl+Y               │
+  │                                                 │
+  │   volume ✓  mute ✓  profils ✓                   │
+  └─────────────────────────────────────────────────┘
+```
+Système undo/redo complet — Ctrl+Z / Ctrl+Y sur tous les changements de volume, mute et profils.
 
-### ✦ Sous le capot
-- CLI avec 19 commandes via named pipe IPC
-- Scaffolding palette de commandes (pour futur plugin Raycast)
-- Crash reporting Sentry avec opt-in GDPR (réinitialisation en temps réel)
-- Health monitoring — mémoire, handles GDI/User, uptime
-- Logging structuré avec rotation (5 fichiers × 5 Mo)
-- Démarrage en 3 phases — Core/UI/Features avec isolation
-- Mode éco (économie batterie)
-- Animations configurables (vitesse et FPS)
+```
+  ┌─────────────────────────────────────────────────┐
+  │  📌  PIN FLYOUT           ⌨️  SWITCH RAPIDE     │
+  │                                                 │
+  │  Ctrl+P → le flyout       Raccourci pour        │
+  │  reste ouvert en          cycler entre les      │
+  │  permanence               périphériques         │
+  └─────────────────────────────────────────────────┘
+```
+
+```
+  ┌─────────────────────────────────────────────────┐
+  │  🎚️  PROFILS VOLUME                             │
+  │                                                 │
+  │   ┌──────────┐  Capturer / Restaurer            │
+  │   │ Gaming   │  Export .btprofile                │
+  │   │ Music    │  Import .btprofile                │
+  │   │ Meeting  │                                   │
+  │   └──────────┘                                   │
+  └─────────────────────────────────────────────────┘
+```
+Sauvegarder et restaurer l'état audio complet de toutes les apps. Export/import en fichier .btprofile.
+
+```
+  ┌─────────────────────────────────────────────────┐
+  │  🎨  MOTEUR DE THÈMES                           │
+  │                                                 │
+  │  7 canaux :  slider │ track │ peak │ fond       │
+  │              texte  │ accent│ glow              │
+  │                                                 │
+  │  ▓▓▓▓░░░░  ▓▓▓▓▓░░  ▓▓░░░░░  ▓▓▓▓▓▓░          │
+  │  Neon       Pastel   Dark      Nature           │
+  └─────────────────────────────────────────────────┘
+```
+Refonte complète — 7 canaux de couleur, thèmes sauvegardés, grille visuelle, mode album art dynamique.
+
+```
+  ┌─────────────────────────────────────────────────┐
+  │  🎵  MEDIA POPUP                                │
+  │                                                 │
+  │   ┌───────────────────────┐                     │
+  │   │ 🎵  Titre             │  Survol de          │
+  │   │    Artiste            │  l'icône tray →     │
+  │   │ ▓▓▓▓▓▓▓▓░░░ 2:34     │  lecteur flottant   │
+  │   │ ◄◄  ▶  ►► 🔀 🔁      │                     │
+  │   └───────────────────────┘                     │
+  └─────────────────────────────────────────────────┘
+```
+Album art, seek bar, contrôles shuffle/repeat. Slider volume avec gradient qui reprend la couleur dominante de la pochette.
+
+```
+  ┌─────────────────────────────────────────────────┐
+  │  🔄  NOTIFICATIONS DE MISE À JOUR               │
+  │                                                 │
+  │  GitHub API → badge tray (●) → bannière flyout  │
+  │  Canaux : Stable · Beta · All                   │
+  └─────────────────────────────────────────────────┘
+```
+
+```
+  ┌─────────────────────────────────────────────────┐
+  │  📋  QUOI DE NEUF         📦  EXPORT / IMPORT   │
+  │                                                 │
+  │  Fenêtre catégorisée      .btsettings (JSON)    │
+  │  après mise à jour,       Tous les réglages     │
+  │  shimmer sur le titre     en un fichier         │
+  └─────────────────────────────────────────────────┘
+```
+
+```
+  ┌─────────────────────────────────────────────────┐
+  │  🎞️  ANIMATIONS           🌿  MODE ÉCO         │
+  │                                                 │
+  │  Vitesse et FPS           Réduit CPU/GPU        │
+  │  configurables            sur batterie          │
+  └─────────────────────────────────────────────────┘
+```
+
+### Refonte UX
+
+Refonte de la page Apparence — Visual First avec onglets, preview hero, grille de thèmes.
+Refonte UX des paramètres — rythme, aération, cohérence.
+Refonte de la page À propos — carte télémétrie, résumé santé.
+
+### Technique
+
+```
+  ┌─────────────────────────────────────────────────┐
+  │  ⚡  CLI · 19 COMMANDES                         │
+  │                                                 │
+  │  $ bt volume set 75                             │
+  │  $ bt device list                               │
+  │  $ bt profile load Gaming                       │
+  │  $ bt update check                              │
+  │  $ bt settings export backup.btsettings         │
+  │                                                 │
+  │  Named pipe IPC · JSON responses                │
+  └─────────────────────────────────────────────────┘
+```
+
+```
+  ┌─────────────────────────────────────────────────┐
+  │  🛡️  CRASH PROTECTION                           │
+  │                                                 │
+  │  Sentry GDPR ──► opt-in toggle en temps réel    │
+  │  Health ──► mémoire, handles GDI/User, uptime   │
+  │  Logging ──► 5 fichiers × 5 Mo, rotation auto   │
+  └─────────────────────────────────────────────────┘
+```
+
+```
+  ┌─────────────────────────────────────────────────┐
+  │  🚀  DÉMARRAGE 3 PHASES                         │
+  │                                                 │
+  │  Phase 1: Core    ──► fatal si échec            │
+  │  Phase 2: UI      ──► isolé, tray + flyout      │
+  │  Phase 3: Features──► isolé, updates + CLI      │
+  └─────────────────────────────────────────────────┘
+```
+Scaffolding palette de commandes (pour futur plugin Raycast). Mode portable (settings JSON, zéro registre).
 
 ---
 
