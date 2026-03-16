@@ -14,6 +14,8 @@ namespace EarTrumpet.UI.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler Completed;
 
+        public const int PageCount = 5;
+
         // Navigation
         public int CurrentPage
         {
@@ -32,6 +34,8 @@ namespace EarTrumpet.UI.ViewModels
                     Raise(nameof(CanGoBack));
                     Raise(nameof(NextButtonText));
                     Raise(nameof(SubtitleText));
+                    Raise(nameof(Progress));
+                    Raise(nameof(IsLastPage));
                 }
             }
         }
@@ -42,6 +46,10 @@ namespace EarTrumpet.UI.ViewModels
         public bool IsPage3 => _currentPage == 3;
         public bool IsPage4 => _currentPage == 4;
         public bool CanGoBack => _currentPage > 0 && _currentPage < 4;
+        public bool IsLastPage => _currentPage == 4;
+
+        /// <summary>Progress 0.0 → 1.0 for the top bar</summary>
+        public double Progress => (double)(_currentPage + 1) / PageCount;
 
         public string NextButtonText
         {
@@ -49,10 +57,10 @@ namespace EarTrumpet.UI.ViewModels
             {
                 switch (_currentPage)
                 {
-                    case 0: return "Commencer";
+                    case 0: return "Continuer";
                     case 3: return "Terminer";
-                    case 4: return "C'est parti !";
-                    default: return "Suivant";
+                    case 4: return "C\u2019est parti\u00a0!";
+                    default: return "Continuer";
                 }
             }
         }
@@ -63,11 +71,11 @@ namespace EarTrumpet.UI.ViewModels
             {
                 switch (_currentPage)
                 {
-                    case 0: return "Le mixeur audio, en mieux.";
-                    case 1: return "Choisissez votre p\u00e9riph\u00e9rique audio par d\u00e9faut.";
-                    case 2: return "Personnalisez l'apparence.";
+                    case 0: return "Prenez enfin le contr\u00f4le total de votre son.";
+                    case 1: return "Choisissez o\u00f9 sort votre audio.";
+                    case 2: return "Choisissez votre style.";
                     case 3: return "Vos donn\u00e9es restent les v\u00f4tres.";
-                    case 4: return "Tout est pr\u00eat.";
+                    case 4: return "";
                     default: return "";
                 }
             }
@@ -102,7 +110,7 @@ namespace EarTrumpet.UI.ViewModels
             }
         }
 
-        // Page 3: Privacy
+        // Page 3: Privacy — no dark pattern, just a simple toggle
         public bool IsTelemetryEnabled
         {
             get => _settings.IsTelemetryEnabled;
@@ -110,13 +118,9 @@ namespace EarTrumpet.UI.ViewModels
             {
                 _settings.IsTelemetryEnabled = value;
                 Raise(nameof(IsTelemetryEnabled));
-                Raise(nameof(TelemetryStatusText));
             }
         }
 
-        public string TelemetryStatusText => IsTelemetryEnabled ? "Activ\u00e9" : "D\u00e9sactiv\u00e9";
-
-        // Page 4: Startup toggle
         public bool RunAtStartup
         {
             get => _settings.RunAtStartup;
