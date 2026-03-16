@@ -429,5 +429,29 @@ namespace EarTrumpet.UI.Views
                 animVm.PeakMeterFps = fps;
             }
         }
+
+        private void CheckUpdate_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetAboutPageViewModel aboutVm)
+            {
+                aboutVm.CheckForUpdateCommand?.Execute(null);
+            }
+            e.Handled = true;
+        }
+
+        private void UpdateChannel0_Click(object sender, MouseButtonEventArgs e) { SetUpdateChannel(0); e.Handled = true; }
+        private void UpdateChannel1_Click(object sender, MouseButtonEventArgs e) { SetUpdateChannel(1); e.Handled = true; }
+        private void UpdateChannel2_Click(object sender, MouseButtonEventArgs e) { SetUpdateChannel(2); e.Handled = true; }
+        private void UpdateChannel3_Click(object sender, MouseButtonEventArgs e) { SetUpdateChannel(3); e.Handled = true; }
+
+        private void SetUpdateChannel(int index)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetAboutPageViewModel aboutVm)
+            {
+                aboutVm.UpdateChannelIndex = index;
+            }
+        }
     }
 }
