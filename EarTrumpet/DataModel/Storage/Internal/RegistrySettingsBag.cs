@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 
 namespace EarTrumpet.DataModel.Storage.Internal
@@ -58,8 +58,9 @@ namespace EarTrumpet.DataModel.Storage.Internal
                 {
                     ret = (T)regKey.GetValue(key);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    System.Diagnostics.Trace.WriteLine($"RegistrySettingsBag: Failed to read '{key}': {ex.Message}");
                     ret = defaultValue;
                 }
                 return ret;
