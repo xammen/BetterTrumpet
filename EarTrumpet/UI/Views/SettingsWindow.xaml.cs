@@ -430,6 +430,26 @@ namespace EarTrumpet.UI.Views
             }
         }
 
+        private void ExportSettings_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetAboutPageViewModel aboutVm)
+            {
+                aboutVm.ExportSettingsCommand?.Execute(null);
+            }
+            e.Handled = true;
+        }
+
+        private void ImportSettings_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetAboutPageViewModel aboutVm)
+            {
+                aboutVm.ImportSettingsCommand?.Execute(null);
+            }
+            e.Handled = true;
+        }
+
         private void CheckUpdate_Click(object sender, MouseButtonEventArgs e)
         {
             var viewModel = DataContext as SettingsViewModel;
