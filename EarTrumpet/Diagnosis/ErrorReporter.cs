@@ -13,7 +13,7 @@ namespace EarTrumpet.Diagnosis
         // Free plan: 5K events/month, 1 user, 30 days retention
         // Set to empty string to disable Sentry entirely
         // ═══════════════════════════════════════════════════════════════
-        private const string SentryDsn = ""; // TODO: Set your Sentry DSN here
+        private const string SentryDsn = "https://7a99ae65aeea77906126eb19b94782a6@o4511055986884608.ingest.de.sentry.io/4511055991668816";
 
         private static ErrorReporter s_instance;
         private readonly CircularBufferTraceListener _listener;
@@ -94,20 +94,34 @@ namespace EarTrumpet.Diagnosis
                         "production";
 #endif
 
-                    // Performance: sample 20% of transactions
+                    // Debug mode: logs Sentry internals to Trace output
+                    // Enable for first-time setup, disable in production
+#if DEBUG
+                    options.Debug = true;
+                    options.DiagnosticLevel = SentryLevel.Info;
+#endif
+
+                    // Tracing: capture 100% in dev, 20% in prod
+#if DEBUG
+                    options.TracesSampleRate = 1.0;
+#else
                     options.TracesSampleRate = 0.2;
+#endif
 
                     // Privacy: don't send PII
                     options.SendDefaultPii = false;
 
-                    // Attach log breadcrumbs (last 50 trace messages)
-                    options.MaxBreadcrumbs = 50;
+                    // Attach log breadcrumbs (last 100 trace messages)
+                    options.MaxBreadcrumbs = 100;
 
-                    // Auto session tracking
+                    // Auto session tracking (Release Health)
                     options.AutoSessionTracking = true;
 
-                    // Capture unhandled exceptions (CrashHandler also catches them)
+                    // Stack traces on all events
                     options.AttachStacktrace = true;
+
+                    // Shutdown timeout — ensure events flush on exit
+                    options.ShutdownTimeout = TimeSpan.FromSeconds(3);
                 });
 
                 // Set context tags
@@ -116,6 +130,8 @@ namespace EarTrumpet.Diagnosis
                     scope.SetTag("portable_mode", StorageFactory.IsPortableMode.ToString());
                     scope.SetTag("os_version", Environment.OSVersion.Version.ToString());
                     scope.SetTag("dotnet_version", Environment.Version.ToString());
+                    scope.SetTag("architecture", Environment.Is64BitProcess ? "x64" : "x86");
+                    scope.SetTag("windows_build", Environment.OSVersion.Version.Build.ToString());
                 });
 
                 Trace.WriteLine("Sentry: Initialized — crash reporting active");
