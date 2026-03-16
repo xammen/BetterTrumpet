@@ -52,7 +52,9 @@ namespace EarTrumpet
 
         private void OnAppStartup(object sender, StartupEventArgs e)
         {
-            // GPU rendering enabled (SoftwareOnly removed in v3 — was killing performance)
+            // ══════════════════════════════════════════════════════════════
+            // STARTUP PHASE 1: Core (fatal if fails — crash report + exit)
+            // ══════════════════════════════════════════════════════════════
 
             Exit += (_, __) => IsShuttingDown = true;
             HasIdentity = PackageHelper.CheckHasIdentity();
@@ -105,20 +107,11 @@ namespace EarTrumpet
 
         private void CompleteStartup()
         {
-            AddonManager.Load(shouldLoadInternalAddons: HasDevIdentity);
-            Exit += (_, __) => AddonManager.Shutdown();
-#if DEBUG
-            DebugHelpers.Add();
-#endif
+            // ══════════════════════════════════════════════════════════════
+            // STARTUP PHASE 2: UI (degraded mode if fails)
+            // ══════════════════════════════════════════════════════════════
             _mixerWindow = new WindowHolder(CreateMixerExperience);
             _settingsWindow = new WindowHolder(CreateSettingsExperience);
-
-            Settings.FlyoutHotkeyTyped += () => _flyoutViewModel.OpenFlyout(InputType.Keyboard);
-            Settings.MixerHotkeyTyped += () => _mixerWindow.OpenOrClose();
-            Settings.SettingsHotkeyTyped += () => _settingsWindow.OpenOrBringToFront();
-            Settings.AbsoluteVolumeUpHotkeyTyped += AbsoluteVolumeIncrement;
-            Settings.AbsoluteVolumeDownHotkeyTyped += AbsoluteVolumeDecrement;
-            Settings.RegisterHotkeys();
 
             _trayIcon.PrimaryInvoke += (_, type) => _flyoutViewModel.OpenFlyout(type);
             _trayIcon.SecondaryInvoke += (_, args) => _trayIcon.ShowContextMenu(GetTrayContextMenuItems(), args.Point);
@@ -127,15 +120,62 @@ namespace EarTrumpet
             _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
             _trayIcon.IsVisible = true;
 
-            // Media popup on hover with configurable delay
-            try { _mediaPopup = new MediaPopupWindow(Settings); }
-            catch (Exception ex) { System.Diagnostics.Trace.WriteLine($"MediaPopupWindow init failed: {ex.Message}"); }
+            // ══════════════════════════════════════════════════════════════
+            // STARTUP PHASE 3: Features (each isolated — failure = feature disabled)
+            // ══════════════════════════════════════════════════════════════
+
+            // 3a. Addons
+            try
+            {
+                AddonManager.Load(shouldLoadInternalAddons: HasDevIdentity);
+                Exit += (_, __) => AddonManager.Shutdown();
+            }
+            catch (Exception ex) { Trace.WriteLine($"Startup: Addons failed to load: {ex.Message}"); }
+
+#if DEBUG
+            try { DebugHelpers.Add(); }
+            catch (Exception ex) { Trace.WriteLine($"Startup: DebugHelpers failed: {ex.Message}"); }
+#endif
+
+            // 3b. Hotkeys
+            try
+            {
+                Settings.FlyoutHotkeyTyped += () => _flyoutViewModel.OpenFlyout(InputType.Keyboard);
+                Settings.MixerHotkeyTyped += () => _mixerWindow.OpenOrClose();
+                Settings.SettingsHotkeyTyped += () => _settingsWindow.OpenOrBringToFront();
+                Settings.AbsoluteVolumeUpHotkeyTyped += AbsoluteVolumeIncrement;
+                Settings.AbsoluteVolumeDownHotkeyTyped += AbsoluteVolumeDecrement;
+                Settings.RegisterHotkeys();
+            }
+            catch (Exception ex) { Trace.WriteLine($"Startup: Hotkeys registration failed: {ex.Message}"); }
+
+            // 3c. Media popup
+            try
+            {
+                _mediaPopup = new MediaPopupWindow(Settings);
+                InitializeMediaPopup();
+            }
+            catch (Exception ex) { Trace.WriteLine($"Startup: MediaPopup failed: {ex.Message}"); }
+
+            // 3d. First-run experience
+            try { DisplayFirstRunExperience(); }
+            catch (Exception ex) { Trace.WriteLine($"Startup: FirstRun dialog failed: {ex.Message}"); }
+
+            Trace.WriteLine($"Startup: Complete in {Duration.TotalMilliseconds:F0}ms");
+        }
+
+        /// <summary>
+        /// Sets up media popup hover behavior. Isolated from CompleteStartup for clarity.
+        /// </summary>
+        private void InitializeMediaPopup()
+        {
+            if (_mediaPopup == null) return;
+
             _mediaPopupDelayTimer = new System.Windows.Threading.DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(Settings.MediaPopupHoverDelay)
             };
 
-            // Update timer interval when settings change
             Settings.MediaPopupSettingsChanged += () =>
             {
                 _mediaPopupDelayTimer.Interval = TimeSpan.FromSeconds(Settings.MediaPopupHoverDelay);
@@ -145,7 +185,6 @@ namespace EarTrumpet
             {
                 _mediaPopupDelayTimer.Stop();
 
-                // Check if we should only show when playing
                 if (Settings.MediaPopupShowOnlyWhenPlaying && !DataModel.MediaSessionService.Instance.IsMediaPlaying)
                 {
                     return;
@@ -155,21 +194,15 @@ namespace EarTrumpet
             };
             _mediaPopup.PopupHidden += (_, __) =>
             {
-                _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip()); // Restore tooltip when popup closes
+                _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
             };
             _trayIcon.MouseHoverChanged += (_, isOver) =>
             {
-                // Skip if media popup is disabled
-                if (!Settings.MediaPopupEnabled)
-                {
-                    return;
-                }
+                if (!Settings.MediaPopupEnabled) return;
 
                 if (isOver)
                 {
-                    // Hide tooltip immediately when hovering
                     _trayIcon.SetTooltip("");
-                    // Start delay timer
                     if (!_mediaPopup.IsShowing)
                     {
                         _mediaPopupDelayTimer.Start();
@@ -177,9 +210,7 @@ namespace EarTrumpet
                 }
                 else
                 {
-                    // Cancel delay timer if mouse leaves before delay
                     _mediaPopupDelayTimer.Stop();
-                    // Restore tooltip when leaving (if popup not showing)
                     if (!_mediaPopup.IsShowing)
                     {
                         _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
@@ -187,8 +218,6 @@ namespace EarTrumpet
                     _mediaPopup.StartHideTimer();
                 }
             };
-
-            DisplayFirstRunExperience();
         }
 
         private void trayIconScrolled(object _, int wheelDelta)
