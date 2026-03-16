@@ -182,6 +182,7 @@
     <Compile Include="DataModel\Storage\StorageFactory.cs" />
     <Compile Include="DataModel\Storage\Internal\WindowsStorageSettingsBag.cs" />
     <Compile Include="DebugHelpers.cs" />
+    <Compile Include="Diagnosis\CrashHandler.cs" />
     <Compile Include="Diagnosis\ErrorReporter.cs" />
     <Compile Include="Diagnosis\SnapshotData.cs" />
     <Compile Include="Extensibility\EarTrumpetAddon.cs" />
