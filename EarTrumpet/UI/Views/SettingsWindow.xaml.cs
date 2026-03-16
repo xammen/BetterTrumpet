@@ -280,6 +280,120 @@ namespace EarTrumpet.UI.Views
             e.Handled = true;
         }
 
+        // ═══════════════════════════════════
+        // Appearance tab switching
+        // ═══════════════════════════════════
+
+        private void AppearanceTab0_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetAppearanceTab(0);
+            e.Handled = true;
+        }
+
+        private void AppearanceTab1_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetAppearanceTab(1);
+            e.Handled = true;
+        }
+
+        private void AppearanceTab2_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetAppearanceTab(2);
+            e.Handled = true;
+        }
+
+        private void SetAppearanceTab(int tab)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
+            {
+                colorsVm.SelectedTab = tab;
+            }
+        }
+
+        // ═══════════════════════════════════
+        // Appearance category switching
+        // ═══════════════════════════════════
+
+        private void CategoryAll_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetAppearanceCategory("All");
+            e.Handled = true;
+        }
+
+        private void CategoryMinimal_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetAppearanceCategory("Minimal");
+            e.Handled = true;
+        }
+
+        private void CategoryBrands_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetAppearanceCategory("Brand");
+            e.Handled = true;
+        }
+
+        private void CategoryRetro_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetAppearanceCategory("Retro / Gaming");
+            e.Handled = true;
+        }
+
+        private void CategoryDev_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetAppearanceCategory("Developer");
+            e.Handled = true;
+        }
+
+        private void CategoryNature_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetAppearanceCategory("Nature / Premium");
+            e.Handled = true;
+        }
+
+        private void CategoryAccessibility_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetAppearanceCategory("Accessibility");
+            e.Handled = true;
+        }
+
+        private void SetAppearanceCategory(string category)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
+            {
+                colorsVm.SelectedCategory = category;
+            }
+        }
+
+        // ═══════════════════════════════════
+        // Randomize colors
+        // ═══════════════════════════════════
+
+        private void RandomizeColors_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
+            {
+                colorsVm.RandomizeColorsCommand?.Execute(null);
+            }
+            e.Handled = true;
+        }
+
+        // ═══════════════════════════════════
+        // Overflow menu
+        // ═══════════════════════════════════
+
+        private void OverflowMenu_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
+            {
+                colorsVm.IsOverflowOpen = !colorsVm.IsOverflowOpen;
+            }
+            e.Handled = true;
+        }
+
         /// <summary>
         /// Handle FPS card clicks
         /// </summary>
