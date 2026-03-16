@@ -1,4 +1,4 @@
-﻿using EarTrumpet.DataModel.Audio;
+using EarTrumpet.DataModel.Audio;
 using EarTrumpet.DataModel.WindowsAudio.Internal;
 using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.Extensions;
@@ -27,7 +27,7 @@ namespace EarTrumpet.UI.ViewModels
 
         public Color Background { get; private set; }
         public char IconText => string.IsNullOrWhiteSpace(DisplayName) ? '?' : DisplayName.ToUpperInvariant().FirstOrDefault(x => char.IsLetterOrDigit(x));
-        public string DisplayName => _session.DisplayName;
+        public override string DisplayName => _session.DisplayName;
         public string ExeName => _session.ExeName;
         public string AppId => _session.AppId;
         public string IconPath => _session.IconPath;

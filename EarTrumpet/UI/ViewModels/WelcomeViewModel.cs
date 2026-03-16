@@ -1,4 +1,4 @@
-﻿using EarTrumpet.Interop.Helpers;
+using EarTrumpet.Interop.Helpers;
 using EarTrumpet.UI.Helpers;
 using System.Windows;
 using System.Windows.Input;
@@ -26,8 +26,8 @@ namespace EarTrumpet.UI.ViewModels
         {
             _settings = settings;
             Title = Properties.Resources.WelcomeDialogHeaderText;
-            LearnMore = new RelayCommand(() => ProcessHelper.StartNoThrow("https://github.com/File-New-Project/EarTrumpet"));
-            OpenPrivacy = new RelayCommand(() => ProcessHelper.StartNoThrow("https://github.com/File-New-Project/EarTrumpet/blob/master/PRIVACY.md"));
+            LearnMore = new RelayCommand(() => ProcessHelper.StartNoThrow("https://github.com/xammen/BetterTrumpet"));
+            OpenPrivacy = new RelayCommand(() => ProcessHelper.StartNoThrow("https://github.com/xammen/BetterTrumpet/blob/master/PRIVACY.md"));
         }
 
         public void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
