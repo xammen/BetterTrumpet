@@ -231,6 +231,17 @@
     <Compile Include="Extensions\ListExtensions.cs" />
 
 
+    <Compile Include="CLI\CliHandler.cs" />
+    <Compile Include="CLI\CliEntryPoint.cs" />
+    <Compile Include="Interop\Helpers\PipeServer.cs" />
+    <Compile Include="Interop\Helpers\PipeClient.cs" />
+    <Compile Include="DataModel\VolumeUndoService.cs" />
+    <Compile Include="DataModel\UpdateService.cs" />
+    <Compile Include="UI\Helpers\UndoRedoHelper.cs" />
+    <Compile Include="UI\Helpers\CommandPaletteHelper.cs" />
+    <Compile Include="UI\Views\CommandPaletteWindow.xaml.cs">
+      <DependentUpon>CommandPaletteWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Interop\Helpers\AudioPolicyConfigFactoryImplFor21H2.cs" />
     <Compile Include="Interop\Helpers\AudioPolicyConfigFactoryImplForDownlevel.cs" />
     <Compile Include="Interop\Helpers\InputHelper.cs" />
@@ -500,6 +511,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="UI\Views\AppItemView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Views\CommandPaletteWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
