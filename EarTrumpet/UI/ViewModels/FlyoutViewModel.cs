@@ -26,8 +26,60 @@ namespace EarTrumpet.UI.ViewModels
         public FlyoutViewState State { get; private set; }
         public ObservableCollection<DeviceViewModel> Devices { get; private set; }
         public ICommand ExpandCollapse { get; private set; }
+        public ICommand TogglePin { get; private set; }
         public InputType LastInput { get; private set; }
         public ICommand DisplaySettingsChanged { get; }
+
+        private bool _isUpdateAvailable;
+        public bool IsUpdateAvailable
+        {
+            get => _isUpdateAvailable;
+            set
+            {
+                if (_isUpdateAvailable != value)
+                {
+                    _isUpdateAvailable = value;
+                    RaisePropertyChanged(nameof(IsUpdateAvailable));
+                    RaisePropertyChanged(nameof(UpdateText));
+                }
+            }
+        }
+        public string UpdateText => _updateService?.UpdateText ?? "";
+
+        private DataModel.UpdateService _updateService;
+        public void SetUpdateService(DataModel.UpdateService svc)
+        {
+            _updateService = svc;
+            svc.PropertyChanged += (_, args) =>
+            {
+                if (args.PropertyName == nameof(DataModel.UpdateService.IsUpdateAvailable))
+                {
+                    _currentDispatcher.Invoke(() => IsUpdateAvailable = svc.IsUpdateAvailable);
+                }
+            };
+            IsUpdateAvailable = svc.IsUpdateAvailable;
+        }
+
+        public void OpenUpdatePage()
+        {
+            _updateService?.OpenReleasePage();
+        }
+
+        private bool _isPinned;
+        public bool IsPinned
+        {
+            get => _isPinned;
+            set
+            {
+                if (_isPinned != value)
+                {
+                    _isPinned = value;
+                    RaisePropertyChanged(nameof(IsPinned));
+                    RaisePropertyChanged(nameof(PinGlyph));
+                }
+            }
+        }
+        public string PinGlyph => IsPinned ? "\xE841" : "\xE840";
 
         private readonly DeviceCollectionViewModel _mainViewModel;
         private readonly DispatcherTimer _deBounceTimer;
@@ -60,6 +112,7 @@ private readonly Action _returnFocusToTray;
                 IsExpandingOrCollapsing = true;
                 BeginClose(LastInput);
             });
+            TogglePin = new RelayCommand(() => IsPinned = !IsPinned);
             DisplaySettingsChanged = new RelayCommand(() => BeginClose(InputType.Command));
 
             _mh = new MouseHook();
@@ -380,6 +433,10 @@ public void OpenFlyout(InputType inputType)
             {
                 return;
             }
+            if (IsPinned)
+            {
+                return;
+            }
             BeginClose(InputType.Command);
         }
 
@@ -401,6 +458,30 @@ public void OpenFlyout(InputType inputType)
                 // Disable the system menu.
                 e.Handled = true;
             }
+            else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.Z)
+            {
+                Trace.WriteLine($"FlyoutVM: Ctrl+Z pressed, CanUndo={App.UndoService.CanUndo}, UndoCount={App.UndoService.UndoCount}");
+                ApplyUndo();
+                e.Handled = true;
+            }
+            else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.Y)
+            {
+                Trace.WriteLine($"FlyoutVM: Ctrl+Y pressed, CanRedo={App.UndoService.CanRedo}, RedoCount={App.UndoService.RedoCount}");
+                ApplyRedo();
+                e.Handled = true;
+            }
+        }
+
+        private void ApplyUndo()
+        {
+            var action = App.UndoService.Undo();
+            if (action != null) UndoRedoHelper.ApplyAction(action, isUndo: true);
+        }
+
+        private void ApplyRedo()
+        {
+            var action = App.UndoService.Redo();
+            if (action != null) UndoRedoHelper.ApplyAction(action, isUndo: false);
         }
 
         public void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
