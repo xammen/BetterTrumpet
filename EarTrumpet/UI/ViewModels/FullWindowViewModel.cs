@@ -1,4 +1,5 @@
-﻿using EarTrumpet.UI.Helpers;
+using EarTrumpet.DataModel;
+using EarTrumpet.UI.Helpers;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -99,6 +100,33 @@ namespace EarTrumpet.UI.ViewModels
                     ((Window)sender).Close();
                 }
             }
+            else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.Z)
+            {
+                ApplyUndo();
+                e.Handled = true;
+            }
+            else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.Y)
+            {
+                ApplyRedo();
+                e.Handled = true;
+            }
+            else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.P)
+            {
+                CommandPaletteHelper.Show();
+                e.Handled = true;
+            }
+        }
+
+        private void ApplyUndo()
+        {
+            var action = App.UndoService.Undo();
+            if (action != null) UndoRedoHelper.ApplyAction(action, isUndo: true);
+        }
+
+        private void ApplyRedo()
+        {
+            var action = App.UndoService.Redo();
+            if (action != null) UndoRedoHelper.ApplyAction(action, isUndo: false);
         }
 
         public void OnSizeChanged(object sender, SizeChangedEventArgs e)

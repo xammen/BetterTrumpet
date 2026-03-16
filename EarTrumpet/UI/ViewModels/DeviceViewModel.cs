@@ -31,7 +31,8 @@ namespace EarTrumpet.UI.ViewModels
             Microphone,
         }
 
-        public string DisplayName => _device.DisplayName;
+        public override string DisplayName => _device.DisplayName;
+        protected override bool IsDevice => true;
         public string AccessibleName => IsMuted ? Properties.Resources.AppOrDeviceMutedFormatAccessibleText.Replace("{Name}", DisplayName) :
             Properties.Resources.AppOrDeviceFormatAccessibleText.Replace("{Name}", DisplayName).Replace("{Volume}", Volume.ToString());
         public string DeviceDescription => ((IAudioDeviceWindowsAudio)_device).DeviceDescription;
