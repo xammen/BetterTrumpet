@@ -324,23 +324,17 @@ namespace EarTrumpet
             }
 #endif
 
-            // Don't show on first run (onboarding handles that)
-            if (string.IsNullOrEmpty(lastSeen) && !Settings.HasShownFirstRun)
+            // First-run: no previous version seen → seed the version and skip changelog
+            // (onboarding already handles first-run experience)
+            if (string.IsNullOrEmpty(lastSeen))
             {
                 Settings.LastSeenVersion = currentVersion;
                 return;
             }
 
-            // Show if version changed
-            if (lastSeen != currentVersion && Settings.HasShownFirstRun)
+            // Show changelog only when version actually changed (upgrade scenario)
+            if (lastSeen != currentVersion)
             {
-                Settings.LastSeenVersion = currentVersion;
-                var window = new UI.Views.ChangelogWindow();
-                window.Show();
-            }
-            else if (string.IsNullOrEmpty(lastSeen))
-            {
-                // Existing user upgrading for the first time — show changelog
                 Settings.LastSeenVersion = currentVersion;
                 var window = new UI.Views.ChangelogWindow();
                 window.Show();
