@@ -52,7 +52,7 @@ namespace EarTrumpet
 
         private void OnAppStartup(object sender, StartupEventArgs e)
         {
-            RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
+            // GPU rendering enabled (SoftwareOnly removed in v3 — was killing performance)
 
             Exit += (_, __) => IsShuttingDown = true;
             HasIdentity = PackageHelper.CheckHasIdentity();
