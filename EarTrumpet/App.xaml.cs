@@ -157,7 +157,11 @@ namespace EarTrumpet
             }
             catch (Exception ex) { Trace.WriteLine($"Startup: MediaPopup failed: {ex.Message}"); }
 
-            // 3d. First-run experience
+            // 3d. Health monitoring
+            try { HealthMonitor.Start(); }
+            catch (Exception ex) { Trace.WriteLine($"Startup: HealthMonitor failed: {ex.Message}"); }
+
+            // 3e. First-run experience
             try { DisplayFirstRunExperience(); }
             catch (Exception ex) { Trace.WriteLine($"Startup: FirstRun dialog failed: {ex.Message}"); }
 
