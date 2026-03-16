@@ -21,6 +21,19 @@ namespace EarTrumpet.UI.Views
 
             _viewModel.StateChanged += OnStateChanged;
             _viewModel.WindowSizeInvalidated += OnWindowsSizeInvalidated;
+
+            // Sync Topmost with pin state
+            if (_viewModel is FlyoutViewModel fvm)
+            {
+                fvm.PropertyChanged += (s, args) =>
+                {
+                    if (args.PropertyName == nameof(FlyoutViewModel.IsPinned))
+                    {
+                        Topmost = fvm.IsPinned;
+                    }
+                };
+            }
+
             SourceInitialized += (_, __) =>
             {
                 this.Cloak();
@@ -196,6 +209,14 @@ else
             }
             this.SetWindowPos(top, left, flyoutHeight, flyoutWidth);
             _viewModel.UpdateWindowPos(top, left, flyoutHeight, flyoutWidth);
+        }
+
+        private void UpdateBanner_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (DataContext is FlyoutViewModel fvm)
+            {
+                fvm.OpenUpdatePage();
+            }
         }
 
         private void EnableAcrylicIfApplicable(WindowsTaskbar.State taskbar)

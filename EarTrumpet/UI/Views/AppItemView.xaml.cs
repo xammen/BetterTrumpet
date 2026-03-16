@@ -1,4 +1,4 @@
-﻿using EarTrumpet.Extensions;
+using EarTrumpet.Extensions;
 using EarTrumpet.UI.ViewModels;
 using System.Windows;
 using System.Windows.Controls;

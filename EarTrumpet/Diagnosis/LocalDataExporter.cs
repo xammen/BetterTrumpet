@@ -1,4 +1,4 @@
-﻿using EarTrumpet.DataModel.Audio;
+using EarTrumpet.DataModel.Audio;
 using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.DataModel.WindowsAudio.Internal;
 using EarTrumpet.Extensions;
@@ -95,8 +95,9 @@ namespace EarTrumpet.Diagnosis
                 }
                 isAlive = true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Trace.WriteLine($"IsProcessAlive: Process {processId} check failed: {ex.Message}");
             }
             return isAlive;
         }

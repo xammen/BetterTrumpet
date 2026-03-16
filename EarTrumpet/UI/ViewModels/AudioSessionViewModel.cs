@@ -1,4 +1,5 @@
-﻿using EarTrumpet.DataModel.Audio;
+using EarTrumpet.DataModel;
+using EarTrumpet.DataModel.Audio;
 using EarTrumpet.Extensions;
 using EarTrumpet.UI.Helpers;
 using System.Windows.Input;
@@ -31,11 +32,20 @@ namespace EarTrumpet.UI.ViewModels
         }
 
         public string Id => _stream.Id;
+        public virtual string DisplayName => Id;
+        protected virtual bool IsDevice => false;
         public ICommand ToggleMute { get; } 
         public bool IsMuted
         {
             get => _stream.IsMuted;
-            set => _stream.IsMuted = value;
+            set
+            {
+                if (_stream.IsMuted != value)
+                {
+                    App.UndoService.RecordMuteChange(Id, DisplayName, IsDevice, _stream.IsMuted, value);
+                    _stream.IsMuted = value;
+                }
+            }
         }
 
         public bool IsAbsMuted
@@ -47,7 +57,15 @@ namespace EarTrumpet.UI.ViewModels
         public int Volume
         {
             get => _stream.Volume.ToVolumeInt();
-            set => _stream.Volume = value/100f;
+            set
+            {
+                var oldVol = _stream.Volume.ToVolumeInt();
+                if (oldVol != value)
+                {
+                    App.UndoService.RecordVolumeChange(Id, DisplayName, IsDevice, oldVol, value);
+                    _stream.Volume = value / 100f;
+                }
+            }
         }
         public virtual float PeakValue1 => _stream.PeakValue1;
         public virtual float PeakValue2 => _stream.PeakValue2;

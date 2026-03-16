@@ -1,8 +1,9 @@
-﻿namespace EarTrumpet.UI.ViewModels
+namespace EarTrumpet.UI.ViewModels
 {
     public class SettingsPageHeaderViewModel : BindableBase
     {
         public string Title => _settingsPageViewModel.Title;
+        public string Subtitle => _settingsPageViewModel.Subtitle;
 
         private SettingsPageViewModel _settingsPageViewModel;
 
