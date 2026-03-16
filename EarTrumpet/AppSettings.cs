@@ -1,3 +1,4 @@
+using EarTrumpet.DataModel;
 using EarTrumpet.DataModel.Storage;
 using EarTrumpet.Interop.Helpers;
 using System;
@@ -15,9 +16,23 @@ namespace EarTrumpet
         public event Action SettingsHotkeyTyped;
         public event Action AbsoluteVolumeUpHotkeyTyped;
         public event Action AbsoluteVolumeDownHotkeyTyped;
+        public event Action SwitchDeviceHotkeyTyped;
         public event Action CustomSliderColorsChanged;
 
         private ISettingsBag _settings = StorageFactory.GetSettings();
+
+        /// <summary>
+        /// Safely parses a color string from settings, returning fallback on failure.
+        /// Deduplicates the 7+ ColorConverter.ConvertFromString patterns.
+        /// </summary>
+        private System.Windows.Media.Color ParseColorSetting(string key, System.Windows.Media.Color fallback = default)
+        {
+            var colorStr = _settings.Get(key, "");
+            if (string.IsNullOrEmpty(colorStr))
+                return fallback == default ? System.Windows.Media.Colors.Transparent : fallback;
+            try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
+            catch { return fallback == default ? System.Windows.Media.Colors.Transparent : fallback; }
+        }
 
         public void RegisterHotkeys()
         {
@@ -26,6 +41,7 @@ namespace EarTrumpet
             HotkeyManager.Current.Register(SettingsHotkey);
             HotkeyManager.Current.Register(AbsoluteVolumeUpHotkey);
             HotkeyManager.Current.Register(AbsoluteVolumeDownHotkey);
+            HotkeyManager.Current.Register(SwitchDeviceHotkey);
 
             HotkeyManager.Current.KeyPressed += (hotkey) =>
             {
@@ -53,6 +69,11 @@ namespace EarTrumpet
                 {
                     Trace.WriteLine("AppSettings AbsoluteVolumeDownHotkeyTyped");
                     AbsoluteVolumeDownHotkeyTyped?.Invoke();
+                }
+                else if (hotkey.Equals(SwitchDeviceHotkey))
+                {
+                    Trace.WriteLine("AppSettings SwitchDeviceHotkeyTyped");
+                    SwitchDeviceHotkeyTyped?.Invoke();
                 }
             };
         }
@@ -112,6 +133,17 @@ namespace EarTrumpet
             }
         }
 
+        public HotkeyData SwitchDeviceHotkey
+        {
+            get => _settings.Get("SwitchDeviceHotkey", new HotkeyData { });
+            set
+            {
+                HotkeyManager.Current.Unregister(SwitchDeviceHotkey);
+                _settings.Set("SwitchDeviceHotkey", value);
+                HotkeyManager.Current.Register(SwitchDeviceHotkey);
+            }
+        }
+
         public bool UseLegacyIcon
         {
             get
@@ -152,13 +184,19 @@ namespace EarTrumpet
             set => _settings.Set("hasShownFirstRun", value);
         }
 
+        public event Action TelemetryConsentChanged;
+
         public bool IsTelemetryEnabled
         {
             get
             {
                 return _settings.Get("IsTelemetryEnabled", IsTelemetryEnabledByDefault());
             }
-            set => _settings.Set("IsTelemetryEnabled", value);
+            set
+            {
+                _settings.Set("IsTelemetryEnabled", value);
+                TelemetryConsentChanged?.Invoke();
+            }
         }
 
         public bool UseLogarithmicVolume
@@ -270,14 +308,7 @@ namespace EarTrumpet
 
         public System.Windows.Media.Color SliderThumbColor
         {
-            get
-            {
-                var colorStr = _settings.Get("SliderThumbColor", "");
-                if (string.IsNullOrEmpty(colorStr))
-                    return System.Windows.Media.Colors.Transparent;
-                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
-                catch { return System.Windows.Media.Colors.Transparent; }
-            }
+            get => ParseColorSetting("SliderThumbColor");
             set
             {
                 _settings.Set("SliderThumbColor", value.ToString());
@@ -287,14 +318,7 @@ namespace EarTrumpet
 
         public System.Windows.Media.Color SliderTrackFillColor
         {
-            get
-            {
-                var colorStr = _settings.Get("SliderTrackFillColor", "");
-                if (string.IsNullOrEmpty(colorStr))
-                    return System.Windows.Media.Colors.Transparent;
-                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
-                catch { return System.Windows.Media.Colors.Transparent; }
-            }
+            get => ParseColorSetting("SliderTrackFillColor");
             set
             {
                 _settings.Set("SliderTrackFillColor", value.ToString());
@@ -304,14 +328,7 @@ namespace EarTrumpet
 
         public System.Windows.Media.Color SliderTrackBackgroundColor
         {
-            get
-            {
-                var colorStr = _settings.Get("SliderTrackBackgroundColor", "");
-                if (string.IsNullOrEmpty(colorStr))
-                    return System.Windows.Media.Colors.Transparent;
-                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
-                catch { return System.Windows.Media.Colors.Transparent; }
-            }
+            get => ParseColorSetting("SliderTrackBackgroundColor");
             set
             {
                 _settings.Set("SliderTrackBackgroundColor", value.ToString());
@@ -321,14 +338,7 @@ namespace EarTrumpet
 
         public System.Windows.Media.Color PeakMeterColor
         {
-            get
-            {
-                var colorStr = _settings.Get("PeakMeterColor", "");
-                if (string.IsNullOrEmpty(colorStr))
-                    return System.Windows.Media.Colors.Transparent;
-                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
-                catch { return System.Windows.Media.Colors.Transparent; }
-            }
+            get => ParseColorSetting("PeakMeterColor");
             set
             {
                 _settings.Set("PeakMeterColor", value.ToString());
@@ -354,17 +364,17 @@ namespace EarTrumpet
             set => _settings.Set("ActiveThemeName", value);
         }
 
+        // Last seen version (for changelog display)
+        public string LastSeenVersion
+        {
+            get => _settings.Get("LastSeenVersion", "");
+            set => _settings.Set("LastSeenVersion", value);
+        }
+
         // Extended theme colors (Window Background, Text, Accent Glow)
         public System.Windows.Media.Color WindowBackgroundColor
         {
-            get
-            {
-                var colorStr = _settings.Get("WindowBackgroundColor", "");
-                if (string.IsNullOrEmpty(colorStr))
-                    return System.Windows.Media.Colors.Transparent;
-                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
-                catch { return System.Windows.Media.Colors.Transparent; }
-            }
+            get => ParseColorSetting("WindowBackgroundColor");
             set
             {
                 _settings.Set("WindowBackgroundColor", value.ToString());
@@ -374,14 +384,7 @@ namespace EarTrumpet
 
         public System.Windows.Media.Color TextColor
         {
-            get
-            {
-                var colorStr = _settings.Get("TextColor", "");
-                if (string.IsNullOrEmpty(colorStr))
-                    return System.Windows.Media.Colors.Transparent;
-                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
-                catch { return System.Windows.Media.Colors.Transparent; }
-            }
+            get => ParseColorSetting("TextColor");
             set
             {
                 _settings.Set("TextColor", value.ToString());
@@ -391,14 +394,7 @@ namespace EarTrumpet
 
         public System.Windows.Media.Color AccentGlowColor
         {
-            get
-            {
-                var colorStr = _settings.Get("AccentGlowColor", "");
-                if (string.IsNullOrEmpty(colorStr))
-                    return System.Windows.Media.Colors.Transparent;
-                try { return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorStr); }
-                catch { return System.Windows.Media.Colors.Transparent; }
-            }
+            get => ParseColorSetting("AccentGlowColor");
             set
             {
                 _settings.Set("AccentGlowColor", value.ToString());
@@ -494,6 +490,26 @@ namespace EarTrumpet
         {
             get => _settings.Get("MediaPopupIsExpanded", false);
             set => _settings.Set("MediaPopupIsExpanded", value);
+        }
+
+        // Auto-check for updates
+        public bool AutoCheckForUpdates
+        {
+            get => _settings.Get("AutoCheckForUpdates", true);
+            set => _settings.Set("AutoCheckForUpdates", value);
+        }
+
+        /// <summary>
+        /// Which updates to notify about: All (patch+minor+major), MinorAndMajor, MajorOnly, None.
+        /// </summary>
+        public UpdateChannel UpdateNotifyChannel
+        {
+            get
+            {
+                var val = _settings.Get("UpdateNotifyChannel", (int)UpdateChannel.All);
+                return Enum.IsDefined(typeof(UpdateChannel), val) ? (UpdateChannel)val : UpdateChannel.All;
+            }
+            set => _settings.Set("UpdateNotifyChannel", (int)value);
         }
 
         // Run at Windows startup

@@ -14,6 +14,7 @@ namespace EarTrumpet.UI.ViewModels
         {
             _settings = settings;
             Title = Properties.Resources.CommunitySettingsPageText;
+            Subtitle = "Community-contributed features and tweaks.";
             Glyph = "\xE902";
         }
     }

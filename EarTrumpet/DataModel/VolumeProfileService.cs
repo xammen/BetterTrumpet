@@ -106,6 +106,9 @@ namespace EarTrumpet.DataModel
                     continue;
                 }
 
+                // Suppress undo recording for bulk profile restore
+                App.UndoService.BeginUndoRedo();
+
                 device.Volume = savedDevice.Volume;
                 device.IsMuted = savedDevice.IsMuted;
 
@@ -129,6 +132,8 @@ namespace EarTrumpet.DataModel
                         Trace.WriteLine($"VolumeProfileService: App not found: {savedApp.DisplayName} ({savedApp.ExeName})");
                     }
                 }
+
+                App.UndoService.EndUndoRedo();
             }
 
             Trace.WriteLine($"VolumeProfileService: Applied profile '{profile.Name}'");

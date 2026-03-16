@@ -1,3 +1,4 @@
+using EarTrumpet.CLI;
 using EarTrumpet.DataModel;
 using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.Diagnosis;
@@ -37,13 +38,19 @@ namespace EarTrumpet
         private FlyoutViewModel _flyoutViewModel;
 
         private ShellNotifyIcon _trayIcon;
+        private TaskbarIconSource _trayIconSource;
         private WindowHolder _mixerWindow;
         private WindowHolder _settingsWindow;
         private ErrorReporter _errorReporter;
         private MediaPopupWindow _mediaPopup;
         private System.Windows.Threading.DispatcherTimer _mediaPopupDelayTimer;
+        private PipeServer _pipeServer;
+        private CliHandler _cliHandler;
+        private DataModel.Audio.IAudioDeviceManager _deviceManager;
+        private DataModel.UpdateService _updateService;
 
         public static AppSettings Settings { get; private set; }
+        public static VolumeUndoService UndoService { get; } = new VolumeUndoService();
 
         public void OpenMixerWindow()
         {
@@ -52,9 +59,24 @@ namespace EarTrumpet
 
         private void OnAppStartup(object sender, StartupEventArgs e)
         {
-            RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
+            // ══════════════════════════════════════════════════════════════
+            // CLI INTERCEPT: If launched with CLI args, send to running instance and exit
+            // ══════════════════════════════════════════════════════════════
+            if (CliEntryPoint.TryHandleCliArgs(Environment.GetCommandLineArgs().Skip(1).ToArray()))
+            {
+                Shutdown();
+                return;
+            }
 
-            Exit += (_, __) => IsShuttingDown = true;
+            // ══════════════════════════════════════════════════════════════
+            // STARTUP PHASE 1: Core (fatal if fails — crash report + exit)
+            // ══════════════════════════════════════════════════════════════
+
+            Exit += (_, __) =>
+            {
+                IsShuttingDown = true;
+                ErrorReporter.Shutdown(); // Flush Sentry events before exit
+            };
             HasIdentity = PackageHelper.CheckHasIdentity();
             HasDevIdentity = PackageHelper.HasDevIdentity();
             PackageVersion = PackageHelper.GetVersion(HasIdentity);
@@ -62,6 +84,7 @@ namespace EarTrumpet
 
             Settings = new AppSettings();
             _errorReporter = new ErrorReporter(Settings);
+            CrashHandler.Initialize();
 
             if (SingleInstanceAppMutex.TakeExclusivity())
             {
@@ -87,11 +110,12 @@ namespace EarTrumpet
         {
             ((UI.Themes.Manager)Resources["ThemeManager"]).Load();
 
-            var deviceManager = WindowsAudioFactory.Create(AudioDeviceKind.Playback);
-            deviceManager.Loaded += (_, __) => CompleteStartup();
-            CollectionViewModel = new DeviceCollectionViewModel(deviceManager, Settings);
+            _deviceManager = WindowsAudioFactory.Create(AudioDeviceKind.Playback);
+            _deviceManager.Loaded += (_, __) => CompleteStartup();
+            CollectionViewModel = new DeviceCollectionViewModel(_deviceManager, Settings);
 
-            _trayIcon = new ShellNotifyIcon(new TaskbarIconSource(CollectionViewModel, Settings));
+            _trayIconSource = new TaskbarIconSource(CollectionViewModel, Settings);
+            _trayIcon = new ShellNotifyIcon(_trayIconSource);
             Exit += (_, __) => _trayIcon.IsVisible = false;
             CollectionViewModel.TrayPropertyChanged += () => _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
 
@@ -104,20 +128,11 @@ namespace EarTrumpet
 
         private void CompleteStartup()
         {
-            AddonManager.Load(shouldLoadInternalAddons: HasDevIdentity);
-            Exit += (_, __) => AddonManager.Shutdown();
-#if DEBUG
-            DebugHelpers.Add();
-#endif
+            // ══════════════════════════════════════════════════════════════
+            // STARTUP PHASE 2: UI (degraded mode if fails)
+            // ══════════════════════════════════════════════════════════════
             _mixerWindow = new WindowHolder(CreateMixerExperience);
             _settingsWindow = new WindowHolder(CreateSettingsExperience);
-
-            Settings.FlyoutHotkeyTyped += () => _flyoutViewModel.OpenFlyout(InputType.Keyboard);
-            Settings.MixerHotkeyTyped += () => _mixerWindow.OpenOrClose();
-            Settings.SettingsHotkeyTyped += () => _settingsWindow.OpenOrBringToFront();
-            Settings.AbsoluteVolumeUpHotkeyTyped += AbsoluteVolumeIncrement;
-            Settings.AbsoluteVolumeDownHotkeyTyped += AbsoluteVolumeDecrement;
-            Settings.RegisterHotkeys();
 
             _trayIcon.PrimaryInvoke += (_, type) => _flyoutViewModel.OpenFlyout(type);
             _trayIcon.SecondaryInvoke += (_, args) => _trayIcon.ShowContextMenu(GetTrayContextMenuItems(), args.Point);
@@ -126,15 +141,100 @@ namespace EarTrumpet
             _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
             _trayIcon.IsVisible = true;
 
-            // Media popup on hover with configurable delay
-            try { _mediaPopup = new MediaPopupWindow(Settings); }
-            catch (Exception ex) { System.Diagnostics.Trace.WriteLine($"MediaPopupWindow init failed: {ex.Message}"); }
+            // ══════════════════════════════════════════════════════════════
+            // STARTUP PHASE 3: Features (each isolated — failure = feature disabled)
+            // ══════════════════════════════════════════════════════════════
+
+            // 3a. Addons
+            try
+            {
+                AddonManager.Load(shouldLoadInternalAddons: HasDevIdentity);
+                Exit += (_, __) => AddonManager.Shutdown();
+            }
+            catch (Exception ex) { Trace.WriteLine($"Startup: Addons failed to load: {ex.Message}"); }
+
+#if DEBUG
+            try { DebugHelpers.Add(); }
+            catch (Exception ex) { Trace.WriteLine($"Startup: DebugHelpers failed: {ex.Message}"); }
+#endif
+
+            // 3b. Hotkeys
+            try
+            {
+                Settings.FlyoutHotkeyTyped += () => _flyoutViewModel.OpenFlyout(InputType.Keyboard);
+                Settings.MixerHotkeyTyped += () => _mixerWindow.OpenOrClose();
+                Settings.SettingsHotkeyTyped += () => _settingsWindow.OpenOrBringToFront();
+                Settings.AbsoluteVolumeUpHotkeyTyped += AbsoluteVolumeIncrement;
+                Settings.AbsoluteVolumeDownHotkeyTyped += AbsoluteVolumeDecrement;
+                Settings.SwitchDeviceHotkeyTyped += CycleDefaultDevice;
+                Settings.RegisterHotkeys();
+            }
+            catch (Exception ex) { Trace.WriteLine($"Startup: Hotkeys registration failed: {ex.Message}"); }
+
+            // 3c. Media popup
+            try
+            {
+                _mediaPopup = new MediaPopupWindow(Settings);
+                InitializeMediaPopup();
+            }
+            catch (Exception ex) { Trace.WriteLine($"Startup: MediaPopup failed: {ex.Message}"); }
+
+            // 3d. Health monitoring
+            try { HealthMonitor.Start(); }
+            catch (Exception ex) { Trace.WriteLine($"Startup: HealthMonitor failed: {ex.Message}"); }
+
+            // 3f. Update checker
+            try
+            {
+                _updateService = new DataModel.UpdateService();
+                _updateService.Channel = Settings.UpdateNotifyChannel;
+                _flyoutViewModel.SetUpdateService(_updateService);
+                _updateService.UpdateAvailableChanged += () =>
+                {
+                    if (_trayIconSource != null) _trayIconSource.ShowUpdateBadge = _updateService.IsUpdateAvailable;
+                };
+                if (Settings.AutoCheckForUpdates && Settings.UpdateNotifyChannel != DataModel.UpdateChannel.None)
+                {
+                    _updateService.Start();
+                }
+            }
+            catch (Exception ex) { Trace.WriteLine($"Startup: UpdateService failed: {ex.Message}"); }
+
+            // 3g. CLI pipe server
+            try
+            {
+                _cliHandler = new CliHandler(() => CollectionViewModel, () => Settings, () => _deviceManager);
+                if (_updateService != null) _cliHandler.SetUpdateServiceProvider(() => _updateService);
+                _pipeServer = new PipeServer();
+                _pipeServer.CommandReceived += _cliHandler.ProcessCommand;
+                _pipeServer.Start();
+                Exit += (_, __) => _pipeServer?.Dispose();
+            }
+            catch (Exception ex) { Trace.WriteLine($"Startup: PipeServer failed: {ex.Message}"); }
+
+            // 3e. First-run experience
+            try { DisplayFirstRunExperience(); }
+            catch (Exception ex) { Trace.WriteLine($"Startup: FirstRun dialog failed: {ex.Message}"); }
+
+            // 3h. What's New changelog (show after version upgrade, not on first run)
+            try { DisplayChangelogIfUpdated(); }
+            catch (Exception ex) { Trace.WriteLine($"Startup: Changelog failed: {ex.Message}"); }
+
+            Trace.WriteLine($"Startup: Complete in {Duration.TotalMilliseconds:F0}ms");
+        }
+
+        /// <summary>
+        /// Sets up media popup hover behavior. Isolated from CompleteStartup for clarity.
+        /// </summary>
+        private void InitializeMediaPopup()
+        {
+            if (_mediaPopup == null) return;
+
             _mediaPopupDelayTimer = new System.Windows.Threading.DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(Settings.MediaPopupHoverDelay)
             };
 
-            // Update timer interval when settings change
             Settings.MediaPopupSettingsChanged += () =>
             {
                 _mediaPopupDelayTimer.Interval = TimeSpan.FromSeconds(Settings.MediaPopupHoverDelay);
@@ -144,7 +244,6 @@ namespace EarTrumpet
             {
                 _mediaPopupDelayTimer.Stop();
 
-                // Check if we should only show when playing
                 if (Settings.MediaPopupShowOnlyWhenPlaying && !DataModel.MediaSessionService.Instance.IsMediaPlaying)
                 {
                     return;
@@ -154,21 +253,15 @@ namespace EarTrumpet
             };
             _mediaPopup.PopupHidden += (_, __) =>
             {
-                _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip()); // Restore tooltip when popup closes
+                _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
             };
             _trayIcon.MouseHoverChanged += (_, isOver) =>
             {
-                // Skip if media popup is disabled
-                if (!Settings.MediaPopupEnabled)
-                {
-                    return;
-                }
+                if (!Settings.MediaPopupEnabled) return;
 
                 if (isOver)
                 {
-                    // Hide tooltip immediately when hovering
                     _trayIcon.SetTooltip("");
-                    // Start delay timer
                     if (!_mediaPopup.IsShowing)
                     {
                         _mediaPopupDelayTimer.Start();
@@ -176,9 +269,7 @@ namespace EarTrumpet
                 }
                 else
                 {
-                    // Cancel delay timer if mouse leaves before delay
                     _mediaPopupDelayTimer.Stop();
-                    // Restore tooltip when leaving (if popup not showing)
                     if (!_mediaPopup.IsShowing)
                     {
                         _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
@@ -186,8 +277,6 @@ namespace EarTrumpet
                     _mediaPopup.StartHideTimer();
                 }
             };
-
-            DisplayFirstRunExperience();
         }
 
         private void trayIconScrolled(object _, int wheelDelta)
@@ -210,12 +299,51 @@ namespace EarTrumpet
 #endif
                 )
             {
-                Trace.WriteLine($"App DisplayFirstRunExperience Showing welcome dialog");
+                Trace.WriteLine($"App DisplayFirstRunExperience Showing onboarding");
                 Settings.HasShownFirstRun = true;
 
-                var dialog = new DialogWindow { DataContext = new WelcomeViewModel(Settings) };
-                dialog.Show();
-                dialog.RaiseWindow();
+                var vm = new OnboardingViewModel(Settings, _deviceManager);
+                var window = new OnboardingWindow { DataContext = vm };
+                vm.Completed += (s, e) => window.Close();
+                window.Show();
+            }
+        }
+
+        private void DisplayChangelogIfUpdated()
+        {
+            var currentVersion = App.PackageVersion?.ToString() ?? "";
+            var lastSeen = Settings.LastSeenVersion;
+
+#if DEBUG
+            // Hold Shift at startup to force changelog display
+            if (Keyboard.IsKeyDown(Key.LeftShift))
+            {
+                var window = new UI.Views.ChangelogWindow();
+                window.Show();
+                return;
+            }
+#endif
+
+            // Don't show on first run (onboarding handles that)
+            if (string.IsNullOrEmpty(lastSeen) && !Settings.HasShownFirstRun)
+            {
+                Settings.LastSeenVersion = currentVersion;
+                return;
+            }
+
+            // Show if version changed
+            if (lastSeen != currentVersion && Settings.HasShownFirstRun)
+            {
+                Settings.LastSeenVersion = currentVersion;
+                var window = new UI.Views.ChangelogWindow();
+                window.Show();
+            }
+            else if (string.IsNullOrEmpty(lastSeen))
+            {
+                // Existing user upgrading for the first time — show changelog
+                Settings.LastSeenVersion = currentVersion;
+                var window = new UI.Views.ChangelogWindow();
+                window.Show();
             }
         }
 
@@ -295,6 +423,17 @@ namespace EarTrumpet
                 ret.Add(new ContextMenuSeparator());
             }
 
+            if (_updateService != null && _updateService.IsUpdateAvailable)
+            {
+                ret.Add(new ContextMenuItem
+                {
+                    DisplayName = $"Mettre \u00e0 jour (v{_updateService.LatestVersion})",
+                    Glyph = "\xE896",
+                    Command = new RelayCommand(() => _updateService.OpenReleasePage()),
+                });
+                ret.Add(new ContextMenuSeparator());
+            }
+
             ret.AddRange(new List<ContextMenuItem>
                 {
                     new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.FullWindowTitleText, Command = new RelayCommand(_mixerWindow.OpenOrBringToFront) },
@@ -317,7 +456,7 @@ namespace EarTrumpet
                         new EarTrumpetMouseSettingsPageViewModel(Settings),
                         new EarTrumpetCommunitySettingsPageViewModel(Settings),
                         new EarTrumpetLegacySettingsPageViewModel(Settings),
-                        new EarTrumpetAboutPageViewModel(() => _errorReporter.DisplayDiagnosticData(), Settings)
+                        CreateAboutPage()
                     });
 
             var customizationCategory = new SettingsCategoryViewModel(
@@ -358,6 +497,13 @@ namespace EarTrumpet
             return category;
         }
 
+        private EarTrumpetAboutPageViewModel CreateAboutPage()
+        {
+            var vm = new EarTrumpetAboutPageViewModel(() => _errorReporter.DisplayDiagnosticData(), Settings);
+            if (_updateService != null) vm.SetUpdateService(_updateService);
+            return vm;
+        }
+
         private Window CreateMixerExperience() => new FullWindow { DataContext = new FullWindowViewModel(CollectionViewModel) };
 
         private void AbsoluteVolumeIncrement()
@@ -385,6 +531,19 @@ namespace EarTrumpet
                     device.IsAbsMuted = true;
                 }
             }
+        }
+
+        private void CycleDefaultDevice()
+        {
+            var devices = _deviceManager.Devices;
+            if (devices == null || devices.Count < 2) return;
+
+            var current = _deviceManager.Default;
+            var list = devices.ToList();
+            var idx = current != null ? list.FindIndex(d => d.Id == current.Id) : -1;
+            var next = list[(idx + 1) % list.Count];
+            _deviceManager.Default = next;
+            Trace.WriteLine($"CycleDefaultDevice: switched to '{next.DisplayName}'");
         }
     }
 }
