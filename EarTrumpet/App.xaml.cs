@@ -294,12 +294,13 @@ namespace EarTrumpet
 #endif
                 )
             {
-                Trace.WriteLine($"App DisplayFirstRunExperience Showing welcome dialog");
+                Trace.WriteLine($"App DisplayFirstRunExperience Showing onboarding");
                 Settings.HasShownFirstRun = true;
 
-                var dialog = new DialogWindow { DataContext = new WelcomeViewModel(Settings) };
-                dialog.Show();
-                dialog.RaiseWindow();
+                var vm = new OnboardingViewModel(Settings, _deviceManager);
+                var window = new OnboardingWindow { DataContext = vm };
+                vm.Completed += (s, e) => window.Close();
+                window.Show();
             }
         }
 
