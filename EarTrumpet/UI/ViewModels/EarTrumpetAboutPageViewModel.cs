@@ -15,6 +15,8 @@ namespace EarTrumpet.UI.ViewModels
         public ICommand OpenFeedbackCommand { get; }
         public ICommand OpenPrivacyPolicyCommand { get; }
         public ICommand CheckForUpdateCommand { get; }
+        public ICommand ExportSettingsCommand { get; }
+        public ICommand ImportSettingsCommand { get; }
         public string AboutText { get; }
 
         public bool IsTelemetryEnabled
@@ -141,6 +143,18 @@ namespace EarTrumpet.UI.ViewModels
             OpenFeedbackCommand = new RelayCommand(OpenGitHubIssueChooser);
             OpenPrivacyPolicyCommand = new RelayCommand(OpenPrivacyPolicy);
             CheckForUpdateCommand = new RelayCommand(CheckForUpdate);
+            ExportSettingsCommand = new RelayCommand(() => DataModel.SettingsExportService.ExportWithDialog(_settings));
+            ImportSettingsCommand = new RelayCommand(() =>
+            {
+                if (DataModel.SettingsExportService.ImportWithDialog(_settings))
+                {
+                    System.Windows.MessageBox.Show(
+                        "Settings imported successfully! Some changes may require restarting BetterTrumpet.",
+                        "Import Complete",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Information);
+                }
+            });
         }
 
         public void SetUpdateService(DataModel.UpdateService svc)

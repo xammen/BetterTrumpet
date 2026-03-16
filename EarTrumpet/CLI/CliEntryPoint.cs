@@ -67,6 +67,8 @@ namespace EarTrumpet.CLI
                 case "apply-profile":
                 case "watch":
                 case "check-update":
+                case "export-settings":
+                case "import-settings":
                 case "ping":
                     AttachConsole(ATTACH_PARENT_PROCESS);
                     HandleRemoteCommand(cliArgs);
@@ -138,6 +140,8 @@ namespace EarTrumpet.CLI
             Console.WriteLine("  --apply-profile NAME                    Apply a saved volume profile");
             Console.WriteLine("  --watch                                 Snapshot all devices/volumes (JSON)");
             Console.WriteLine("  --check-update                          Check for new version on GitHub");
+            Console.WriteLine("  --export-settings [path]                Export all settings to .btsettings file");
+            Console.WriteLine("  --import-settings <path>                Import settings from .btsettings file");
             Console.WriteLine("  --ping                                  Check if BetterTrumpet is running");
             Console.WriteLine("  --version                               Show version");
             Console.WriteLine("  --help                                  Show this help");

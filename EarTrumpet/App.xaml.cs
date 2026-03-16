@@ -166,6 +166,7 @@ namespace EarTrumpet
                 Settings.SettingsHotkeyTyped += () => _settingsWindow.OpenOrBringToFront();
                 Settings.AbsoluteVolumeUpHotkeyTyped += AbsoluteVolumeIncrement;
                 Settings.AbsoluteVolumeDownHotkeyTyped += AbsoluteVolumeDecrement;
+                Settings.SwitchDeviceHotkeyTyped += CycleDefaultDevice;
                 Settings.RegisterHotkeys();
             }
             catch (Exception ex) { Trace.WriteLine($"Startup: Hotkeys registration failed: {ex.Message}"); }
@@ -214,6 +215,10 @@ namespace EarTrumpet
             // 3e. First-run experience
             try { DisplayFirstRunExperience(); }
             catch (Exception ex) { Trace.WriteLine($"Startup: FirstRun dialog failed: {ex.Message}"); }
+
+            // 3h. What's New changelog (show after version upgrade, not on first run)
+            try { DisplayChangelogIfUpdated(); }
+            catch (Exception ex) { Trace.WriteLine($"Startup: Changelog failed: {ex.Message}"); }
 
             Trace.WriteLine($"Startup: Complete in {Duration.TotalMilliseconds:F0}ms");
         }
@@ -300,6 +305,44 @@ namespace EarTrumpet
                 var vm = new OnboardingViewModel(Settings, _deviceManager);
                 var window = new OnboardingWindow { DataContext = vm };
                 vm.Completed += (s, e) => window.Close();
+                window.Show();
+            }
+        }
+
+        private void DisplayChangelogIfUpdated()
+        {
+            var currentVersion = App.PackageVersion?.ToString() ?? "";
+            var lastSeen = Settings.LastSeenVersion;
+
+#if DEBUG
+            // Hold Shift at startup to force changelog display
+            if (Keyboard.IsKeyDown(Key.LeftShift))
+            {
+                var window = new UI.Views.ChangelogWindow();
+                window.Show();
+                return;
+            }
+#endif
+
+            // Don't show on first run (onboarding handles that)
+            if (string.IsNullOrEmpty(lastSeen) && !Settings.HasShownFirstRun)
+            {
+                Settings.LastSeenVersion = currentVersion;
+                return;
+            }
+
+            // Show if version changed
+            if (lastSeen != currentVersion && Settings.HasShownFirstRun)
+            {
+                Settings.LastSeenVersion = currentVersion;
+                var window = new UI.Views.ChangelogWindow();
+                window.Show();
+            }
+            else if (string.IsNullOrEmpty(lastSeen))
+            {
+                // Existing user upgrading for the first time — show changelog
+                Settings.LastSeenVersion = currentVersion;
+                var window = new UI.Views.ChangelogWindow();
                 window.Show();
             }
         }
@@ -488,6 +531,19 @@ namespace EarTrumpet
                     device.IsAbsMuted = true;
                 }
             }
+        }
+
+        private void CycleDefaultDevice()
+        {
+            var devices = _deviceManager.Devices;
+            if (devices == null || devices.Count < 2) return;
+
+            var current = _deviceManager.Default;
+            var list = devices.ToList();
+            var idx = current != null ? list.FindIndex(d => d.Id == current.Id) : -1;
+            var next = list[(idx + 1) % list.Count];
+            _deviceManager.Default = next;
+            Trace.WriteLine($"CycleDefaultDevice: switched to '{next.DisplayName}'");
         }
     }
 }

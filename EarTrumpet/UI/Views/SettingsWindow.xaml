@@ -189,6 +189,28 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Hotkey card: Switch Default Device -->
+                <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
+                        Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
+                                    Background="#15FFFFFF">
+                                <TextBlock Text="&#xE8AB;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="White" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Switch Default Device" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Style="{StaticResource BodySubText}" FontSize="12">
+                                    <Run Text="Default: " /><Run Text="{Binding DefaultSwitchDeviceHotKey, Mode=OneWay}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                        <ContentControl Content="{Binding SwitchDeviceHotkey}" IsTabStop="False" Margin="48,0,0,0" />
+                    </StackPanel>
+                </Border>
+
             </StackPanel>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:EarTrumpetMouseSettingsPageViewModel}">
@@ -2198,6 +2220,46 @@
                         </Hyperlink>
                     </TextBlock>
                 </StackPanel>
+
+                <!-- Export & Import settings card -->
+                <Border Margin="12,0,12,20"
+                        Padding="16"
+                        CornerRadius="8"
+                        Background="#1AFFFFFF">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
+                                    Background="#15FFFFFF">
+                                <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="White" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Export &amp; Import" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="Backup or restore all your settings"
+                                           Style="{StaticResource BodySubText}" FontSize="12" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <Border Style="{StaticResource ActionButtonBorder}" Margin="0,0,8,0"
+                                    MouseLeftButtonDown="ExportSettings_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xEDE1;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    <TextBlock Text="Export Settings" FontSize="12" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource ActionButtonBorder}"
+                                    MouseLeftButtonDown="ImportSettings_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE8B5;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    <TextBlock Text="Import Settings" FontSize="12" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
 
                 <!-- Health info (for power users) -->
                 <Border Margin="12,20,12,0"
