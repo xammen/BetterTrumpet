@@ -14,3 +14,16 @@ Get-ChocolateyWebFile @packageArgs
 
 # Create shim ignore file so choco doesn't auto-create a shim
 New-Item "$toolsDir\BetterTrumpet.exe.ignore" -Type File -Force | Out-Null
+
+# Create Start Menu shortcut
+$exePath = "$toolsDir\BetterTrumpet.exe"
+$startMenuDir = [Environment]::GetFolderPath('Programs')
+$shortcutPath = Join-Path $startMenuDir 'BetterTrumpet.lnk'
+Install-ChocolateyShortcut -ShortcutFilePath $shortcutPath -TargetPath $exePath -Description 'BetterTrumpet - Volume Control'
+
+# Optional: add to Windows startup (user can disable later in Settings)
+$startupDir = [Environment]::GetFolderPath('Startup')
+$startupShortcut = Join-Path $startupDir 'BetterTrumpet.lnk'
+Install-ChocolateyShortcut -ShortcutFilePath $startupShortcut -TargetPath $exePath -Description 'BetterTrumpet - Volume Control'
+
+Write-Host "BetterTrumpet installed. Shortcuts created in Start Menu and Startup." -ForegroundColor Green
