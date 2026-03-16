@@ -176,6 +176,7 @@
     <Compile Include="DataModel\WindowsAudio\WindowsAudioFactory.cs" />
     <Compile Include="DataModel\WindowsAudio\Internal\Helpers.cs" />
     <Compile Include="DataModel\Audio\SessionState.cs" />
+    <Compile Include="DataModel\Storage\Internal\JsonFileSettingsBag.cs" />
     <Compile Include="DataModel\Storage\Internal\RegistrySettingsBag.cs" />
     <Compile Include="DataModel\Storage\Serializer.cs" />
     <Compile Include="DataModel\Storage\StorageFactory.cs" />
