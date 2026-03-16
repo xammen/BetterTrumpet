@@ -127,7 +127,8 @@ namespace EarTrumpet
             _trayIcon.IsVisible = true;
 
             // Media popup on hover with configurable delay
-            _mediaPopup = new MediaPopupWindow(Settings);
+            try { _mediaPopup = new MediaPopupWindow(Settings); }
+            catch (Exception ex) { System.Diagnostics.Trace.WriteLine($"MediaPopupWindow init failed: {ex.Message}"); }
             _mediaPopupDelayTimer = new System.Windows.Threading.DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(Settings.MediaPopupHoverDelay)
