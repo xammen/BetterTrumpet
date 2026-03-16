@@ -185,6 +185,7 @@
     <Compile Include="Diagnosis\CrashHandler.cs" />
     <Compile Include="Diagnosis\ErrorReporter.cs" />
     <Compile Include="Diagnosis\FileTraceListener.cs" />
+    <Compile Include="Diagnosis\HealthMonitor.cs" />
     <Compile Include="Diagnosis\SnapshotData.cs" />
     <Compile Include="Extensibility\EarTrumpetAddon.cs" />
     <Compile Include="Extensibility\EarTrumpetAddonManifest.cs" />
