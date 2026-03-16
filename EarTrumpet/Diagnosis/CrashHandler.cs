@@ -1,3 +1,4 @@
+using Sentry;
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -43,6 +44,13 @@ namespace EarTrumpet.Diagnosis
             var message = ex?.ToString() ?? e.ExceptionObject?.ToString() ?? "Unknown exception";
 
             Trace.WriteLine($"## FATAL UNHANDLED EXCEPTION ##: IsTerminating={e.IsTerminating}\n{message}");
+
+            // Forward to Sentry before the process dies
+            if (ErrorReporter.IsSentryActive && ex != null)
+            {
+                try { SentrySdk.CaptureException(ex); SentrySdk.FlushAsync(TimeSpan.FromSeconds(2)).Wait(); }
+                catch { }
+            }
 
             if (e.IsTerminating)
             {

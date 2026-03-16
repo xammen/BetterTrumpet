@@ -1,4 +1,5 @@
 using EarTrumpet.DataModel.Storage;
+using Sentry;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -7,14 +8,29 @@ namespace EarTrumpet.Diagnosis
 {
     class ErrorReporter
     {
+        // ═══════════════════════════════════════════════════════════════
+        // SENTRY DSN — Replace with your project's DSN from sentry.io
+        // Free plan: 5K events/month, 1 user, 30 days retention
+        // Set to empty string to disable Sentry entirely
+        // ═══════════════════════════════════════════════════════════════
+        private const string SentryDsn = ""; // TODO: Set your Sentry DSN here
+
         private static ErrorReporter s_instance;
         private readonly CircularBufferTraceListener _listener;
         private readonly FileTraceListener _fileListener;
+        private readonly AppSettings _settings;
+        private static IDisposable _sentryDisposable;
+
+        /// <summary>
+        /// True if Sentry is currently active (DSN configured + user opted in).
+        /// </summary>
+        public static bool IsSentryActive => _sentryDisposable != null;
 
         public ErrorReporter(AppSettings settings)
         {
             Debug.Assert(s_instance == null);
             s_instance = this;
+            _settings = settings;
 
             _listener = new CircularBufferTraceListener();
             Trace.Listeners.Clear();
@@ -30,7 +46,90 @@ namespace EarTrumpet.Diagnosis
                 $".NET: {Environment.Version}, " +
                 $"Portable: {StorageFactory.IsPortableMode}");
 
-            // Telemetry: Sentry will be initialized here in v3 (Phase 3)
+            // Initialize Sentry if user has opted in (GDPR)
+            InitializeSentry();
+        }
+
+        /// <summary>
+        /// Initializes Sentry crash reporting if:
+        /// 1. A DSN is configured (not empty)
+        /// 2. The user has opted in via Settings (IsTelemetryEnabled)
+        /// Can be called again to re-initialize after opt-in changes.
+        /// </summary>
+        public void InitializeSentry()
+        {
+            // Dispose previous instance if re-initializing
+            _sentryDisposable?.Dispose();
+            _sentryDisposable = null;
+
+            if (string.IsNullOrEmpty(SentryDsn))
+            {
+                Trace.WriteLine("Sentry: DSN not configured — crash reporting disabled");
+                return;
+            }
+
+            if (!_settings.IsTelemetryEnabled)
+            {
+                Trace.WriteLine("Sentry: User has not opted in — crash reporting disabled (GDPR)");
+                return;
+            }
+
+            try
+            {
+                _sentryDisposable = SentrySdk.Init(options =>
+                {
+                    options.Dsn = SentryDsn;
+                    options.Release = $"bettertrumpet@{App.PackageVersion}";
+                    options.Environment = 
+#if DEBUG
+                        "development";
+#else
+                        "production";
+#endif
+
+                    // Performance: sample 20% of transactions
+                    options.TracesSampleRate = 0.2;
+
+                    // Privacy: don't send PII
+                    options.SendDefaultPii = false;
+
+                    // Attach log breadcrumbs (last 50 trace messages)
+                    options.MaxBreadcrumbs = 50;
+
+                    // Auto session tracking
+                    options.AutoSessionTracking = true;
+
+                    // Capture unhandled exceptions (CrashHandler also catches them)
+                    options.AttachStacktrace = true;
+                });
+
+                // Set context tags
+                SentrySdk.ConfigureScope(scope =>
+                {
+                    scope.SetTag("portable_mode", StorageFactory.IsPortableMode.ToString());
+                    scope.SetTag("os_version", Environment.OSVersion.Version.ToString());
+                    scope.SetTag("dotnet_version", Environment.Version.ToString());
+                });
+
+                Trace.WriteLine("Sentry: Initialized — crash reporting active");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Sentry: Failed to initialize: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Shuts down Sentry cleanly (call on app exit).
+        /// </summary>
+        public static void Shutdown()
+        {
+            try
+            {
+                _sentryDisposable?.Dispose();
+                _sentryDisposable = null;
+            }
+            catch { }
         }
 
         public void DisplayDiagnosticData()
@@ -62,11 +161,21 @@ namespace EarTrumpet.Diagnosis
         /// </summary>
         public string GetLogDirectoryPath() => _fileListener?.GetLogDirectory();
 
-        public static void LogWarning(Exception ex) => s_instance?.LogWarningInstance(ex);
+        public static void LogWarning(Exception ex)
+        {
+            s_instance?.LogWarningInstance(ex);
+        }
         
         private void LogWarningInstance(Exception ex)
         {
             Trace.WriteLine($"## Warning Notify ##: {ex}");
+
+            // Forward to Sentry as a non-fatal event
+            if (IsSentryActive)
+            {
+                try { SentrySdk.CaptureException(ex); }
+                catch { /* Sentry should never crash the app */ }
+            }
         }
     }
 }
