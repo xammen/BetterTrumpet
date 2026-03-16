@@ -69,6 +69,7 @@ namespace EarTrumpet.UI.ViewModels
         {
             _settings = settings;
             Title = "Media Popup";
+            Subtitle = "Control how media controls appear on tray hover.";
             Glyph = "\xE8D6"; // Music icon
         }
     }
