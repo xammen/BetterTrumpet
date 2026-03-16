@@ -2029,6 +2029,152 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Update notifications card -->
+                <Border Margin="12,0,12,20"
+                        Padding="16"
+                        CornerRadius="8"
+                        Background="#1AFFFFFF">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
+                                    Background="#15FFFFFF">
+                                <TextBlock Text="&#xE896;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="White" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Mises &#224; jour" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="Notifications de nouvelles versions"
+                                           Style="{StaticResource BodySubText}" FontSize="12" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Channel selector — segmented control -->
+                        <TextBlock Text="Me notifier pour :" FontSize="12" Margin="0,0,0,8" Opacity="0.7" />
+                        <Border CornerRadius="8" Background="#08FFFFFF" Padding="3"
+                                BorderBrush="#15FFFFFF" BorderThickness="1" Margin="0,0,0,6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- All -->
+                                <Border Grid.Column="0" Padding="0,8" CornerRadius="6" Cursor="Hand"
+                                        MouseLeftButtonDown="UpdateChannel0_Click">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding UpdateChannelIndex}" Value="0">
+                                                    <Setter Property="Background" Value="#20FFFFFF" />
+                                                </DataTrigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#12FFFFFF" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="Toutes" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Patch+" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Minor + Major -->
+                                <Border Grid.Column="1" Padding="0,8" CornerRadius="6" Cursor="Hand"
+                                        MouseLeftButtonDown="UpdateChannel1_Click">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding UpdateChannelIndex}" Value="1">
+                                                    <Setter Property="Background" Value="#20FFFFFF" />
+                                                </DataTrigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#12FFFFFF" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="Mineures" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Minor+" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Major only -->
+                                <Border Grid.Column="2" Padding="0,8" CornerRadius="6" Cursor="Hand"
+                                        MouseLeftButtonDown="UpdateChannel2_Click">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding UpdateChannelIndex}" Value="2">
+                                                    <Setter Property="Background" Value="#20FFFFFF" />
+                                                </DataTrigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#12FFFFFF" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="Majeures" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Major" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- None -->
+                                <Border Grid.Column="3" Padding="0,8" CornerRadius="6" Cursor="Hand"
+                                        MouseLeftButtonDown="UpdateChannel3_Click">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding UpdateChannelIndex}" Value="3">
+                                                    <Setter Property="Background" Value="#20FFFFFF" />
+                                                </DataTrigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#12FFFFFF" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="Aucune" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Off" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <TextBlock Text="{Binding UpdateChannelDescription}"
+                                   FontSize="11" Opacity="0.45" TextWrapping="Wrap"
+                                   Margin="0,0,0,12" />
+
+                        <!-- Separator -->
+                        <Border Height="1" Background="#10FFFFFF" Margin="0,0,0,12" />
+
+                        <!-- Status + manual check -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding UpdateStatusText}" FontSize="12" />
+                                <TextBlock Text="{Binding LastCheckText}" FontSize="11" Opacity="0.4" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <Border Grid.Column="1" Style="{StaticResource ActionButtonBorder}"
+                                    MouseLeftButtonDown="CheckUpdate_Click">
+                                <TextBlock Text="V&#233;rifier" FontSize="12" VerticalAlignment="Center" />
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
                 <!-- Links -->
                 <StackPanel Margin="12,0,12,0">
                     <TextBlock Style="{StaticResource HyperlinkBlock}" Margin="0,0,0,4">

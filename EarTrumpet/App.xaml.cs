@@ -1,3 +1,4 @@
+using EarTrumpet.CLI;
 using EarTrumpet.DataModel;
 using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.Diagnosis;
@@ -37,13 +38,19 @@ namespace EarTrumpet
         private FlyoutViewModel _flyoutViewModel;
 
         private ShellNotifyIcon _trayIcon;
+        private TaskbarIconSource _trayIconSource;
         private WindowHolder _mixerWindow;
         private WindowHolder _settingsWindow;
         private ErrorReporter _errorReporter;
         private MediaPopupWindow _mediaPopup;
         private System.Windows.Threading.DispatcherTimer _mediaPopupDelayTimer;
+        private PipeServer _pipeServer;
+        private CliHandler _cliHandler;
+        private DataModel.Audio.IAudioDeviceManager _deviceManager;
+        private DataModel.UpdateService _updateService;
 
         public static AppSettings Settings { get; private set; }
+        public static VolumeUndoService UndoService { get; } = new VolumeUndoService();
 
         public void OpenMixerWindow()
         {
@@ -52,6 +59,15 @@ namespace EarTrumpet
 
         private void OnAppStartup(object sender, StartupEventArgs e)
         {
+            // ══════════════════════════════════════════════════════════════
+            // CLI INTERCEPT: If launched with CLI args, send to running instance and exit
+            // ══════════════════════════════════════════════════════════════
+            if (CliEntryPoint.TryHandleCliArgs(Environment.GetCommandLineArgs().Skip(1).ToArray()))
+            {
+                Shutdown();
+                return;
+            }
+
             // ══════════════════════════════════════════════════════════════
             // STARTUP PHASE 1: Core (fatal if fails — crash report + exit)
             // ══════════════════════════════════════════════════════════════
@@ -94,11 +110,12 @@ namespace EarTrumpet
         {
             ((UI.Themes.Manager)Resources["ThemeManager"]).Load();
 
-            var deviceManager = WindowsAudioFactory.Create(AudioDeviceKind.Playback);
-            deviceManager.Loaded += (_, __) => CompleteStartup();
-            CollectionViewModel = new DeviceCollectionViewModel(deviceManager, Settings);
+            _deviceManager = WindowsAudioFactory.Create(AudioDeviceKind.Playback);
+            _deviceManager.Loaded += (_, __) => CompleteStartup();
+            CollectionViewModel = new DeviceCollectionViewModel(_deviceManager, Settings);
 
-            _trayIcon = new ShellNotifyIcon(new TaskbarIconSource(CollectionViewModel, Settings));
+            _trayIconSource = new TaskbarIconSource(CollectionViewModel, Settings);
+            _trayIcon = new ShellNotifyIcon(_trayIconSource);
             Exit += (_, __) => _trayIcon.IsVisible = false;
             CollectionViewModel.TrayPropertyChanged += () => _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
 
@@ -164,6 +181,35 @@ namespace EarTrumpet
             // 3d. Health monitoring
             try { HealthMonitor.Start(); }
             catch (Exception ex) { Trace.WriteLine($"Startup: HealthMonitor failed: {ex.Message}"); }
+
+            // 3f. Update checker
+            try
+            {
+                _updateService = new DataModel.UpdateService();
+                _updateService.Channel = Settings.UpdateNotifyChannel;
+                _flyoutViewModel.SetUpdateService(_updateService);
+                _updateService.UpdateAvailableChanged += () =>
+                {
+                    if (_trayIconSource != null) _trayIconSource.ShowUpdateBadge = _updateService.IsUpdateAvailable;
+                };
+                if (Settings.AutoCheckForUpdates && Settings.UpdateNotifyChannel != DataModel.UpdateChannel.None)
+                {
+                    _updateService.Start();
+                }
+            }
+            catch (Exception ex) { Trace.WriteLine($"Startup: UpdateService failed: {ex.Message}"); }
+
+            // 3g. CLI pipe server
+            try
+            {
+                _cliHandler = new CliHandler(() => CollectionViewModel, () => Settings, () => _deviceManager);
+                if (_updateService != null) _cliHandler.SetUpdateServiceProvider(() => _updateService);
+                _pipeServer = new PipeServer();
+                _pipeServer.CommandReceived += _cliHandler.ProcessCommand;
+                _pipeServer.Start();
+                Exit += (_, __) => _pipeServer?.Dispose();
+            }
+            catch (Exception ex) { Trace.WriteLine($"Startup: PipeServer failed: {ex.Message}"); }
 
             // 3e. First-run experience
             try { DisplayFirstRunExperience(); }
@@ -333,6 +379,17 @@ namespace EarTrumpet
                 ret.Add(new ContextMenuSeparator());
             }
 
+            if (_updateService != null && _updateService.IsUpdateAvailable)
+            {
+                ret.Add(new ContextMenuItem
+                {
+                    DisplayName = $"Mettre \u00e0 jour (v{_updateService.LatestVersion})",
+                    Glyph = "\xE896",
+                    Command = new RelayCommand(() => _updateService.OpenReleasePage()),
+                });
+                ret.Add(new ContextMenuSeparator());
+            }
+
             ret.AddRange(new List<ContextMenuItem>
                 {
                     new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.FullWindowTitleText, Command = new RelayCommand(_mixerWindow.OpenOrBringToFront) },
@@ -355,7 +412,7 @@ namespace EarTrumpet
                         new EarTrumpetMouseSettingsPageViewModel(Settings),
                         new EarTrumpetCommunitySettingsPageViewModel(Settings),
                         new EarTrumpetLegacySettingsPageViewModel(Settings),
-                        new EarTrumpetAboutPageViewModel(() => _errorReporter.DisplayDiagnosticData(), Settings)
+                        CreateAboutPage()
                     });
 
             var customizationCategory = new SettingsCategoryViewModel(
@@ -394,6 +451,13 @@ namespace EarTrumpet
                 category.Pages.Add(new AddonAboutPageViewModel(addon));
             }
             return category;
+        }
+
+        private EarTrumpetAboutPageViewModel CreateAboutPage()
+        {
+            var vm = new EarTrumpetAboutPageViewModel(() => _errorReporter.DisplayDiagnosticData(), Settings);
+            if (_updateService != null) vm.SetUpdateService(_updateService);
+            return vm;
         }
 
         private Window CreateMixerExperience() => new FullWindow { DataContext = new FullWindowViewModel(CollectionViewModel) };
