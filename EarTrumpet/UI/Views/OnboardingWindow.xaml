@@ -426,8 +426,94 @@
                         </Border>
                         <!-- Reassuring line under telemetry -->
                         <TextBlock Text="&#x2139;  Cela nous aide &#224; corriger les bugs sans jamais collecter de donn&#233;es priv&#233;es."
-                                   FontSize="11" Foreground="{StaticResource T3}" Margin="4,6,0,16"
+                                   FontSize="11" Foreground="{StaticResource T3}" Margin="4,6,0,12"
                                    TextWrapping="Wrap"/>
+
+                        <!-- Update channel -->
+                        <Border Padding="16,14" CornerRadius="10" Margin="0,0,0,4"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock Text="Mises &#224; jour automatiques" FontSize="13" FontWeight="SemiBold"
+                                           Foreground="{StaticResource T1}" Margin="0,0,0,10"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <!-- All -->
+                                    <Border Grid.Column="0" Padding="0,7" CornerRadius="6" Cursor="Hand"
+                                            Margin="0,0,3,0"
+                                            MouseLeftButtonDown="OnboardingUpdateChannel0_Click">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#08FFFFFF"/>
+                                                <Setter Property="BorderThickness" Value="1.5"/>
+                                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding UpdateChannelIndex}" Value="0">
+                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                                        <Setter Property="Background">
+                                                            <Setter.Value><SolidColorBrush Color="{StaticResource AccentColor}" Opacity="0.1"/></Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <TextBlock Text="Toutes" FontSize="12" FontWeight="SemiBold"
+                                                       HorizontalAlignment="Center" Foreground="{StaticResource T1}"/>
+                                            <TextBlock Text="Recommand&#233;" FontSize="9" Opacity="0.5"
+                                                       HorizontalAlignment="Center" Foreground="{StaticResource AccentBrush}"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <!-- Minor+Major -->
+                                    <Border Grid.Column="1" Padding="0,7" CornerRadius="6" Cursor="Hand"
+                                            Margin="0,0,3,0"
+                                            MouseLeftButtonDown="OnboardingUpdateChannel1_Click">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#08FFFFFF"/>
+                                                <Setter Property="BorderThickness" Value="1.5"/>
+                                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding UpdateChannelIndex}" Value="1">
+                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                                        <Setter Property="Background">
+                                                            <Setter.Value><SolidColorBrush Color="{StaticResource AccentColor}" Opacity="0.1"/></Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="Mineures" FontSize="12" FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center" Foreground="{StaticResource T1}"/>
+                                    </Border>
+                                    <!-- None -->
+                                    <Border Grid.Column="2" Padding="0,7" CornerRadius="6" Cursor="Hand"
+                                            MouseLeftButtonDown="OnboardingUpdateChannel3_Click">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#08FFFFFF"/>
+                                                <Setter Property="BorderThickness" Value="1.5"/>
+                                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding UpdateChannelIndex}" Value="3">
+                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                                        <Setter Property="Background">
+                                                            <Setter.Value><SolidColorBrush Color="{StaticResource AccentColor}" Opacity="0.1"/></Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="Aucune" FontSize="12" FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center" Foreground="{StaticResource T1}"/>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
 
                         <!-- Startup -->
                         <Border Padding="16,14" CornerRadius="10"

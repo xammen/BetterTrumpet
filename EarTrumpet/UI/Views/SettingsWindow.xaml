@@ -2179,7 +2179,7 @@
                         <!-- Separator -->
                         <Border Height="1" Background="#10FFFFFF" Margin="0,0,0,12" />
 
-                        <!-- Status + manual check -->
+                        <!-- Status + dynamic check/install button -->
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -2189,9 +2189,67 @@
                                 <TextBlock Text="{Binding UpdateStatusText}" FontSize="12" />
                                 <TextBlock Text="{Binding LastCheckText}" FontSize="11" Opacity="0.4" Margin="0,2,0,0" />
                             </StackPanel>
-                            <Border Grid.Column="1" Style="{StaticResource ActionButtonBorder}"
+
+                            <!-- Check button (when no update) -->
+                            <Border x:Name="CheckUpdateBtn" Grid.Column="1" Style="{StaticResource ActionButtonBorder}"
                                     MouseLeftButtonDown="CheckUpdate_Click">
+                                <Border.Style>
+                                    <Style TargetType="Border" BasedOn="{StaticResource ActionButtonBorder}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsUpdateAvailable}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
                                 <TextBlock Text="V&#233;rifier" FontSize="12" VerticalAlignment="Center" />
+                            </Border>
+
+                            <!-- Install button (when update available) — accent glow -->
+                            <Border x:Name="InstallUpdateBtn" Grid.Column="1" CornerRadius="8"
+                                    Padding="16,8" Cursor="Hand"
+                                    MouseLeftButtonDown="InstallUpdate_Click">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#3B9EFF" Offset="0"/>
+                                                    <GradientStop Color="#7C4DFF" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsUpdateAvailable}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsDownloading}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                            <GradientStop Color="#5BB0FF" Offset="0"/>
+                                                            <GradientStop Color="#9C6AFF" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#3B9EFF" BlurRadius="16" ShadowDepth="0" Opacity="0.4"/>
+                                </Border.Effect>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE896;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                               Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock x:Name="InstallBtnText" Text="Mettre &#224; jour" FontSize="12"
+                                               FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                </StackPanel>
                             </Border>
                         </Grid>
                     </StackPanel>
