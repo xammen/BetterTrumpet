@@ -88,7 +88,10 @@ Name: "{autodesktop}\BetterTrumpet"; Filename: "{app}\BetterTrumpet.exe"; Tasks:
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "BetterTrumpet"; ValueData: """{app}\BetterTrumpet.exe"""; Flags: uninsdeletevalue; Tasks: startup
 
 [Run]
+; After normal install: checkbox "Launch BetterTrumpet" (skipped in silent mode)
 Filename: "{app}\BetterTrumpet.exe"; Description: "Lancer BetterTrumpet"; Flags: nowait postinstall skipifsilent
+; After silent/verysilent install: always relaunch (no checkbox)
+Filename: "{app}\BetterTrumpet.exe"; Flags: nowait postinstall skipifnotsilent
 
 [UninstallRun]
 Filename: "taskkill"; Parameters: "/F /IM BetterTrumpet.exe"; Flags: runhidden; RunOnceId: "KillApp"
