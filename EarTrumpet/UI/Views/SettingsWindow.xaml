@@ -969,7 +969,8 @@
                     <!-- ═══════════════════════════════════════════════════ -->
                     <!-- TAB 0: DYNAMIC — Album Art Theme                   -->
                     <!-- ═══════════════════════════════════════════════════ -->
-                    <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
+                    <Border x:Name="TabPanelDynamic"
+                            Margin="0,0,0,20" Padding="20" CornerRadius="10"
                             Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                         <Border.Style>
                             <Style TargetType="Border">
@@ -1013,7 +1014,8 @@
                     <!-- ═══════════════════════════════════════════════════ -->
                     <!-- TAB 1: PRESETS — Visual Theme Grid (2 columns)     -->
                     <!-- ═══════════════════════════════════════════════════ -->
-                    <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
+                    <Border x:Name="TabPanelPresets"
+                            Margin="0,0,0,20" Padding="20" CornerRadius="10"
                             Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                         <Border.Style>
                             <Style TargetType="Border">
@@ -1239,7 +1241,7 @@
                     <!-- ═══════════════════════════════════════════════════ -->
                     <!-- TAB 2: CUSTOM — Color swatches + My Themes         -->
                     <!-- ═══════════════════════════════════════════════════ -->
-                    <StackPanel>
+                    <StackPanel x:Name="TabPanelCustom">
                         <StackPanel.Style>
                             <Style TargetType="StackPanel">
                                 <Setter Property="Visibility" Value="Collapsed" />
@@ -3164,11 +3166,13 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
                             <ContentControl Content="{Binding Selected.Selected.Header}" IsTabStop="False" />
-                            <ScrollViewer Grid.Row="1"
+                            <ScrollViewer x:Name="PageScrollViewer"
+                                          Grid.Row="1"
                                           b:ScrollViewerEx.ScrollToTopOnChanged="{Binding Selected.Selected}"
                                           HorizontalScrollBarVisibility="Disabled"
                                           VerticalScrollBarVisibility="Auto">
-                                <ContentControl Margin="12,0,0,0"
+                                <ContentControl x:Name="PageContent"
+                                                Margin="12,0,0,0"
                                                 Content="{Binding Selected.Selected}"
                                                 FocusVisualStyle="{x:Null}"
                                                 Focusable="False"
