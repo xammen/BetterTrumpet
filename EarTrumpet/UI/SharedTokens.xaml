@@ -172,6 +172,24 @@
         </Style.Triggers>
     </Style>
 
+    <!-- Segmented control item — base style for FPS, categories, update channels -->
+    <!-- Each instance adds its own DataTrigger for selection state -->
+    <Style x:Key="BT.SegmentItem" TargetType="Border">
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="CornerRadius" Value="{StaticResource BT.Radius.SM}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#10FFFFFF"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Segmented control item — selected state (apply via DataTrigger in each instance) -->
+    <!-- Use Background="#18FFFFFF" when selected -->
+
     <!-- Separator line — 1px alpha-white -->
     <Style x:Key="BT.Separator" TargetType="Border">
         <Setter Property="Height" Value="1"/>
