@@ -8,6 +8,20 @@ using static EarTrumpet.Interop.User32;
 
 namespace EarTrumpet
 {
+    /// <summary>
+    /// Visual style for the peak meter display.
+    /// Classic uses the original solid Border bars.
+    /// Unicode styles render text characters for a retro/artistic look.
+    /// </summary>
+    public enum PeakMeterStyle
+    {
+        Classic = 0,   // Original solid bars (Border)
+        Dotted = 1,    // Braille dots: ⣿⣿⣿⣀⣀⣀
+        Blocks = 2,    // Block elements: ▓▓▓▒▒░░
+        Bars = 3,      // Thin bars: ┃┃┃┃╎╎╎
+        Wave = 4,      // Wavy: ≋≋≋≋⋯⋯⋯
+    }
+
     public class AppSettings
     {
         public event EventHandler<bool> UseLegacyIconChanged;
@@ -345,6 +359,25 @@ namespace EarTrumpet
                 if (!_batchMode) CustomSliderColorsChanged?.Invoke();
             }
         }
+
+        // Peak meter visual style: Classic (solid bars), Dotted, Blocks, Bars, Wave
+        public PeakMeterStyle PeakMeterStyle
+        {
+            get
+            {
+                var val = _settings.Get("PeakMeterStyle", 0);
+                return (PeakMeterStyle)System.Math.Min(val, 4);
+            }
+            set
+            {
+                _settings.Set("PeakMeterStyle", (int)value);
+                PeakMeterStyleChanged?.Invoke();
+                if (!_batchMode) CustomSliderColorsChanged?.Invoke();
+            }
+        }
+
+        // Event fired when peak meter style changes (triggers visibility toggle in VolumeSlider)
+        public event Action PeakMeterStyleChanged;
 
         // Custom saved themes (JSON array)
         public string CustomThemesJson
