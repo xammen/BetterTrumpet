@@ -77,129 +77,97 @@ namespace EarTrumpet.UI.Views
         private void ParseMarkdownToUI(string markdown)
         {
             var lines = markdown.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            StackPanel currentSection = null;
 
             foreach (var rawLine in lines)
             {
                 var line = rawLine.Trim();
 
                 if (string.IsNullOrWhiteSpace(line))
-                {
                     continue;
-                }
 
-                // ## H2 — Main title (e.g. "## BetterTrumpet v3.0.3")
+                // ## H2 — Main title → skip (version badge already shows it)
                 if (line.StartsWith("## "))
-                {
-                    // Skip the main title since we already show version in the badge
                     continue;
-                }
 
-                // ### H3 — Section header (e.g. "### Fix", "### New")
+                // ### H3 — Section header → new section card
                 if (line.StartsWith("### "))
                 {
                     var title = line.Substring(4).Trim();
                     AddSectionHeader(GetSectionGlyph(title), title);
+                    currentSection = new StackPanel();
+                    var card = new Border
+                    {
+                        CornerRadius = new CornerRadius(10),
+                        Background = _surfaceBrush,
+                        BorderBrush = new SolidColorBrush(Color.FromArgb(0x08, 0xFF, 0xFF, 0xFF)),
+                        BorderThickness = new Thickness(1),
+                        Padding = new Thickness(4, 8, 4, 8),
+                        Margin = new Thickness(0, 0, 0, 8),
+                        Child = currentSection,
+                    };
+                    ContentPanel.Children.Add(card);
                     continue;
                 }
 
-                // - Bullet item → individual card per item
+                // - Bullet item → add to current section card
                 if (line.StartsWith("- "))
                 {
                     var text = line.Substring(2).Trim();
-                    AddFeatureCard(text);
+                    var target = currentSection ?? ContentPanel;
+                    AddBulletRow(target, text);
                     continue;
                 }
 
-                // Plain text paragraph
-                ContentPanel.Children.Add(new TextBlock
+                // Plain text → add to current section or root
+                var target2 = currentSection ?? ContentPanel;
+                target2.Children.Add(new TextBlock
                 {
                     Text = StripMarkdownFormatting(line),
-                    FontSize = 13,
-                    Foreground = _t2,
+                    FontSize = 12,
+                    Foreground = _t3,
                     TextWrapping = TextWrapping.Wrap,
-                    LineHeight = 20,
-                    Margin = new Thickness(0, 0, 0, 8),
+                    LineHeight = 18,
+                    Margin = new Thickness(14, 4, 14, 4),
                 });
             }
         }
 
         /// <summary>
-        /// Renders a bullet item as an individual card.
-        /// If the text contains **bold** — title, the bold becomes the card title
-        /// and the rest becomes the description below it.
+        /// Renders a bullet row inside a section card.
+        /// Parses **bold** — description into a compact two-line layout.
         /// </summary>
-        private void AddFeatureCard(string markdownText)
+        private void AddBulletRow(Panel parent, string markdownText)
         {
-            // Parse "**Title** — description" pattern
-            string title = null;
-            string description = null;
+            var row = new Grid { Margin = new Thickness(10, 6, 10, 6) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(16) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            int boldStart = markdownText.IndexOf("**");
-            int boldEnd = boldStart >= 0 ? markdownText.IndexOf("**", boldStart + 2) : -1;
-
-            if (boldStart >= 0 && boldEnd > boldStart)
+            // Accent dot
+            var dot = new Border
             {
-                title = markdownText.Substring(boldStart + 2, boldEnd - boldStart - 2);
-                var rest = markdownText.Substring(boldEnd + 2).Trim();
-                // Strip leading dash/emdash separator
-                if (rest.StartsWith("—") || rest.StartsWith("-") || rest.StartsWith("–"))
-                    rest = rest.Substring(1).Trim();
-                description = rest;
-            }
-            else
-            {
-                description = StripMarkdownFormatting(markdownText);
-            }
-
-            var card = new Border
-            {
-                CornerRadius = new CornerRadius(10),
-                Background = _surfaceBrush,
-                BorderBrush = new SolidColorBrush(Color.FromArgb(0x08, 0xFF, 0xFF, 0xFF)),
-                BorderThickness = new Thickness(1),
-                Padding = new Thickness(14, 12, 14, 12),
-                Margin = new Thickness(0, 0, 0, 6),
+                Width = 5, Height = 5,
+                CornerRadius = new CornerRadius(2.5),
+                Background = new SolidColorBrush(_accent),
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(0, 5, 0, 0),
             };
+            Grid.SetColumn(dot, 0);
+            row.Children.Add(dot);
 
-            var stack = new StackPanel();
-
-            if (title != null)
+            // Text content
+            var textBlock = new TextBlock
             {
-                // Title row with accent dot
-                var titleRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 4) };
-                titleRow.Children.Add(new Border
-                {
-                    Width = 6, Height = 6,
-                    CornerRadius = new CornerRadius(3),
-                    Background = new SolidColorBrush(_accent),
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Margin = new Thickness(0, 0, 8, 0),
-                });
-                titleRow.Children.Add(new TextBlock
-                {
-                    Text = title,
-                    FontSize = 13,
-                    FontWeight = FontWeights.SemiBold,
-                    Foreground = _t1,
-                });
-                stack.Children.Add(titleRow);
-            }
+                FontSize = 12,
+                Foreground = _t2,
+                TextWrapping = TextWrapping.Wrap,
+                LineHeight = 18,
+            };
+            ParseInlineMarkdown(textBlock, markdownText);
+            Grid.SetColumn(textBlock, 1);
+            row.Children.Add(textBlock);
 
-            if (!string.IsNullOrEmpty(description))
-            {
-                stack.Children.Add(new TextBlock
-                {
-                    Text = description,
-                    FontSize = 12,
-                    Foreground = _t3,
-                    TextWrapping = TextWrapping.Wrap,
-                    LineHeight = 18,
-                    Margin = title != null ? new Thickness(14, 0, 0, 0) : new Thickness(0),
-                });
-            }
-
-            card.Child = stack;
-            ContentPanel.Children.Add(card);
+            parent.Children.Add(row);
         }
 
         /// <summary>
