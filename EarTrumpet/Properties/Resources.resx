@@ -887,6 +887,12 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
   <data name="SettingsPeakMeterDesc" xml:space="preserve">
     <value>Audio level visualization refresh</value>
   </data>
+  <data name="SettingsPeakMeterStyle" xml:space="preserve">
+    <value>Peak Meter Style</value>
+  </data>
+  <data name="SettingsPeakMeterStyleDesc" xml:space="preserve">
+    <value>Choose how the audio level meter looks</value>
+  </data>
   <data name="SettingsDynamicAlbumArt" xml:space="preserve">
     <value>Dynamic Album Art Theme</value>
   </data>

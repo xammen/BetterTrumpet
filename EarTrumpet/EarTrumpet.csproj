@@ -406,6 +406,7 @@
     </Compile>
     <Compile Include="Interop\Helpers\SingleInstanceAppMutex.cs" />
     <Compile Include="UI\Controls\VolumeSlider.cs" />
+    <Compile Include="UI\Controls\UnicodePeakMeterRenderer.cs" />
     <Compile Include="UI\Controls\ColorPickerPopup.cs" />
     <Compile Include="UI\Controls\ColorWheel.cs" />
     <Compile Include="UI\Controls\EyedropperTool.cs" />

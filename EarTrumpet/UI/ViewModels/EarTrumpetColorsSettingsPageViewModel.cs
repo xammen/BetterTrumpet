@@ -114,6 +114,22 @@ namespace EarTrumpet.UI.ViewModels
         public ICommand RandomizeColorsCommand { get; }
         public ICommand ToggleOverflowCommand { get; }
 
+        // Peak meter visual style (independent of custom colors)
+        public int PeakMeterStyleIndex
+        {
+            get => (int)_settings.PeakMeterStyle;
+            set
+            {
+                _settings.PeakMeterStyle = (PeakMeterStyle)value;
+                RaisePropertyChanged(nameof(PeakMeterStyleIndex));
+                RaisePropertyChanged(nameof(PeakMeterStylePreview));
+                RaisePropertyChanged(nameof(PeakMeterStyleName));
+            }
+        }
+
+        public string PeakMeterStyleName => EarTrumpet.UI.Controls.UnicodePeakMeterRenderer.GetDisplayName(_settings.PeakMeterStyle);
+        public string PeakMeterStylePreview => EarTrumpet.UI.Controls.UnicodePeakMeterRenderer.GetPreview(_settings.PeakMeterStyle);
+
         // Enable custom colors
         public bool UseCustomSliderColors
         {

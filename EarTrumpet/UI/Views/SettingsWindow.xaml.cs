@@ -435,6 +435,48 @@ namespace EarTrumpet.UI.Views
             }
         }
 
+        /// <summary>
+        /// Handle Peak Meter Style card clicks
+        /// </summary>
+        private void PeakStyleClassic_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetPeakMeterStyle(0);
+            e.Handled = true;
+        }
+
+        private void PeakStyleDotted_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetPeakMeterStyle(1);
+            e.Handled = true;
+        }
+
+        private void PeakStyleBlocks_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetPeakMeterStyle(2);
+            e.Handled = true;
+        }
+
+        private void PeakStyleBars_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetPeakMeterStyle(3);
+            e.Handled = true;
+        }
+
+        private void PeakStyleWave_Click(object sender, MouseButtonEventArgs e)
+        {
+            SetPeakMeterStyle(4);
+            e.Handled = true;
+        }
+
+        private void SetPeakMeterStyle(int styleIndex)
+        {
+            var viewModel = DataContext as SettingsViewModel;
+            if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
+            {
+                colorsVm.PeakMeterStyleIndex = styleIndex;
+            }
+        }
+
         private void ExportSettings_Click(object sender, MouseButtonEventArgs e)
         {
             var viewModel = DataContext as SettingsViewModel;

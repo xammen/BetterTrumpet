@@ -505,6 +505,188 @@
             <StackPanel Orientation="Vertical" Margin="0,0,16,0">
 
                     <!-- ═══════════════════════════════════════════════════ -->
+                    <!-- PEAK METER VISUAL STYLE (Experimental)              -->
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <Border Margin="0,0,0,16" Padding="16,14" CornerRadius="10"
+                            Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
+                                        Background="{StaticResource PanelBackgroundBrush}">
+                                    <TextBlock Text="&#xE9E9;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="White" />
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsPeakMeterStyle}" FontSize="15" FontWeight="SemiBold" />
+                                        <Border CornerRadius="4" Background="#30FFA500" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="Experimental" FontSize="9" FontWeight="Bold" Foreground="#FFA500" />
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsPeakMeterStyleDesc}"
+                                               Style="{StaticResource BodySubText}" FontSize="12" />
+                                </StackPanel>
+                            </StackPanel>
+                            <Border CornerRadius="8" Background="#08FFFFFF" Padding="3"
+                                    BorderBrush="#15FFFFFF" BorderThickness="1">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Classic: two thick bars -->
+                                    <Border Grid.Column="0" Padding="4,10" CornerRadius="6" Cursor="Hand"
+                                            MouseLeftButtonDown="PeakStyleClassic_Click">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding PeakMeterStyleIndex}" Value="0">
+                                                        <Setter Property="Background" Value="#20FFFFFF" />
+                                                    </DataTrigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#12FFFFFF" />
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <StackPanel Height="14" VerticalAlignment="Center" Margin="0,0,0,0">
+                                                <Border Width="48" Height="4" CornerRadius="2" Background="White" Opacity="0.6" Margin="0,0,0,2" HorizontalAlignment="Left" />
+                                                <Border Width="36" Height="4" CornerRadius="2" Background="White" Opacity="0.6" HorizontalAlignment="Left" />
+                                            </StackPanel>
+                                            <TextBlock Text="Classic" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Dotted: thin dashed line -->
+                                    <Border Grid.Column="1" Padding="4,10" CornerRadius="6" Cursor="Hand"
+                                            MouseLeftButtonDown="PeakStyleDotted_Click">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding PeakMeterStyleIndex}" Value="1">
+                                                        <Setter Property="Background" Value="#20FFFFFF" />
+                                                    </DataTrigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#12FFFFFF" />
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <Grid Height="14" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Border Width="3" Height="2" Background="White" Opacity="0.5" Margin="0,0,2,0" />
+                                                    <Border Width="3" Height="2" Background="White" Opacity="0.5" Margin="0,0,2,0" />
+                                                    <Border Width="3" Height="2" Background="White" Opacity="0.5" Margin="0,0,2,0" />
+                                                    <Border Width="3" Height="2" Background="White" Opacity="0.5" Margin="0,0,2,0" />
+                                                    <Border Width="3" Height="2" Background="White" Opacity="0.5" Margin="0,0,2,0" />
+                                                    <Border Width="3" Height="2" Background="White" Opacity="0.5" Margin="0,0,2,0" />
+                                                    <Border Width="3" Height="2" Background="White" Opacity="0.3" Margin="0,0,2,0" />
+                                                    <Border Width="3" Height="2" Background="White" Opacity="0.15" />
+                                                </StackPanel>
+                                            </Grid>
+                                            <TextBlock Text="Dotted" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Blocks: chunky segments -->
+                                    <Border Grid.Column="2" Padding="4,10" CornerRadius="6" Cursor="Hand"
+                                            MouseLeftButtonDown="PeakStyleBlocks_Click">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding PeakMeterStyleIndex}" Value="2">
+                                                        <Setter Property="Background" Value="#20FFFFFF" />
+                                                    </DataTrigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#12FFFFFF" />
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <Grid Height="14" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Border Width="6" Height="3" Background="White" Opacity="0.55" Margin="0,0,2,0" />
+                                                    <Border Width="6" Height="3" Background="White" Opacity="0.55" Margin="0,0,2,0" />
+                                                    <Border Width="6" Height="3" Background="White" Opacity="0.55" Margin="0,0,2,0" />
+                                                    <Border Width="6" Height="3" Background="White" Opacity="0.55" Margin="0,0,2,0" />
+                                                    <Border Width="6" Height="3" Background="White" Opacity="0.3" Margin="0,0,2,0" />
+                                                    <Border Width="6" Height="3" Background="White" Opacity="0.15" />
+                                                </StackPanel>
+                                            </Grid>
+                                            <TextBlock Text="Blocks" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Bars: thin clean line -->
+                                    <Border Grid.Column="3" Padding="4,10" CornerRadius="6" Cursor="Hand"
+                                            MouseLeftButtonDown="PeakStyleBars_Click">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding PeakMeterStyleIndex}" Value="3">
+                                                        <Setter Property="Background" Value="#20FFFFFF" />
+                                                    </DataTrigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#12FFFFFF" />
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <Grid Height="14" VerticalAlignment="Center">
+                                                <Border Width="48" Height="1.5" CornerRadius="1" Background="White" Opacity="0.4" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                            </Grid>
+                                            <TextBlock Text="Line" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Wave: spaced dashes -->
+                                    <Border Grid.Column="4" Padding="4,10" CornerRadius="6" Cursor="Hand"
+                                            MouseLeftButtonDown="PeakStyleWave_Click">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding PeakMeterStyleIndex}" Value="4">
+                                                        <Setter Property="Background" Value="#20FFFFFF" />
+                                                    </DataTrigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#12FFFFFF" />
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <Grid Height="14" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Border Width="5" Height="2" CornerRadius="1" Background="White" Opacity="0.45" Margin="0,0,4,0" />
+                                                    <Border Width="5" Height="2" CornerRadius="1" Background="White" Opacity="0.45" Margin="0,0,4,0" />
+                                                    <Border Width="5" Height="2" CornerRadius="1" Background="White" Opacity="0.45" Margin="0,0,4,0" />
+                                                    <Border Width="5" Height="2" CornerRadius="1" Background="White" Opacity="0.3" Margin="0,0,4,0" />
+                                                    <Border Width="5" Height="2" CornerRadius="1" Background="White" Opacity="0.15" />
+                                                </StackPanel>
+                                            </Grid>
+                                            <TextBlock Text="Dashes" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ═══════════════════════════════════════════════════ -->
                     <!-- MASTER TOGGLE: Enable Custom Colors                -->
                     <!-- ═══════════════════════════════════════════════════ -->
                     <Border Margin="0,0,0,16" Padding="16,12" CornerRadius="10"
@@ -535,8 +717,7 @@
                     <!-- SEGMENTED TAB BAR: [Dynamic] [Presets] [Custom]     -->
                     <!-- ═══════════════════════════════════════════════════ -->
                     <Border Margin="0,0,0,16" CornerRadius="8" Padding="3"
-                            Background="#08FFFFFF" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
-                            IsEnabled="{Binding UseCustomSliderColors}">
+                            Background="#08FFFFFF" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -619,8 +800,7 @@
                     <!-- HERO PREVIEW: Always visible large slider preview  -->
                     <!-- ═══════════════════════════════════════════════════ -->
                     <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
-                            Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window"
-                            IsEnabled="{Binding UseCustomSliderColors}">
+                            Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                         <StackPanel>
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
@@ -819,8 +999,7 @@
                     <!-- TAB 0: DYNAMIC — Album Art Theme                   -->
                     <!-- ═══════════════════════════════════════════════════ -->
                     <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
-                            Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window"
-                            IsEnabled="{Binding UseCustomSliderColors}">
+                            Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Visibility" Value="Collapsed" />
@@ -864,8 +1043,7 @@
                     <!-- TAB 1: PRESETS — Visual Theme Grid (2 columns)     -->
                     <!-- ═══════════════════════════════════════════════════ -->
                     <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
-                            Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window"
-                            IsEnabled="{Binding UseCustomSliderColors}">
+                            Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Visibility" Value="Collapsed" />
@@ -1104,8 +1282,7 @@
 
                         <!-- Color Swatches Card -->
                         <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
-                                Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window"
-                                IsEnabled="{Binding UseCustomSliderColors}">
+                                Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                                     <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
@@ -1348,8 +1525,7 @@
 
                         <!-- My Themes Card -->
                         <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
-                                Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window"
-                                IsEnabled="{Binding UseCustomSliderColors}">
+                                Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                             <StackPanel>
                                 <!-- Header with overflow menu -->
                                 <Grid Margin="0,0,0,14">

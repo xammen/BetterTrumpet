@@ -884,6 +884,12 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
   <data name="SettingsPeakMeterDesc" xml:space="preserve">
     <value>Rafraîchissement de la visualisation audio</value>
   </data>
+  <data name="SettingsPeakMeterStyle" xml:space="preserve">
+    <value>Style du vu-mètre</value>
+  </data>
+  <data name="SettingsPeakMeterStyleDesc" xml:space="preserve">
+    <value>Choisir l'apparence de l'indicateur audio</value>
+  </data>
   <data name="SettingsDynamicAlbumArt" xml:space="preserve">
     <value>Thème dynamique album art</value>
   </data>

@@ -80,6 +80,9 @@ namespace EarTrumpet.UI.Controls
         private RepeatButton _sliderRight;
         private Point _lastMousePosition;
         
+        // Peak meter style state
+        private PeakMeterStyle _currentPeakStyle = PeakMeterStyle.Classic;
+        
         // Smooth animation state for peak meters
         private double _currentWidth1;
         private double _currentWidth2;
@@ -128,6 +131,9 @@ namespace EarTrumpet.UI.Controls
             _currentWidth1 = 0;
             _currentWidth2 = 0;
             
+            // Initialize peak meter style
+            ApplyPeakMeterStyle();
+            
             // Apply custom colors if enabled
             ApplyCustomColors();
             
@@ -136,6 +142,7 @@ namespace EarTrumpet.UI.Controls
             {
                 App.Settings.CustomSliderColorsChanged += OnCustomSliderColorsChanged;
                 App.Settings.EcoModeChanged += OnEcoModeChanged;
+                App.Settings.PeakMeterStyleChanged += OnPeakMeterStyleChanged;
             }
             
             // Re-apply custom colors after any theme change (the theme system
@@ -186,11 +193,138 @@ namespace EarTrumpet.UI.Controls
             {
                 App.Settings.CustomSliderColorsChanged -= OnCustomSliderColorsChanged;
                 App.Settings.EcoModeChanged -= OnEcoModeChanged;
+                App.Settings.PeakMeterStyleChanged -= OnPeakMeterStyleChanged;
             }
             if (UI.Themes.Manager.Current != null)
             {
                 UI.Themes.Manager.Current.ThemeChanged -= OnThemeChangedReapplyColors;
             }
+        }
+        
+        private void OnPeakMeterStyleChanged()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(ApplyPeakMeterStyle);
+                return;
+            }
+            ApplyPeakMeterStyle();
+        }
+        
+        /// <summary>
+        /// Apply visual style to peak meter Borders.
+        /// Each style changes height, opacity, corner radius, and margin to create
+        /// a distinct visual feel — all using the same Border elements.
+        /// 
+        /// Classic:  2 thick bars (4px), full opacity — the original look
+        /// Dotted:   1 thin bar (1.5px), low opacity — subtle, minimal
+        /// Blocks:   1 medium bar (2.5px), dashed look via OpacityMask
+        /// Bars:     1 ultra-thin line (1px), very low opacity — barely visible whisper
+        /// Wave:     1 thin bar (2px), medium opacity — clean single line
+        /// </summary>
+        private void ApplyPeakMeterStyle()
+        {
+            if (App.Settings == null) return;
+            
+            _currentPeakStyle = App.Settings.PeakMeterStyle;
+            
+            if (_peakMeter1 == null || _peakMeter2 == null) return;
+            
+            // Dim the slider track fill when using non-Classic styles
+            // so the peak meter pattern pops against a darker background
+            if (_sliderLeft != null)
+            {
+                _sliderLeft.Opacity = _currentPeakStyle == PeakMeterStyle.Classic ? 1.0 : 0.4;
+            }
+            
+            switch (_currentPeakStyle)
+            {
+                case PeakMeterStyle.Classic:
+                    // Original: two thick bars, stereo
+                    _peakMeter1.Height = 4;
+                    _peakMeter1.Margin = new Thickness(0, -3, 0, 0);
+                    _peakMeter1.CornerRadius = new CornerRadius(2);
+                    _peakMeter1.Opacity = 0.6;
+                    _peakMeter1.Visibility = Visibility.Visible;
+                    _peakMeter1.OpacityMask = null;
+                    _peakMeter2.Height = 4;
+                    _peakMeter2.Margin = new Thickness(0, 2, 0, 0);
+                    _peakMeter2.CornerRadius = new CornerRadius(2);
+                    _peakMeter2.Opacity = 0.6;
+                    _peakMeter2.Visibility = Visibility.Visible;
+                    _peakMeter2.OpacityMask = null;
+                    break;
+                    
+                case PeakMeterStyle.Dotted:
+                    // Dotted: small squares with tiny gaps, punchy and visible
+                    _peakMeter1.Height = 3;
+                    _peakMeter1.Margin = new Thickness(0, -2, 0, 0);
+                    _peakMeter1.CornerRadius = new CornerRadius(0);
+                    _peakMeter1.Opacity = 0.7;
+                    _peakMeter1.Visibility = Visibility.Visible;
+                    _peakMeter1.OpacityMask = CreateDottedBrush(3, 2);
+                    _peakMeter2.Visibility = Visibility.Collapsed;
+                    break;
+                    
+                case PeakMeterStyle.Blocks:
+                    // Blocks: wide chunky segments, LED meter style
+                    _peakMeter1.Height = 4;
+                    _peakMeter1.Margin = new Thickness(0, -2, 0, 0);
+                    _peakMeter1.CornerRadius = new CornerRadius(0);
+                    _peakMeter1.Opacity = 0.7;
+                    _peakMeter1.Visibility = Visibility.Visible;
+                    _peakMeter1.OpacityMask = CreateDottedBrush(6, 2);
+                    _peakMeter2.Visibility = Visibility.Collapsed;
+                    break;
+                    
+                case PeakMeterStyle.Bars:
+                    // Line: single clean thin bar, no pattern
+                    _peakMeter1.Height = 2;
+                    _peakMeter1.Margin = new Thickness(0, -1, 0, 0);
+                    _peakMeter1.CornerRadius = new CornerRadius(1);
+                    _peakMeter1.Opacity = 0.55;
+                    _peakMeter1.Visibility = Visibility.Visible;
+                    _peakMeter1.OpacityMask = null;
+                    _peakMeter2.Visibility = Visibility.Collapsed;
+                    break;
+                    
+                case PeakMeterStyle.Wave:
+                    // Dashes: wide spaced dashes, retro feel
+                    _peakMeter1.Height = 3;
+                    _peakMeter1.Margin = new Thickness(0, -2, 0, 0);
+                    _peakMeter1.CornerRadius = new CornerRadius(1);
+                    _peakMeter1.Opacity = 0.65;
+                    _peakMeter1.Visibility = Visibility.Visible;
+                    _peakMeter1.OpacityMask = CreateDottedBrush(5, 4);
+                    _peakMeter2.Visibility = Visibility.Collapsed;
+                    break;
+            }
+        }
+        
+        /// <summary>
+        /// Creates a horizontal repeating pattern brush for dotted/dashed effects.
+        /// Uses a DrawingBrush tiled horizontally to create segment gaps.
+        /// </summary>
+        private static Brush CreateDottedBrush(double segmentWidth, double gapWidth)
+        {
+            var totalWidth = segmentWidth + gapWidth;
+            var drawing = new GeometryDrawing
+            {
+                Geometry = new RectangleGeometry(new System.Windows.Rect(0, 0, segmentWidth, 1)),
+                Brush = Brushes.White
+            };
+            var brush = new DrawingBrush
+            {
+                Drawing = drawing,
+                TileMode = TileMode.Tile,
+                Viewport = new System.Windows.Rect(0, 0, totalWidth, 1),
+                ViewportUnits = BrushMappingMode.Absolute,
+                Viewbox = new System.Windows.Rect(0, 0, totalWidth, 1),
+                ViewboxUnits = BrushMappingMode.Absolute,
+                Stretch = Stretch.None
+            };
+            brush.Freeze();
+            return brush;
         }
         
         private void OnThemeChangedReapplyColors()
@@ -266,6 +400,7 @@ namespace EarTrumpet.UI.Controls
                 _peakMeter1.Background = CustomPeakMeterBrush;
             if (_peakMeter2 != null && CustomPeakMeterBrush != null)
                 _peakMeter2.Background = CustomPeakMeterBrush;
+
         }
         
         private void ResetVisualElementColors()
@@ -328,13 +463,22 @@ namespace EarTrumpet.UI.Controls
                     _currentWidth1 = Lerp(_currentWidth1, _targetWidth1, PeakSmoothingFactor);
                     _currentWidth2 = Lerp(_currentWidth2, _targetWidth2, PeakSmoothingFactor);
                     
-                    // Apply smoothed values
+                    // Apply smoothed values to Border widths
                     if (_peakMeter1 != null)
                     {
-                        _peakMeter1.Width = Math.Max(0, _currentWidth1);
+                        if (_currentPeakStyle == PeakMeterStyle.Classic)
+                        {
+                            // Classic: each channel gets its own bar
+                            _peakMeter1.Width = Math.Max(0, _currentWidth1);
+                        }
+                        else
+                        {
+                            // Non-classic: single bar uses the max of both channels
+                            _peakMeter1.Width = Math.Max(0, Math.Max(_currentWidth1, _currentWidth2));
+                        }
                     }
                     
-                    if (_peakMeter2 != null)
+                    if (_peakMeter2 != null && _currentPeakStyle == PeakMeterStyle.Classic)
                     {
                         _peakMeter2.Width = Math.Max(0, _currentWidth2);
                     }
@@ -380,7 +524,7 @@ namespace EarTrumpet.UI.Controls
         {
             return current + (target - current) * factor;
         }
-
+        
         protected override Size ArrangeOverride(Size arrangeBounds)
         {
             var ret = base.ArrangeOverride(arrangeBounds);
