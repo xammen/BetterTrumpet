@@ -2191,7 +2191,7 @@
                             </StackPanel>
 
                             <!-- Check button (when no update) -->
-                            <Border x:Name="CheckUpdateBtn" Grid.Column="1" Style="{StaticResource ActionButtonBorder}"
+                            <Border x:Name="CheckUpdateBtn" Grid.Column="1"
                                     MouseLeftButtonDown="CheckUpdate_Click">
                                 <Border.Style>
                                     <Style TargetType="Border" BasedOn="{StaticResource ActionButtonBorder}">
