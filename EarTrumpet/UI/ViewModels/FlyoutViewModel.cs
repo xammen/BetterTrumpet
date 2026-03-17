@@ -62,7 +62,7 @@ namespace EarTrumpet.UI.ViewModels
 
         public void OpenUpdatePage()
         {
-            _updateService?.OpenReleasePage();
+            _updateService?.DownloadAndInstallAsync();
         }
 
         private bool _isPinned;

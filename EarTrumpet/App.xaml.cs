@@ -423,7 +423,7 @@ namespace EarTrumpet
                 {
                     DisplayName = $"Mettre \u00e0 jour (v{_updateService.LatestVersion})",
                     Glyph = "\xE896",
-                    Command = new RelayCommand(() => _updateService.OpenReleasePage()),
+                    Command = new RelayCommand(() => _updateService.DownloadAndInstallAsync()),
                 });
                 ret.Add(new ContextMenuSeparator());
             }

@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Theme="clr-namespace:EarTrumpet.UI.Themes"
+        xmlns:gif="clr-namespace:XamlAnimatedGif;assembly=XamlAnimatedGif"
         Title="BetterTrumpet"
         Width="520" Height="640"
         WindowStartupLocation="CenterScreen"
@@ -513,6 +514,44 @@
                             <TextBlock Text="Confidentialit&#233; configur&#233;e" FontSize="13"
                                        Foreground="{StaticResource T2}"/>
                         </StackPanel>
+                    </StackPanel>
+
+                    <!-- ══ PAGE 5: TRAY PIN ══ -->
+                    <StackPanel x:Name="Page5" VerticalAlignment="Center"
+                                Visibility="{Binding IsPage5, Converter={StaticResource BoolVis}}">
+                        <StackPanel.RenderTransform>
+                            <TranslateTransform x:Name="Page5Translate"/>
+                        </StackPanel.RenderTransform>
+
+                        <!-- Pin icon -->
+                        <Border Width="52" Height="52" CornerRadius="26" HorizontalAlignment="Left"
+                                Margin="0,0,0,20">
+                            <Border.Background>
+                                <SolidColorBrush Color="{StaticResource AccentColor}" Opacity="0.15"/>
+                            </Border.Background>
+                            <TextBlock Text="&#xE718;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Foreground="{StaticResource AccentBrush}"/>
+                        </Border>
+
+                        <TextBlock Text="&#201;pinglez BetterTrumpet" FontSize="24" FontWeight="Bold"
+                                   Foreground="{StaticResource T1}" Margin="0,0,0,6"/>
+                        <TextBlock FontSize="13" TextWrapping="Wrap" LineHeight="20" MaxWidth="400"
+                                   HorizontalAlignment="Left"
+                                   Foreground="{StaticResource T2}" Margin="0,0,0,20"
+                                   Text="Glissez l'ic&#244;ne BetterTrumpet depuis le menu cach&#233; vers votre barre des t&#226;ches pour y acc&#233;der en un clic."/>
+
+                        <!-- GIF demo -->
+                        <Border CornerRadius="10" ClipToBounds="True" HorizontalAlignment="Left"
+                                MaxWidth="400" MaxHeight="220"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1">
+                            <Image gif:AnimationBehavior.SourceUri="pack://application:,,,/BetterTrumpet;component/Assets/TrayPin.gif"
+                                   gif:AnimationBehavior.AutoStart="True"
+                                   gif:AnimationBehavior.RepeatBehavior="Forever"
+                                   Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="Fant"/>
+                        </Border>
                     </StackPanel>
                 </Grid>
 

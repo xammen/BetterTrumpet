@@ -14,7 +14,7 @@ namespace EarTrumpet.UI.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler Completed;
 
-        public const int PageCount = 5;
+        public const int PageCount = 6;
 
         // Navigation
         public int CurrentPage
@@ -31,6 +31,7 @@ namespace EarTrumpet.UI.ViewModels
                     Raise(nameof(IsPage2));
                     Raise(nameof(IsPage3));
                     Raise(nameof(IsPage4));
+                    Raise(nameof(IsPage5));
                     Raise(nameof(CanGoBack));
                     Raise(nameof(NextButtonText));
                     Raise(nameof(SubtitleText));
@@ -45,8 +46,9 @@ namespace EarTrumpet.UI.ViewModels
         public bool IsPage2 => _currentPage == 2;
         public bool IsPage3 => _currentPage == 3;
         public bool IsPage4 => _currentPage == 4;
+        public bool IsPage5 => _currentPage == 5;
         public bool CanGoBack => _currentPage > 0 && _currentPage < 4;
-        public bool IsLastPage => _currentPage == 4;
+        public bool IsLastPage => _currentPage == 5;
 
         /// <summary>Progress 0.0 → 1.0 for the top bar</summary>
         public double Progress => (double)(_currentPage + 1) / PageCount;
@@ -59,7 +61,8 @@ namespace EarTrumpet.UI.ViewModels
                 {
                     case 0: return "Continuer";
                     case 3: return "Terminer";
-                    case 4: return "C\u2019est parti\u00a0!";
+                    case 4: return "Suivant";
+                    case 5: return "C\u2019est fait\u00a0!";
                     default: return "Continuer";
                 }
             }
@@ -76,6 +79,7 @@ namespace EarTrumpet.UI.ViewModels
                     case 2: return "Choisissez votre style.";
                     case 3: return "Vos donn\u00e9es restent les v\u00f4tres.";
                     case 4: return "";
+                    case 5: return "";
                     default: return "";
                 }
             }
@@ -189,7 +193,7 @@ namespace EarTrumpet.UI.ViewModels
                     break;
             }
 
-            if (_currentPage < 4)
+            if (_currentPage < 5)
             {
                 CurrentPage++;
             }
