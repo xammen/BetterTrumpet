@@ -126,7 +126,7 @@ begin
   Result := Pos(';' + Uppercase(Param) + ';', ';' + Uppercase(OrigPath) + ';') = 0;
 end;
 
-// Remove from PATH on uninstall
+// Remove from PATH + clean BetterTrumpet registry on uninstall
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   OrigPath: string;
@@ -135,6 +135,7 @@ var
 begin
   if CurUninstallStep = usPostUninstall then
   begin
+    // Remove from PATH
     AppDir := ExpandConstant('{app}');
     if RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', OrigPath) then
     begin
@@ -145,5 +146,8 @@ begin
         RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', OrigPath);
       end;
     end;
+
+    // Clean all BetterTrumpet settings (so reinstall triggers onboarding)
+    RegDeleteKeyIncludingSubkeys(HKEY_CURRENT_USER, 'Software\EarTrumpet');
   end;
 end;
