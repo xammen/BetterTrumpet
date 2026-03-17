@@ -626,10 +626,7 @@
                                 MaxWidth="400" MaxHeight="220"
                                 Background="{StaticResource SurfaceBrush}"
                                 BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1">
-                            <Image gif:AnimationBehavior.SourceUri="pack://application:,,,/BetterTrumpet;component/Assets/TrayPin.gif"
-                                   gif:AnimationBehavior.AutoStart="True"
-                                   gif:AnimationBehavior.RepeatBehavior="Forever"
-                                   Stretch="Uniform"
+                            <Image x:Name="TrayPinGif" Stretch="Uniform"
                                    RenderOptions.BitmapScalingMode="Fant"/>
                         </Border>
                     </StackPanel>
