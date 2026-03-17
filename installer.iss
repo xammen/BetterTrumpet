@@ -1,7 +1,7 @@
 [Setup]
 AppName=BetterTrumpet
-AppVersion=3.0.5
-AppVerName=BetterTrumpet 3.0.5
+AppVersion=3.0.6
+AppVerName=BetterTrumpet 3.0.6
 AppPublisher=xammen
 AppPublisherURL=https://bettertrumpet.hiii.boo
 AppSupportURL=https://github.com/xammen/BetterTrumpet/issues
@@ -10,7 +10,7 @@ DefaultDirName={autopf}\BetterTrumpet
 DefaultGroupName=BetterTrumpet
 UninstallDisplayIcon={app}\BetterTrumpet.exe
 OutputDir=dist
-OutputBaseFilename=BetterTrumpet-3.0.5-setup
+OutputBaseFilename=BetterTrumpet-3.0.6-setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 ArchitecturesAllowed=x86compatible
@@ -21,11 +21,11 @@ DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 LicenseFile=LICENSE
-VersionInfoVersion=3.0.5.0
+VersionInfoVersion=3.0.6.0
 VersionInfoCompany=xammen
 VersionInfoDescription=BetterTrumpet - Windows Volume Control
 VersionInfoProductName=BetterTrumpet
-VersionInfoProductVersion=3.0.5
+VersionInfoProductVersion=3.0.6
 MinVersion=10.0.17134
 
 [Languages]
