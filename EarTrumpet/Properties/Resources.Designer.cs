@@ -1931,6 +1931,12 @@ namespace EarTrumpet.Properties {
         public static string SettingsPeakMeterDesc {
             get { return ResourceManager.GetString("SettingsPeakMeterDesc", resourceCulture); }
         }
+        public static string SettingsPeakMeterStyle {
+            get { return ResourceManager.GetString("SettingsPeakMeterStyle", resourceCulture); }
+        }
+        public static string SettingsPeakMeterStyleDesc {
+            get { return ResourceManager.GetString("SettingsPeakMeterStyleDesc", resourceCulture); }
+        }
         public static string SettingsRefreshRate {
             get { return ResourceManager.GetString("SettingsRefreshRate", resourceCulture); }
         }
