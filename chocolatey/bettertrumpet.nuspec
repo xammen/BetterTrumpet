@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>bettertrumpet</id>
-    <version>2.4.0</version>
+    <version>3.0.4</version>
     <title>BetterTrumpet</title>
     <authors>xmn</authors>
     <owners>xmn</owners>
@@ -10,13 +10,16 @@
     <projectUrl>https://bettertrumpet.hiii.boo</projectUrl>
     <iconUrl>https://cdn.jsdelivr.net/gh/xammen/BetterTrumpet@master/EarTrumpet/Assets/icon.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>A refined fork of EarTrumpet with enhanced volume control and music overlay. Features include enhanced volume control, a slick music overlay, fully customizable colors, and a cleaner interface.</description>
-    <summary>A refined fork of EarTrumpet, the beloved Windows volume mixer.</summary>
-    <releaseNotes>https://github.com/xammen/BetterTrumpet/releases</releaseNotes>
-    <tags>audio volume mixer sound music eartrumpet windows</tags>
+    <description>BetterTrumpet is a refined fork of EarTrumpet, the beloved Windows volume mixer. Features include per-app volume control, a media popup with album art, 28+ built-in themes, volume profiles, undo/redo, CLI with 19 commands, crash reporting, and auto-updates.</description>
+    <summary>A refined fork of EarTrumpet — the better Windows volume mixer.</summary>
+    <releaseNotes>https://github.com/xammen/BetterTrumpet/releases/tag/v3.0.4</releaseNotes>
+    <tags>audio volume mixer sound music eartrumpet bettertrumpet windows</tags>
     <packageSourceUrl>https://github.com/xammen/BetterTrumpet</packageSourceUrl>
     <projectSourceUrl>https://github.com/xammen/BetterTrumpet</projectSourceUrl>
     <bugTrackerUrl>https://github.com/xammen/BetterTrumpet/issues</bugTrackerUrl>
+    <dependencies>
+      <dependency id="chocolatey-core.extension" version="1.3.3" />
+    </dependencies>
   </metadata>
   <files>
     <file src="tools\**" target="tools" />
