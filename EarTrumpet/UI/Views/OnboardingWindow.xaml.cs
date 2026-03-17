@@ -56,7 +56,7 @@ namespace EarTrumpet.UI.Views
 
                 if (newPage == 4)
                 {
-                    AnimateFinalPage();
+                    AnimateReadyPage();
                 }
             }
         }
@@ -85,6 +85,7 @@ namespace EarTrumpet.UI.Views
                 case 2: page = Page2; translate = Page2Translate; break;
                 case 3: page = Page3; translate = Page3Translate; break;
                 case 4: page = Page4; translate = Page4Translate; break;
+                case 5: page = Page5; translate = Page5Translate; break;
                 default: return;
             }
 
@@ -108,7 +109,7 @@ namespace EarTrumpet.UI.Views
             page.BeginAnimation(OpacityProperty, fadeAnim);
         }
 
-        private void AnimateFinalPage()
+        private void AnimateReadyPage()
         {
             var items = new[] { CheckItem0, CheckItem1, CheckItem2 };
             for (int i = 0; i < items.Length; i++)
