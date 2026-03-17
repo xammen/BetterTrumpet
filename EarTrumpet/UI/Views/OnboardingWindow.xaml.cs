@@ -182,6 +182,19 @@ namespace EarTrumpet.UI.Views
 
         private void AnimateTrayPinPage()
         {
+            // Load the GIF programmatically (more reliable than pack URI in non-packaged mode)
+            try
+            {
+                var uri = new Uri("pack://application:,,,/Assets/TrayPin.gif", UriKind.Absolute);
+                XamlAnimatedGif.AnimationBehavior.SetSourceUri(TrayPinGif, uri);
+                XamlAnimatedGif.AnimationBehavior.SetAutoStart(TrayPinGif, true);
+                XamlAnimatedGif.AnimationBehavior.SetRepeatBehavior(TrayPinGif, RepeatBehavior.Forever);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"OnboardingWindow: Failed to load TrayPin.gif — {ex.Message}");
+            }
+
             // Bouncing arrow animation — gentle up/down loop
             var bounce = new DoubleAnimation(0, 8, new Duration(TimeSpan.FromMilliseconds(600)))
             {
