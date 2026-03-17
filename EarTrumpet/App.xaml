@@ -17,6 +17,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="UI\Mutable.xaml" />
+                <ResourceDictionary Source="UI\SharedTokens.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <Theme:Manager x:Key="ThemeManager">
