@@ -307,6 +307,11 @@ namespace EarTrumpet.UI.Views
             var viewModel = DataContext as SettingsViewModel;
             if (viewModel?.Selected?.Selected is EarTrumpetColorsSettingsPageViewModel colorsVm)
             {
+                // Auto-enable custom colors when clicking any tab
+                if (!colorsVm.UseCustomSliderColors)
+                {
+                    colorsVm.UseCustomSliderColors = true;
+                }
                 colorsVm.SelectedTab = tab;
             }
         }
