@@ -417,7 +417,7 @@ namespace EarTrumpet
             {
                 ret.Add(new ContextMenuItem
                 {
-                    DisplayName = $"Mettre \u00e0 jour (v{_updateService.LatestVersion})",
+                    DisplayName = string.Format(EarTrumpet.Properties.Resources.UpdateContextMenu, _updateService.LatestVersion),
                     Glyph = "\xE896",
                     Command = new RelayCommand(() => _updateService.DownloadAndInstallAsync()),
                 });

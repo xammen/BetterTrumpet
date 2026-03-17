@@ -169,9 +169,6 @@ namespace EarTrumpet.UI.ViewModels
             BackCommand = new RelayCommand(GoBack);
             SkipCommand = new RelayCommand(Skip);
 
-            // Default telemetry to enabled in onboarding (user can opt out)
-            _settings.IsTelemetryEnabled = true;
-
             LoadDevices();
         }
 
@@ -207,6 +204,10 @@ namespace EarTrumpet.UI.ViewModels
                     break;
                 case 2:
                     ApplyTheme();
+                    break;
+                case 3:
+                    // Apply telemetry choice only when leaving the Privacy page
+                    _settings.IsTelemetryEnabled = IsTelemetryEnabled;
                     break;
             }
 

@@ -1,7 +1,7 @@
 [Setup]
 AppName=BetterTrumpet
-AppVersion=3.0.6
-AppVerName=BetterTrumpet 3.0.6
+AppVersion=3.0.7
+AppVerName=BetterTrumpet 3.0.7
 AppPublisher=xammen
 AppPublisherURL=https://bettertrumpet.hiii.boo
 AppSupportURL=https://github.com/xammen/BetterTrumpet/issues
@@ -10,7 +10,7 @@ DefaultDirName={autopf}\BetterTrumpet
 DefaultGroupName=BetterTrumpet
 UninstallDisplayIcon={app}\BetterTrumpet.exe
 OutputDir=dist
-OutputBaseFilename=BetterTrumpet-3.0.6-setup
+OutputBaseFilename=BetterTrumpet-3.0.7-setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 ArchitecturesAllowed=x86compatible
@@ -21,11 +21,11 @@ DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 LicenseFile=LICENSE
-VersionInfoVersion=3.0.6.0
+VersionInfoVersion=3.0.7.0
 VersionInfoCompany=xammen
 VersionInfoDescription=BetterTrumpet - Windows Volume Control
 VersionInfoProductName=BetterTrumpet
-VersionInfoProductVersion=3.0.6
+VersionInfoProductVersion=3.0.7
 MinVersion=10.0.17134
 
 [Languages]
@@ -44,6 +44,8 @@ english.AddToPathTask=Add to PATH (enables "bt" command in terminal for CLI)
 french.AddToPathTask=Ajouter au PATH (active la commande "bt" dans le terminal pour le CLI)
 english.OptionsGroup=Options:
 french.OptionsGroup=Options :
+english.LaunchAfterInstall=Launch BetterTrumpet
+french.LaunchAfterInstall=Lancer BetterTrumpet
 
 [Files]
 Source: "Build\Release\BetterTrumpet.exe"; DestDir: "{app}"; Flags: ignoreversion
@@ -95,7 +97,7 @@ Root: HKCU; Subkey: "Environment"; ValueType: expandsz; ValueName: "Path"; Value
 
 [Run]
 ; After normal install: checkbox "Launch BetterTrumpet" (skipped in silent mode)
-Filename: "{app}\BetterTrumpet.exe"; Description: "Lancer BetterTrumpet"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\BetterTrumpet.exe"; Description: "{cm:LaunchAfterInstall}"; Flags: nowait postinstall skipifsilent
 ; After silent/verysilent install: always relaunch (no checkbox)
 Filename: "{app}\BetterTrumpet.exe"; Flags: nowait postinstall skipifnotsilent
 

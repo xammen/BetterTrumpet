@@ -1215,4 +1215,88 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
   <data name="OnboardingTelemetryReassurance" xml:space="preserve">
     <value>On comprend. Nous ne vendons aucune donnée — les rapports de crash contiennent uniquement des infos techniques (stack traces, version OS) pour corriger les bugs et optimiser les performances.</value>
   </data>
+  <data name="UpdateTextDownloading" xml:space="preserve">
+    <value>Téléchargement en cours...</value>
+  </data>
+  <data name="UpdateTextAvailable" xml:space="preserve">
+    <value>Mise à jour disponible : v{0}</value>
+  </data>
+  <data name="UpdateTextUpToDate" xml:space="preserve">
+    <value>À jour</value>
+  </data>
+  <data name="UpdateTextNeverChecked" xml:space="preserve">
+    <value>Jamais vérifié</value>
+  </data>
+  <data name="UpdateTextLastChecked" xml:space="preserve">
+    <value>Dernière vérification : {0}</value>
+  </data>
+  <data name="UpdateContextMenu" xml:space="preserve">
+    <value>Mettre à jour (v{0})</value>
+  </data>
+  <data name="ChangelogTitle" xml:space="preserve">
+    <value>Quoi de neuf</value>
+  </data>
+  <data name="ChangelogSubtitle" xml:space="preserve">
+    <value>Tout ce qui a changé dans cette version.</value>
+  </data>
+  <data name="ChangelogThanks" xml:space="preserve">
+    <value>Merci d'utiliser BetterTrumpet.</value>
+  </data>
+  <data name="ChangelogContinue" xml:space="preserve">
+    <value>C'est parti</value>
+  </data>
+  <data name="ChangelogLoading" xml:space="preserve">
+    <value>Chargement...</value>
+  </data>
+  <data name="ChangelogNoNotes" xml:space="preserve">
+    <value>Aucune note de version disponible.</value>
+  </data>
+  <data name="ChangelogLoadError" xml:space="preserve">
+    <value>Impossible de charger les notes de version.\nVérifiez votre connexion internet.</value>
+  </data>
+  <data name="PresetCategoryAll" xml:space="preserve">
+    <value>Toutes</value>
+  </data>
+  <data name="PresetCategoryMinimal" xml:space="preserve">
+    <value>Minimal</value>
+  </data>
+  <data name="PresetCategoryBrands" xml:space="preserve">
+    <value>Marques</value>
+  </data>
+  <data name="PresetCategoryRetro" xml:space="preserve">
+    <value>Rétro</value>
+  </data>
+  <data name="PresetCategoryDeveloper" xml:space="preserve">
+    <value>Développeur</value>
+  </data>
+  <data name="PresetCategoryNature" xml:space="preserve">
+    <value>Nature</value>
+  </data>
+  <data name="PresetCategoryAccessibility" xml:space="preserve">
+    <value>Accessibilité</value>
+  </data>
+  <data name="ColorLabelThumb" xml:space="preserve">
+    <value>Curseur</value>
+  </data>
+  <data name="ColorLabelFill" xml:space="preserve">
+    <value>Remplissage</value>
+  </data>
+  <data name="ColorLabelTrackBg" xml:space="preserve">
+    <value>Fond piste</value>
+  </data>
+  <data name="ColorLabelPeakMeter" xml:space="preserve">
+    <value>VU-mètre</value>
+  </data>
+  <data name="ColorLabelWindowBg" xml:space="preserve">
+    <value>Fond fenêtre</value>
+  </data>
+  <data name="ColorLabelText" xml:space="preserve">
+    <value>Texte</value>
+  </data>
+  <data name="ColorLabelGlow" xml:space="preserve">
+    <value>Halo</value>
+  </data>
+  <data name="ColorLabelPreview" xml:space="preserve">
+    <value>Aperçu</value>
+  </data>
 </root>
