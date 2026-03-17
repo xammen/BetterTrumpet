@@ -701,4 +701,518 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
   <data name="SettingsPeakMeterColor" xml:space="preserve">
     <value>Peak meter color:</value>
   </data>
+  <!-- Settings - Appearance page -->
+  <data name="SettingsCustomColors" xml:space="preserve">
+    <value>Custom Colors</value>
+  </data>
+  <data name="SettingsCustomColorsDesc" xml:space="preserve">
+    <value>Personalize volume slider appearance</value>
+  </data>
+  <data name="SettingsTabDynamic" xml:space="preserve">
+    <value>Dynamic</value>
+  </data>
+  <data name="SettingsTabPresets" xml:space="preserve">
+    <value>Presets</value>
+  </data>
+  <data name="SettingsTabCustom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="SettingsLivePreview" xml:space="preserve">
+    <value>Live Preview</value>
+  </data>
+  <data name="SettingsColorPalette" xml:space="preserve">
+    <value>Color Palette</value>
+  </data>
+  <data name="SettingsSliderColors" xml:space="preserve">
+    <value>Slider Colors</value>
+  </data>
+  <data name="SettingsWindowColors" xml:space="preserve">
+    <value>Window Colors</value>
+  </data>
+  <data name="SettingsWindowBgColor" xml:space="preserve">
+    <value>Window background</value>
+  </data>
+  <data name="SettingsTextColor" xml:space="preserve">
+    <value>Text color</value>
+  </data>
+  <data name="SettingsAccentGlowColor" xml:space="preserve">
+    <value>Accent glow</value>
+  </data>
+  <data name="SettingsMyThemes" xml:space="preserve">
+    <value>My Themes</value>
+  </data>
+  <data name="SettingsSaveTheme" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="SettingsResetToDefault" xml:space="preserve">
+    <value>Reset to Default</value>
+  </data>
+  <data name="SettingsThemeNamePlaceholder" xml:space="preserve">
+    <value>Theme name...</value>
+  </data>
+  <data name="SettingsCopyToClipboard" xml:space="preserve">
+    <value>Copy to clipboard</value>
+  </data>
+  <data name="SettingsPasteFromClipboard" xml:space="preserve">
+    <value>Paste from clipboard</value>
+  </data>
+  <data name="SettingsExportBttheme" xml:space="preserve">
+    <value>Export .bttheme</value>
+  </data>
+  <data name="SettingsImportBttheme" xml:space="preserve">
+    <value>Import .bttheme</value>
+  </data>
+  <data name="SettingsPresetCategories" xml:space="preserve">
+    <value>Categories</value>
+  </data>
+  <data name="SettingsCategoryAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <!-- Settings - Performance page -->
+  <data name="SettingsEcoMode" xml:space="preserve">
+    <value>Eco Mode</value>
+  </data>
+  <data name="SettingsEcoModeDesc" xml:space="preserve">
+    <value>Reduce CPU/GPU usage on battery</value>
+  </data>
+  <data name="SettingsEcoModeOverridden" xml:space="preserve">
+    <value>Overridden by Eco Mode when active</value>
+  </data>
+  <data name="SettingsAnimations" xml:space="preserve">
+    <value>Animations</value>
+  </data>
+  <data name="SettingsSmoothVolumeAnimation" xml:space="preserve">
+    <value>Smooth volume animation</value>
+  </data>
+  <data name="SettingsAnimationSpeedLabel" xml:space="preserve">
+    <value>Animation speed</value>
+  </data>
+  <data name="SettingsSpeedSlow" xml:space="preserve">
+    <value>Slow</value>
+  </data>
+  <data name="SettingsSpeedFast" xml:space="preserve">
+    <value>Fast</value>
+  </data>
+  <data name="SettingsPeakMeter" xml:space="preserve">
+    <value>Peak Meter</value>
+  </data>
+  <data name="SettingsRefreshRate" xml:space="preserve">
+    <value>Refresh rate</value>
+  </data>
+  <data name="SettingsFpsUltraSaver" xml:space="preserve">
+    <value>Ultra saver</value>
+  </data>
+  <data name="SettingsFpsBatterySaver" xml:space="preserve">
+    <value>Battery saver</value>
+  </data>
+  <data name="SettingsFpsBalanced" xml:space="preserve">
+    <value>Balanced</value>
+  </data>
+  <data name="SettingsFpsSmoothest" xml:space="preserve">
+    <value>Smoothest</value>
+  </data>
+  <!-- Settings - General page -->
+  <data name="SettingsScrollWheelDesc" xml:space="preserve">
+    <value>Control volume with your mouse wheel</value>
+  </data>
+  <data name="SettingsScrollWheel" xml:space="preserve">
+    <value>Scroll Wheel</value>
+  </data>
+  <data name="SettingsScrollWheelTrayTip" xml:space="preserve">
+    <value>Scroll your mouse wheel over the tray icon to quickly adjust system volume.</value>
+  </data>
+  <data name="SettingsScrollWheelGlobalTip" xml:space="preserve">
+    <value>Enables volume control via scroll wheel anywhere on screen when holding a modifier key.</value>
+  </data>
+  <data name="SettingsVolumeScale" xml:space="preserve">
+    <value>Volume Scale</value>
+  </data>
+  <data name="SettingsVolumeScaleDesc" xml:space="preserve">
+    <value>How volume steps are distributed</value>
+  </data>
+  <data name="SettingsLogVolumeDesc" xml:space="preserve">
+    <value>Logarithmic scale matches human hearing perception — finer control at low volumes, coarser at high.</value>
+  </data>
+  <data name="SettingsStartupDesc" xml:space="preserve">
+    <value>Launch BetterTrumpet with Windows</value>
+  </data>
+  <data name="SettingsTrayIconDesc" xml:space="preserve">
+    <value>System tray icon appearance</value>
+  </data>
+  <data name="SettingsMediaPopupDesc" xml:space="preserve">
+    <value>Show media controls on tray hover</value>
+  </data>
+  <data name="SettingsEnableMediaPopup" xml:space="preserve">
+    <value>Enable media popup</value>
+  </data>
+  <data name="SettingsInteractionDesc" xml:space="preserve">
+    <value>Hover delay and trigger behavior</value>
+  </data>
+  <data name="SettingsOnlyWhenPlaying" xml:space="preserve">
+    <value>Only show when media is playing</value>
+  </data>
+  <data name="SettingsRememberExpanded" xml:space="preserve">
+    <value>Remember expanded/collapsed state</value>
+  </data>
+  <data name="SettingsVisualEffectsDesc" xml:space="preserve">
+    <value>Album art blur intensity</value>
+  </data>
+  <data name="SettingsBlurNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="SettingsBlurMax" xml:space="preserve">
+    <value>Max</value>
+  </data>
+  <data name="SettingsEcoModeEnable" xml:space="preserve">
+    <value>Enable Eco Mode (20 FPS)</value>
+  </data>
+  <data name="SettingsEcoModeEnableTip" xml:space="preserve">
+    <value>Reduces peak meter refresh rate to 20 FPS, significantly lowering CPU usage. Ideal for laptops or when running on battery power.</value>
+  </data>
+  <data name="SettingsAutoEcoMode" xml:space="preserve">
+    <value>Auto-enable when on battery</value>
+  </data>
+  <data name="SettingsAutoEcoModeTip" xml:space="preserve">
+    <value>Automatically activates Eco Mode when your device is running on battery to extend battery life.</value>
+  </data>
+  <data name="SettingsSmoothVolumeAnimationTip" xml:space="preserve">
+    <value>When enabled, clicking on the volume track will smoothly animate to the target volume instead of jumping instantly.</value>
+  </data>
+  <data name="SettingsCurrentRefreshRate" xml:space="preserve">
+    <value>Current refresh rate: </value>
+  </data>
+  <data name="SettingsAnimationsDesc" xml:space="preserve">
+    <value>Volume slider transitions</value>
+  </data>
+  <data name="SettingsPeakMeterDesc" xml:space="preserve">
+    <value>Audio level visualization refresh</value>
+  </data>
+  <data name="SettingsDynamicAlbumArt" xml:space="preserve">
+    <value>Dynamic Album Art Theme</value>
+  </data>
+  <data name="SettingsDynamicAlbumArtDesc" xml:space="preserve">
+    <value>Colors automatically adapt to the album art of currently playing music</value>
+  </data>
+  <data name="SettingsEnableDynamicAlbumArt" xml:space="preserve">
+    <value>Enable dynamic album art colors</value>
+  </data>
+  <data name="SettingsDynamicAlbumArtInfo" xml:space="preserve">
+    <value> When enabled, BetterTrumpet samples colors from album art every few seconds and generates a harmonious palette for your sliders.</value>
+  </data>
+  <data name="SettingsColorPaletteDesc" xml:space="preserve">
+    <value>Click any swatch to edit its color</value>
+  </data>
+  <data name="SettingsMyThemesDesc" xml:space="preserve">
+    <value>Saved custom color schemes</value>
+  </data>
+  <data name="SettingsNoSavedThemes" xml:space="preserve">
+    <value>No saved themes yet. Create one from your current colors.</value>
+  </data>
+  <data name="SettingsRandomizeTooltip" xml:space="preserve">
+    <value>Randomize colors</value>
+  </data>
+  <data name="SettingsProfileApply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="SettingsProfileDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="SettingsProfileExport" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="SettingsProfileImport" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="SettingsProfileSave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="SettingsStartup" xml:space="preserve">
+    <value>Startup</value>
+  </data>
+  <data name="SettingsTrayIcon" xml:space="preserve">
+    <value>Tray Icon</value>
+  </data>
+  <data name="SettingsRunAtStartup" xml:space="preserve">
+    <value>Run at Windows startup</value>
+  </data>
+  <data name="SettingsMediaPopup" xml:space="preserve">
+    <value>Media Popup</value>
+  </data>
+  <data name="SettingsInteraction" xml:space="preserve">
+    <value>Interaction</value>
+  </data>
+  <data name="SettingsHoverDelay" xml:space="preserve">
+    <value>Hover delay</value>
+  </data>
+  <data name="SettingsVisualEffects" xml:space="preserve">
+    <value>Visual Effects</value>
+  </data>
+  <data name="SettingsBlurRadius" xml:space="preserve">
+    <value>Blur radius</value>
+  </data>
+  <data name="SettingsShowOnlyWhenPlaying" xml:space="preserve">
+    <value>Show only when playing</value>
+  </data>
+  <data name="SettingsExpandedByDefault" xml:space="preserve">
+    <value>Expanded by default</value>
+  </data>
+  <data name="SettingsAbsoluteVolume" xml:space="preserve">
+    <value>Absolute Volume</value>
+  </data>
+  <data name="SettingsAbsoluteVolumeDesc" xml:space="preserve">
+    <value>Direct volume up/down hotkeys</value>
+  </data>
+  <data name="SettingsSwitchDevice" xml:space="preserve">
+    <value>Switch Default Device</value>
+  </data>
+  <data name="SettingsDefaultPrefix" xml:space="preserve">
+    <value>Default: </value>
+  </data>
+  <!-- Settings - Profiles page -->
+  <data name="SettingsSaveCurrentVolumes" xml:space="preserve">
+    <value>Save Current Volumes</value>
+  </data>
+  <data name="SettingsSaveCurrentVolumesDesc" xml:space="preserve">
+    <value>Snapshot device and app volumes</value>
+  </data>
+  <data name="SettingsSavedProfiles" xml:space="preserve">
+    <value>Saved Profiles</value>
+  </data>
+  <data name="SettingsSavedProfilesDesc" xml:space="preserve">
+    <value>Select a profile to apply or manage</value>
+  </data>
+  <data name="SettingsProfileDeviceCount" xml:space="preserve">
+    <value>{0} device(s) | {1}</value>
+  </data>
+  <!-- Settings - About page -->
+  <data name="SettingsAboutSubtitle" xml:space="preserve">
+    <value>Version info, telemetry, and diagnostics.</value>
+  </data>
+  <data name="SettingsSendDiagnostics" xml:space="preserve">
+    <value>Send diagnostic data to improve BetterTrumpet</value>
+  </data>
+  <data name="SettingsSendDiagnosticsDesc" xml:space="preserve">
+    <value>Send anonymous crash reports and usage statistics. No personal data is collected.</value>
+  </data>
+  <data name="SettingsUpdates" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="SettingsUpdatesDesc" xml:space="preserve">
+    <value>New version notifications</value>
+  </data>
+  <data name="SettingsNotifyFor" xml:space="preserve">
+    <value>Notify for:</value>
+  </data>
+  <data name="SettingsUpdateChannelAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="SettingsUpdateChannelAllSub" xml:space="preserve">
+    <value>Patch+</value>
+  </data>
+  <data name="SettingsUpdateChannelMinor" xml:space="preserve">
+    <value>Minor+</value>
+  </data>
+  <data name="SettingsUpdateChannelMinorSub" xml:space="preserve">
+    <value>Minor+</value>
+  </data>
+  <data name="SettingsUpdateChannelMajor" xml:space="preserve">
+    <value>Major</value>
+  </data>
+  <data name="SettingsUpdateChannelMajorSub" xml:space="preserve">
+    <value>Major</value>
+  </data>
+  <data name="SettingsUpdateChannelNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="SettingsUpdateChannelNoneSub" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="SettingsCheckUpdate" xml:space="preserve">
+    <value>Check</value>
+  </data>
+  <data name="SettingsInstallUpdate" xml:space="preserve">
+    <value>Install update</value>
+  </data>
+  <data name="SettingsTelemetryDesc" xml:space="preserve">
+    <value>Send anonymous crash reports and usage statistics to improve BetterTrumpet. No personal data is collected.</value>
+  </data>
+  <data name="SettingsTelemetryEnabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="SettingsTelemetryDisabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="SettingsUpdateChannelAllDesc" xml:space="preserve">
+    <value>All updates</value>
+  </data>
+  <data name="SettingsUpdateChannelMinorMajorDesc" xml:space="preserve">
+    <value>Minor and major</value>
+  </data>
+  <data name="SettingsUpdateChannelMajorOnlyDesc" xml:space="preserve">
+    <value>Major only</value>
+  </data>
+  <data name="SettingsUpdateChannelNoneDesc" xml:space="preserve">
+    <value>No update notifications</value>
+  </data>
+  <data name="SettingsUpdateChannelAllDetail" xml:space="preserve">
+    <value>Patch, minor and major (e.g. 3.0.0 → 3.0.1)</value>
+  </data>
+  <data name="SettingsUpdateChannelMinorMajorDetail" xml:space="preserve">
+    <value>Minor and major only (e.g. 3.0 → 3.1)</value>
+  </data>
+  <data name="SettingsUpdateChannelMajorOnlyDetail" xml:space="preserve">
+    <value>Major only (e.g. 3 → 4)</value>
+  </data>
+  <data name="SettingsUpdateChannelNoneDetail" xml:space="preserve">
+    <value>No update notifications</value>
+  </data>
+  <data name="SettingsUpdateStatusDownloading" xml:space="preserve">
+    <value>Downloading...</value>
+  </data>
+  <data name="SettingsUpdateStatusChecking" xml:space="preserve">
+    <value>Checking...</value>
+  </data>
+  <data name="SettingsUpdateStatusAvailable" xml:space="preserve">
+    <value>v{0} available</value>
+  </data>
+  <data name="SettingsUpdateStatusUpToDate" xml:space="preserve">
+    <value>Up to date</value>
+  </data>
+  <data name="SettingsExportImport" xml:space="preserve">
+    <value>Export &amp; Import</value>
+  </data>
+  <data name="SettingsExportImportDesc" xml:space="preserve">
+    <value>Backup or restore all your settings</value>
+  </data>
+  <data name="SettingsExportSettings" xml:space="preserve">
+    <value>Export Settings</value>
+  </data>
+  <data name="SettingsImportSettings" xml:space="preserve">
+    <value>Import Settings</value>
+  </data>
+  <data name="SettingsImportSuccess" xml:space="preserve">
+    <value>Settings imported successfully! Some changes may require restarting BetterTrumpet.</value>
+  </data>
+  <data name="SettingsImportTitle" xml:space="preserve">
+    <value>Import Complete</value>
+  </data>
+  <!-- Settings - Dialogs -->
+  <data name="SettingsResetConfirm" xml:space="preserve">
+    <value>Reset all colors to Windows defaults?</value>
+  </data>
+  <data name="SettingsResetTitle" xml:space="preserve">
+    <value>Reset Theme</value>
+  </data>
+  <data name="SettingsDeleteConfirm" xml:space="preserve">
+    <value>Delete "{0}"?</value>
+  </data>
+  <data name="SettingsDeleteTitle" xml:space="preserve">
+    <value>Delete Theme</value>
+  </data>
+  <data name="SettingsThemeCopied" xml:space="preserve">
+    <value>Theme copied to clipboard</value>
+  </data>
+  <!-- Onboarding -->
+  <data name="OnboardingWelcomeTo" xml:space="preserve">
+    <value>Welcome to</value>
+  </data>
+  <data name="OnboardingSubtitleWelcome" xml:space="preserve">
+    <value>Take full control of your sound.</value>
+  </data>
+  <data name="OnboardingAudioOutput" xml:space="preserve">
+    <value>Audio Output</value>
+  </data>
+  <data name="OnboardingSubtitleAudio" xml:space="preserve">
+    <value>Choose where your audio goes.</value>
+  </data>
+  <data name="OnboardingAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="OnboardingSubtitleAppearance" xml:space="preserve">
+    <value>Choose your style.</value>
+  </data>
+  <data name="OnboardingPrivacy" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="OnboardingSubtitlePrivacy" xml:space="preserve">
+    <value>Your data stays yours.</value>
+  </data>
+  <data name="OnboardingCrashReports" xml:space="preserve">
+    <value>Crash reports</value>
+  </data>
+  <data name="OnboardingCrashReportsDesc" xml:space="preserve">
+    <value>Anonymous, no personal data</value>
+  </data>
+  <data name="OnboardingCrashReportsInfo" xml:space="preserve">
+    <value>This helps us fix bugs without ever collecting private data.</value>
+  </data>
+  <data name="OnboardingAutoUpdates" xml:space="preserve">
+    <value>Automatic updates</value>
+  </data>
+  <data name="OnboardingUpdateAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="OnboardingUpdateRecommended" xml:space="preserve">
+    <value>Recommended</value>
+  </data>
+  <data name="OnboardingUpdateMinor" xml:space="preserve">
+    <value>Minor</value>
+  </data>
+  <data name="OnboardingUpdateNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="OnboardingLaunchAtStartup" xml:space="preserve">
+    <value>Launch at startup</value>
+  </data>
+  <data name="OnboardingLaunchAtStartupDesc" xml:space="preserve">
+    <value>Starts with Windows</value>
+  </data>
+  <data name="OnboardingAllReady" xml:space="preserve">
+    <value>All set</value>
+  </data>
+  <data name="OnboardingAllReadyDesc" xml:space="preserve">
+    <value>Click the icon in the taskbar to mix your audio.</value>
+  </data>
+  <data name="OnboardingDeviceConfigured" xml:space="preserve">
+    <value>Audio device configured</value>
+  </data>
+  <data name="OnboardingAppearanceChosen" xml:space="preserve">
+    <value>Appearance chosen</value>
+  </data>
+  <data name="OnboardingPrivacyConfigured" xml:space="preserve">
+    <value>Privacy configured</value>
+  </data>
+  <data name="OnboardingPinTitle" xml:space="preserve">
+    <value>Pin BetterTrumpet</value>
+  </data>
+  <data name="OnboardingPinDesc" xml:space="preserve">
+    <value>Drag the BetterTrumpet icon from the hidden menu to your taskbar for one-click access.</value>
+  </data>
+  <data name="OnboardingNoDevices" xml:space="preserve">
+    <value>No audio devices detected.</value>
+  </data>
+  <data name="OnboardingSystemTheme" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="OnboardingSystemThemeDesc" xml:space="preserve">
+    <value>Follows Windows</value>
+  </data>
+  <data name="OnboardingCustomTheme" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="OnboardingCustomThemeDesc" xml:space="preserve">
+    <value>Custom colors</value>
+  </data>
+  <data name="OnboardingSkip" xml:space="preserve">
+    <value>Skip</value>
+  </data>
+  <data name="OnboardingBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="OnboardingContinue" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="OnboardingDone" xml:space="preserve">
+    <value>Done!</value>
+  </data>
 </root>

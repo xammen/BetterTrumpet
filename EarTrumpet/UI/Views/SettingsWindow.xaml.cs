@@ -122,7 +122,7 @@ namespace EarTrumpet.UI.Views
         private void ResetButton_Click(object sender, MouseButtonEventArgs e)
         {
             var result = System.Windows.MessageBox.Show(
-                "Reset all colors to Windows defaults?", "Reset Theme",
+                Properties.Resources.SettingsResetConfirm, Properties.Resources.SettingsResetTitle,
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
@@ -160,7 +160,7 @@ namespace EarTrumpet.UI.Views
             if (border?.Tag is ColorTheme theme)
             {
                 var result = System.Windows.MessageBox.Show(
-                    $"Delete \"{theme.Name}\"?", "Delete Theme",
+                    string.Format(Properties.Resources.SettingsDeleteConfirm, theme.Name), Properties.Resources.SettingsDeleteTitle,
                     MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {

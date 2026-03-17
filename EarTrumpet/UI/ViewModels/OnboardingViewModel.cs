@@ -59,8 +59,8 @@ namespace EarTrumpet.UI.ViewModels
             {
                 switch (_currentPage)
                 {
-                    case 5: return "C\u2019est fait\u00a0!";
-                    default: return "Continuer";
+                    case 5: return Properties.Resources.OnboardingDone;
+                    default: return Properties.Resources.OnboardingContinue;
                 }
             }
         }
@@ -71,10 +71,10 @@ namespace EarTrumpet.UI.ViewModels
             {
                 switch (_currentPage)
                 {
-                    case 0: return "Prenez enfin le contr\u00f4le total de votre son.";
-                    case 1: return "Choisissez o\u00f9 sort votre audio.";
-                    case 2: return "Choisissez votre style.";
-                    case 3: return "Vos donn\u00e9es restent les v\u00f4tres.";
+                    case 0: return Properties.Resources.OnboardingSubtitleWelcome;
+                    case 1: return Properties.Resources.OnboardingSubtitleAudio;
+                    case 2: return Properties.Resources.OnboardingSubtitleAppearance;
+                    case 3: return Properties.Resources.OnboardingSubtitlePrivacy;
                     case 4: return "";
                     case 5: return "";
                     default: return "";
