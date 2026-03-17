@@ -606,7 +606,7 @@ namespace EarTrumpet.UI.ViewModels
         private long _transitionStartTick;
         private int _transitionFrameCount;
         private const long TransitionDurationTicks = 300 * TimeSpan.TicksPerMillisecond;
-        private const int ExtendedRefreshInterval = 1; // update flyout Refs every frame (60fps)
+        private const int ExtendedRefreshInterval = 3; // update flyout Refs every 3rd frame (~20Hz)
 
         private void ApplyTheme(ColorTheme theme)
         {
