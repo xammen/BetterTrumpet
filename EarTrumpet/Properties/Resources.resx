@@ -1215,4 +1215,7 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
   <data name="OnboardingDone" xml:space="preserve">
     <value>Done!</value>
   </data>
+  <data name="OnboardingTelemetryReassurance" xml:space="preserve">
+    <value>We understand. We never sell your data — crash reports only contain technical info (stack traces, OS version) to help us fix bugs and optimize performance.</value>
+  </data>
 </root>
