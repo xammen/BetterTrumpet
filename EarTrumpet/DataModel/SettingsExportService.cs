@@ -40,6 +40,7 @@ namespace EarTrumpet.DataModel
                 ["UseSmoothVolumeAnimation"] = settings.UseSmoothVolumeAnimation,
                 ["VolumeAnimationSpeed"] = settings.VolumeAnimationSpeed,
                 ["PeakMeterFps"] = settings.PeakMeterFps,
+                ["PeakMeterStyle"] = (int)settings.PeakMeterStyle,
                 ["EcoMode"] = settings.EcoMode,
                 ["AutoEcoMode"] = settings.AutoEcoMode,
 
@@ -201,6 +202,7 @@ namespace EarTrumpet.DataModel
             TrySet(data, "UseSmoothVolumeAnimation", (bool v) => settings.UseSmoothVolumeAnimation = v);
             TrySet(data, "VolumeAnimationSpeed", (double v) => settings.VolumeAnimationSpeed = v);
             TrySet(data, "PeakMeterFps", (int v) => settings.PeakMeterFps = v);
+            TrySet(data, "PeakMeterStyle", (int v) => settings.PeakMeterStyle = (PeakMeterStyle)v);
             TrySet(data, "EcoMode", (bool v) => settings.EcoMode = v);
             TrySet(data, "AutoEcoMode", (bool v) => settings.AutoEcoMode = v);
 
