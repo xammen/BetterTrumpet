@@ -135,6 +135,17 @@ namespace EarTrumpet.UI.ViewModels
             }
         }
 
+        // Page 3: Update channel (0=All, 1=MinorMajor, 2=MajorOnly, 3=None)
+        public int UpdateChannelIndex
+        {
+            get => (int)_settings.UpdateNotifyChannel;
+            set
+            {
+                _settings.UpdateNotifyChannel = (DataModel.UpdateChannel)value;
+                Raise(nameof(UpdateChannelIndex));
+            }
+        }
+
         // Commands
         public ICommand NextCommand { get; }
         public ICommand BackCommand { get; }
