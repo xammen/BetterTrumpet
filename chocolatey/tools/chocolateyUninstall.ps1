@@ -1,22 +1,23 @@
 $ErrorActionPreference = 'Stop'
 
-# Remove Start Menu shortcut
-$startMenuDir = [Environment]::GetFolderPath('Programs')
-$shortcutPath = Join-Path $startMenuDir 'BetterTrumpet.lnk'
-if (Test-Path $shortcutPath) {
-    Remove-Item $shortcutPath -Force
-    Write-Host "Removed Start Menu shortcut." -ForegroundColor Green
-}
-
-# Remove Startup shortcut
-$startupDir = [Environment]::GetFolderPath('Startup')
-$startupShortcut = Join-Path $startupDir 'BetterTrumpet.lnk'
-if (Test-Path $startupShortcut) {
-    Remove-Item $startupShortcut -Force
-    Write-Host "Removed Startup shortcut." -ForegroundColor Green
-}
-
 # Kill running instance
 Get-Process -Name 'BetterTrumpet' -ErrorAction SilentlyContinue | Stop-Process -Force
+Start-Sleep -Seconds 1
 
-Write-Host "BetterTrumpet uninstalled." -ForegroundColor Green
+# Uninstall via Inno Setup uninstaller
+$uninstallKey = Get-UninstallRegistryKey -SoftwareName 'BetterTrumpet*'
+
+if ($uninstallKey) {
+  $uninstallString = $uninstallKey.UninstallString
+  # Inno Setup uninstaller path may be quoted
+  $uninstallExe = $uninstallString -replace '"', ''
+  
+  if (Test-Path $uninstallExe) {
+    Start-Process -FilePath $uninstallExe -ArgumentList '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART' -Wait
+    Write-Host "BetterTrumpet uninstalled successfully." -ForegroundColor Green
+  } else {
+    Write-Warning "Uninstaller not found at: $uninstallExe"
+  }
+} else {
+  Write-Warning "BetterTrumpet uninstall registry key not found. It may have been removed manually."
+}
