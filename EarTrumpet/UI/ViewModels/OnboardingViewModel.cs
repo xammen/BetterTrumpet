@@ -111,7 +111,7 @@ namespace EarTrumpet.UI.ViewModels
             }
         }
 
-        // Page 3: Privacy — no dark pattern, just a simple toggle
+        // Page 3: Privacy — telemetry enabled by default in onboarding
         public bool IsTelemetryEnabled
         {
             get => _settings.IsTelemetryEnabled;
@@ -119,8 +119,12 @@ namespace EarTrumpet.UI.ViewModels
             {
                 _settings.IsTelemetryEnabled = value;
                 Raise(nameof(IsTelemetryEnabled));
+                Raise(nameof(ShowTelemetryReassurance));
             }
         }
+
+        /// <summary>Show reassurance message when user disables telemetry.</summary>
+        public bool ShowTelemetryReassurance => !IsTelemetryEnabled;
 
         public bool RunAtStartup
         {
@@ -164,6 +168,9 @@ namespace EarTrumpet.UI.ViewModels
             NextCommand = new RelayCommand(GoNext);
             BackCommand = new RelayCommand(GoBack);
             SkipCommand = new RelayCommand(Skip);
+
+            // Default telemetry to enabled in onboarding (user can opt out)
+            _settings.IsTelemetryEnabled = true;
 
             LoadDevices();
         }

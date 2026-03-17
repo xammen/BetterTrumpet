@@ -434,10 +434,23 @@
                                           VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
-                        <!-- Reassuring line under telemetry -->
+                        <!-- Reassuring line under telemetry (always visible) -->
                         <TextBlock Text="{x:Static resx:Resources.OnboardingCrashReportsInfo}"
-                                   FontSize="11" Foreground="{StaticResource T3}" Margin="4,6,0,12"
+                                   FontSize="11" Foreground="{StaticResource T3}" Margin="4,6,0,0"
                                    TextWrapping="Wrap"/>
+
+                        <!-- Extra reassurance when user disables telemetry -->
+                        <Border Margin="0,8,0,12" Padding="12,10" CornerRadius="8"
+                                Background="#15FFD54F"
+                                Visibility="{Binding ShowTelemetryReassurance, Converter={StaticResource BoolVis}}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                           Foreground="#FFD54F" VerticalAlignment="Top" Margin="0,1,10,0"/>
+                                <TextBlock FontSize="11.5" Foreground="{StaticResource T2}" TextWrapping="Wrap"
+                                           MaxWidth="360"
+                                           Text="{x:Static resx:Resources.OnboardingTelemetryReassurance}"/>
+                            </StackPanel>
+                        </Border>
 
                         <!-- Update channel -->
                         <Border Padding="16,14" CornerRadius="10" Margin="0,0,0,4"
