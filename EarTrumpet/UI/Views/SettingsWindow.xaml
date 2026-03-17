@@ -241,7 +241,7 @@
                                   Content="{x:Static resx:Resources.SettingsUseLogarithmicVolume}"
                                   IsChecked="{Binding UseLogarithmicVolume, Mode=TwoWay}"
                                   ToolTip="{x:Static resx:Resources.SettingsLogVolumeDesc}" />
-                        <TextBlock Style="{StaticResource BodySubText}" FontSize="11" Opacity="0.5" Margin="0,8,0,0"
+                        <TextBlock Style="{StaticResource BodySubText}" FontSize="12" Opacity="0.7" Margin="0,8,0,0"
                                    TextWrapping="Wrap"
                                    Text="{x:Static resx:Resources.SettingsLogVolumeDesc}" />
                     </StackPanel>
@@ -450,7 +450,7 @@
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{x:Static resx:Resources.SettingsPeakMeterStyle}" FontSize="15" FontWeight="SemiBold" />
                                         <Border CornerRadius="4" Background="#30FFA500" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
-                                            <TextBlock Text="Experimental" FontSize="9" FontWeight="Bold" Foreground="#FFA500" />
+                                            <TextBlock Text="Experimental" FontSize="10" FontWeight="SemiBold" Foreground="#FFA500" />
                                         </Border>
                                     </StackPanel>
                                     <TextBlock Text="{x:Static resx:Resources.SettingsPeakMeterStyleDesc}"
@@ -816,7 +816,7 @@
                                                 </Border.Background>
                                             </Border>
                                         </Grid>
-                                        <TextBlock Grid.Column="2" Text="80" FontSize="14" FontWeight="Medium"
+                                        <TextBlock Grid.Column="2" Text="80" FontSize="13"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <TextBlock.Foreground>
                                                 <SolidColorBrush Color="{Binding TextColorValue}" />
@@ -868,7 +868,7 @@
                                                 </Border.Background>
                                             </Border>
                                         </Grid>
-                                        <TextBlock Grid.Column="2" Text="50" FontSize="14" FontWeight="Medium"
+                                        <TextBlock Grid.Column="2" Text="50" FontSize="13"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <TextBlock.Foreground>
                                                 <SolidColorBrush Color="{Binding TextColorValue}" />
@@ -912,7 +912,7 @@
                                                 </Border.Background>
                                             </Border>
                                         </Grid>
-                                        <TextBlock Grid.Column="2" Text="100" FontSize="14" FontWeight="Medium"
+                                        <TextBlock Grid.Column="2" Text="100" FontSize="13"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <TextBlock.Foreground>
                                                 <SolidColorBrush Color="{Binding TextColorValue}" />
@@ -961,7 +961,7 @@
                             <Border Padding="12,10" CornerRadius="8" Margin="0,14,0,0"
                                     Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Style="{StaticResource BodySubText}" FontSize="12" TextWrapping="Wrap"
-                                           Opacity="0.6">
+                                           Opacity="0.7">
                                     <Run Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="12" />
                                     <Run Text="{x:Static resx:Resources.SettingsDynamicAlbumArtInfo}" />
                                 </TextBlock>
@@ -1001,7 +1001,7 @@
                                             <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="All">
                                                 <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
                                         </Style></Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryAll}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryAll}" FontSize="12" VerticalAlignment="Center"/>
                                     </Border>
                                     <!-- Minimal -->
                                     <Border Margin="2" MouseLeftButtonDown="CategoryMinimal_Click">
@@ -1009,7 +1009,7 @@
                                             <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="Minimal">
                                                 <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
                                         </Style></Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryMinimal}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryMinimal}" FontSize="12" VerticalAlignment="Center"/>
                                     </Border>
                                     <!-- Brands -->
                                     <Border Margin="2" MouseLeftButtonDown="CategoryBrands_Click">
@@ -1017,7 +1017,7 @@
                                             <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="Brand">
                                                 <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
                                         </Style></Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryBrands}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryBrands}" FontSize="12" VerticalAlignment="Center"/>
                                     </Border>
                                     <!-- Retro -->
                                     <Border Margin="2" MouseLeftButtonDown="CategoryRetro_Click">
@@ -1025,7 +1025,7 @@
                                             <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="Retro / Gaming">
                                                 <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
                                         </Style></Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryRetro}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryRetro}" FontSize="12" VerticalAlignment="Center"/>
                                     </Border>
                                     <!-- Developer -->
                                     <Border Margin="2" MouseLeftButtonDown="CategoryDev_Click">
@@ -1033,7 +1033,7 @@
                                             <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="Developer">
                                                 <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
                                         </Style></Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryDeveloper}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryDeveloper}" FontSize="12" VerticalAlignment="Center"/>
                                     </Border>
                                     <!-- Nature -->
                                     <Border Margin="2" MouseLeftButtonDown="CategoryNature_Click">
@@ -1041,7 +1041,7 @@
                                             <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="Nature / Premium">
                                                 <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
                                         </Style></Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryNature}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryNature}" FontSize="12" VerticalAlignment="Center"/>
                                     </Border>
                                     <!-- Accessibility -->
                                     <Border Margin="2" MouseLeftButtonDown="CategoryAccessibility_Click">
@@ -1049,7 +1049,7 @@
                                             <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="Accessibility">
                                                 <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
                                         </Style></Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryAccessibility}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryAccessibility}" FontSize="12" VerticalAlignment="Center"/>
                                     </Border>
                                 </ItemsControl>
                             </Border>
@@ -1114,7 +1114,7 @@
                                                     </Grid>
                                                 </Border>
                                                 <!-- Theme name + category -->
-                                                <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
+                                                <TextBlock Text="{Binding Name}" FontSize="13"
                                                            Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                                 <TextBlock Text="{Binding Category}" FontSize="10" Opacity="0.45"
                                                            Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
@@ -1160,7 +1160,7 @@
                                 </StackPanel>
 
                                 <!-- Slider Colors -->
-                                <TextBlock Text="{x:Static resx:Resources.SettingsSliderColors}" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,8"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsSliderColors}" FontSize="13" Margin="0,0,0,8"
                                            Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
                                 <Grid Margin="0,0,0,16">
                                     <Grid.ColumnDefinitions>
@@ -1191,7 +1191,7 @@
                                             </Border.Background>
                                             <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
                                         </Border>
-                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelThumb}" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
+                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelThumb}" FontSize="12" Margin="0,6,0,0"
                                                    HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
                                     </StackPanel>
 
@@ -1216,7 +1216,7 @@
                                             </Border.Background>
                                             <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
                                         </Border>
-                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelFill}" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
+                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelFill}" FontSize="12" Margin="0,6,0,0"
                                                    HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
                                     </StackPanel>
 
@@ -1241,7 +1241,7 @@
                                             </Border.Background>
                                             <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
                                         </Border>
-                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelTrackBg}" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
+                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelTrackBg}" FontSize="12" Margin="0,6,0,0"
                                                    HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
                                     </StackPanel>
 
@@ -1266,13 +1266,13 @@
                                             </Border.Background>
                                             <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
                                         </Border>
-                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelPeakMeter}" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
+                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelPeakMeter}" FontSize="12" Margin="0,6,0,0"
                                                    HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
                                     </StackPanel>
                                 </Grid>
 
                                 <!-- Window Colors -->
-                                <TextBlock Text="{x:Static resx:Resources.SettingsWindowColors}" FontSize="12" FontWeight="SemiBold" Margin="0,4,0,8"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsWindowColors}" FontSize="13" Margin="0,4,0,8"
                                            Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
                                 <Grid Margin="0,0,0,20">
                                     <Grid.ColumnDefinitions>
@@ -1303,7 +1303,7 @@
                                             </Border.Background>
                                             <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
                                         </Border>
-                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelWindowBg}" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
+                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelWindowBg}" FontSize="12" Margin="0,6,0,0"
                                                    HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
                                     </StackPanel>
 
@@ -1328,7 +1328,7 @@
                                             </Border.Background>
                                             <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
                                         </Border>
-                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelText}" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
+                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelText}" FontSize="12" Margin="0,6,0,0"
                                                    HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
                                     </StackPanel>
 
@@ -1353,7 +1353,7 @@
                                             </Border.Background>
                                             <Border CornerRadius="10" BorderThickness="1" BorderBrush="#20FFFFFF" Margin="2" />
                                         </Border>
-                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelGlow}" FontSize="11" Margin="0,6,0,0" FontWeight="Medium"
+                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelGlow}" FontSize="12" Margin="0,6,0,0"
                                                    HorizontalAlignment="Center" Style="{StaticResource BodySubText}" />
                                     </StackPanel>
                                 </Grid>
@@ -1561,7 +1561,7 @@
                                                         </Border>
                                                     </Grid>
                                                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
-                                                               FontSize="12" FontWeight="Medium"
+                                                               FontSize="12"
                                                                Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                                     <Border Width="18" Height="18" CornerRadius="9" Margin="8,0,0,0"
                                                             Background="{StaticResource BT.DangerDimBrush}" Cursor="Hand"
@@ -1587,7 +1587,7 @@
 
                                 <!-- Empty state text (visible when no custom themes) -->
                                 <TextBlock Text="{x:Static resx:Resources.SettingsNoSavedThemes}"
-                                           FontSize="12" Opacity="0.35" Margin="0,2,0,8" FontStyle="Italic"
+                                           FontSize="12" Opacity="0.45" Margin="0,2,0,8" FontStyle="Italic"
                                            Theme:Brush.Foreground="Theme=Text, HighContrast=Text">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -1826,7 +1826,7 @@
                                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.9">
                                         <TextBlock Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="22"
                                                    HorizontalAlignment="Center" Foreground="White" />
-                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelPreview}" FontSize="11" HorizontalAlignment="Center"
+                                        <TextBlock Text="{x:Static resx:Resources.ColorLabelPreview}" FontSize="12" HorizontalAlignment="Center"
                                                    Foreground="White" Opacity="0.7" Margin="0,2,0,0" />
                                     </StackPanel>
                                 </Grid>
@@ -1953,7 +1953,7 @@
                                                    VerticalAlignment="Center" Margin="0,0,8,0" Foreground="#80FFFFFF" />
                                         <StackPanel>
                                             <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" />
-                                            <TextBlock FontSize="11" Foreground="#80FFFFFF">
+                                            <TextBlock FontSize="12" Foreground="#80FFFFFF">
                                                 <TextBlock.Text>
                                                     <MultiBinding StringFormat="{}{0} device(s) | {1}">
                                                         <Binding Path="Devices.Count" />
@@ -1993,7 +1993,7 @@
                         </ListBox>
 
                         <!-- Selected profile details -->
-                        <TextBlock Text="{Binding SelectedProfileDetails}" FontSize="11" Foreground="#60FFFFFF"
+                        <TextBlock Text="{Binding SelectedProfileDetails}" FontSize="12" Foreground="#60FFFFFF"
                                    Margin="0,8,0,0" Visibility="{Binding HasSelectedProfile, Converter={StaticResource BoolToVisibilityConverter}}" />
 
                         <!-- Action buttons -->
@@ -2051,8 +2051,8 @@
                            Source="/BetterTrumpet;component/Assets/icon.png"
                            RenderOptions.BitmapScalingMode="NearestNeighbor" />
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock FontSize="24" FontWeight="SemiBold" Text="BetterTrumpet" />
-                        <TextBlock FontSize="12" Opacity="0.5" Text="{Binding AboutText}" />
+                        <TextBlock FontSize="26" FontWeight="SemiBold" Text="BetterTrumpet" />
+                        <TextBlock FontSize="12" Opacity="0.7" Text="{Binding AboutText}" />
                     </StackPanel>
                 </StackPanel>
 
@@ -2061,7 +2061,7 @@
                     <TextBlock Style="{StaticResource BodyText}"
                                Text="{x:Static resx:Resources.ForkAttributionText}" />
                     <TextBlock Style="{StaticResource BodyText}"
-                               Opacity="0.5"
+                               Opacity="0.7"
                                Text="&#169; 2026 xmn" />
                 </StackPanel>
 
@@ -2071,10 +2071,10 @@
                         CornerRadius="8"
                         Background="{StaticResource BT.SurfaceBrush}">
                     <StackPanel>
-                        <TextBlock FontSize="14" FontWeight="SemiBold"
+                        <TextBlock FontSize="13" FontWeight="SemiBold"
                                    Margin="0,0,0,4"
                                    Text="{x:Static resx:Resources.PrivacyCheckboxText}" />
-                        <TextBlock FontSize="12" Opacity="0.5" TextWrapping="Wrap"
+                        <TextBlock FontSize="12" Opacity="0.7" TextWrapping="Wrap"
                                    Margin="0,0,0,10"
                                    Text="{Binding TelemetryDescription}" />
                         <StackPanel Orientation="Horizontal">
@@ -2102,7 +2102,7 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="{x:Static resx:Resources.SettingsUpdates}" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsUpdates}" FontSize="15" FontWeight="SemiBold" />
                                 <TextBlock Text="{x:Static resx:Resources.SettingsUpdatesDesc}"
                                            Style="{StaticResource BodySubText}" FontSize="12" />
                             </StackPanel>
@@ -2137,7 +2137,7 @@
                                         </Style>
                                     </Border.Style>
                                     <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelAll}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelAll}" FontSize="13" HorizontalAlignment="Center" />
                                         <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelAllSub}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
@@ -2159,7 +2159,7 @@
                                         </Style>
                                     </Border.Style>
                                     <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelMinor}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelMinor}" FontSize="13" HorizontalAlignment="Center" />
                                         <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelMinorSub}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
@@ -2181,7 +2181,7 @@
                                         </Style>
                                     </Border.Style>
                                     <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelMajor}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelMajor}" FontSize="13" HorizontalAlignment="Center" />
                                         <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelMajorSub}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
@@ -2203,14 +2203,14 @@
                                         </Style>
                                     </Border.Style>
                                     <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelNone}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelNone}" FontSize="13" HorizontalAlignment="Center" />
                                         <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelNoneSub}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                             </Grid>
                         </Border>
                         <TextBlock Text="{Binding UpdateChannelDescription}"
-                                   FontSize="11" Opacity="0.45" TextWrapping="Wrap"
+                                   FontSize="12" Opacity="0.45" TextWrapping="Wrap"
                                    Margin="0,0,0,12" />
 
                         <!-- Separator -->
@@ -2224,7 +2224,7 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding UpdateStatusText}" FontSize="12" />
-                                <TextBlock Text="{Binding LastCheckText}" FontSize="11" Opacity="0.4" Margin="0,2,0,0" />
+                                <TextBlock Text="{Binding LastCheckText}" FontSize="12" Opacity="0.45" Margin="0,2,0,0" />
                             </StackPanel>
 
                             <!-- Check button (when no update) -->
@@ -2330,7 +2330,7 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="{x:Static resx:Resources.SettingsExportImport}" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsExportImport}" FontSize="15" FontWeight="SemiBold" />
                                 <TextBlock Text="{x:Static resx:Resources.SettingsExportImportDesc}"
                                            Style="{StaticResource BodySubText}" FontSize="12" />
                             </StackPanel>
@@ -2361,7 +2361,7 @@
                         Padding="12"
                         CornerRadius="6"
                         Background="#0DFFFFFF">
-                    <TextBlock FontSize="11" Opacity="0.4" FontFamily="Consolas"
+                    <TextBlock FontSize="12" Opacity="0.45" FontFamily="Consolas"
                                Text="{Binding HealthSummary}" />
                 </Border>
             </StackPanel>
@@ -2819,7 +2819,7 @@
                     </Grid.RowDefinitions>
                     <TextBlock HorizontalAlignment="Center"
                                FontSize="26"
-                               FontWeight="Light"
+                               FontWeight="SemiBold"
                                Style="{StaticResource HeadingText}"
                                Text="{x:Static resx:Resources.SettingsTitle}" />
                     <ComboBox Grid.Row="1"
@@ -2926,8 +2926,8 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Margin="16,0,0,0"
-                                       FontSize="15"
-                                       FontWeight="Bold"
+                                        FontSize="15"
+                                       FontWeight="SemiBold"
                                        Text="{Binding Selected.Title}" />
                             <ItemsControl Grid.Column="1"
                                           IsTabStop="False"
