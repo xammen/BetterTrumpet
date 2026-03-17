@@ -109,7 +109,7 @@
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="{x:Static resx:Resources.SettingsOpenEarTrumpetText}" FontSize="15" FontWeight="SemiBold" />
                                 <TextBlock Style="{StaticResource BodySubText}" FontSize="12">
-                                    <Run Text="Default: " /><Run Text="{Binding DefaultHotKey, Mode=OneWay}" />
+                                    <Run Text="{x:Static resx:Resources.SettingsDefaultPrefix}" /><Run Text="{Binding DefaultHotKey, Mode=OneWay}" />
                                 </TextBlock>
                             </StackPanel>
                         </StackPanel>
@@ -131,7 +131,7 @@
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="{x:Static resx:Resources.SettingsOpenMixerText}" FontSize="15" FontWeight="SemiBold" />
                                 <TextBlock Style="{StaticResource BodySubText}" FontSize="12">
-                                    <Run Text="Default: " /><Run Text="{Binding DefaultMixerHotKey, Mode=OneWay}" />
+                                    <Run Text="{x:Static resx:Resources.SettingsDefaultPrefix}" /><Run Text="{Binding DefaultMixerHotKey, Mode=OneWay}" />
                                 </TextBlock>
                             </StackPanel>
                         </StackPanel>
@@ -153,7 +153,7 @@
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="{x:Static resx:Resources.SettingsOpenSettingsText}" FontSize="15" FontWeight="SemiBold" />
                                 <TextBlock Style="{StaticResource BodySubText}" FontSize="12">
-                                    <Run Text="Default: " /><Run Text="{Binding DefaultSettingsHotKey, Mode=OneWay}" />
+                                    <Run Text="{x:Static resx:Resources.SettingsDefaultPrefix}" /><Run Text="{Binding DefaultSettingsHotKey, Mode=OneWay}" />
                                 </TextBlock>
                             </StackPanel>
                         </StackPanel>
@@ -173,8 +173,8 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Absolute Volume" FontSize="15" FontWeight="SemiBold" />
-                                <TextBlock Text="Direct volume up/down hotkeys"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsAbsoluteVolume}" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsAbsoluteVolumeDesc}"
                                            Style="{StaticResource BodySubText}" FontSize="12" />
                             </StackPanel>
                         </StackPanel>
@@ -201,9 +201,9 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Switch Default Device" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsSwitchDevice}" FontSize="15" FontWeight="SemiBold" />
                                 <TextBlock Style="{StaticResource BodySubText}" FontSize="12">
-                                    <Run Text="Default: " /><Run Text="{Binding DefaultSwitchDeviceHotKey, Mode=OneWay}" />
+                                    <Run Text="{x:Static resx:Resources.SettingsDefaultPrefix}" /><Run Text="{Binding DefaultSwitchDeviceHotKey, Mode=OneWay}" />
                                 </TextBlock>
                             </StackPanel>
                         </StackPanel>
@@ -227,8 +227,8 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Scroll Wheel" FontSize="15" FontWeight="SemiBold" />
-                                <TextBlock Text="Control volume with your mouse wheel"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsScrollWheel}" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsScrollWheelDesc}"
                                            Style="{StaticResource BodySubText}" FontSize="12" />
                             </StackPanel>
                         </StackPanel>
@@ -236,11 +236,11 @@
                         <CheckBox HorizontalAlignment="Left" Margin="0,0,0,10"
                                   Content="{x:Static resx:Resources.SettingsUseScrollWheelInTray}"
                                   IsChecked="{Binding UseScrollWheelInTray, Mode=TwoWay}"
-                                  ToolTip="Scroll your mouse wheel over the tray icon to quickly adjust system volume." />
+                                  ToolTip="{x:Static resx:Resources.SettingsScrollWheelTrayTip}" />
                         <CheckBox HorizontalAlignment="Left"
                                   Content="{x:Static resx:Resources.SettingsUseGlobalMouseWheelHook}"
                                   IsChecked="{Binding UseGlobalMouseWheelHook, Mode=TwoWay}"
-                                  ToolTip="Enables volume control via scroll wheel anywhere on screen when holding a modifier key. May conflict with some applications." />
+                                  ToolTip="{x:Static resx:Resources.SettingsScrollWheelGlobalTip}" />
                     </StackPanel>
                 </Border>
 
@@ -260,8 +260,8 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Volume Scale" FontSize="15" FontWeight="SemiBold" />
-                                <TextBlock Text="How volume steps are distributed"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsVolumeScale}" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsVolumeScaleDesc}"
                                            Style="{StaticResource BodySubText}" FontSize="12" />
                             </StackPanel>
                         </StackPanel>
@@ -269,10 +269,10 @@
                         <CheckBox HorizontalAlignment="Left"
                                   Content="{x:Static resx:Resources.SettingsUseLogarithmicVolume}"
                                   IsChecked="{Binding UseLogarithmicVolume, Mode=TwoWay}"
-                                  ToolTip="Use logarithmic volume scale for more natural volume control. Lower volumes will have finer adjustment, matching how human hearing perceives loudness changes." />
+                                  ToolTip="{x:Static resx:Resources.SettingsLogVolumeDesc}" />
                         <TextBlock Style="{StaticResource BodySubText}" FontSize="11" Opacity="0.5" Margin="0,8,0,0"
                                    TextWrapping="Wrap"
-                                   Text="Logarithmic scale matches human hearing perception — finer control at low volumes, coarser at high." />
+                                   Text="{x:Static resx:Resources.SettingsLogVolumeDesc}" />
                     </StackPanel>
                 </Border>
 
@@ -294,22 +294,22 @@
                                                Foreground="White" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Eco Mode" FontSize="15" FontWeight="SemiBold" />
-                                    <TextBlock Text="Save battery by reducing refresh rate"
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsEcoMode}" FontSize="15" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsEcoModeDesc}"
                                                Style="{StaticResource BodySubText}" FontSize="12" />
                                 </StackPanel>
                             </StackPanel>
 
-                            <CheckBox Content="Enable Eco Mode (20 FPS)"
+                            <CheckBox Content="{x:Static resx:Resources.SettingsEcoModeEnable}"
                                       IsChecked="{Binding EcoMode, Mode=TwoWay}" Margin="0,8,0,6"
-                                      ToolTip="Reduces peak meter refresh rate to 20 FPS, significantly lowering CPU usage. Ideal for laptops or when running on battery power." />
-                            <CheckBox Content="Auto-enable when on battery"
+                                      ToolTip="{x:Static resx:Resources.SettingsEcoModeEnableTip}" />
+                            <CheckBox Content="{x:Static resx:Resources.SettingsAutoEcoMode}"
                                       IsChecked="{Binding AutoEcoMode, Mode=TwoWay}" Margin="0,0,0,14"
-                                      ToolTip="Automatically activates Eco Mode when your device is running on battery to extend battery life." />
+                                      ToolTip="{x:Static resx:Resources.SettingsAutoEcoModeTip}" />
 
                             <Border Padding="10,8" CornerRadius="6" Background="#15FFFFFF">
                                 <TextBlock Style="{StaticResource BodySubText}" FontSize="12">
-                                    <Run Text="Current refresh rate: " />
+                                    <Run Text="{x:Static resx:Resources.SettingsCurrentRefreshRate}" />
                                     <Run Text="{Binding EffectiveFpsText, Mode=OneWay}" FontWeight="SemiBold"
                                          Foreground="{StaticResource BrandAccentBrush}" />
                                 </TextBlock>
@@ -329,31 +329,31 @@
                                                Foreground="White" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Animations" FontSize="15" FontWeight="SemiBold" />
-                                    <TextBlock Text="Volume slider transitions"
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsAnimations}" FontSize="15" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsAnimationsDesc}"
                                                Style="{StaticResource BodySubText}" FontSize="12" />
                                 </StackPanel>
                             </StackPanel>
 
-                            <CheckBox Content="Smooth volume animation"
+                            <CheckBox Content="{x:Static resx:Resources.SettingsSmoothVolumeAnimation}"
                                       IsChecked="{Binding UseSmoothVolumeAnimation, Mode=TwoWay}" Margin="0,8,0,12"
-                                      ToolTip="When enabled, clicking on the volume track will smoothly animate to the target volume instead of jumping instantly. Disable for immediate response." />
+                                      ToolTip="{x:Static resx:Resources.SettingsSmoothVolumeAnimationTip}" />
 
                             <StackPanel Orientation="Vertical" Margin="0,0,0,0"
                                         IsEnabled="{Binding UseSmoothVolumeAnimation}">
-                                <TextBlock Text="Animation speed" Margin="0,0,0,8" FontSize="13" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsAnimationSpeedLabel}" Margin="0,0,0,8" FontSize="13" />
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="Slow" Style="{StaticResource BodySubText}"
+                                    <TextBlock Grid.Column="0" Text="{x:Static resx:Resources.SettingsSpeedSlow}" Style="{StaticResource BodySubText}"
                                                VerticalAlignment="Center" Margin="0,0,12,0" />
                                     <Slider Grid.Column="1" Minimum="1" Maximum="10"
                                             Value="{Binding VolumeAnimationSpeed, Mode=TwoWay}"
                                             TickFrequency="1" IsSnapToTickEnabled="True" />
-                                    <TextBlock Grid.Column="2" Text="Fast" Style="{StaticResource BodySubText}"
+                                    <TextBlock Grid.Column="2" Text="{x:Static resx:Resources.SettingsSpeedFast}" Style="{StaticResource BodySubText}"
                                                VerticalAlignment="Center" Margin="12,0,0,0" />
                                 </Grid>
                             </StackPanel>
@@ -372,8 +372,8 @@
                                                Foreground="White" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Peak Meter" FontSize="15" FontWeight="SemiBold" />
-                                    <TextBlock Text="Audio level visualization refresh"
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsPeakMeter}" FontSize="15" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsPeakMeterDesc}"
                                                Style="{StaticResource BodySubText}" FontSize="12" />
                                 </StackPanel>
                             </StackPanel>
@@ -388,13 +388,13 @@
                                                Foreground="{StaticResource WarningAmberBrush}" />
                                     <TextBlock FontSize="12" VerticalAlignment="Center"
                                                Foreground="{StaticResource WarningAmberBrush}">
-                                        <Run Text="Overridden by Eco Mode when active" />
+                                        <Run Text="{x:Static resx:Resources.SettingsEcoModeOverridden}" />
                                     </TextBlock>
                                 </StackPanel>
                             </Border>
 
                             <!-- Segmented Control for FPS -->
-                            <TextBlock Text="Refresh rate" FontSize="13" Margin="0,0,0,10" />
+                            <TextBlock Text="{x:Static resx:Resources.SettingsRefreshRate}" FontSize="13" Margin="0,0,0,10" />
                             <Border CornerRadius="8" Background="#08FFFFFF" Padding="3"
                                     BorderBrush="#15FFFFFF" BorderThickness="1">
                                 <Grid>
@@ -423,7 +423,7 @@
                                         </Border.Style>
                                         <StackPanel HorizontalAlignment="Center">
                                             <TextBlock Text="5 FPS" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                            <TextBlock Text="Ultra saver" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{x:Static resx:Resources.SettingsFpsUltraSaver}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
                                         </StackPanel>
                                     </Border>
 
@@ -445,7 +445,7 @@
                                         </Border.Style>
                                         <StackPanel HorizontalAlignment="Center">
                                             <TextBlock Text="20 FPS" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                            <TextBlock Text="Battery saver" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{x:Static resx:Resources.SettingsFpsBatterySaver}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
                                         </StackPanel>
                                     </Border>
 
@@ -467,7 +467,7 @@
                                         </Border.Style>
                                         <StackPanel HorizontalAlignment="Center">
                                             <TextBlock Text="30 FPS" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                            <TextBlock Text="Balanced" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{x:Static resx:Resources.SettingsFpsBalanced}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
                                         </StackPanel>
                                     </Border>
 
@@ -489,7 +489,7 @@
                                         </Border.Style>
                                         <StackPanel HorizontalAlignment="Center">
                                             <TextBlock Text="60 FPS" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                            <TextBlock Text="Smoothest" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{x:Static resx:Resources.SettingsFpsSmoothest}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
                                         </StackPanel>
                                     </Border>
                                 </Grid>
@@ -522,8 +522,8 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="Custom Colors" FontSize="15" FontWeight="SemiBold" />
-                                <TextBlock Text="Personalize volume slider appearance"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsCustomColors}" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsCustomColorsDesc}"
                                            Style="{StaticResource BodySubText}" FontSize="12" />
                             </StackPanel>
                             <CheckBox Grid.Column="2" VerticalAlignment="Center"
@@ -563,7 +563,7 @@
                                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                                     <TextBlock Text="&#xE8D6;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                VerticalAlignment="Center" Margin="0,0,6,0" Opacity="0.7" />
-                                    <TextBlock Text="Dynamic" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsTabDynamic}" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
 
@@ -586,7 +586,7 @@
                                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                                     <TextBlock Text="&#xE91B;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                VerticalAlignment="Center" Margin="0,0,6,0" Opacity="0.7" />
-                                    <TextBlock Text="Presets" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsTabPresets}" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
 
@@ -609,7 +609,7 @@
                                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                                     <TextBlock Text="&#xE2B1;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                VerticalAlignment="Center" Margin="0,0,6,0" Opacity="0.7" />
-                                    <TextBlock Text="Custom" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsTabCustom}" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
                         </Grid>
@@ -627,12 +627,12 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="Live Preview" FontSize="13" FontWeight="SemiBold"
+                                <TextBlock Grid.Column="0" Text="{x:Static resx:Resources.SettingsLivePreview}" FontSize="13" FontWeight="SemiBold"
                                            VerticalAlignment="Center"
                                            Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                 <!-- Randomize button -->
                                 <Border Grid.Column="1" Width="32" Height="32" CornerRadius="8" Cursor="Hand"
-                                        ToolTip="Randomize colors" MouseLeftButtonDown="RandomizeColors_Click">
+                                        ToolTip="{x:Static resx:Resources.SettingsRandomizeTooltip}" MouseLeftButtonDown="RandomizeColors_Click">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
@@ -840,13 +840,13 @@
                                                Foreground="White" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Dynamic Album Art Theme" FontSize="15" FontWeight="SemiBold" />
-                                    <TextBlock Text="Colors automatically adapt to the album art of currently playing music"
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsDynamicAlbumArt}" FontSize="15" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsDynamicAlbumArtDesc}"
                                                Style="{StaticResource BodySubText}" FontSize="12" TextWrapping="Wrap" />
                                 </StackPanel>
                             </StackPanel>
 
-                            <CheckBox Content="Enable dynamic album art colors"
+                            <CheckBox Content="{x:Static resx:Resources.SettingsEnableDynamicAlbumArt}"
                                       IsChecked="{Binding UseDynamicAlbumArtTheme, Mode=TwoWay}" Margin="0,4,0,0" />
 
                             <Border Padding="12,10" CornerRadius="8" Margin="0,14,0,0"
@@ -854,7 +854,7 @@
                                 <TextBlock Style="{StaticResource BodySubText}" FontSize="12" TextWrapping="Wrap"
                                            Opacity="0.6">
                                     <Run Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="12" />
-                                    <Run Text=" When enabled, BetterTrumpet samples colors from album art every few seconds and generates a harmonious palette for your sliders." />
+                                    <Run Text="{x:Static resx:Resources.SettingsDynamicAlbumArtInfo}" />
                                 </TextBlock>
                             </Border>
                         </StackPanel>
@@ -1115,14 +1115,14 @@
                                                    Foreground="White" />
                                     </Border>
                                     <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="Color Palette" FontSize="15" FontWeight="SemiBold" />
-                                        <TextBlock Text="Click any swatch to edit its color"
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsColorPalette}" FontSize="15" FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsColorPaletteDesc}"
                                                    Style="{StaticResource BodySubText}" FontSize="12" />
                                     </StackPanel>
                                 </StackPanel>
 
                                 <!-- Slider Colors -->
-                                <TextBlock Text="Slider Colors" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,8"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsSliderColors}" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,8"
                                            Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
                                 <Grid Margin="0,0,0,16">
                                     <Grid.ColumnDefinitions>
@@ -1234,7 +1234,7 @@
                                 </Grid>
 
                                 <!-- Window Colors -->
-                                <TextBlock Text="Window Colors" FontSize="12" FontWeight="SemiBold" Margin="0,4,0,8"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsWindowColors}" FontSize="12" FontWeight="SemiBold" Margin="0,4,0,8"
                                            Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
                                 <Grid Margin="0,0,0,20">
                                     <Grid.ColumnDefinitions>
@@ -1339,7 +1339,7 @@
                                         <TextBlock Text="&#xE777;" FontFamily="Segoe MDL2 Assets" FontSize="14"
                                                    VerticalAlignment="Center" Margin="0,0,10,0"
                                                    Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
-                                        <TextBlock Text="Reset to Default" FontSize="13" VerticalAlignment="Center"
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsResetToDefault}" FontSize="13" VerticalAlignment="Center"
                                                    Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                     </StackPanel>
                                 </Border>
@@ -1366,8 +1366,8 @@
                                                        Foreground="White" />
                                         </Border>
                                         <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="My Themes" FontSize="15" FontWeight="SemiBold" />
-                                            <TextBlock Text="Saved custom color schemes"
+                                            <TextBlock Text="{x:Static resx:Resources.SettingsMyThemes}" FontSize="15" FontWeight="SemiBold" />
+                                            <TextBlock Text="{x:Static resx:Resources.SettingsMyThemesDesc}"
                                                        Style="{StaticResource BodySubText}" FontSize="12" />
                                         </StackPanel>
                                     </StackPanel>
@@ -1411,7 +1411,7 @@
                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
                                                         <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="13"
                                                                    VerticalAlignment="Center" Margin="0,0,10,0" Opacity="0.7" />
-                                                        <TextBlock Text="Copy to clipboard" FontSize="12" VerticalAlignment="Center" Foreground="White" />
+                                                         <TextBlock Text="{x:Static resx:Resources.SettingsCopyToClipboard}" FontSize="12" VerticalAlignment="Center" Foreground="White" />
                                                     </StackPanel>
                                                 </Border>
                                                 <!-- Paste from clipboard -->
@@ -1430,7 +1430,7 @@
                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
                                                         <TextBlock Text="&#xE77F;" FontFamily="Segoe MDL2 Assets" FontSize="13"
                                                                    VerticalAlignment="Center" Margin="0,0,10,0" Opacity="0.7" />
-                                                        <TextBlock Text="Paste from clipboard" FontSize="12" VerticalAlignment="Center" Foreground="White" />
+                                                         <TextBlock Text="{x:Static resx:Resources.SettingsPasteFromClipboard}" FontSize="12" VerticalAlignment="Center" Foreground="White" />
                                                     </StackPanel>
                                                 </Border>
                                                 <!-- Separator -->
@@ -1451,7 +1451,7 @@
                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
                                                         <TextBlock Text="&#xEDE1;" FontFamily="Segoe MDL2 Assets" FontSize="13"
                                                                    VerticalAlignment="Center" Margin="0,0,10,0" Opacity="0.7" />
-                                                        <TextBlock Text="Export .bttheme" FontSize="12" VerticalAlignment="Center" Foreground="White" />
+                                                         <TextBlock Text="{x:Static resx:Resources.SettingsExportBttheme}" FontSize="12" VerticalAlignment="Center" Foreground="White" />
                                                     </StackPanel>
                                                 </Border>
                                                 <!-- Import .bttheme -->
@@ -1470,7 +1470,7 @@
                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
                                                         <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets" FontSize="13"
                                                                    VerticalAlignment="Center" Margin="0,0,10,0" Opacity="0.7" />
-                                                        <TextBlock Text="Import .bttheme" FontSize="12" VerticalAlignment="Center" Foreground="White" />
+                                                         <TextBlock Text="{x:Static resx:Resources.SettingsImportBttheme}" FontSize="12" VerticalAlignment="Center" Foreground="White" />
                                                     </StackPanel>
                                                 </Border>
                                             </StackPanel>
@@ -1549,7 +1549,7 @@
                                 </ItemsControl>
 
                                 <!-- Empty state text (visible when no custom themes) -->
-                                <TextBlock Text="No saved themes yet. Create one from your current colors."
+                                <TextBlock Text="{x:Static resx:Resources.SettingsNoSavedThemes}"
                                            FontSize="12" Opacity="0.35" Margin="0,2,0,8" FontStyle="Italic"
                                            Theme:Brush.Foreground="Theme=Text, HighContrast=Text">
                                     <TextBlock.Style>
@@ -1572,7 +1572,7 @@
                                                  Background="{StaticResource PanelBackgroundBrush}" Foreground="White" 
                                                  BorderBrush="{StaticResource BorderSubtleBrush}"
                                                  x:Name="ThemeNameBox" />
-                                        <TextBlock Text="Theme name..." FontSize="12" Padding="8,6" IsHitTestVisible="False"
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsThemeNamePlaceholder}" FontSize="12" Padding="8,6" IsHitTestVisible="False"
                                                    Foreground="#50FFFFFF" VerticalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
@@ -1603,7 +1603,7 @@
                                             <TextBlock Text="&#xE105;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                        VerticalAlignment="Center" Margin="0,0,6,0"
                                                        Foreground="{StaticResource SuccessAccentBrush}" />
-                                            <TextBlock Text="Save" FontSize="12" VerticalAlignment="Center"
+                                            <TextBlock Text="{x:Static resx:Resources.SettingsSaveTheme}" FontSize="12" VerticalAlignment="Center"
                                                        Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                         </StackPanel>
                                     </Border>
@@ -1630,14 +1630,14 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Startup" FontSize="15" FontWeight="SemiBold" />
-                                <TextBlock Text="Launch BetterTrumpet with Windows"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsStartup}" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsStartupDesc}"
                                            Style="{StaticResource BodySubText}" FontSize="12" />
                             </StackPanel>
                         </StackPanel>
 
                         <CheckBox HorizontalAlignment="Left"
-                                  Content="Run at Windows startup"
+                                  Content="{x:Static resx:Resources.SettingsRunAtStartup}"
                                   IsChecked="{Binding RunAtStartup, Mode=TwoWay}" />
                     </StackPanel>
                 </Border>
@@ -1654,8 +1654,8 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Tray Icon" FontSize="15" FontWeight="SemiBold" />
-                                <TextBlock Text="System tray icon appearance"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsTrayIcon}" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsTrayIconDesc}"
                                            Style="{StaticResource BodySubText}" FontSize="12" />
                             </StackPanel>
                         </StackPanel>
@@ -1685,13 +1685,13 @@
                                                Foreground="White" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Media Popup" FontSize="15" FontWeight="SemiBold" />
-                                    <TextBlock Text="Show media controls on tray hover"
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsMediaPopup}" FontSize="15" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsMediaPopupDesc}"
                                                Style="{StaticResource BodySubText}" FontSize="12" />
                                 </StackPanel>
                             </StackPanel>
 
-                            <CheckBox Content="Enable media popup"
+                            <CheckBox Content="{x:Static resx:Resources.SettingsEnableMediaPopup}"
                                       IsChecked="{Binding MediaPopupEnabled, Mode=TwoWay}" Margin="0,8,0,0" />
                         </StackPanel>
                     </Border>
@@ -1709,14 +1709,14 @@
                                                Foreground="White" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Interaction" FontSize="15" FontWeight="SemiBold" />
-                                    <TextBlock Text="Hover delay and trigger behavior"
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsInteraction}" FontSize="15" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsInteractionDesc}"
                                                Style="{StaticResource BodySubText}" FontSize="12" />
                                 </StackPanel>
                             </StackPanel>
 
                             <!-- Hover delay slider -->
-                            <TextBlock Text="Hover delay" FontSize="13" Margin="0,0,0,8" />
+                            <TextBlock Text="{x:Static resx:Resources.SettingsHoverDelay}" FontSize="13" Margin="0,0,0,8" />
                             <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -1742,9 +1742,9 @@
                             <Border Height="1" Background="#10FFFFFF" Margin="0,0,0,14" />
 
                             <!-- Behavior options -->
-                            <CheckBox Content="Only show when media is playing"
+                            <CheckBox Content="{x:Static resx:Resources.SettingsOnlyWhenPlaying}"
                                       IsChecked="{Binding ShowOnlyWhenPlaying, Mode=TwoWay}" Margin="0,0,0,8" />
-                            <CheckBox Content="Remember expanded/collapsed state"
+                            <CheckBox Content="{x:Static resx:Resources.SettingsRememberExpanded}"
                                       IsChecked="{Binding RememberExpanded, Mode=TwoWay}" />
                         </StackPanel>
                     </Border>
@@ -1762,8 +1762,8 @@
                                                Foreground="White" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Visual Effects" FontSize="15" FontWeight="SemiBold" />
-                                    <TextBlock Text="Album art blur intensity"
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsVisualEffects}" FontSize="15" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsVisualEffectsDesc}"
                                                Style="{StaticResource BodySubText}" FontSize="12" />
                                 </StackPanel>
                             </StackPanel>
@@ -1803,12 +1803,12 @@
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="60" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="None" Style="{StaticResource BodySubText}"
+                                <TextBlock Grid.Column="0" Text="{x:Static resx:Resources.SettingsBlurNone}" Style="{StaticResource BodySubText}"
                                            VerticalAlignment="Center" Margin="0,0,12,0" />
                                 <Slider Grid.Column="1" Minimum="0" Maximum="30"
                                         Value="{Binding BlurRadius, Mode=TwoWay}"
                                         SmallChange="1" LargeChange="5" IsSnapToTickEnabled="False" />
-                                <TextBlock Grid.Column="2" Text="Max" Style="{StaticResource BodySubText}"
+                                <TextBlock Grid.Column="2" Text="{x:Static resx:Resources.SettingsBlurMax}" Style="{StaticResource BodySubText}"
                                            VerticalAlignment="Center" Margin="12,0,0,0" />
                                 <Border Grid.Column="3" Padding="8,4" CornerRadius="6" Background="#20FFFFFF"
                                         HorizontalAlignment="Right" Margin="12,0,0,0">
@@ -1837,8 +1837,8 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Save Current Volumes" FontSize="15" FontWeight="SemiBold" />
-                                <TextBlock Text="Snapshot device and app volumes"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsSaveCurrentVolumes}" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsSaveCurrentVolumesDesc}"
                                            Style="{StaticResource BodySubText}" FontSize="12" />
                             </StackPanel>
                         </StackPanel>
@@ -1880,7 +1880,7 @@
                                     <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                VerticalAlignment="Center" Margin="0,0,6,0"
                                                Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
-                                    <TextBlock Text="Save" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsProfileSave}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"
                                                Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                 </StackPanel>
                             </Border>
@@ -1899,8 +1899,8 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Saved Profiles" FontSize="15" FontWeight="SemiBold" />
-                                <TextBlock Text="Select a profile to apply or manage"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsSavedProfiles}" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsSavedProfilesDesc}"
                                            Style="{StaticResource BodySubText}" FontSize="12" />
                             </StackPanel>
                         </StackPanel>
@@ -1966,7 +1966,7 @@
                                     <TextBlock Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                VerticalAlignment="Center" Margin="0,0,6,0"
                                                Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
-                                    <TextBlock Text="Apply" FontSize="12" VerticalAlignment="Center"
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsProfileApply}" FontSize="12" VerticalAlignment="Center"
                                                Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                 </StackPanel>
                             </Border>
@@ -1975,7 +1975,7 @@
                                     <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                VerticalAlignment="Center" Margin="0,0,6,0"
                                                Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
-                                    <TextBlock Text="Delete" FontSize="12" VerticalAlignment="Center"
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsProfileDelete}" FontSize="12" VerticalAlignment="Center"
                                                Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                 </StackPanel>
                             </Border>
@@ -1984,7 +1984,7 @@
                                     <TextBlock Text="&#xEDE1;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                VerticalAlignment="Center" Margin="0,0,6,0"
                                                Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
-                                    <TextBlock Text="Export" FontSize="12" VerticalAlignment="Center"
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsProfileExport}" FontSize="12" VerticalAlignment="Center"
                                                Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                 </StackPanel>
                             </Border>
@@ -1993,7 +1993,7 @@
                                     <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                VerticalAlignment="Center" Margin="0,0,6,0"
                                                Theme:Brush.Foreground="Theme=GrayText, HighContrast=Text" />
-                                    <TextBlock Text="Import" FontSize="12" VerticalAlignment="Center"
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsProfileImport}" FontSize="12" VerticalAlignment="Center"
                                                Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                 </StackPanel>
                             </Border>
@@ -2065,14 +2065,14 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Mises &#224; jour" FontSize="14" FontWeight="SemiBold" />
-                                <TextBlock Text="Notifications de nouvelles versions"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsUpdates}" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsUpdatesDesc}"
                                            Style="{StaticResource BodySubText}" FontSize="12" />
                             </StackPanel>
                         </StackPanel>
 
                         <!-- Channel selector — segmented control -->
-                        <TextBlock Text="Me notifier pour :" FontSize="12" Margin="0,0,0,8" Opacity="0.7" />
+                        <TextBlock Text="{x:Static resx:Resources.SettingsNotifyFor}" FontSize="12" Margin="0,0,0,8" Opacity="0.7" />
                         <Border CornerRadius="8" Background="#08FFFFFF" Padding="3"
                                 BorderBrush="#15FFFFFF" BorderThickness="1" Margin="0,0,0,6">
                             <Grid>
@@ -2100,8 +2100,8 @@
                                         </Style>
                                     </Border.Style>
                                     <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="Toutes" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="Patch+" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelAll}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelAllSub}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
 
@@ -2122,8 +2122,8 @@
                                         </Style>
                                     </Border.Style>
                                     <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="Mineures" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="Minor+" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelMinor}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelMinorSub}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
 
@@ -2144,8 +2144,8 @@
                                         </Style>
                                     </Border.Style>
                                     <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="Majeures" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="Major" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelMajor}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelMajorSub}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
 
@@ -2166,8 +2166,8 @@
                                         </Style>
                                     </Border.Style>
                                     <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="Aucune" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="Off" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelNone}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Static resx:Resources.SettingsUpdateChannelNoneSub}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                             </Grid>
@@ -2203,7 +2203,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                                <TextBlock Text="V&#233;rifier" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsCheckUpdate}" FontSize="12" VerticalAlignment="Center" />
                             </Border>
 
                             <!-- Install button (when update available) — accent glow -->
@@ -2247,7 +2247,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE896;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBlock x:Name="InstallBtnText" Text="Mettre &#224; jour" FontSize="12"
+                                    <TextBlock x:Name="InstallBtnText" Text="{x:Static resx:Resources.SettingsInstallUpdate}" FontSize="12"
                                                FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
@@ -2293,8 +2293,8 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Export &amp; Import" FontSize="14" FontWeight="SemiBold" />
-                                <TextBlock Text="Backup or restore all your settings"
+                                <TextBlock Text="{x:Static resx:Resources.SettingsExportImport}" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsExportImportDesc}"
                                            Style="{StaticResource BodySubText}" FontSize="12" />
                             </StackPanel>
                         </StackPanel>
@@ -2304,7 +2304,7 @@
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="&#xEDE1;" FontFamily="Segoe MDL2 Assets" FontSize="13"
                                                VerticalAlignment="Center" Margin="0,0,8,0" />
-                                    <TextBlock Text="Export Settings" FontSize="12" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsExportSettings}" FontSize="12" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Border>
                             <Border Style="{StaticResource ActionButtonBorder}"
@@ -2312,7 +2312,7 @@
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="&#xE8B5;" FontFamily="Segoe MDL2 Assets" FontSize="13"
                                                VerticalAlignment="Center" Margin="0,0,8,0" />
-                                    <TextBlock Text="Import Settings" FontSize="12" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Static resx:Resources.SettingsImportSettings}" FontSize="12" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>

@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Theme="clr-namespace:EarTrumpet.UI.Themes"
         xmlns:gif="clr-namespace:XamlAnimatedGif;assembly=XamlAnimatedGif"
+        xmlns:resx="clr-namespace:EarTrumpet.Properties"
         Title="BetterTrumpet"
         Width="520" Height="640"
         WindowStartupLocation="CenterScreen"
@@ -164,7 +165,7 @@
                         <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center"
                                    Margin="0,0,20,0" Cursor="Hand"
                                    MouseLeftButtonDown="Skip_Click"
-                                   FontSize="12" FontWeight="Medium" Text="Passer">
+                                    FontSize="12" FontWeight="Medium" Text="{x:Static resx:Resources.OnboardingSkip}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Foreground" Value="#40FFFFFF"/>
@@ -202,7 +203,7 @@
                             </Border>
                         </Grid>
 
-                        <TextBlock Text="Bienvenue sur" FontSize="14" FontWeight="Medium"
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingWelcomeTo}" FontSize="14" FontWeight="Medium"
                                    Foreground="{StaticResource T2}" Margin="0,0,0,4"/>
                         <TextBlock Text="BetterTrumpet" FontSize="32" FontWeight="Bold"
                                    Foreground="{StaticResource T1}" Margin="0,0,0,14"/>
@@ -222,7 +223,7 @@
 
                         <TextBlock Text="&#xE767;" FontFamily="Segoe MDL2 Assets" FontSize="24"
                                    Foreground="{StaticResource AccentBrush}" Margin="0,8,0,16"/>
-                        <TextBlock Text="Sortie audio" FontSize="24" FontWeight="SemiBold"
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingAudioOutput}" FontSize="24" FontWeight="SemiBold"
                                    Foreground="{StaticResource T1}" Margin="0,0,0,6"/>
                         <TextBlock Text="{Binding SubtitleText}" FontSize="13"
                                    Foreground="{StaticResource T2}" Margin="0,0,0,24"/>
@@ -232,7 +233,7 @@
                                     Visibility="{Binding HasNoDevices, Converter={StaticResource BoolVis}}">
                             <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="16"
                                        Foreground="#FFD54F" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <TextBlock Text="Aucun p&#233;riph&#233;rique audio d&#233;tect&#233;." FontSize="13"
+                            <TextBlock Text="{x:Static resx:Resources.OnboardingNoDevices}" FontSize="13"
                                        Foreground="{StaticResource T2}" VerticalAlignment="Center"/>
                         </StackPanel>
 
@@ -284,7 +285,7 @@
 
                         <TextBlock Text="&#xE790;" FontFamily="Segoe MDL2 Assets" FontSize="24"
                                    Foreground="{StaticResource AccentBrush}" Margin="0,8,0,16"/>
-                        <TextBlock Text="Apparence" FontSize="24" FontWeight="SemiBold"
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingAppearance}" FontSize="24" FontWeight="SemiBold"
                                    Foreground="{StaticResource T1}" Margin="0,0,0,6"/>
                         <TextBlock Text="{Binding SubtitleText}" FontSize="13"
                                    Foreground="{StaticResource T2}" Margin="0,0,0,28"/>
@@ -335,9 +336,9 @@
                                         </StackPanel>
                                     </Border>
                                     <StackPanel Margin="14,12,14,14">
-                                        <TextBlock Text="Syst&#232;me" FontSize="13" FontWeight="SemiBold"
+                                        <TextBlock Text="{x:Static resx:Resources.OnboardingSystemTheme}" FontSize="13" FontWeight="SemiBold"
                                                    Foreground="{StaticResource T1}"/>
-                                        <TextBlock Text="Suit Windows" FontSize="11" Margin="0,2,0,0"
+                                        <TextBlock Text="{x:Static resx:Resources.OnboardingSystemThemeDesc}" FontSize="11" Margin="0,2,0,0"
                                                    Foreground="{StaticResource T3}"/>
                                     </StackPanel>
                                 </StackPanel>
@@ -389,9 +390,9 @@
                                         </StackPanel>
                                     </Border>
                                     <StackPanel Margin="14,12,14,14">
-                                        <TextBlock Text="Personnalis&#233;" FontSize="13" FontWeight="SemiBold"
+                                        <TextBlock Text="{x:Static resx:Resources.OnboardingCustomTheme}" FontSize="13" FontWeight="SemiBold"
                                                    Foreground="{StaticResource T1}"/>
-                                        <TextBlock Text="Couleurs custom" FontSize="11" Margin="0,2,0,0"
+                                        <TextBlock Text="{x:Static resx:Resources.OnboardingCustomThemeDesc}" FontSize="11" Margin="0,2,0,0"
                                                    Foreground="{StaticResource T3}"/>
                                     </StackPanel>
                                 </StackPanel>
@@ -408,7 +409,7 @@
 
                         <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" FontSize="24"
                                    Foreground="{StaticResource AccentBrush}" Margin="0,8,0,16"/>
-                        <TextBlock Text="Confidentialit&#233;" FontSize="24" FontWeight="SemiBold"
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingPrivacy}" FontSize="24" FontWeight="SemiBold"
                                    Foreground="{StaticResource T1}" Margin="0,0,0,6"/>
                         <TextBlock Text="{Binding SubtitleText}" FontSize="13"
                                    Foreground="{StaticResource T2}" Margin="0,0,0,28"/>
@@ -423,9 +424,9 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                                    <TextBlock Text="Rapports de crash" FontSize="13" FontWeight="SemiBold"
+                                    <TextBlock Text="{x:Static resx:Resources.OnboardingCrashReports}" FontSize="13" FontWeight="SemiBold"
                                                Foreground="{StaticResource T1}" Margin="0,0,0,3"/>
-                                    <TextBlock Text="Anonymes, aucune donn&#233;e personnelle" FontSize="12"
+                                    <TextBlock Text="{x:Static resx:Resources.OnboardingCrashReportsDesc}" FontSize="12"
                                                Foreground="{StaticResource T3}"/>
                                 </StackPanel>
                                 <CheckBox Grid.Column="1" Style="{StaticResource Toggle}"
@@ -434,7 +435,7 @@
                             </Grid>
                         </Border>
                         <!-- Reassuring line under telemetry -->
-                        <TextBlock Text="&#x2139;  Cela nous aide &#224; corriger les bugs sans jamais collecter de donn&#233;es priv&#233;es."
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingCrashReportsInfo}"
                                    FontSize="11" Foreground="{StaticResource T3}" Margin="4,6,0,12"
                                    TextWrapping="Wrap"/>
 
@@ -443,7 +444,7 @@
                                 Background="{StaticResource SurfaceBrush}"
                                 BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1">
                             <StackPanel>
-                                <TextBlock Text="Mises &#224; jour automatiques" FontSize="13" FontWeight="SemiBold"
+                                <TextBlock Text="{x:Static resx:Resources.OnboardingAutoUpdates}" FontSize="13" FontWeight="SemiBold"
                                            Foreground="{StaticResource T1}" Margin="0,0,0,10"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -471,9 +472,9 @@
                                             </Style>
                                         </Border.Style>
                                         <StackPanel HorizontalAlignment="Center">
-                                            <TextBlock Text="Toutes" FontSize="12" FontWeight="SemiBold"
+                                            <TextBlock Text="{x:Static resx:Resources.OnboardingUpdateAll}" FontSize="12" FontWeight="SemiBold"
                                                        HorizontalAlignment="Center" Foreground="{StaticResource T1}"/>
-                                            <TextBlock Text="Recommand&#233;" FontSize="9" Opacity="0.5"
+                                            <TextBlock Text="{x:Static resx:Resources.OnboardingUpdateRecommended}" FontSize="9" Opacity="0.5"
                                                        HorizontalAlignment="Center" Foreground="{StaticResource AccentBrush}"/>
                                         </StackPanel>
                                     </Border>
@@ -496,7 +497,7 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <TextBlock Text="Mineures" FontSize="12" FontWeight="SemiBold"
+                                        <TextBlock Text="{x:Static resx:Resources.OnboardingUpdateMinor}" FontSize="12" FontWeight="SemiBold"
                                                    HorizontalAlignment="Center" Foreground="{StaticResource T1}"/>
                                     </Border>
                                     <!-- None -->
@@ -517,7 +518,7 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <TextBlock Text="Aucune" FontSize="12" FontWeight="SemiBold"
+                                        <TextBlock Text="{x:Static resx:Resources.OnboardingUpdateNone}" FontSize="12" FontWeight="SemiBold"
                                                    HorizontalAlignment="Center" Foreground="{StaticResource T1}"/>
                                     </Border>
                                 </Grid>
@@ -534,9 +535,9 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                                    <TextBlock Text="Lancer au d&#233;marrage" FontSize="13" FontWeight="SemiBold"
+                                    <TextBlock Text="{x:Static resx:Resources.OnboardingLaunchAtStartup}" FontSize="13" FontWeight="SemiBold"
                                                Foreground="{StaticResource T1}" Margin="0,0,0,3"/>
-                                    <TextBlock Text="D&#233;marre avec Windows" FontSize="12"
+                                    <TextBlock Text="{x:Static resx:Resources.OnboardingLaunchAtStartupDesc}" FontSize="12"
                                                Foreground="{StaticResource T3}"/>
                                 </StackPanel>
                                 <CheckBox Grid.Column="1" Style="{StaticResource Toggle}"
@@ -564,33 +565,33 @@
                                        Foreground="{StaticResource AccentBrush}"/>
                         </Border>
 
-                        <TextBlock Text="Tout est pr&#234;t" FontSize="28" FontWeight="Bold"
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingAllReady}" FontSize="28" FontWeight="Bold"
                                    Foreground="{StaticResource T1}" Margin="0,0,0,8"/>
                         <TextBlock FontSize="13" TextWrapping="Wrap" LineHeight="20" MaxWidth="380"
                                    HorizontalAlignment="Left"
                                    Foreground="{StaticResource T2}" Margin="0,0,0,32"
-                                   Text="Cliquez sur l'ic&#244;ne dans la barre des t&#226;ches pour mixer votre audio."/>
+                                   Text="{x:Static resx:Resources.OnboardingAllReadyDesc}"/>
 
                         <!-- Animated check items -->
                         <StackPanel x:Name="CheckItem0" Orientation="Horizontal" Margin="0,0,0,12">
                             <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                        Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center"
                                        Margin="0,0,12,0"/>
-                            <TextBlock Text="P&#233;riph&#233;rique audio configur&#233;" FontSize="13"
+                            <TextBlock Text="{x:Static resx:Resources.OnboardingDeviceConfigured}" FontSize="13"
                                        Foreground="{StaticResource T2}"/>
                         </StackPanel>
                         <StackPanel x:Name="CheckItem1" Orientation="Horizontal" Margin="0,0,0,12">
                             <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                        Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center"
                                        Margin="0,0,12,0"/>
-                            <TextBlock Text="Apparence choisie" FontSize="13"
+                            <TextBlock Text="{x:Static resx:Resources.OnboardingAppearanceChosen}" FontSize="13"
                                        Foreground="{StaticResource T2}"/>
                         </StackPanel>
                         <StackPanel x:Name="CheckItem2" Orientation="Horizontal" Margin="0,0,0,0">
                             <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                        Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center"
                                        Margin="0,0,12,0"/>
-                            <TextBlock Text="Confidentialit&#233; configur&#233;e" FontSize="13"
+                            <TextBlock Text="{x:Static resx:Resources.OnboardingPrivacyConfigured}" FontSize="13"
                                        Foreground="{StaticResource T2}"/>
                         </StackPanel>
                     </StackPanel>
@@ -613,12 +614,12 @@
                                        Foreground="{StaticResource AccentBrush}"/>
                         </Border>
 
-                        <TextBlock Text="&#201;pinglez BetterTrumpet" FontSize="24" FontWeight="Bold"
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingPinTitle}" FontSize="24" FontWeight="Bold"
                                    Foreground="{StaticResource T1}" Margin="0,0,0,6"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                             <TextBlock FontSize="13" TextWrapping="Wrap" LineHeight="20" MaxWidth="360"
                                        Foreground="{StaticResource T2}"
-                                       Text="Glissez l'ic&#244;ne BetterTrumpet depuis le menu cach&#233; vers votre barre des t&#226;ches pour y acc&#233;der en un clic."/>
+                                       Text="{x:Static resx:Resources.OnboardingPinDesc}"/>
                             <!-- Animated bouncing arrow ↓ -->
                             <TextBlock x:Name="BouncingArrow" Text="&#xE74B;" FontFamily="Segoe MDL2 Assets"
                                        FontSize="18" Foreground="{StaticResource AccentBrush}"
@@ -663,7 +664,7 @@
                                 </Style.Triggers>
                             </Style>
                         </Border.Style>
-                        <TextBlock Text="Retour" FontSize="13" FontWeight="Medium"
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingBack}" FontSize="13" FontWeight="Medium"
                                    Foreground="{StaticResource T3}"/>
                     </Border>
 
