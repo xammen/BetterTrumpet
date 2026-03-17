@@ -294,9 +294,7 @@ namespace EarTrumpet
         private void DisplayFirstRunExperience()
         {
             if (!Settings.HasShownFirstRun
-#if DEBUG
                 || Keyboard.IsKeyDown(Key.LeftCtrl)
-#endif
                 )
             {
                 Trace.WriteLine($"App DisplayFirstRunExperience Showing onboarding");
@@ -314,7 +312,6 @@ namespace EarTrumpet
             var currentVersion = App.PackageVersion?.ToString() ?? "";
             var lastSeen = Settings.LastSeenVersion;
 
-#if DEBUG
             // Hold Shift at startup to force changelog display
             if (Keyboard.IsKeyDown(Key.LeftShift))
             {
@@ -322,7 +319,6 @@ namespace EarTrumpet
                 window.Show();
                 return;
             }
-#endif
 
             // First-run: no previous version seen → seed the version and skip changelog
             // (onboarding already handles first-run experience)
