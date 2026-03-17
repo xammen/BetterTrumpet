@@ -47,7 +47,7 @@ namespace EarTrumpet.UI.ViewModels
         public bool IsPage3 => _currentPage == 3;
         public bool IsPage4 => _currentPage == 4;
         public bool IsPage5 => _currentPage == 5;
-        public bool CanGoBack => _currentPage > 0 && _currentPage < 4;
+        public bool CanGoBack => _currentPage > 0 && _currentPage < 5;
         public bool IsLastPage => _currentPage == 5;
 
         /// <summary>Progress 0.0 → 1.0 for the top bar</summary>
@@ -59,9 +59,6 @@ namespace EarTrumpet.UI.ViewModels
             {
                 switch (_currentPage)
                 {
-                    case 0: return "Continuer";
-                    case 3: return "Terminer";
-                    case 4: return "Suivant";
                     case 5: return "C\u2019est fait\u00a0!";
                     default: return "Continuer";
                 }
@@ -146,6 +143,8 @@ namespace EarTrumpet.UI.ViewModels
             }
         }
 
+        public bool HasNoDevices => AudioDevices.Count == 0;
+
         // Commands
         public ICommand NextCommand { get; }
         public ICommand BackCommand { get; }
@@ -226,9 +225,13 @@ namespace EarTrumpet.UI.ViewModels
 
         private void ApplyDefaultDevice()
         {
-            if (_selectedDevice != null && !_selectedDevice.IsDefault)
+            if (_selectedDevice == null) return;
+
+            try
             {
-                try
+                var currentDefault = _deviceManager.Default;
+                // Only apply if the user picked a different device than current default
+                if (currentDefault == null || currentDefault.Id != _selectedDevice.Id)
                 {
                     var dev = _deviceManager.Devices.FirstOrDefault(d => d.Id == _selectedDevice.Id);
                     if (dev != null)
@@ -237,10 +240,10 @@ namespace EarTrumpet.UI.ViewModels
                         Trace.WriteLine($"Onboarding: Set default device to {_selectedDevice.DisplayName}");
                     }
                 }
-                catch (Exception ex)
-                {
-                    Trace.WriteLine($"Onboarding: Failed to set default device: {ex.Message}");
-                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Onboarding: Failed to set default device: {ex.Message}");
             }
         }
 
@@ -250,15 +253,34 @@ namespace EarTrumpet.UI.ViewModels
             {
                 _settings.UseCustomSliderColors = true;
             }
+            else
+            {
+                _settings.UseCustomSliderColors = false;
+            }
         }
 
         private void Raise(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
-    public class AudioDeviceChoice
+    public class AudioDeviceChoice : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public string Id { get; set; }
         public string DisplayName { get; set; }
-        public bool IsDefault { get; set; }
+
+        private bool _isDefault;
+        public bool IsDefault
+        {
+            get => _isDefault;
+            set
+            {
+                if (_isDefault != value)
+                {
+                    _isDefault = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDefault)));
+                }
+            }
+        }
     }
 }

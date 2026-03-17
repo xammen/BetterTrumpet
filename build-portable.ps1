@@ -1,5 +1,5 @@
 $src = 'Build\Release'
-$dst = 'dist\BetterTrumpet-3.0.5-portable'
+$dst = 'dist\BetterTrumpet-3.0.6-portable'
 Remove-Item $dst -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $dst | Out-Null
 
@@ -15,7 +15,7 @@ Get-ChildItem $src -Directory | ForEach-Object {
 Set-Content (Join-Path $dst '.portable') 'BetterTrumpet Portable Mode'
 
 # Zip it
-$zipPath = 'dist\BetterTrumpet-3.0.5-portable.zip'
+$zipPath = 'dist\BetterTrumpet-3.0.6-portable.zip'
 Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
 Compress-Archive -Path "$dst\*" -DestinationPath $zipPath -CompressionLevel Optimal
 
