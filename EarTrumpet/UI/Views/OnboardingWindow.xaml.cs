@@ -420,5 +420,23 @@ namespace EarTrumpet.UI.Views
             if (DataContext is OnboardingViewModel vm) vm.SelectedThemeIndex = 1;
             e.Handled = true;
         }
+
+        private void OnboardingUpdateChannel0_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is OnboardingViewModel vm) vm.UpdateChannelIndex = 0;
+            e.Handled = true;
+        }
+
+        private void OnboardingUpdateChannel1_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is OnboardingViewModel vm) vm.UpdateChannelIndex = 1;
+            e.Handled = true;
+        }
+
+        private void OnboardingUpdateChannel3_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is OnboardingViewModel vm) vm.UpdateChannelIndex = 3;
+            e.Handled = true;
+        }
     }
 }

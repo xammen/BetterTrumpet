@@ -97,14 +97,19 @@ namespace EarTrumpet.UI.ViewModels
             }
         }
 
+        public bool IsUpdateAvailable => _updateService?.IsUpdateAvailable ?? false;
+        public bool IsDownloading => _updateService?.IsDownloading ?? false;
+
         public string UpdateStatusText
         {
             get
             {
                 var svc = _updateService;
                 if (svc == null) return "";
-                if (svc.IsChecking) return "Checking...";
-                return svc.UpdateText;
+                if (svc.IsDownloading) return "T\u00e9l\u00e9chargement en cours...";
+                if (svc.IsChecking) return "V\u00e9rification...";
+                if (svc.IsUpdateAvailable) return $"v{svc.LatestVersion} disponible";
+                return "\u00c0 jour";
             }
         }
 
@@ -164,11 +169,47 @@ namespace EarTrumpet.UI.ViewModels
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpdateStatusText)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastCheckText)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsUpdateAvailable)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDownloading)));
             };
+        }
+
+        public void DownloadAndInstall()
+        {
+            _updateService?.DownloadAndInstallAsync();
+        }
+
+        /// <summary>
+        /// DEBUG: simulate a fake update available to test the UI effect.
+        /// Hold Left Ctrl when clicking "Vérifier" to trigger.
+        /// </summary>
+        private void SimulateFakeUpdate()
+        {
+            if (_updateService == null) return;
+            // Use reflection to set private fields for testing
+            var type = _updateService.GetType();
+            var latestProp = type.GetProperty(nameof(DataModel.UpdateService.LatestVersion));
+            latestProp?.SetValue(_updateService, "99.0.0");
+            var updateProp = type.GetProperty(nameof(DataModel.UpdateService.IsUpdateAvailable));
+            // IsUpdateAvailable has a private setter, so we set it via the backing field
+            var field = type.GetField("_isUpdateAvailable", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (field != null)
+            {
+                field.SetValue(_updateService, true);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsUpdateAvailable)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpdateStatusText)));
+            }
+            System.Diagnostics.Trace.WriteLine("DEBUG: Simulated fake update v99.0.0");
         }
 
         private void CheckForUpdate()
         {
+            // DEBUG: Hold Left Ctrl to simulate a fake update available
+            if (Keyboard.IsKeyDown(Key.LeftCtrl))
+            {
+                SimulateFakeUpdate();
+                return;
+            }
             _updateService?.CheckForUpdateAsync();
         }
 
