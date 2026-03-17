@@ -38,6 +38,8 @@ namespace EarTrumpet.UI.Views
             AnimatePageEntrance(Page0, Page0Translate);
             UpdateProgressBar();
 
+            UpdateStepDots(0);
+
             if (DataContext is INotifyPropertyChanged npc)
             {
                 npc.PropertyChanged += OnViewModelPropertyChanged;
@@ -52,11 +54,16 @@ namespace EarTrumpet.UI.Views
                 bool forward = newPage > _lastPage;
                 AnimatePageTransition(newPage, forward);
                 UpdateProgressBar();
+                UpdateStepDots(newPage);
                 _lastPage = newPage;
 
                 if (newPage == 4)
                 {
                     AnimateReadyPage();
+                }
+                else if (newPage == 5)
+                {
+                    AnimateTrayPinPage();
                 }
             }
         }
@@ -70,6 +77,33 @@ namespace EarTrumpet.UI.Views
                     EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
                 };
                 ProgressScale.BeginAnimation(ScaleTransform.ScaleXProperty, anim);
+            }
+        }
+
+        private void UpdateStepDots(int currentPage)
+        {
+            var dots = new[] { Dot0, Dot1, Dot2, Dot3, Dot4, Dot5 };
+            var accentBrush = (SolidColorBrush)FindResource("AccentBrush");
+            var dimBrush = new SolidColorBrush(Color.FromArgb(0x25, 0xFF, 0xFF, 0xFF));
+
+            for (int i = 0; i < dots.Length; i++)
+            {
+                var targetBrush = i == currentPage ? accentBrush : dimBrush;
+                var anim = new ColorAnimation(((SolidColorBrush)targetBrush).Color,
+                    new Duration(TimeSpan.FromMilliseconds(250)))
+                {
+                    EasingFunction = _easeOut
+                };
+                ((SolidColorBrush)dots[i].Fill).BeginAnimation(SolidColorBrush.ColorProperty, anim);
+
+                // Active dot slightly bigger
+                var sizeAnim = new DoubleAnimation(i == currentPage ? 7 : 6,
+                    new Duration(TimeSpan.FromMilliseconds(200)))
+                {
+                    EasingFunction = _easeOut
+                };
+                dots[i].BeginAnimation(WidthProperty, sizeAnim);
+                dots[i].BeginAnimation(HeightProperty, sizeAnim);
             }
         }
 
@@ -136,6 +170,29 @@ namespace EarTrumpet.UI.Views
             }
 
             var btnDelay = TimeSpan.FromMilliseconds(700);
+            var pulse = new DoubleAnimation(1.0, 1.04, new Duration(TimeSpan.FromMilliseconds(300)))
+            {
+                BeginTime = btnDelay,
+                AutoReverse = true,
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+            };
+            CtaButtonScale.BeginAnimation(ScaleTransform.ScaleXProperty, pulse);
+            CtaButtonScale.BeginAnimation(ScaleTransform.ScaleYProperty, pulse);
+        }
+
+        private void AnimateTrayPinPage()
+        {
+            // Bouncing arrow animation — gentle up/down loop
+            var bounce = new DoubleAnimation(0, 8, new Duration(TimeSpan.FromMilliseconds(600)))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
+            };
+            ArrowBounce.BeginAnimation(TranslateTransform.YProperty, bounce);
+
+            // CTA button pulse
+            var btnDelay = TimeSpan.FromMilliseconds(400);
             var pulse = new DoubleAnimation(1.0, 1.04, new Duration(TimeSpan.FromMilliseconds(300)))
             {
                 BeginTime = btnDelay,
@@ -276,47 +333,6 @@ namespace EarTrumpet.UI.Views
             piece.BeginAnimation(OpacityProperty, fadeAnim);
         }
 
-        // ═══ VU METER ═══
-
-        private Storyboard _vuMeterStoryboard;
-
-        public void StartVuMeter(StackPanel vuPanel)
-        {
-            StopVuMeter();
-
-            _vuMeterStoryboard = new Storyboard { RepeatBehavior = RepeatBehavior.Forever };
-            var rand = new Random();
-
-            foreach (var child in vuPanel.Children)
-            {
-                if (child is Rectangle bar)
-                {
-                    var maxHeight = 4 + rand.NextDouble() * 14;
-                    var anim = new DoubleAnimation
-                    {
-                        From = 3,
-                        To = maxHeight,
-                        Duration = new Duration(TimeSpan.FromMilliseconds(250 + rand.Next(200))),
-                        AutoReverse = true,
-                        RepeatBehavior = RepeatBehavior.Forever,
-                        EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
-                    };
-
-                    Storyboard.SetTarget(anim, bar);
-                    Storyboard.SetTargetProperty(anim, new PropertyPath(HeightProperty));
-                    _vuMeterStoryboard.Children.Add(anim);
-                }
-            }
-
-            _vuMeterStoryboard.Begin();
-        }
-
-        public void StopVuMeter()
-        {
-            _vuMeterStoryboard?.Stop();
-            _vuMeterStoryboard = null;
-        }
-
         // ═══ EVENT HANDLERS ═══
 
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -388,26 +404,9 @@ namespace EarTrumpet.UI.Views
                 foreach (var d in temp) items.Add(d);
                 vm.SelectedDevice = choice;
 
-                if (fe is Border border)
-                {
-                    var vuPanel = FindVuPanel(border);
-                    if (vuPanel != null) StartVuMeter(vuPanel);
-                }
+                // Selection visual is handled by XAML DataTrigger on IsDefault
             }
             e.Handled = true;
-        }
-
-        private StackPanel FindVuPanel(DependencyObject parent)
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is StackPanel sp && sp.Name == "VuMeter")
-                    return sp;
-                var found = FindVuPanel(child);
-                if (found != null) return found;
-            }
-            return null;
         }
 
         private void Theme0_Click(object sender, MouseButtonEventArgs e)
