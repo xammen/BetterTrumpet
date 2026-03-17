@@ -2295,5 +2295,89 @@ namespace EarTrumpet.Properties {
         public static string OnboardingTelemetryReassurance {
             get { return ResourceManager.GetString("OnboardingTelemetryReassurance", resourceCulture); }
         }
+        public static string UpdateTextDownloading {
+            get { return ResourceManager.GetString("UpdateTextDownloading", resourceCulture); }
+        }
+        public static string UpdateTextAvailable {
+            get { return ResourceManager.GetString("UpdateTextAvailable", resourceCulture); }
+        }
+        public static string UpdateTextUpToDate {
+            get { return ResourceManager.GetString("UpdateTextUpToDate", resourceCulture); }
+        }
+        public static string UpdateTextNeverChecked {
+            get { return ResourceManager.GetString("UpdateTextNeverChecked", resourceCulture); }
+        }
+        public static string UpdateTextLastChecked {
+            get { return ResourceManager.GetString("UpdateTextLastChecked", resourceCulture); }
+        }
+        public static string UpdateContextMenu {
+            get { return ResourceManager.GetString("UpdateContextMenu", resourceCulture); }
+        }
+        public static string ChangelogTitle {
+            get { return ResourceManager.GetString("ChangelogTitle", resourceCulture); }
+        }
+        public static string ChangelogSubtitle {
+            get { return ResourceManager.GetString("ChangelogSubtitle", resourceCulture); }
+        }
+        public static string ChangelogThanks {
+            get { return ResourceManager.GetString("ChangelogThanks", resourceCulture); }
+        }
+        public static string ChangelogContinue {
+            get { return ResourceManager.GetString("ChangelogContinue", resourceCulture); }
+        }
+        public static string ChangelogLoading {
+            get { return ResourceManager.GetString("ChangelogLoading", resourceCulture); }
+        }
+        public static string ChangelogNoNotes {
+            get { return ResourceManager.GetString("ChangelogNoNotes", resourceCulture); }
+        }
+        public static string ChangelogLoadError {
+            get { return ResourceManager.GetString("ChangelogLoadError", resourceCulture); }
+        }
+        public static string PresetCategoryAll {
+            get { return ResourceManager.GetString("PresetCategoryAll", resourceCulture); }
+        }
+        public static string PresetCategoryMinimal {
+            get { return ResourceManager.GetString("PresetCategoryMinimal", resourceCulture); }
+        }
+        public static string PresetCategoryBrands {
+            get { return ResourceManager.GetString("PresetCategoryBrands", resourceCulture); }
+        }
+        public static string PresetCategoryRetro {
+            get { return ResourceManager.GetString("PresetCategoryRetro", resourceCulture); }
+        }
+        public static string PresetCategoryDeveloper {
+            get { return ResourceManager.GetString("PresetCategoryDeveloper", resourceCulture); }
+        }
+        public static string PresetCategoryNature {
+            get { return ResourceManager.GetString("PresetCategoryNature", resourceCulture); }
+        }
+        public static string PresetCategoryAccessibility {
+            get { return ResourceManager.GetString("PresetCategoryAccessibility", resourceCulture); }
+        }
+        public static string ColorLabelThumb {
+            get { return ResourceManager.GetString("ColorLabelThumb", resourceCulture); }
+        }
+        public static string ColorLabelFill {
+            get { return ResourceManager.GetString("ColorLabelFill", resourceCulture); }
+        }
+        public static string ColorLabelTrackBg {
+            get { return ResourceManager.GetString("ColorLabelTrackBg", resourceCulture); }
+        }
+        public static string ColorLabelPeakMeter {
+            get { return ResourceManager.GetString("ColorLabelPeakMeter", resourceCulture); }
+        }
+        public static string ColorLabelWindowBg {
+            get { return ResourceManager.GetString("ColorLabelWindowBg", resourceCulture); }
+        }
+        public static string ColorLabelText {
+            get { return ResourceManager.GetString("ColorLabelText", resourceCulture); }
+        }
+        public static string ColorLabelGlow {
+            get { return ResourceManager.GetString("ColorLabelGlow", resourceCulture); }
+        }
+        public static string ColorLabelPreview {
+            get { return ResourceManager.GetString("ColorLabelPreview", resourceCulture); }
+        }
     }
 }

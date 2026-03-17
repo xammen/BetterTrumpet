@@ -1,3 +1,4 @@
+using EarTrumpet.Properties;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
@@ -144,14 +145,14 @@ namespace EarTrumpet.DataModel
         {
             get
             {
-                if (IsDownloading) return "Downloading update...";
-                return IsUpdateAvailable ? $"Update available: v{LatestVersion}" : "Up to date";
+                if (IsDownloading) return Resources.UpdateTextDownloading;
+                return IsUpdateAvailable ? string.Format(Resources.UpdateTextAvailable, LatestVersion) : Resources.UpdateTextUpToDate;
             }
         }
 
         public string LastCheckText => LastCheckTime == DateTime.MinValue
-            ? "Never checked"
-            : $"Last checked: {LastCheckTime:g}";
+            ? Resources.UpdateTextNeverChecked
+            : string.Format(Resources.UpdateTextLastChecked, LastCheckTime.ToString("g"));
 
         public UpdateService()
         {
