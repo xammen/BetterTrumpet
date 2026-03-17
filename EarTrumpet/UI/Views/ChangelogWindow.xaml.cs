@@ -1,14 +1,20 @@
 using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using Newtonsoft.Json.Linq;
 
 namespace EarTrumpet.UI.Views
 {
     public partial class ChangelogWindow : Window
     {
+        private const string GitHubApiUrl = "https://api.github.com/repos/xammen/BetterTrumpet/releases/latest";
+
         private static readonly Color _accent = Color.FromRgb(0x3B, 0x9E, 0xFF);
         private static readonly Brush _t1 = new SolidColorBrush(Color.FromArgb(0xF0, 0xFF, 0xFF, 0xFF));
         private static readonly Brush _t2 = new SolidColorBrush(Color.FromArgb(0x70, 0xFF, 0xFF, 0xFF));
@@ -19,13 +25,295 @@ namespace EarTrumpet.UI.Views
         {
             InitializeComponent();
             VersionBadge.Text = $"v{App.PackageVersion}";
-            BuildContent();
             Loaded += OnLoaded;
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        private async void OnLoaded(object sender, RoutedEventArgs e)
         {
-            // Staggered fade-in for content sections
+            // Show loading state
+            AddLoadingIndicator();
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "BetterTrumpet-Changelog");
+                    client.Timeout = TimeSpan.FromSeconds(10);
+
+                    var response = await client.GetStringAsync(GitHubApiUrl);
+                    var json = JObject.Parse(response);
+
+                    var body = json["body"]?.ToString() ?? "";
+                    var tagName = json["tag_name"]?.ToString() ?? "";
+
+                    ContentPanel.Children.Clear();
+
+                    if (!string.IsNullOrWhiteSpace(body))
+                    {
+                        ParseMarkdownToUI(body);
+                    }
+                    else
+                    {
+                        AddFallbackContent("Aucune note de version disponible.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"ChangelogWindow: Failed to fetch release notes — {ex.Message}");
+                ContentPanel.Children.Clear();
+                AddFallbackContent("Impossible de charger les notes de version.\nVérifiez votre connexion internet.");
+            }
+
+            // Animate content in
+            AnimateContentIn();
+            ApplyTitleShimmer();
+        }
+
+        /// <summary>
+        /// Parse GitHub release markdown into WPF UI elements.
+        /// Handles: ## H2, ### H3, **bold**, - bullet, plain text
+        /// </summary>
+        private void ParseMarkdownToUI(string markdown)
+        {
+            var lines = markdown.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            StackPanel currentBulletList = null;
+
+            foreach (var rawLine in lines)
+            {
+                var line = rawLine.Trim();
+
+                // Skip empty lines — flush current bullet list
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    currentBulletList = null;
+                    continue;
+                }
+
+                // ## H2 — Main title (e.g. "## BetterTrumpet v3.0.3")
+                if (line.StartsWith("## "))
+                {
+                    currentBulletList = null;
+                    // Skip the main title since we already show version in the badge
+                    continue;
+                }
+
+                // ### H3 — Section header (e.g. "### Fix", "### New")
+                if (line.StartsWith("### "))
+                {
+                    currentBulletList = null;
+                    var title = line.Substring(4).Trim();
+                    AddSectionHeader(GetSectionGlyph(title), title);
+                    continue;
+                }
+
+                // - Bullet item
+                if (line.StartsWith("- "))
+                {
+                    var text = line.Substring(2).Trim();
+
+                    if (currentBulletList == null)
+                    {
+                        currentBulletList = new StackPanel
+                        {
+                            Margin = new Thickness(0, 0, 0, 12)
+                        };
+                        var card = new Border
+                        {
+                            CornerRadius = new CornerRadius(10),
+                            Background = _surfaceBrush,
+                            BorderBrush = new SolidColorBrush(Color.FromArgb(0x0A, 0xFF, 0xFF, 0xFF)),
+                            BorderThickness = new Thickness(1),
+                            Padding = new Thickness(0, 6, 0, 6),
+                            Margin = new Thickness(0, 0, 0, 4),
+                        };
+                        card.Child = currentBulletList;
+                        ContentPanel.Children.Add(card);
+                    }
+
+                    AddBulletItem(currentBulletList, text);
+                    continue;
+                }
+
+                // Plain text paragraph
+                currentBulletList = null;
+                ContentPanel.Children.Add(new TextBlock
+                {
+                    Text = StripMarkdownFormatting(line),
+                    FontSize = 13,
+                    Foreground = _t2,
+                    TextWrapping = TextWrapping.Wrap,
+                    LineHeight = 20,
+                    Margin = new Thickness(0, 0, 0, 8),
+                });
+            }
+        }
+
+        private void AddBulletItem(StackPanel parent, string markdownText)
+        {
+            // Add separator between items
+            if (parent.Children.Count > 0)
+            {
+                parent.Children.Add(new Border
+                {
+                    Height = 1,
+                    Background = new SolidColorBrush(Color.FromArgb(0x08, 0xFF, 0xFF, 0xFF)),
+                    Margin = new Thickness(16, 0, 16, 0),
+                });
+            }
+
+            var row = new Grid { Margin = new Thickness(16, 8, 16, 8) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(20) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            // Bullet dot
+            var dot = new Border
+            {
+                Width = 5, Height = 5,
+                CornerRadius = new CornerRadius(2.5),
+                Background = new SolidColorBrush(_accent),
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(0, 6, 0, 0),
+            };
+            Grid.SetColumn(dot, 0);
+            row.Children.Add(dot);
+
+            // Text with bold support
+            var textBlock = new TextBlock
+            {
+                FontSize = 12.5,
+                Foreground = _t2,
+                TextWrapping = TextWrapping.Wrap,
+                LineHeight = 19,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+
+            // Parse **bold** segments
+            ParseInlineMarkdown(textBlock, markdownText);
+
+            Grid.SetColumn(textBlock, 1);
+            row.Children.Add(textBlock);
+
+            parent.Children.Add(row);
+        }
+
+        /// <summary>
+        /// Parse **bold** and regular text into TextBlock inlines.
+        /// </summary>
+        private void ParseInlineMarkdown(TextBlock textBlock, string text)
+        {
+            int pos = 0;
+            while (pos < text.Length)
+            {
+                int boldStart = text.IndexOf("**", pos);
+                if (boldStart < 0)
+                {
+                    // Rest is plain text
+                    textBlock.Inlines.Add(new System.Windows.Documents.Run(text.Substring(pos)) { Foreground = _t2 });
+                    break;
+                }
+
+                // Plain text before bold
+                if (boldStart > pos)
+                {
+                    textBlock.Inlines.Add(new System.Windows.Documents.Run(text.Substring(pos, boldStart - pos)) { Foreground = _t2 });
+                }
+
+                int boldEnd = text.IndexOf("**", boldStart + 2);
+                if (boldEnd < 0)
+                {
+                    // Unclosed bold — treat rest as plain
+                    textBlock.Inlines.Add(new System.Windows.Documents.Run(text.Substring(boldStart)) { Foreground = _t2 });
+                    break;
+                }
+
+                var boldText = text.Substring(boldStart + 2, boldEnd - boldStart - 2);
+                textBlock.Inlines.Add(new System.Windows.Documents.Run(boldText)
+                {
+                    FontWeight = FontWeights.SemiBold,
+                    Foreground = _t1,
+                });
+
+                pos = boldEnd + 2;
+            }
+        }
+
+        private string StripMarkdownFormatting(string text)
+        {
+            return text.Replace("**", "");
+        }
+
+        private string GetSectionGlyph(string sectionTitle)
+        {
+            var lower = sectionTitle.ToLowerInvariant();
+            if (lower.Contains("fix")) return "\xE90F";       // wrench
+            if (lower.Contains("new") || lower.Contains("feat") || lower.Contains("nouveau")) return "\xE710"; // add
+            if (lower.Contains("break")) return "\xE7BA";     // warning
+            if (lower.Contains("perf")) return "\xE9F5";      // speedometer
+            if (lower.Contains("under") || lower.Contains("capot") || lower.Contains("tech")) return "\xE756"; // code
+            if (lower.Contains("onboard")) return "\xE7BE";   // graduation
+            return "\xE81C"; // bullet list
+        }
+
+        private void AddSectionHeader(string glyph, string title)
+        {
+            var sp = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(0, 12, 0, 10),
+            };
+
+            sp.Children.Add(new TextBlock
+            {
+                Text = glyph,
+                FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                FontSize = 13,
+                Foreground = new SolidColorBrush(_accent),
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 10, 0),
+            });
+
+            sp.Children.Add(new TextBlock
+            {
+                Text = title,
+                FontSize = 14,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = _t1,
+                VerticalAlignment = VerticalAlignment.Center,
+            });
+
+            ContentPanel.Children.Add(sp);
+        }
+
+        private void AddLoadingIndicator()
+        {
+            ContentPanel.Children.Clear();
+            ContentPanel.Children.Add(new TextBlock
+            {
+                Text = "Chargement...",
+                FontSize = 13,
+                Foreground = _t3,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 40, 0, 0),
+            });
+        }
+
+        private void AddFallbackContent(string message)
+        {
+            ContentPanel.Children.Add(new TextBlock
+            {
+                Text = message,
+                FontSize = 13,
+                Foreground = _t2,
+                TextWrapping = TextWrapping.Wrap,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                TextAlignment = TextAlignment.Center,
+                Margin = new Thickness(0, 40, 0, 0),
+            });
+        }
+
+        private void AnimateContentIn()
+        {
             int i = 0;
             foreach (UIElement child in ContentPanel.Children)
             {
@@ -47,19 +335,15 @@ namespace EarTrumpet.UI.Views
                 ((TranslateTransform)child.RenderTransform).BeginAnimation(TranslateTransform.YProperty, slide);
                 i++;
             }
-
-            // Single subtle shimmer on main title — one pass, then stays white
-            ApplyTitleShimmer();
         }
 
         /// <summary>
         /// A single slow light sweep across "Quoi de neuf", then settles to plain white.
-        /// Not a loop. Just a moment of polish.
         /// </summary>
         private void ApplyTitleShimmer()
         {
             var baseColor = Color.FromArgb(0xF0, 0xFF, 0xFF, 0xFF);
-            var glint = Color.FromArgb(0xFF, 0xBB, 0xDD, 0xFF); // very soft blue-white
+            var glint = Color.FromArgb(0xFF, 0xBB, 0xDD, 0xFF);
 
             var brush = new LinearGradientBrush
             {
@@ -67,7 +351,6 @@ namespace EarTrumpet.UI.Views
                 EndPoint = new Point(1, 0.5),
                 MappingMode = BrushMappingMode.RelativeToBoundingBox,
             };
-            // Tight highlight band — most of the text stays base color
             brush.GradientStops.Add(new GradientStop(baseColor, 0.0));
             brush.GradientStops.Add(new GradientStop(baseColor, 0.4));
             brush.GradientStops.Add(new GradientStop(glint, 0.48));
@@ -80,16 +363,14 @@ namespace EarTrumpet.UI.Views
             brush.Transform = transform;
             MainTitle.Foreground = brush;
 
-            // One pass: slow sweep left to right, ease in/out, no repeat
             var sweep = new DoubleAnimation
             {
                 From = -350,
                 To = 500,
                 Duration = TimeSpan.FromSeconds(1.8),
-                BeginTime = TimeSpan.FromSeconds(0.6), // wait for fade-in to finish
+                BeginTime = TimeSpan.FromSeconds(0.6),
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut },
             };
-            // After the sweep, revert to solid foreground (clean)
             sweep.Completed += (s, ev) =>
             {
                 MainTitle.Foreground = _t1;
@@ -97,305 +378,7 @@ namespace EarTrumpet.UI.Views
             transform.BeginAnimation(TranslateTransform.XProperty, sweep);
         }
 
-        private void BuildContent()
-        {
-            // ── HERO FEATURE ──
-            AddHeroCard(
-                "\xE7BE", "Onboarding premium",
-                "Assistant de configuration en 5 pages avec pr\u00e9visualisation audio, choix d'appareil et personnalisation du th\u00e8me.",
-                new[] {
-                    new MiniTag("5 pages", "#1A3B9EFF"),
-                    new MiniTag("Animations", "#1A7C4DFF"),
-                    new MiniTag("Confetti", "#1A9C27B0"),
-                });
-
-            // ── SECTION: Contr\u00f4le audio ──
-            AddSectionHeader("\xE767", "Contr\u00f4le audio");
-            AddFeatureRow(
-                new Feature("\xE7A7", "Undo / Redo", "Ctrl+Z / Ctrl+Y sur tous les sliders"),
-                new Feature("\xE8AB", "Switch rapide", "Raccourci pour changer de p\u00e9riph\u00e9rique")
-            );
-            AddFeatureRow(
-                new Feature("\xE9E9", "Profils volume", "Sauvegarder et restaurer vos configurations"),
-                new Feature("\xE718", "Pin Flyout", "Garder le flyout ouvert en permanence")
-            );
-
-            // ── SECTION: Exp\u00e9rience ──
-            AddSectionHeader("\xE790", "Exp\u00e9rience");
-            AddFeatureRow(
-                new Feature("\xE790", "Th\u00e8mes complets", "Sliders, fond, texte, accent \u2014 tout custom"),
-                new Feature("\xE8D6", "Media popup", "Info now-playing au survol du tray")
-            );
-            AddFeatureRow(
-                new Feature("\xE896", "Mises \u00e0 jour", "V\u00e9rification auto avec badge et banni\u00e8re"),
-                new Feature("\xEA80", "Mode \u00e9co", "R\u00e9duit le CPU sur batterie")
-            );
-
-            // ── SECTION: Sous le capot ──
-            AddSectionHeader("\xE756", "Sous le capot");
-            AddCompactList(new[] {
-                new CompactItem("\xE756", "CLI", "19 commandes pour tout contr\u00f4ler depuis le terminal"),
-                new CompactItem("\xE730", "Crash protection", "Sentry GDPR + health monitoring"),
-                new CompactItem("\xE8B7", "Export / Import", "Sauvegardez et restaurez tous vos r\u00e9glages"),
-                new CompactItem("\xE7B5", "Animations fluides", "Vitesse d'animation et FPS configurables"),
-            });
-        }
-
-        // ──────────────────────────────────────────────
-        // Hero card — large featured item
-        // ──────────────────────────────────────────────
-        private void AddHeroCard(string glyph, string title, string description, MiniTag[] tags)
-        {
-            var card = new Border
-            {
-                CornerRadius = new CornerRadius(12),
-                Padding = new Thickness(20, 18, 20, 18),
-                Margin = new Thickness(0, 0, 0, 24),
-                Background = _surfaceBrush,
-                BorderBrush = new SolidColorBrush(Color.FromArgb(0x12, 0xFF, 0xFF, 0xFF)),
-                BorderThickness = new Thickness(1),
-            };
-
-            var sp = new StackPanel();
-
-            // Icon
-            var iconBorder = new Border
-            {
-                Width = 40, Height = 40, CornerRadius = new CornerRadius(10),
-                Margin = new Thickness(0, 0, 0, 14),
-                HorizontalAlignment = HorizontalAlignment.Left,
-                Background = new SolidColorBrush(Color.FromArgb(0x18, _accent.R, _accent.G, _accent.B)),
-            };
-            iconBorder.Child = new TextBlock
-            {
-                Text = glyph,
-                FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                FontSize = 18,
-                Foreground = new SolidColorBrush(_accent),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-            };
-            sp.Children.Add(iconBorder);
-
-            sp.Children.Add(new TextBlock
-            {
-                Text = title,
-                FontSize = 17,
-                FontWeight = FontWeights.SemiBold,
-                Foreground = _t1,
-                Margin = new Thickness(0, 0, 0, 6),
-            });
-
-            sp.Children.Add(new TextBlock
-            {
-                Text = description,
-                FontSize = 12.5,
-                Foreground = _t2,
-                TextWrapping = TextWrapping.Wrap,
-                LineHeight = 19,
-                Margin = new Thickness(0, 0, 0, 14),
-            });
-
-            // Tags
-            var tagPanel = new WrapPanel { Orientation = Orientation.Horizontal };
-            foreach (var tag in tags)
-            {
-                var tagBorder = new Border
-                {
-                    CornerRadius = new CornerRadius(6),
-                    Padding = new Thickness(10, 4, 10, 4),
-                    Margin = new Thickness(0, 0, 6, 0),
-                    Background = (Brush)new BrushConverter().ConvertFrom(tag.BgColor),
-                };
-                tagBorder.Child = new TextBlock
-                {
-                    Text = tag.Label,
-                    FontSize = 11,
-                    FontWeight = FontWeights.Medium,
-                    Foreground = new SolidColorBrush(_accent),
-                };
-                tagPanel.Children.Add(tagBorder);
-            }
-            sp.Children.Add(tagPanel);
-
-            card.Child = sp;
-            ContentPanel.Children.Add(card);
-        }
-
-        // ──────────────────────────────────────────────
-        // Section header
-        // ──────────────────────────────────────────────
-        private void AddSectionHeader(string glyph, string title)
-        {
-            var sp = new StackPanel
-            {
-                Orientation = Orientation.Horizontal,
-                Margin = new Thickness(0, 4, 0, 12),
-            };
-
-            sp.Children.Add(new TextBlock
-            {
-                Text = glyph,
-                FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                FontSize = 13,
-                Foreground = new SolidColorBrush(_accent),
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(0, 0, 10, 0),
-            });
-
-            sp.Children.Add(new TextBlock
-            {
-                Text = title,
-                FontSize = 13,
-                FontWeight = FontWeights.SemiBold,
-                Foreground = _t2,
-                VerticalAlignment = VerticalAlignment.Center,
-            });
-
-            ContentPanel.Children.Add(sp);
-        }
-
-        // ──────────────────────────────────────────────
-        // Feature row — 2 cards side by side
-        // ──────────────────────────────────────────────
-        private void AddFeatureRow(Feature left, Feature right)
-        {
-            var grid = new Grid { Margin = new Thickness(0, 0, 0, 8) };
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(8) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-            var leftCard = MakeFeatureCard(left);
-            Grid.SetColumn(leftCard, 0);
-            grid.Children.Add(leftCard);
-
-            var rightCard = MakeFeatureCard(right);
-            Grid.SetColumn(rightCard, 2);
-            grid.Children.Add(rightCard);
-
-            ContentPanel.Children.Add(grid);
-        }
-
-        private Border MakeFeatureCard(Feature f)
-        {
-            var card = new Border
-            {
-                CornerRadius = new CornerRadius(10),
-                Padding = new Thickness(14, 12, 14, 12),
-                Background = _surfaceBrush,
-                BorderBrush = new SolidColorBrush(Color.FromArgb(0x0A, 0xFF, 0xFF, 0xFF)),
-                BorderThickness = new Thickness(1),
-            };
-
-            var sp = new StackPanel();
-
-            var iconBorder = new Border
-            {
-                Width = 28, Height = 28, CornerRadius = new CornerRadius(7),
-                Margin = new Thickness(0, 0, 0, 10),
-                HorizontalAlignment = HorizontalAlignment.Left,
-                Background = new SolidColorBrush(Color.FromArgb(0x10, _accent.R, _accent.G, _accent.B)),
-            };
-            iconBorder.Child = new TextBlock
-            {
-                Text = f.Glyph,
-                FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                FontSize = 12,
-                Foreground = new SolidColorBrush(_accent),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-            };
-            sp.Children.Add(iconBorder);
-
-            sp.Children.Add(new TextBlock
-            {
-                Text = f.Title,
-                FontSize = 13,
-                FontWeight = FontWeights.SemiBold,
-                Foreground = _t1,
-                Margin = new Thickness(0, 0, 0, 3),
-            });
-
-            sp.Children.Add(new TextBlock
-            {
-                Text = f.Description,
-                FontSize = 11.5,
-                Foreground = _t3,
-                TextWrapping = TextWrapping.Wrap,
-                LineHeight = 16,
-            });
-
-            card.Child = sp;
-            return card;
-        }
-
-        // ──────────────────────────────────────────────
-        // Compact list — "under the hood" items
-        // ──────────────────────────────────────────────
-        private void AddCompactList(CompactItem[] items)
-        {
-            var card = new Border
-            {
-                CornerRadius = new CornerRadius(10),
-                Background = _surfaceBrush,
-                BorderBrush = new SolidColorBrush(Color.FromArgb(0x0A, 0xFF, 0xFF, 0xFF)),
-                BorderThickness = new Thickness(1),
-                Padding = new Thickness(0, 4, 0, 4),
-                Margin = new Thickness(0, 0, 0, 8),
-            };
-
-            var sp = new StackPanel();
-            for (int i = 0; i < items.Length; i++)
-            {
-                var item = items[i];
-                var row = new Grid { Margin = new Thickness(16, 8, 16, 8) };
-                row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(28) });
-                row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-                var icon = new TextBlock
-                {
-                    Text = item.Glyph,
-                    FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                    FontSize = 12,
-                    Foreground = _t3,
-                    VerticalAlignment = VerticalAlignment.Center,
-                };
-                Grid.SetColumn(icon, 0);
-                row.Children.Add(icon);
-
-                var textPanel = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
-                var titleBlock = new TextBlock
-                {
-                    FontSize = 12.5,
-                    Foreground = _t1,
-                    VerticalAlignment = VerticalAlignment.Center,
-                };
-                titleBlock.Inlines.Add(new System.Windows.Documents.Run(item.Title) { FontWeight = FontWeights.Medium });
-                titleBlock.Inlines.Add(new System.Windows.Documents.Run($"  \u2014  {item.Description}") { Foreground = _t3 });
-                textPanel.Children.Add(titleBlock);
-                Grid.SetColumn(textPanel, 1);
-                row.Children.Add(textPanel);
-
-                sp.Children.Add(row);
-
-                if (i < items.Length - 1)
-                {
-                    sp.Children.Add(new Border
-                    {
-                        Height = 1,
-                        Background = new SolidColorBrush(Color.FromArgb(0x08, 0xFF, 0xFF, 0xFF)),
-                        Margin = new Thickness(16, 0, 16, 0),
-                    });
-                }
-            }
-
-            card.Child = sp;
-            ContentPanel.Children.Add(card);
-        }
-
-        // ──────────────────────────────────────────────
-        // Events
-        // ──────────────────────────────────────────────
+        // ═══ Events ═══
         private void TitleBar_Drag(object sender, MouseButtonEventArgs e)
         {
             if (e.ButtonState == MouseButtonState.Pressed) DragMove();
@@ -410,30 +393,6 @@ namespace EarTrumpet.UI.Views
         private void Continue_Click(object sender, MouseButtonEventArgs e)
         {
             Close();
-        }
-
-        // ──────────────────────────────────────────────
-        // Data types
-        // ──────────────────────────────────────────────
-        private struct Feature
-        {
-            public string Glyph, Title, Description;
-            public Feature(string glyph, string title, string description)
-            { Glyph = glyph; Title = title; Description = description; }
-        }
-
-        private struct MiniTag
-        {
-            public string Label, BgColor;
-            public MiniTag(string label, string bgColor)
-            { Label = label; BgColor = bgColor; }
-        }
-
-        private struct CompactItem
-        {
-            public string Glyph, Title, Description;
-            public CompactItem(string glyph, string title, string description)
-            { Glyph = glyph; Title = title; Description = description; }
         }
     }
 }
