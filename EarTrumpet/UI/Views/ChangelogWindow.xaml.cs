@@ -77,23 +77,19 @@ namespace EarTrumpet.UI.Views
         private void ParseMarkdownToUI(string markdown)
         {
             var lines = markdown.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-            StackPanel currentBulletList = null;
 
             foreach (var rawLine in lines)
             {
                 var line = rawLine.Trim();
 
-                // Skip empty lines — flush current bullet list
                 if (string.IsNullOrWhiteSpace(line))
                 {
-                    currentBulletList = null;
                     continue;
                 }
 
                 // ## H2 — Main title (e.g. "## BetterTrumpet v3.0.3")
                 if (line.StartsWith("## "))
                 {
-                    currentBulletList = null;
                     // Skip the main title since we already show version in the badge
                     continue;
                 }
@@ -101,42 +97,20 @@ namespace EarTrumpet.UI.Views
                 // ### H3 — Section header (e.g. "### Fix", "### New")
                 if (line.StartsWith("### "))
                 {
-                    currentBulletList = null;
                     var title = line.Substring(4).Trim();
                     AddSectionHeader(GetSectionGlyph(title), title);
                     continue;
                 }
 
-                // - Bullet item
+                // - Bullet item → individual card per item
                 if (line.StartsWith("- "))
                 {
                     var text = line.Substring(2).Trim();
-
-                    if (currentBulletList == null)
-                    {
-                        currentBulletList = new StackPanel
-                        {
-                            Margin = new Thickness(0, 0, 0, 12)
-                        };
-                        var card = new Border
-                        {
-                            CornerRadius = new CornerRadius(10),
-                            Background = _surfaceBrush,
-                            BorderBrush = new SolidColorBrush(Color.FromArgb(0x0A, 0xFF, 0xFF, 0xFF)),
-                            BorderThickness = new Thickness(1),
-                            Padding = new Thickness(0, 6, 0, 6),
-                            Margin = new Thickness(0, 0, 0, 4),
-                        };
-                        card.Child = currentBulletList;
-                        ContentPanel.Children.Add(card);
-                    }
-
-                    AddBulletItem(currentBulletList, text);
+                    AddFeatureCard(text);
                     continue;
                 }
 
                 // Plain text paragraph
-                currentBulletList = null;
                 ContentPanel.Children.Add(new TextBlock
                 {
                     Text = StripMarkdownFormatting(line),
@@ -149,52 +123,83 @@ namespace EarTrumpet.UI.Views
             }
         }
 
-        private void AddBulletItem(StackPanel parent, string markdownText)
+        /// <summary>
+        /// Renders a bullet item as an individual card.
+        /// If the text contains **bold** — title, the bold becomes the card title
+        /// and the rest becomes the description below it.
+        /// </summary>
+        private void AddFeatureCard(string markdownText)
         {
-            // Add separator between items
-            if (parent.Children.Count > 0)
+            // Parse "**Title** — description" pattern
+            string title = null;
+            string description = null;
+
+            int boldStart = markdownText.IndexOf("**");
+            int boldEnd = boldStart >= 0 ? markdownText.IndexOf("**", boldStart + 2) : -1;
+
+            if (boldStart >= 0 && boldEnd > boldStart)
             {
-                parent.Children.Add(new Border
+                title = markdownText.Substring(boldStart + 2, boldEnd - boldStart - 2);
+                var rest = markdownText.Substring(boldEnd + 2).Trim();
+                // Strip leading dash/emdash separator
+                if (rest.StartsWith("—") || rest.StartsWith("-") || rest.StartsWith("–"))
+                    rest = rest.Substring(1).Trim();
+                description = rest;
+            }
+            else
+            {
+                description = StripMarkdownFormatting(markdownText);
+            }
+
+            var card = new Border
+            {
+                CornerRadius = new CornerRadius(10),
+                Background = _surfaceBrush,
+                BorderBrush = new SolidColorBrush(Color.FromArgb(0x08, 0xFF, 0xFF, 0xFF)),
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(14, 12, 14, 12),
+                Margin = new Thickness(0, 0, 0, 6),
+            };
+
+            var stack = new StackPanel();
+
+            if (title != null)
+            {
+                // Title row with accent dot
+                var titleRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 4) };
+                titleRow.Children.Add(new Border
                 {
-                    Height = 1,
-                    Background = new SolidColorBrush(Color.FromArgb(0x08, 0xFF, 0xFF, 0xFF)),
-                    Margin = new Thickness(16, 0, 16, 0),
+                    Width = 6, Height = 6,
+                    CornerRadius = new CornerRadius(3),
+                    Background = new SolidColorBrush(_accent),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(0, 0, 8, 0),
+                });
+                titleRow.Children.Add(new TextBlock
+                {
+                    Text = title,
+                    FontSize = 13,
+                    FontWeight = FontWeights.SemiBold,
+                    Foreground = _t1,
+                });
+                stack.Children.Add(titleRow);
+            }
+
+            if (!string.IsNullOrEmpty(description))
+            {
+                stack.Children.Add(new TextBlock
+                {
+                    Text = description,
+                    FontSize = 12,
+                    Foreground = _t3,
+                    TextWrapping = TextWrapping.Wrap,
+                    LineHeight = 18,
+                    Margin = title != null ? new Thickness(14, 0, 0, 0) : new Thickness(0),
                 });
             }
 
-            var row = new Grid { Margin = new Thickness(16, 8, 16, 8) };
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(20) });
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-            // Bullet dot
-            var dot = new Border
-            {
-                Width = 5, Height = 5,
-                CornerRadius = new CornerRadius(2.5),
-                Background = new SolidColorBrush(_accent),
-                VerticalAlignment = VerticalAlignment.Top,
-                Margin = new Thickness(0, 6, 0, 0),
-            };
-            Grid.SetColumn(dot, 0);
-            row.Children.Add(dot);
-
-            // Text with bold support
-            var textBlock = new TextBlock
-            {
-                FontSize = 12.5,
-                Foreground = _t2,
-                TextWrapping = TextWrapping.Wrap,
-                LineHeight = 19,
-                VerticalAlignment = VerticalAlignment.Center,
-            };
-
-            // Parse **bold** segments
-            ParseInlineMarkdown(textBlock, markdownText);
-
-            Grid.SetColumn(textBlock, 1);
-            row.Children.Add(textBlock);
-
-            parent.Children.Add(row);
+            card.Child = stack;
+            ContentPanel.Children.Add(card);
         }
 
         /// <summary>
