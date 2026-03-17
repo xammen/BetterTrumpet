@@ -44,6 +44,14 @@ namespace EarTrumpet.UI.Views
             {
                 npc.PropertyChanged += OnViewModelPropertyChanged;
             }
+
+            // Cleanup on close to avoid memory leaks
+            Closed += (s, ev) =>
+            {
+                if (DataContext is INotifyPropertyChanged n)
+                    n.PropertyChanged -= OnViewModelPropertyChanged;
+                ConfettiCanvas.Children.Clear();
+            };
         }
 
         private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -410,14 +418,6 @@ namespace EarTrumpet.UI.Views
                     dev.IsDefault = false;
                 choice.IsDefault = true;
                 vm.SelectedDevice = choice;
-
-                var items = vm.AudioDevices;
-                var temp = new System.Collections.Generic.List<AudioDeviceChoice>(items);
-                items.Clear();
-                foreach (var d in temp) items.Add(d);
-                vm.SelectedDevice = choice;
-
-                // Selection visual is handled by XAML DataTrigger on IsDefault
             }
             e.Handled = true;
         }
