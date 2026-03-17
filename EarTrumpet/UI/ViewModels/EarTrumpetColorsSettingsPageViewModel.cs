@@ -617,6 +617,12 @@ namespace EarTrumpet.UI.ViewModels
                 UseCustomSliderColors = true;
             }
 
+            // Selecting a preset disables dynamic album art mode
+            if (UseDynamicAlbumArtTheme)
+            {
+                UseDynamicAlbumArtTheme = false;
+            }
+
             // Snapshot current colors
             _fromThumb = SliderThumbColor;
             _fromFill = SliderTrackFillColor;
