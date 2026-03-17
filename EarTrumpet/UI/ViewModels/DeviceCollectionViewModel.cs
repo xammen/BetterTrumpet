@@ -38,9 +38,19 @@ namespace EarTrumpet.UI.ViewModels
             _deviceManager.Devices.CollectionChanged += OnCollectionChanged;
             OnCollectionChanged(null, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 
-            _peakMeterTimer = new Timer(1000 / 30); // 30 fps
+            var fps = _settings?.EffectivePeakMeterFps ?? 30;
+            _peakMeterTimer = new Timer(1000.0 / fps);
             _peakMeterTimer.AutoReset = true;
             _peakMeterTimer.Elapsed += PeakMeterTimer_Elapsed;
+
+            // Update timer interval when eco mode or FPS setting changes
+            if (_settings != null)
+            {
+                _settings.EcoModeChanged += () =>
+                {
+                    _peakMeterTimer.Interval = 1000.0 / (_settings.EffectivePeakMeterFps);
+                };
+            }
         }
 
         private void OnDefaultChanged(object sender, IAudioDevice newDevice)
