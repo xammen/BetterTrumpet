@@ -377,90 +377,48 @@
                                     </Grid.ColumnDefinitions>
 
                                     <!-- 5 FPS -->
-                                    <Border Grid.Column="0" Padding="0,8" CornerRadius="6" Cursor="Hand"
-                                            MouseLeftButtonDown="Fps5Card_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding PeakMeterFps}" Value="5">
-                                                        <Setter Property="Background" Value="#20FFFFFF" />
-                                                    </DataTrigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#12FFFFFF" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
+                                    <Border Grid.Column="0" Padding="0,8" MouseLeftButtonDown="Fps5Card_Click">
+                                        <Border.Style><Style TargetType="Border" BasedOn="{StaticResource BT.SegmentItem}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding PeakMeterFps}" Value="5">
+                                                <Setter Property="Background" Value="#20FFFFFF"/></DataTrigger></Style.Triggers>
+                                        </Style></Border.Style>
                                         <StackPanel HorizontalAlignment="Center">
-                                            <TextBlock Text="5 FPS" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                            <TextBlock Text="{x:Static resx:Resources.SettingsFpsUltraSaver}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                            <TextBlock Text="5 FPS" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="{x:Static resx:Resources.SettingsFpsUltraSaver}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
 
                                     <!-- 20 FPS -->
-                                    <Border Grid.Column="1" Padding="0,8" CornerRadius="6" Cursor="Hand"
-                                            MouseLeftButtonDown="Fps20Card_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding PeakMeterFps}" Value="20">
-                                                        <Setter Property="Background" Value="#20FFFFFF" />
-                                                    </DataTrigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#12FFFFFF" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
+                                    <Border Grid.Column="1" Padding="0,8" MouseLeftButtonDown="Fps20Card_Click">
+                                        <Border.Style><Style TargetType="Border" BasedOn="{StaticResource BT.SegmentItem}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding PeakMeterFps}" Value="20">
+                                                <Setter Property="Background" Value="#20FFFFFF"/></DataTrigger></Style.Triggers>
+                                        </Style></Border.Style>
                                         <StackPanel HorizontalAlignment="Center">
-                                            <TextBlock Text="20 FPS" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                            <TextBlock Text="{x:Static resx:Resources.SettingsFpsBatterySaver}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                            <TextBlock Text="20 FPS" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="{x:Static resx:Resources.SettingsFpsBatterySaver}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
-
                                     <!-- 30 FPS -->
-                                    <Border Grid.Column="2" Padding="0,8" CornerRadius="6" Cursor="Hand"
-                                            MouseLeftButtonDown="Fps30Card_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding PeakMeterFps}" Value="30">
-                                                        <Setter Property="Background" Value="#20FFFFFF" />
-                                                    </DataTrigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#12FFFFFF" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
+                                    <Border Grid.Column="2" Padding="0,8" MouseLeftButtonDown="Fps30Card_Click">
+                                        <Border.Style><Style TargetType="Border" BasedOn="{StaticResource BT.SegmentItem}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding PeakMeterFps}" Value="30">
+                                                <Setter Property="Background" Value="#20FFFFFF"/></DataTrigger></Style.Triggers>
+                                        </Style></Border.Style>
                                         <StackPanel HorizontalAlignment="Center">
-                                            <TextBlock Text="30 FPS" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                            <TextBlock Text="{x:Static resx:Resources.SettingsFpsBalanced}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                            <TextBlock Text="30 FPS" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="{x:Static resx:Resources.SettingsFpsBalanced}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
-
                                     <!-- 60 FPS -->
-                                    <Border Grid.Column="3" Padding="0,8" CornerRadius="6" Cursor="Hand"
-                                            MouseLeftButtonDown="Fps60Card_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding PeakMeterFps}" Value="60">
-                                                        <Setter Property="Background" Value="#20FFFFFF" />
-                                                    </DataTrigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#12FFFFFF" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
+                                    <Border Grid.Column="3" Padding="0,8" MouseLeftButtonDown="Fps60Card_Click">
+                                        <Border.Style><Style TargetType="Border" BasedOn="{StaticResource BT.SegmentItem}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding PeakMeterFps}" Value="60">
+                                                <Setter Property="Background" Value="#20FFFFFF"/></DataTrigger></Style.Triggers>
+                                        </Style></Border.Style>
                                         <StackPanel HorizontalAlignment="Center">
-                                            <TextBlock Text="60 FPS" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                            <TextBlock Text="{x:Static resx:Resources.SettingsFpsSmoothest}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center" />
+                                            <TextBlock Text="60 FPS" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="{x:Static resx:Resources.SettingsFpsSmoothest}" FontSize="10" Opacity="0.5" HorizontalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
                                 </Grid>
@@ -1038,130 +996,60 @@
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <!-- All -->
-                                    <Border Height="28" Padding="10,0" CornerRadius="5" Cursor="Hand" Margin="2"
-                                            MouseLeftButtonDown="CategoryAll_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding SelectedCategory}" Value="All">
-                                                        <Setter Property="Background" Value="#18FFFFFF" />
-                                                    </DataTrigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#10FFFFFF" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryAll}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center" />
+                                    <Border Margin="2" MouseLeftButtonDown="CategoryAll_Click">
+                                        <Border.Style><Style TargetType="Border" BasedOn="{StaticResource BT.SegmentItem}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="All">
+                                                <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
+                                        </Style></Border.Style>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryAll}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
                                     </Border>
                                     <!-- Minimal -->
-                                    <Border Height="28" Padding="10,0" CornerRadius="5" Cursor="Hand" Margin="2"
-                                            MouseLeftButtonDown="CategoryMinimal_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding SelectedCategory}" Value="Minimal">
-                                                        <Setter Property="Background" Value="#18FFFFFF" />
-                                                    </DataTrigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#10FFFFFF" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryMinimal}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center" />
+                                    <Border Margin="2" MouseLeftButtonDown="CategoryMinimal_Click">
+                                        <Border.Style><Style TargetType="Border" BasedOn="{StaticResource BT.SegmentItem}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="Minimal">
+                                                <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
+                                        </Style></Border.Style>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryMinimal}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
                                     </Border>
                                     <!-- Brands -->
-                                    <Border Height="28" Padding="10,0" CornerRadius="5" Cursor="Hand" Margin="2"
-                                            MouseLeftButtonDown="CategoryBrands_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding SelectedCategory}" Value="Brand">
-                                                        <Setter Property="Background" Value="#18FFFFFF" />
-                                                    </DataTrigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#10FFFFFF" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryBrands}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center" />
+                                    <Border Margin="2" MouseLeftButtonDown="CategoryBrands_Click">
+                                        <Border.Style><Style TargetType="Border" BasedOn="{StaticResource BT.SegmentItem}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="Brand">
+                                                <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
+                                        </Style></Border.Style>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryBrands}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
                                     </Border>
                                     <!-- Retro -->
-                                    <Border Height="28" Padding="10,0" CornerRadius="5" Cursor="Hand" Margin="2"
-                                            MouseLeftButtonDown="CategoryRetro_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding SelectedCategory}" Value="Retro / Gaming">
-                                                        <Setter Property="Background" Value="#18FFFFFF" />
-                                                    </DataTrigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#10FFFFFF" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryRetro}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center" />
+                                    <Border Margin="2" MouseLeftButtonDown="CategoryRetro_Click">
+                                        <Border.Style><Style TargetType="Border" BasedOn="{StaticResource BT.SegmentItem}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="Retro / Gaming">
+                                                <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
+                                        </Style></Border.Style>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryRetro}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
                                     </Border>
                                     <!-- Developer -->
-                                    <Border Height="28" Padding="10,0" CornerRadius="5" Cursor="Hand" Margin="2"
-                                            MouseLeftButtonDown="CategoryDev_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding SelectedCategory}" Value="Developer">
-                                                        <Setter Property="Background" Value="#18FFFFFF" />
-                                                    </DataTrigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#10FFFFFF" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryDeveloper}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center" />
+                                    <Border Margin="2" MouseLeftButtonDown="CategoryDev_Click">
+                                        <Border.Style><Style TargetType="Border" BasedOn="{StaticResource BT.SegmentItem}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="Developer">
+                                                <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
+                                        </Style></Border.Style>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryDeveloper}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
                                     </Border>
                                     <!-- Nature -->
-                                    <Border Height="28" Padding="10,0" CornerRadius="5" Cursor="Hand" Margin="2"
-                                            MouseLeftButtonDown="CategoryNature_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding SelectedCategory}" Value="Nature / Premium">
-                                                        <Setter Property="Background" Value="#18FFFFFF" />
-                                                    </DataTrigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#10FFFFFF" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryNature}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center" />
+                                    <Border Margin="2" MouseLeftButtonDown="CategoryNature_Click">
+                                        <Border.Style><Style TargetType="Border" BasedOn="{StaticResource BT.SegmentItem}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="Nature / Premium">
+                                                <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
+                                        </Style></Border.Style>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryNature}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
                                     </Border>
                                     <!-- Accessibility -->
-                                    <Border Height="28" Padding="10,0" CornerRadius="5" Cursor="Hand" Margin="2"
-                                            MouseLeftButtonDown="CategoryAccessibility_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding SelectedCategory}" Value="Accessibility">
-                                                        <Setter Property="Background" Value="#18FFFFFF" />
-                                                    </DataTrigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#10FFFFFF" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryAccessibility}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center" />
+                                    <Border Margin="2" MouseLeftButtonDown="CategoryAccessibility_Click">
+                                        <Border.Style><Style TargetType="Border" BasedOn="{StaticResource BT.SegmentItem}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding SelectedCategory}" Value="Accessibility">
+                                                <Setter Property="Background" Value="#18FFFFFF"/></DataTrigger></Style.Triggers>
+                                        </Style></Border.Style>
+                                        <TextBlock Text="{x:Static resx:Resources.PresetCategoryAccessibility}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
                                     </Border>
                                 </ItemsControl>
                             </Border>
