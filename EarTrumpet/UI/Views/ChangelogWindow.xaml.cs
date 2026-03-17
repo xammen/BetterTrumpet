@@ -1,3 +1,4 @@
+using EarTrumpet.Properties;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -54,7 +55,7 @@ namespace EarTrumpet.UI.Views
                     }
                     else
                     {
-                        AddFallbackContent("Aucune note de version disponible.");
+                        AddFallbackContent(Properties.Resources.ChangelogNoNotes);
                     }
                 }
             }
@@ -62,7 +63,7 @@ namespace EarTrumpet.UI.Views
             {
                 Trace.WriteLine($"ChangelogWindow: Failed to fetch release notes — {ex.Message}");
                 ContentPanel.Children.Clear();
-                AddFallbackContent("Impossible de charger les notes de version.\nVérifiez votre connexion internet.");
+                AddFallbackContent(Properties.Resources.ChangelogLoadError);
             }
 
             // Animate content in
@@ -263,7 +264,7 @@ namespace EarTrumpet.UI.Views
             ContentPanel.Children.Clear();
             ContentPanel.Children.Add(new TextBlock
             {
-                Text = "Chargement...",
+                Text = Properties.Resources.ChangelogLoading,
                 FontSize = 13,
                 Foreground = _t3,
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -366,6 +367,11 @@ namespace EarTrumpet.UI.Views
         private void Continue_Click(object sender, MouseButtonEventArgs e)
         {
             Close();
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape) Close();
         }
     }
 }
