@@ -2292,5 +2292,8 @@ namespace EarTrumpet.Properties {
         public static string OnboardingDone {
             get { return ResourceManager.GetString("OnboardingDone", resourceCulture); }
         }
+        public static string OnboardingTelemetryReassurance {
+            get { return ResourceManager.GetString("OnboardingTelemetryReassurance", resourceCulture); }
+        }
     }
 }
