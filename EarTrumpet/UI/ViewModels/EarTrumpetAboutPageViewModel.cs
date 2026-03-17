@@ -34,14 +34,13 @@ namespace EarTrumpet.UI.ViewModels
         /// Description text explaining what telemetry collects.
         /// </summary>
         public string TelemetryDescription =>
-            "Envoyer des rapports de crash anonymes et des statistiques d'utilisation pour am\u00e9liorer BetterTrumpet. " +
-            "Aucune donn\u00e9e personnelle n'est collect\u00e9e.";
+            Properties.Resources.SettingsTelemetryDesc;
 
         /// <summary>
         /// Status text: "Activ\u00e9" or "D\u00e9sactiv\u00e9"
         /// </summary>
         public string TelemetryStatusText =>
-            IsTelemetryEnabled ? "Activ\u00e9" : "D\u00e9sactiv\u00e9";
+            IsTelemetryEnabled ? Properties.Resources.SettingsTelemetryEnabled : Properties.Resources.SettingsTelemetryDisabled;
 
         public bool AutoCheckForUpdates
         {
@@ -76,10 +75,10 @@ namespace EarTrumpet.UI.ViewModels
 
         public string[] UpdateChannelOptions => new[]
         {
-            "Toutes les mises \u00e0 jour",
-            "Mineures et majeures",
-            "Majeures uniquement",
-            "Aucune notification"
+            Properties.Resources.SettingsUpdateChannelAllDesc,
+            Properties.Resources.SettingsUpdateChannelMinorMajorDesc,
+            Properties.Resources.SettingsUpdateChannelMajorOnlyDesc,
+            Properties.Resources.SettingsUpdateChannelNoneDesc
         };
 
         public string UpdateChannelDescription
@@ -88,10 +87,10 @@ namespace EarTrumpet.UI.ViewModels
             {
                 switch ((DataModel.UpdateChannel)UpdateChannelIndex)
                 {
-                    case DataModel.UpdateChannel.All: return "Patch, mineures et majeures (ex: 3.0.0 \u2192 3.0.1)";
-                    case DataModel.UpdateChannel.MinorAndMajor: return "Mineures et majeures uniquement (ex: 3.0 \u2192 3.1)";
-                    case DataModel.UpdateChannel.MajorOnly: return "Majeures uniquement (ex: 3 \u2192 4)";
-                    case DataModel.UpdateChannel.None: return "Aucune notification de mise \u00e0 jour";
+                    case DataModel.UpdateChannel.All: return Properties.Resources.SettingsUpdateChannelAllDetail;
+                    case DataModel.UpdateChannel.MinorAndMajor: return Properties.Resources.SettingsUpdateChannelMinorMajorDetail;
+                    case DataModel.UpdateChannel.MajorOnly: return Properties.Resources.SettingsUpdateChannelMajorOnlyDetail;
+                    case DataModel.UpdateChannel.None: return Properties.Resources.SettingsUpdateChannelNoneDetail;
                     default: return "";
                 }
             }
@@ -106,10 +105,10 @@ namespace EarTrumpet.UI.ViewModels
             {
                 var svc = _updateService;
                 if (svc == null) return "";
-                if (svc.IsDownloading) return "T\u00e9l\u00e9chargement en cours...";
-                if (svc.IsChecking) return "V\u00e9rification...";
-                if (svc.IsUpdateAvailable) return $"v{svc.LatestVersion} disponible";
-                return "\u00c0 jour";
+                if (svc.IsDownloading) return Properties.Resources.SettingsUpdateStatusDownloading;
+                if (svc.IsChecking) return Properties.Resources.SettingsUpdateStatusChecking;
+                if (svc.IsUpdateAvailable) return string.Format(Properties.Resources.SettingsUpdateStatusAvailable, svc.LatestVersion);
+                return Properties.Resources.SettingsUpdateStatusUpToDate;
             }
         }
 
@@ -140,7 +139,7 @@ namespace EarTrumpet.UI.ViewModels
             _openDiagnostics = openDiagnostics;
             Glyph = "\xE946";
             Title = Properties.Resources.AboutTitle;
-            Subtitle = "Version info, telemetry, and diagnostics.";
+            Subtitle = Properties.Resources.SettingsAboutSubtitle;
             AboutText = $"v{App.PackageVersion}";
 
             OpenAboutCommand = new RelayCommand(OpenAbout);
@@ -154,8 +153,8 @@ namespace EarTrumpet.UI.ViewModels
                 if (DataModel.SettingsExportService.ImportWithDialog(_settings))
                 {
                     System.Windows.MessageBox.Show(
-                        "Settings imported successfully! Some changes may require restarting BetterTrumpet.",
-                        "Import Complete",
+                        Properties.Resources.SettingsImportSuccess,
+                        Properties.Resources.SettingsImportTitle,
                         System.Windows.MessageBoxButton.OK,
                         System.Windows.MessageBoxImage.Information);
                 }
