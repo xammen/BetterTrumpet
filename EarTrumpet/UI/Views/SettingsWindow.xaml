@@ -33,75 +33,46 @@
         <local:PercentWidthConverter x:Key="PercentWidthConverter" />
         <local:ThumbMarginConverter x:Key="ThumbMarginConverter" />
 
-        <!-- Named brushes: replaces 90+ hardcoded alpha-white colors -->
-        <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#15FFFFFF"/>
-        <SolidColorBrush x:Key="BorderSubtleBrush" Color="#20FFFFFF"/>
-        <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#25FFFFFF"/>
-        <SolidColorBrush x:Key="HoverBorderBrush" Color="#30FFFFFF"/>
-        <SolidColorBrush x:Key="ActiveBorderBrush" Color="#60FFFFFF"/>
-        <SolidColorBrush x:Key="PressedBackgroundBrush" Color="#40FFFFFF"/>
-        <SolidColorBrush x:Key="DimTextBrush" Color="#80FFFFFF"/>
-        <SolidColorBrush x:Key="FaintTextBrush" Color="#60FFFFFF"/>
+        <!-- Named brushes: local aliases kept for backward compat; prefer BT.* tokens directly -->
+        <!-- PanelBackgroundBrush → BT.SurfaceBrush -->
+        <!-- BorderSubtleBrush   → BT.StrokeMidBrush -->
+        <!-- HoverBackgroundBrush → BT.HoverBrush -->
+        <!-- HoverBorderBrush    → BT.HoverBorderBrush -->
+        <!-- ActiveBorderBrush   → BT.StrokeStrongBrush -->
+        <!-- PressedBackgroundBrush → BT.PressedBrush -->
+        <!-- SelectedBorderBrush → BT.SelectedBorderBrush -->
+        <!-- DeleteBackgroundBrush → BT.DangerDimBrush -->
+        <!-- DeleteTextBrush     → BT.DangerBrush -->
+        <!-- SuccessAccentBrush  → BT.SuccessBrush -->
+        <!-- WarningAmberBrush   → BT.WarningBrush -->
+        <!-- WarningAmberDimBrush → BT.WarningDimBrush -->
+        <!-- Keep: ListItemBackgroundBrush (#08FFFFFF) — more subtle than BT.Surface -->
         <SolidColorBrush x:Key="ListItemBackgroundBrush" Color="#08FFFFFF"/>
+        <!-- Keep: ListItemHoverBrush (#12FFFFFF) — lighter hover for list context -->
         <SolidColorBrush x:Key="ListItemHoverBrush" Color="#12FFFFFF"/>
-        <SolidColorBrush x:Key="SelectedBorderBrush" Color="#50FFFFFF"/>
-        <SolidColorBrush x:Key="DeleteBackgroundBrush" Color="#20FF4444"/>
-        <SolidColorBrush x:Key="DeleteTextBrush" Color="#FFFF6666"/>
-        <SolidColorBrush x:Key="SuccessAccentBrush" Color="#FF7ED321"/>
-        <!-- Brand accent: warm trumpet gold -->
+        <!-- Keep: Brand accent (gold #FFC857) — not in shared tokens -->
         <Color x:Key="BrandAccentColor">#FFFFC857</Color>
         <SolidColorBrush x:Key="BrandAccentBrush" Color="{StaticResource BrandAccentColor}"/>
         <SolidColorBrush x:Key="BrandAccentDimBrush" Color="#40FFC857"/>
-        <!-- Warning amber for Eco Mode override notice -->
-        <SolidColorBrush x:Key="WarningAmberBrush" Color="#FFFFA726"/>
-        <SolidColorBrush x:Key="WarningAmberDimBrush" Color="#25FFA726"/>
 
-        <!-- Reusable action button style with hover + pressed states -->
-        <Style x:Key="ActionButtonBorder" TargetType="Border">
-            <Setter Property="Height" Value="32"/>
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="14,0"/>
-            <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderSubtleBrush}"/>
-            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
-            <Setter Property="RenderTransform">
-                <Setter.Value><ScaleTransform ScaleX="1" ScaleY="1"/></Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource HoverBorderBrush}"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+        <!-- Reusable action button style — delegates to BT.ActionButton from SharedTokens -->
+        <Style x:Key="ActionButtonBorder" TargetType="Border" BasedOn="{StaticResource BT.ActionButton}"/>
 
-        <!-- Section card style -->
-        <Style x:Key="SectionCardBorder" TargetType="Border">
-            <Setter Property="Margin" Value="0,0,0,20"/>
-            <Setter Property="Padding" Value="20"/>
-            <Setter Property="CornerRadius" Value="10"/>
-        </Style>
+        <!-- Section card style — delegates to BT.SectionCard from SharedTokens -->
+        <Style x:Key="SectionCardBorder" TargetType="Border" BasedOn="{StaticResource BT.SectionCard}"/>
 
-        <!-- Section icon style -->
-        <Style x:Key="SectionIconBorder" TargetType="Border">
-            <Setter Property="Width" Value="36"/>
-            <Setter Property="Height" Value="36"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Margin" Value="0,0,12,0"/>
-            <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}"/>
-        </Style>
+        <!-- Section icon style — delegates to BT.SectionIcon from SharedTokens -->
+        <Style x:Key="SectionIconBorder" TargetType="Border" BasedOn="{StaticResource BT.SectionIcon}"/>
         <DataTemplate DataType="{x:Type vm:EarTrumpetShortcutsPageViewModel}">
             <StackPanel Orientation="Vertical" Margin="0,0,16,0">
 
-                <!-- Hotkey card: Open Flyout -->
+                    <!-- Hotkey card: Open Flyout -->
                 <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
                         Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                    Background="#15FFFFFF">
+                                    Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Text="&#xE767;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -117,13 +88,13 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Hotkey card: Open Mixer -->
+                    <!-- Hotkey card: Open Mixer -->
                 <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
                         Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                    Background="#15FFFFFF">
+                                    Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Text="&#xE9E9;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -139,13 +110,13 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Hotkey card: Open Settings -->
+                    <!-- Hotkey card: Open Settings -->
                 <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
                         Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                    Background="#15FFFFFF">
+                                    Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -161,13 +132,13 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Hotkey card: Volume Up/Down -->
+                    <!-- Hotkey card: Volume Up/Down -->
                 <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
                         Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                    Background="#15FFFFFF">
+                                    Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Text="&#xE767;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -182,20 +153,20 @@
                         <TextBlock Text="{x:Static resx:Resources.SettingsAbsoluteVolumeUpText}" FontSize="13" Margin="0,0,0,6" />
                         <ContentControl Content="{Binding AbsoluteVolumeUpHotkey}" IsTabStop="False" Margin="0,0,0,14" />
 
-                        <Border Height="1" Background="#10FFFFFF" Margin="0,0,0,14" />
+                        <Border Height="1" Background="{StaticResource BT.StrokeBrush}" Margin="0,0,0,14" />
 
                         <TextBlock Text="{x:Static resx:Resources.SettingsAbsoluteVolumeDownText}" FontSize="13" Margin="0,0,0,6" />
                         <ContentControl Content="{Binding AbsoluteVolumeDownHotkey}" IsTabStop="False" />
                     </StackPanel>
                 </Border>
 
-                <!-- Hotkey card: Switch Default Device -->
+                    <!-- Hotkey card: Switch Default Device -->
                 <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
                         Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                    Background="#15FFFFFF">
+                                    Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Text="&#xE8AB;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -221,7 +192,7 @@
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                    Background="#15FFFFFF">
+                                    Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Text="&#xE962;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -254,7 +225,7 @@
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                    Background="#15FFFFFF">
+                                    Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Text="&#xE902;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -288,7 +259,7 @@
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                        Background="#15FFFFFF">
+                                        Background="{StaticResource BT.SurfaceBrush}">
                                     <TextBlock Text="&#xEA94;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                Foreground="White" />
@@ -307,7 +278,7 @@
                                       IsChecked="{Binding AutoEcoMode, Mode=TwoWay}" Margin="0,0,0,14"
                                       ToolTip="{x:Static resx:Resources.SettingsAutoEcoModeTip}" />
 
-                            <Border Padding="10,8" CornerRadius="6" Background="#15FFFFFF">
+                            <Border Padding="10,8" CornerRadius="6" Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Style="{StaticResource BodySubText}" FontSize="12">
                                     <Run Text="{x:Static resx:Resources.SettingsCurrentRefreshRate}" />
                                     <Run Text="{Binding EffectiveFpsText, Mode=OneWay}" FontWeight="SemiBold"
@@ -323,7 +294,7 @@
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                        Background="#15FFFFFF">
+                                        Background="{StaticResource BT.SurfaceBrush}">
                                     <TextBlock Text="&#xE916;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                Foreground="White" />
@@ -366,7 +337,7 @@
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                        Background="#15FFFFFF">
+                                        Background="{StaticResource BT.SurfaceBrush}">
                                     <TextBlock Text="&#xE9E9;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                Foreground="White" />
@@ -380,14 +351,14 @@
 
                             <!-- Eco Mode override warning — amber accent -->
                             <Border Padding="12,8" CornerRadius="6" Margin="0,0,0,16"
-                                    Background="{StaticResource WarningAmberDimBrush}"
+                                    Background="{StaticResource BT.WarningDimBrush}"
                                     BorderBrush="#40FFA726" BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="14"
                                                VerticalAlignment="Center" Margin="0,0,8,0"
-                                               Foreground="{StaticResource WarningAmberBrush}" />
+                                               Foreground="{StaticResource BT.WarningBrush}" />
                                     <TextBlock FontSize="12" VerticalAlignment="Center"
-                                               Foreground="{StaticResource WarningAmberBrush}">
+                                               Foreground="{StaticResource BT.WarningBrush}">
                                         <Run Text="{x:Static resx:Resources.SettingsEcoModeOverridden}" />
                                     </TextBlock>
                                 </StackPanel>
@@ -395,8 +366,8 @@
 
                             <!-- Segmented Control for FPS -->
                             <TextBlock Text="{x:Static resx:Resources.SettingsRefreshRate}" FontSize="13" Margin="0,0,0,10" />
-                            <Border CornerRadius="8" Background="#08FFFFFF" Padding="3"
-                                    BorderBrush="#15FFFFFF" BorderThickness="1">
+                            <Border CornerRadius="8" Background="{StaticResource ListItemBackgroundBrush}" Padding="3"
+                                    BorderBrush="{StaticResource BT.SurfaceBrush}" BorderThickness="1">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -512,7 +483,7 @@
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                        Background="{StaticResource PanelBackgroundBrush}">
+                                        Background="{StaticResource BT.SurfaceBrush}">
                                     <TextBlock Text="&#xE9E9;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                Foreground="White" />
@@ -528,8 +499,8 @@
                                                Style="{StaticResource BodySubText}" FontSize="12" />
                                 </StackPanel>
                             </StackPanel>
-                            <Border CornerRadius="8" Background="#08FFFFFF" Padding="3"
-                                    BorderBrush="#15FFFFFF" BorderThickness="1">
+                            <Border CornerRadius="8" Background="{StaticResource ListItemBackgroundBrush}" Padding="3"
+                                    BorderBrush="{StaticResource BT.SurfaceBrush}" BorderThickness="1">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -698,7 +669,7 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                    Background="{StaticResource PanelBackgroundBrush}">
+                                    Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Text="&#xE790;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -717,7 +688,7 @@
                     <!-- SEGMENTED TAB BAR: [Dynamic] [Presets] [Custom]     -->
                     <!-- ═══════════════════════════════════════════════════ -->
                     <Border Margin="0,0,0,16" CornerRadius="8" Padding="3"
-                            Background="#08FFFFFF" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1">
+                            Background="{StaticResource ListItemBackgroundBrush}" BorderBrush="{StaticResource BT.StrokeMidBrush}" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -811,14 +782,14 @@
                                            VerticalAlignment="Center"
                                            Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                 <!-- Randomize button -->
-                                <Border Grid.Column="1" Width="32" Height="32" CornerRadius="8" Cursor="Hand"
-                                        ToolTip="{x:Static resx:Resources.SettingsRandomizeTooltip}" MouseLeftButtonDown="RandomizeColors_Click">
+                                     <Border Grid.Column="1" Width="32" Height="32" CornerRadius="8" Cursor="Hand"
+                                         ToolTip="{x:Static resx:Resources.SettingsRandomizeTooltip}" MouseLeftButtonDown="RandomizeColors_Click">
                                     <Border.Style>
                                         <Style TargetType="Border">
-                                            <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
+                                            <Setter Property="Background" Value="{StaticResource BT.SurfaceBrush}" />
                                             <Style.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
+                                                    <Setter Property="Background" Value="{StaticResource BT.HoverBrush}" />
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
@@ -829,7 +800,7 @@
                                 </Border>
                             </Grid>
                             <!-- Realistic flyout preview — enlarged -->
-                            <Border CornerRadius="10" Padding="0" BorderThickness="1" BorderBrush="#20FFFFFF" ClipToBounds="True">
+                            <Border CornerRadius="10" Padding="0" BorderThickness="1" BorderBrush="{StaticResource BT.StrokeMidBrush}" ClipToBounds="True">
                                 <Border.Background>
                                     <SolidColorBrush Color="{Binding WindowBackgroundColor}" />
                                 </Border.Background>
@@ -1013,7 +984,7 @@
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                        Background="{StaticResource PanelBackgroundBrush}">
+                                        Background="{StaticResource BT.SurfaceBrush}">
                                     <TextBlock Text="&#xE8D6;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                Foreground="White" />
@@ -1029,7 +1000,7 @@
                                       IsChecked="{Binding UseDynamicAlbumArtTheme, Mode=TwoWay}" Margin="0,4,0,0" />
 
                             <Border Padding="12,10" CornerRadius="8" Margin="0,14,0,0"
-                                    Background="{StaticResource PanelBackgroundBrush}">
+                                    Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Style="{StaticResource BodySubText}" FontSize="12" TextWrapping="Wrap"
                                            Opacity="0.6">
                                     <Run Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="12" />
@@ -1286,7 +1257,7 @@
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                                     <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                            Background="{StaticResource PanelBackgroundBrush}">
+                                            Background="{StaticResource BT.SurfaceBrush}">
                                         <TextBlock Text="&#xE2B1;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                                    Foreground="White" />
@@ -1499,15 +1470,15 @@
 
                                 <!-- Reset Button -->
                                 <Border Height="36" HorizontalAlignment="Left" CornerRadius="6" Cursor="Hand"
-                                        Background="{StaticResource PanelBackgroundBrush}" 
-                                        BorderThickness="1" BorderBrush="{StaticResource BorderSubtleBrush}"
+                                        Background="{StaticResource BT.SurfaceBrush}" 
+                                        BorderThickness="1" BorderBrush="{StaticResource BT.StrokeMidBrush}"
                                         MouseLeftButtonDown="ResetButton_Click">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Style.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
-                                                    <Setter Property="BorderBrush" Value="{StaticResource HoverBorderBrush}" />
+                                                    <Setter Property="Background" Value="{StaticResource BT.HoverBrush}" />
+                                                    <Setter Property="BorderBrush" Value="{StaticResource BT.HoverBorderBrush}" />
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
@@ -1536,7 +1507,7 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0" Orientation="Horizontal">
                                         <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                                Background="{StaticResource PanelBackgroundBrush}">
+                                                Background="{StaticResource BT.SurfaceBrush}">
                                             <TextBlock Text="&#xE1F6;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                                        HorizontalAlignment="Center" VerticalAlignment="Center"
                                                        Foreground="White" />
@@ -1547,15 +1518,15 @@
                                                        Style="{StaticResource BodySubText}" FontSize="12" />
                                         </StackPanel>
                                     </StackPanel>
-                                    <!-- Overflow "..." button -->
+                                     <!-- Overflow "..." button -->
                                     <Border Grid.Column="2" x:Name="OverflowButton" Width="32" Height="32" CornerRadius="8" Cursor="Hand"
                                             MouseLeftButtonDown="OverflowMenu_Click">
                                         <Border.Style>
                                             <Style TargetType="Border">
-                                                <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
+                                                <Setter Property="Background" Value="{StaticResource BT.SurfaceBrush}" />
                                                 <Style.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
+                                                        <Setter Property="Background" Value="{StaticResource BT.HoverBrush}" />
                                                     </Trigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -1610,7 +1581,7 @@
                                                     </StackPanel>
                                                 </Border>
                                                 <!-- Separator -->
-                                                <Border Height="1" Background="#15FFFFFF" Margin="8,3" />
+                                                <Border Height="1" Background="{StaticResource BT.SurfaceBrush}" Margin="8,3" />
                                                 <!-- Export .bttheme -->
                                                 <Border Height="34" CornerRadius="4" Cursor="Hand" Margin="2"
                                                         MouseLeftButtonDown="ExportThemeToFile_Click">
@@ -1703,7 +1674,7 @@
                                                                FontSize="12" FontWeight="Medium"
                                                                Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                                     <Border Width="18" Height="18" CornerRadius="9" Margin="8,0,0,0"
-                                                            Background="{StaticResource DeleteBackgroundBrush}" Cursor="Hand"
+                                                            Background="{StaticResource BT.DangerDimBrush}" Cursor="Hand"
                                                             MouseLeftButtonDown="DeleteCustomTheme_Click" Tag="{Binding}">
                                                         <Border.Style>
                                                             <Style TargetType="Border">
@@ -1716,7 +1687,7 @@
                                                         </Border.Style>
                                                         <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="9"
                                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                                   Foreground="{StaticResource DeleteTextBrush}" />
+                                                                   Foreground="{StaticResource BT.DangerBrush}" />
                                                     </Border>
                                                 </StackPanel>
                                             </Border>
@@ -1745,8 +1716,8 @@
                                     <Grid Width="180" Height="30">
                                         <TextBox Padding="6,4" FontSize="12"
                                                  Text="{Binding NewThemeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 Background="{StaticResource PanelBackgroundBrush}" Foreground="White" 
-                                                 BorderBrush="{StaticResource BorderSubtleBrush}"
+                                                 Background="{StaticResource BT.SurfaceBrush}" Foreground="White" 
+                                                 BorderBrush="{StaticResource BT.StrokeMidBrush}"
                                                  x:Name="ThemeNameBox" />
                                         <TextBlock Text="{x:Static resx:Resources.SettingsThemeNamePlaceholder}" FontSize="12" Padding="8,6" IsHitTestVisible="False"
                                                    Foreground="#50FFFFFF" VerticalAlignment="Center">
@@ -1764,13 +1735,13 @@
                                     </Grid>
                                     <Border Height="30" Margin="8,0,0,0" CornerRadius="6" Cursor="Hand" Padding="12,0"
                                             MouseLeftButtonDown="SaveCustomTheme_Click"
-                                            Background="{StaticResource PanelBackgroundBrush}"
-                                            BorderThickness="1" BorderBrush="{StaticResource BorderSubtleBrush}">
+                                            Background="{StaticResource BT.SurfaceBrush}"
+                                            BorderThickness="1" BorderBrush="{StaticResource BT.StrokeMidBrush}">
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
+                                                        <Setter Property="Background" Value="{StaticResource BT.HoverBrush}" />
                                                     </Trigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -1778,7 +1749,7 @@
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <TextBlock Text="&#xE105;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                        VerticalAlignment="Center" Margin="0,0,6,0"
-                                                       Foreground="{StaticResource SuccessAccentBrush}" />
+                                                       Foreground="{StaticResource BT.SuccessBrush}" />
                                             <TextBlock Text="{x:Static resx:Resources.SettingsSaveTheme}" FontSize="12" VerticalAlignment="Center"
                                                        Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                         </StackPanel>
@@ -1800,7 +1771,7 @@
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                    Background="#15FFFFFF">
+                                    Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -1824,7 +1795,7 @@
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                    Background="#15FFFFFF">
+                                    Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Text="&#xE825;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -1855,7 +1826,7 @@
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                        Background="#15FFFFFF">
+                                        Background="{StaticResource BT.SurfaceBrush}">
                                     <TextBlock Text="&#xE8D6;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                Foreground="White" />
@@ -1879,7 +1850,7 @@
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                                 <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                        Background="#15FFFFFF">
+                                        Background="{StaticResource BT.SurfaceBrush}">
                                     <TextBlock Text="&#xE916;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                Foreground="White" />
@@ -1907,7 +1878,7 @@
                                         SmallChange="0.01" LargeChange="0.1" IsSnapToTickEnabled="False" />
                                 <TextBlock Grid.Column="2" Text="5s" Style="{StaticResource BodySubText}"
                                            VerticalAlignment="Center" Margin="12,0,0,0" />
-                                <Border Grid.Column="3" Padding="8,4" CornerRadius="6" Background="#20FFFFFF"
+                                <Border Grid.Column="3" Padding="8,4" CornerRadius="6" Background="{StaticResource BT.StrokeMidBrush}"
                                         HorizontalAlignment="Right" Margin="12,0,0,0">
                                     <TextBlock Text="{Binding HoverDelayText}" FontWeight="SemiBold"
                                                HorizontalAlignment="Center" FontSize="13" />
@@ -1915,7 +1886,7 @@
                             </Grid>
 
                             <!-- Separator -->
-                            <Border Height="1" Background="#10FFFFFF" Margin="0,0,0,14" />
+                            <Border Height="1" Background="{StaticResource BT.StrokeBrush}" Margin="0,0,0,14" />
 
                             <!-- Behavior options -->
                             <CheckBox Content="{x:Static resx:Resources.SettingsOnlyWhenPlaying}"
@@ -1932,7 +1903,7 @@
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                                 <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                        Background="#15FFFFFF">
+                                        Background="{StaticResource BT.SurfaceBrush}">
                                     <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                Foreground="White" />
@@ -1946,7 +1917,7 @@
 
                             <!-- Live preview of blur effect -->
                             <Border CornerRadius="8" Height="80" Margin="0,0,0,16"
-                                    ClipToBounds="True" Background="#20FFFFFF">
+                                    ClipToBounds="True" Background="{StaticResource BT.StrokeMidBrush}">
                                 <Grid>
                                     <!-- Simulated album art background with blur -->
                                     <Border CornerRadius="8">
@@ -1986,7 +1957,7 @@
                                         SmallChange="1" LargeChange="5" IsSnapToTickEnabled="False" />
                                 <TextBlock Grid.Column="2" Text="{x:Static resx:Resources.SettingsBlurMax}" Style="{StaticResource BodySubText}"
                                            VerticalAlignment="Center" Margin="12,0,0,0" />
-                                <Border Grid.Column="3" Padding="8,4" CornerRadius="6" Background="#20FFFFFF"
+                                <Border Grid.Column="3" Padding="8,4" CornerRadius="6" Background="{StaticResource BT.StrokeMidBrush}"
                                         HorizontalAlignment="Right" Margin="12,0,0,0">
                                     <TextBlock Text="{Binding BlurRadiusText}" FontWeight="SemiBold"
                                                HorizontalAlignment="Center" FontSize="13" />
@@ -2007,7 +1978,7 @@
                         Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                            <Border Style="{StaticResource SectionIconBorder}">
+                            <Border Style="{StaticResource BT.SectionIcon}">
                                 <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -2030,24 +2001,24 @@
                                      Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                                 <TextBox.Style>
                                     <Style TargetType="TextBox">
-                                        <Setter Property="BorderBrush" Value="#30FFFFFF" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource BT.HoverBorderBrush}" />
                                         <Setter Property="BorderThickness" Value="1" />
                                         <Style.Triggers>
                                             <Trigger Property="IsFocused" Value="True">
-                                                <Setter Property="BorderBrush" Value="#60FFFFFF" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource BT.SelectedBorderBrush}" />
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
                                 </TextBox.Style>
                             </TextBox>
                             <Border Grid.Column="1" Height="32" Margin="8,0,0,0" CornerRadius="6" Cursor="Hand" Padding="16,0"
-                                    Background="#20FFFFFF" BorderThickness="1" BorderBrush="#30FFFFFF"
+                                    Background="{StaticResource BT.StrokeMidBrush}" BorderThickness="1" BorderBrush="{StaticResource BT.HoverBorderBrush}"
                                     MouseLeftButtonDown="SaveProfile_Click">
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Style.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#30FFFFFF" />
+                                                <Setter Property="Background" Value="{StaticResource BT.HoverBrush}" />
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
@@ -2069,7 +2040,7 @@
                         Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                            <Border Style="{StaticResource SectionIconBorder}">
+                            <Border Style="{StaticResource BT.SectionIcon}">
                                 <TextBlock Text="&#xE9CE;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -2137,7 +2108,7 @@
 
                         <!-- Action buttons -->
                         <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                            <Border Style="{StaticResource ActionButtonBorder}" MouseLeftButtonDown="ApplyProfile_Click">
+                            <Border Style="{StaticResource BT.ActionButton}" MouseLeftButtonDown="ApplyProfile_Click">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                VerticalAlignment="Center" Margin="0,0,6,0"
@@ -2146,7 +2117,7 @@
                                                Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource ActionButtonBorder}" Margin="8,0,0,0" MouseLeftButtonDown="DeleteProfile_Click">
+                            <Border Style="{StaticResource BT.ActionButton}" Margin="8,0,0,0" MouseLeftButtonDown="DeleteProfile_Click">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                VerticalAlignment="Center" Margin="0,0,6,0"
@@ -2155,7 +2126,7 @@
                                                Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource ActionButtonBorder}" Margin="8,0,0,0" MouseLeftButtonDown="ExportProfile_Click">
+                            <Border Style="{StaticResource BT.ActionButton}" Margin="8,0,0,0" MouseLeftButtonDown="ExportProfile_Click">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="&#xEDE1;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                VerticalAlignment="Center" Margin="0,0,6,0"
@@ -2164,7 +2135,7 @@
                                                Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource ActionButtonBorder}" Margin="8,0,0,0" MouseLeftButtonDown="ImportProfile_Click">
+                            <Border Style="{StaticResource BT.ActionButton}" Margin="8,0,0,0" MouseLeftButtonDown="ImportProfile_Click">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                                VerticalAlignment="Center" Margin="0,0,6,0"
@@ -2208,7 +2179,7 @@
                 <Border Margin="12,0,12,20"
                         Padding="16"
                         CornerRadius="8"
-                        Background="#1AFFFFFF">
+                        Background="{StaticResource BT.SurfaceBrush}">
                     <StackPanel>
                         <TextBlock FontSize="14" FontWeight="SemiBold"
                                    Margin="0,0,0,4"
@@ -2231,11 +2202,11 @@
                 <Border Margin="12,0,12,20"
                         Padding="16"
                         CornerRadius="8"
-                        Background="#1AFFFFFF">
+                        Background="{StaticResource BT.SurfaceBrush}">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                    Background="#15FFFFFF">
+                                    Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Text="&#xE896;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -2249,8 +2220,8 @@
 
                         <!-- Channel selector — segmented control -->
                         <TextBlock Text="{x:Static resx:Resources.SettingsNotifyFor}" FontSize="12" Margin="0,0,0,8" Opacity="0.7" />
-                        <Border CornerRadius="8" Background="#08FFFFFF" Padding="3"
-                                BorderBrush="#15FFFFFF" BorderThickness="1" Margin="0,0,0,6">
+                        <Border CornerRadius="8" Background="{StaticResource ListItemBackgroundBrush}" Padding="3"
+                                BorderBrush="{StaticResource BT.SurfaceBrush}" BorderThickness="1" Margin="0,0,0,6">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -2353,7 +2324,7 @@
                                    Margin="0,0,0,12" />
 
                         <!-- Separator -->
-                        <Border Height="1" Background="#10FFFFFF" Margin="0,0,0,12" />
+                        <Border Height="1" Background="{StaticResource BT.StrokeBrush}" Margin="0,0,0,12" />
 
                         <!-- Status + dynamic check/install button -->
                         <Grid>
@@ -2370,7 +2341,7 @@
                             <Border x:Name="CheckUpdateBtn" Grid.Column="1"
                                     MouseLeftButtonDown="CheckUpdate_Click">
                                 <Border.Style>
-                                    <Style TargetType="Border" BasedOn="{StaticResource ActionButtonBorder}">
+                                    <Style TargetType="Border" BasedOn="{StaticResource BT.ActionButton}">
                                         <Setter Property="Visibility" Value="Visible"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsUpdateAvailable}" Value="True">
@@ -2459,11 +2430,11 @@
                 <Border Margin="12,0,12,20"
                         Padding="16"
                         CornerRadius="8"
-                        Background="#1AFFFFFF">
+                        Background="{StaticResource BT.SurfaceBrush}">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
-                                    Background="#15FFFFFF">
+                                    Background="{StaticResource BT.SurfaceBrush}">
                                 <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
@@ -2475,7 +2446,7 @@
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                            <Border Style="{StaticResource ActionButtonBorder}" Margin="0,0,8,0"
+                            <Border Style="{StaticResource BT.ActionButton}" Margin="0,0,8,0"
                                     MouseLeftButtonDown="ExportSettings_Click">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="&#xEDE1;" FontFamily="Segoe MDL2 Assets" FontSize="13"
@@ -2483,7 +2454,7 @@
                                     <TextBlock Text="{x:Static resx:Resources.SettingsExportSettings}" FontSize="12" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource ActionButtonBorder}"
+                            <Border Style="{StaticResource BT.ActionButton}"
                                     MouseLeftButtonDown="ImportSettings_Click">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="&#xE8B5;" FontFamily="Segoe MDL2 Assets" FontSize="13"
