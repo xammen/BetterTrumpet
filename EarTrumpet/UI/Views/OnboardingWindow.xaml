@@ -116,7 +116,7 @@
     <!-- ═══ SHELL ═══ -->
     <Border CornerRadius="14" ClipToBounds="True" Background="#FF101014">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="48" ShadowDepth="0" Opacity="0.5" Color="Black"/>
+            <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.35" Color="Black"/>
         </Border.Effect>
         <Grid>
             <!-- Gradient mesh -->
@@ -134,7 +134,7 @@
             </Border>
 
             <!-- Inner stroke -->
-            <Border CornerRadius="14" BorderThickness="1" BorderBrush="#08FFFFFF" IsHitTestVisible="False"/>
+            <Border CornerRadius="14" BorderThickness="1" BorderBrush="#15FFFFFF" IsHitTestVisible="False"/>
 
             <Grid>
                 <Grid.RowDefinitions>
@@ -226,6 +226,15 @@
                                    Foreground="{StaticResource T1}" Margin="0,0,0,6"/>
                         <TextBlock Text="{Binding SubtitleText}" FontSize="13"
                                    Foreground="{StaticResource T2}" Margin="0,0,0,24"/>
+
+                        <!-- Empty state when no devices -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16"
+                                    Visibility="{Binding HasNoDevices, Converter={StaticResource BoolVis}}">
+                            <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                       Foreground="#FFD54F" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="Aucun p&#233;riph&#233;rique audio d&#233;tect&#233;." FontSize="13"
+                                       Foreground="{StaticResource T2}" VerticalAlignment="Center"/>
+                        </StackPanel>
 
                         <ScrollViewer MaxHeight="310" VerticalScrollBarVisibility="Auto" Margin="0,0,-4,0">
                             <ItemsControl ItemsSource="{Binding AudioDevices}">
