@@ -55,8 +55,8 @@ namespace EarTrumpet.UI.Views
             _hideTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
             _hideTimer.Tick += HideTimer_Tick;
 
-            // Timer for marquee animation
-            _marqueeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(30) };
+            // Timer for marquee animation (20fps is sufficient for text scrolling)
+            _marqueeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
             _marqueeTimer.Tick += MarqueeTimer_Tick;
 
             // Timer for progress bar updates (1 second)
