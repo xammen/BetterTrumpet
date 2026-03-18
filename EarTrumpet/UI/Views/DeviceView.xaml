@@ -15,7 +15,8 @@
 
         <ListViewItem Name="DeviceListItem"
                       AutomationProperties.Name="{Binding Device.AccessibleName}"
-                      Tag="{x:Static views:DeviceView.DeviceListItemKey}">
+                      Tag="{x:Static views:DeviceView.DeviceListItemKey}"
+                      Visibility="Collapsed">
             <Border Theme:Brush.Background=":=Transparent, Flyout:FlyoutBackground, Flyout:HighContrast=Window" Theme:Brush.BorderBrush="Theme=Transparent, HighContrast=Text">
                 <Border.Style>
                     <Style TargetType="Border">

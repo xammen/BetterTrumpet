@@ -28,6 +28,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
         private string _enumeratorName;
         private string _interfaceName;
         private string _deviceDescription;
+        private uint _formFactor;
         private float _volume;
         private bool _isMuted;
         private bool _isRegistered;
@@ -158,6 +159,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
         public string EnumeratorName => _enumeratorName;
         public string InterfaceName => _interfaceName;
         public string DeviceDescription => _deviceDescription;
+        public uint FormFactor => _formFactor;
 
         public IAudioDeviceManager Parent
         {
@@ -205,6 +207,13 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
                 _enumeratorName = propStore.GetValue<string>(PropertyKeys.DEVPKEY_Device_EnumeratorName);
                 _interfaceName = propStore.GetValue<string>(PropertyKeys.DEVPKEY_DeviceInterface_FriendlyName);
                 _deviceDescription = propStore.GetValue<string>(PropertyKeys.DEVPKEY_Device_DeviceDesc);
+                try
+                {
+                    var formFactorPv = propStore.GetValue(ref PropertyKeys.PKEY_AudioEndpoint_FormFactor);
+                    _formFactor = formFactorPv.uintVal;
+                    Ole32.PropVariantClear(ref formFactorPv);
+                }
+                catch { _formFactor = 0; }
             }
             catch (Exception ex) when (ex.Is(HRESULT.AUDCLNT_E_DEVICE_INVALIDATED))
             {
