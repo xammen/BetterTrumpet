@@ -68,6 +68,7 @@ namespace EarTrumpet.DataModel.Audio.Mocks
         public string EnumeratorName => "Mock Enumerator";
         public string InterfaceName => "Mock Interface";
         public string DeviceDescription => "Mock Description";
+        public uint FormFactor => 1;
 
         public void AddFilter(Func<ObservableCollection<IAudioDeviceSession>, ObservableCollection<IAudioDeviceSession>> filter)
         {

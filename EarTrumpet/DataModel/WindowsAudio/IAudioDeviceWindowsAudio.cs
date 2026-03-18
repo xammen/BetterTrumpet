@@ -9,5 +9,6 @@ namespace EarTrumpet.DataModel.WindowsAudio
         string EnumeratorName { get; }
         string InterfaceName { get; }
         string DeviceDescription { get; }
+        uint FormFactor { get; }
     }
 }
