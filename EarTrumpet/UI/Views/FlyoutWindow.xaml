@@ -28,6 +28,10 @@
         UseLayoutRounding="True"
         WindowStyle="None">
     <Window.Resources>
+        <views:FormFactorToIconConverter x:Key="FormFactorToIconConverter"/>
+        <views:EnumeratorToBadgeConverter x:Key="EnumeratorToBadgeConverter"/>
+        <views:ProgressBarWidthConverter x:Key="ProgressBarWidthConverter"/>
+
         <Style x:Key="ExpandCollapseButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
@@ -91,10 +95,124 @@
                               Device="{Binding}"
                               IsDisplayNameVisible="{Binding IsDisplayNameVisible}" />
         </DataTemplate>
+
+        <!-- ═══ DEVICE PICKER ITEM TEMPLATE ═══ -->
+        <DataTemplate x:Key="DevicePickerItemTemplate">
+            <Border Padding="14,9" Margin="0" CornerRadius="6"
+                    Background="Transparent" Cursor="Hand"
+                    MouseLeftButtonUp="DeviceRow_Click" Tag="{Binding}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Theme:Brush.Background" Value="Theme=#20FFFFFF, HighContrast=Highlight"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Name + driver -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="4,0,0,0">
+                        <TextBlock Text="{Binding DeviceDescription}"
+                                   FontSize="13" FontWeight="Medium" Opacity="0.9"
+                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock x:Name="StatusText" FontSize="10" Opacity="0.3" Margin="0,2,0,0" Text="{Binding InterfaceName}"/>
+                    </StackPanel>
+
+                    <!-- Radio dot -->
+                    <Grid Grid.Column="1" Width="22" VerticalAlignment="Center" Margin="8,0,0,0">
+                        <Ellipse x:Name="RadioOuter" Width="18" Height="18"
+                                 Stroke="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" StrokeThickness="1.5" Fill="Transparent" Opacity="0.4"/>
+                        <Ellipse x:Name="RadioSelectedOuter" Width="18" Height="18"
+                                 Fill="#FF3B9EFF" Visibility="Collapsed"/>
+                        <Ellipse x:Name="RadioSelectedInner" Width="7" Height="7"
+                                 Fill="White" Visibility="Collapsed"/>
+                    </Grid>
+                </Grid>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsDefault}" Value="True">
+                    <Setter TargetName="RadioOuter" Property="Visibility" Value="Collapsed"/>
+                    <Setter TargetName="RadioSelectedOuter" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="RadioSelectedInner" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="StatusText" Property="Opacity" Value="0.45"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- Category group template (kept for potential future use) -->
     </Window.Resources>
     <Grid x:Name="LayoutRoot">
-        <ScrollViewer Name="BaseVisual" VerticalScrollBarVisibility="Auto">
-            <StackPanel Name="ContentGrid" VerticalAlignment="Top">
+        <!-- Pin button overlay -->
+        <Border HorizontalAlignment="Right" VerticalAlignment="Top"
+                Margin="0,6,8,0" Padding="6,4" CornerRadius="4"
+                Cursor="Hand" Background="Transparent" Panel.ZIndex="50"
+                MouseLeftButtonUp="PinButton_Click">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Devices.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Theme:Brush.Background" Value="Theme=#20FFFFFF, HighContrast=Highlight"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <TextBlock Text="{Binding PinGlyph}" FontFamily="Segoe MDL2 Assets"
+                       FontSize="11" Opacity="0.3"/>
+        </Border>
+        <DockPanel Name="BaseVisual" LastChildFill="True" Theme:Brush.Background="FlyoutBackground">
+
+            <!-- ═══ GLOBAL MIX (anchored bottom) ═══ -->
+            <Border DockPanel.Dock="Bottom" Padding="4,6,4,8">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Devices.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel>
+                    <Grid Margin="14,0,14,2">
+                        <TextBlock Text="Global Mix" FontSize="12" FontWeight="Medium"
+                                   Opacity="0.55" HorizontalAlignment="Left"/>
+                        <TextBlock HorizontalAlignment="Right" FontSize="12" Opacity="0.35">
+                            <Run Text="{Binding DevicePicker.MasterVolume, Mode=OneWay}"/><Run Text="%"/>
+                        </TextBlock>
+                    </Grid>
+                    <Grid Height="{DynamicResource Mutable_DeviceItemCellHeight}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="46"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="46"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="&#xE993;" FontFamily="Segoe MDL2 Assets"
+                                   FontSize="14" Opacity="0.3"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <ctl:VolumeSlider Grid.Column="1"
+                                         Value="{Binding DevicePicker.MasterVolume, Mode=TwoWay}"
+                                         PeakValue1="{Binding Devices[0].PeakValue1, FallbackValue=0}"
+                                         PeakValue2="{Binding Devices[0].PeakValue2, FallbackValue=0}"/>
+                        <TextBlock Grid.Column="2" Text="&#xE995;" FontFamily="Segoe MDL2 Assets"
+                                   FontSize="14" Opacity="0.3"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ═══ SCROLLABLE CONTENT ═══ -->
+            <ScrollViewer VerticalScrollBarVisibility="Hidden">
+            <StackPanel Name="ContentGrid" VerticalAlignment="Top" Background="#01000000">
+                <!-- No devices message -->
                 <Border VerticalAlignment="Center" Theme:Brush.Background="FlyoutBackground">
                     <Border.Style>
                         <Style TargetType="Border">
@@ -112,100 +230,193 @@
                                Text="{x:Static resx:Resources.NoDevicesPanelContent}"
                                TextWrapping="Wrap" />
                 </Border>
-                <Grid>
-                    <Grid.Style>
-                        <Style TargetType="Grid">
+
+                <!-- Pin button moved to overlay -->
+
+                <!-- ═══ NOW PLAYING — premium, color from cover ═══ -->
+                <Border x:Name="MediaCard" Margin="0,0,0,4" CornerRadius="0" ClipToBounds="True">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Devices.Count}" Value="0">
-                                    <Setter Property="Visibility" Value="Collapsed" />
+                                <DataTrigger Binding="{Binding DevicePicker.HasMedia}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </Grid.Style>
-                    <ItemsControl Name="DevicesList"
-                                  FocusVisualStyle="{x:Null}"
-                                  IsTabStop="False"
-                                  ItemsSource="{Binding Devices}" />
-                    <!-- Pin button: sits in the title bar area, right side before chevron -->
-                    <Button x:Name="PinButton"
-                            Width="30"
-                            Height="{DynamicResource Mutable_DeviceTitleCellHeight}"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            Margin="0,0,24,0"
-                            Panel.ZIndex="5"
-                            Command="{Binding TogglePin}"
-                            ToolTipService.ToolTip="Pin window"
-                            IsTabStop="False"
-                            Style="{StaticResource ExpandCollapseButtonStyle}">
-                        <TextBlock Text="{Binding PinGlyph}"
-                                   FontFamily="Segoe MDL2 Assets"
-                                   FontSize="11"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   Theme:Brush.Foreground="{Binding (Theme:Brush.Foreground), RelativeSource={RelativeSource AncestorType=Button}}" />
-                    </Button>
-                    <Button Height="{DynamicResource Mutable_DeviceTitleCellHeight}"
-                            Command="{Binding ExpandCollapse}"
-                            IsEnabled="{Binding CanExpand}">
-                        <Button.Style>
-                            <Style BasedOn="{StaticResource ExpandCollapseButtonStyle}" TargetType="{x:Type Button}">
-                                <Style.Triggers>
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding CanExpand}" Value="True" />
-                                            <Condition Binding="{Binding IsExpanded}" Value="True" />
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="AutomationProperties.Name" Value="{x:Static resx:Resources.CollapseAccessibleText}" />
-                                    </MultiDataTrigger>
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding CanExpand}" Value="True" />
-                                            <Condition Binding="{Binding IsExpanded}" Value="False" />
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="AutomationProperties.Name" Value="{x:Static resx:Resources.ExpandAccessibleText}" />
-                                    </MultiDataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                        <Button.Content>
+                    </Border.Style>
+                    <Border Padding="12,10">
                             <Grid>
-                                <TextBlock Margin="12,0,56,0"
-                                           HorizontalAlignment="Left"
-                                           Theme:Brush.Foreground="{Binding (Theme:Brush.Foreground), RelativeSource={RelativeSource AncestorType=Button}}"
-                                           Style="{StaticResource DeviceTitleTextStyle}"
-                                           Text="{Binding DeviceNameText}"
-                                           TextTrimming="CharacterEllipsis" />
-                                <TextBlock Margin="{StaticResource WindowMargin}"
-                                           HorizontalAlignment="Right"
-                                           Theme:Brush.Foreground="{Binding (Theme:Brush.Foreground), RelativeSource={RelativeSource AncestorType=Button}}"
-                                           FontSize="{DynamicResource Mutable_ExpandCollapseButtonGlyphFontSize}">
-                                    <TextBlock.Style>
-                                        <Style BasedOn="{StaticResource GlyphTextBlockStyle}" TargetType="{x:Type TextBlock}">
-                                            <Style.Triggers>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding CanExpand}" Value="True" />
-                                                        <Condition Binding="{Binding IsExpanded}" Value="True" />
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Text" Value="&#xe011;" />
-                                                </MultiDataTrigger>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding CanExpand}" Value="True" />
-                                                        <Condition Binding="{Binding IsExpanded}" Value="False" />
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Text" Value="&#xe010;" />
-                                                </MultiDataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Album art -->
+                                <Border Grid.Column="0" Width="52" Height="52" CornerRadius="6"
+                                        Margin="0,0,10,0" Opacity="0.9" ClipToBounds="True">
+                                    <Image Source="{Binding DevicePicker.MediaThumbnail}"
+                                           Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                </Border>
+
+                                <!-- Right: compact info + progress + controls -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding DevicePicker.MediaTitle}"
+                                               FontSize="13" FontWeight="SemiBold" Opacity="0.95"
+                                               TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock FontSize="11" Opacity="0.45" Margin="0,1,0,0"
+                                               TextTrimming="CharacterEllipsis">
+                                        <Run Text="{Binding DevicePicker.MediaArtist, Mode=OneWay}"/>
+                                    </TextBlock>
+                                    <!-- Progress bar -->
+                                    <Grid Margin="0,6,0,0" Height="2.5">
+                                        <Border CornerRadius="1.25" Opacity="0.12" Theme:Brush.Background="Text"/>
+                                        <Border CornerRadius="1.25" Opacity="0.8" Theme:Brush.Background="Text" HorizontalAlignment="Left">
+                                            <Border.Width>
+                                                <MultiBinding Converter="{StaticResource ProgressBarWidthConverter}">
+                                                    <Binding Path="DevicePicker.MediaPosition"/>
+                                                    <Binding Path="DevicePicker.MediaDuration"/>
+                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}"/>
+                                                </MultiBinding>
+                                            </Border.Width>
+                                        </Border>
+                                    </Grid>
+                                    <!-- Timestamps + controls -->
+                                    <Grid Margin="0,4,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding DevicePicker.MediaPositionText}"
+                                                   FontSize="10" Opacity="0.35" VerticalAlignment="Center"/>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <Border Padding="7,2" Cursor="Hand" Background="Transparent"
+                                                    MouseLeftButtonUp="PreviousTrack_Click">
+                                                <TextBlock Text="&#xE892;" FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="12" Opacity="0.55" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <Border Padding="8,2" Cursor="Hand" Background="Transparent"
+                                                    MouseLeftButtonUp="PlayPause_Click">
+                                                <TextBlock Text="{Binding DevicePicker.PlayPauseGlyph}"
+                                                           FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="17" Opacity="0.9" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <Border Padding="7,2" Cursor="Hand" Background="Transparent"
+                                                    MouseLeftButtonUp="NextTrack_Click">
+                                                <TextBlock Text="&#xE893;" FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="12" Opacity="0.55" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Text="{Binding DevicePicker.MediaDurationText}"
+                                                   FontSize="10" Opacity="0.35" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </StackPanel>
                             </Grid>
-                        </Button.Content>
-                    </Button>
-                </Grid>
-                <!-- Update available banner — premium shimmer, in-flow -->
+                        </Border>
+                </Border>
+
+                <!-- ═══ DEVICE LIST (collapsible, animated height) ═══ -->
+                <Border x:Name="DeviceListContainer" ClipToBounds="True" Height="0">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Devices.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <ItemsControl x:Name="DeviceListItems"
+                                  ItemsSource="{Binding DevicePicker.AllPlaybackDevices}" Focusable="False"
+                                  ItemTemplate="{StaticResource DevicePickerItemTemplate}"/>
+                </Border>
+
+                <!-- Toggle header (BELOW the list = bottom-to-top feel) -->
+                <Border Margin="4,0,4,2" Padding="14,9" CornerRadius="6" Cursor="Hand"
+                        MouseLeftButtonUp="ToggleDeviceList_Click">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Devices.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Theme:Brush.Background" Value="Theme=#15FFFFFF, HighContrast=Highlight"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding DevicePicker.SelectedDevice.DeviceDescription, FallbackValue='Speakers'}"
+                                   FontSize="12" FontWeight="Medium" Opacity="0.55" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" FontFamily="Segoe MDL2 Assets" FontSize="9"
+                                   Opacity="0.25" VerticalAlignment="Center" Margin="8,0,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="&#xE70E;"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DevicePicker.IsDeviceListExpanded}" Value="False">
+                                            <Setter Property="Text" Value="&#xE70D;"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Border>
+
+                <!-- Separator -->
+                <Border Height="1" Opacity="0.08" Theme:Brush.Background="Text" Margin="12,4,12,2">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Devices.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
+                <!-- ═══ APPLICATION VOLUME MIX header ═══ -->
+                <TextBlock Text="APPLICATION VOLUME MIX"
+                           FontSize="11" FontWeight="Bold" Opacity="0.35"
+                           Margin="16,12,16,4">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Devices.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <!-- ═══ APP SLIDERS ═══ -->
+                <ItemsControl Name="DevicesList"
+                              FocusVisualStyle="{x:Null}"
+                              IsTabStop="False"
+                              ItemsSource="{Binding Devices}">
+                    <ItemsControl.Style>
+                        <Style TargetType="ItemsControl">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Devices.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ItemsControl.Style>
+                </ItemsControl>
+
+                <!-- Update available banner -->
                 <Border x:Name="UpdateBanner"
                         Cursor="Hand"
                         MouseLeftButtonUp="UpdateBanner_Click"
@@ -221,25 +432,17 @@
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <!-- Static subtle glass background -->
-                    <Border CornerRadius="6" ClipToBounds="True"
-                            Background="#10FFFFFF">
-                        <!-- Inner content with border + fade-in -->
+                    <Border CornerRadius="6" ClipToBounds="True" Background="#10808080">
                         <Border x:Name="UpdateBannerInner"
-                                CornerRadius="5"
-                                BorderBrush="#20FFFFFF"
-                                BorderThickness="1"
-                                Padding="12,8"
-                                Opacity="0">
+                                CornerRadius="5" BorderBrush="#20808080" BorderThickness="1"
+                                Padding="12,8" Opacity="0">
                             <Border.Triggers>
                                 <EventTrigger RoutedEvent="Border.Loaded">
                                     <BeginStoryboard>
                                         <Storyboard>
                                             <DoubleAnimation Storyboard.TargetName="UpdateBannerInner"
                                                              Storyboard.TargetProperty="Opacity"
-                                                             From="0" To="1"
-                                                             Duration="0:0:0.4"
-                                                             BeginTime="0:0:0.1" />
+                                                             From="0" To="1" Duration="0:0:0.4" BeginTime="0:0:0.1" />
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </EventTrigger>
@@ -250,13 +453,8 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <!-- Sparkle icon -->
-                                <TextBlock Grid.Column="0"
-                                           Text="&#xE735;"
-                                           FontFamily="Segoe MDL2 Assets"
-                                           FontSize="14"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,10,0">
+                                <TextBlock Grid.Column="0" Text="&#xE735;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0">
                                     <TextBlock.Foreground>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                             <GradientStop Color="#70B8FF" Offset="0" />
@@ -264,27 +462,17 @@
                                         </LinearGradientBrush>
                                     </TextBlock.Foreground>
                                 </TextBlock>
-                                <!-- Text -->
-                                <TextBlock Grid.Column="1"
-                                           Text="{Binding UpdateText}"
-                                           FontSize="12"
-                                           FontWeight="Medium"
-                                           VerticalAlignment="Center"
-                                           Foreground="#CCFFFFFF" />
-                                <!-- Arrow -->
-                                <TextBlock Grid.Column="2"
-                                           Text="&#xE76C;"
-                                           FontFamily="Segoe MDL2 Assets"
-                                           FontSize="11"
-                                           VerticalAlignment="Center"
-                                           Margin="8,0,0,0"
-                                           Foreground="#66FFFFFF" />
+                                <TextBlock Grid.Column="1" Text="{Binding UpdateText}" FontSize="12"
+                                           FontWeight="Medium" VerticalAlignment="Center" Opacity="0.8" />
+                                <TextBlock Grid.Column="2" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="11" VerticalAlignment="Center" Margin="8,0,0,0" Opacity="0.4" />
                             </Grid>
                         </Border>
                     </Border>
                 </Border>
             </StackPanel>
-        </ScrollViewer>
+            </ScrollViewer>
+        </DockPanel>
         <Border Name="LightDismissBorder"
                 Theme:Brush.Background="Background"
                 PreviewMouseDown="{Event:Binding OnLightDismissBorderPreviewMouseDown}">
@@ -303,9 +491,7 @@
                                 <BeginStoryboard Name="EnterLightDismiss_AnimationsOn">
                                     <Storyboard>
                                         <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                         From="0"
-                                                         To="1"
-                                                         Duration="00:00:00.15" />
+                                                         From="0" To="1" Duration="00:00:00.15" />
                                         <ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetProperty="(UIElement.Visibility)">
                                             <DiscreteObjectKeyFrame KeyTime="00:00:00" Value="{x:Static Visibility.Visible}" />
                                         </ObjectAnimationUsingKeyFrames>
@@ -318,9 +504,7 @@
                                 <BeginStoryboard Name="ExitLightDismiss_AnimationsOn">
                                     <Storyboard>
                                         <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                         From="1"
-                                                         To="0"
-                                                         Duration="00:00:00.15" />
+                                                         From="1" To="0" Duration="00:00:00.15" />
                                         <ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetProperty="(UIElement.Visibility)">
                                             <DiscreteObjectKeyFrame KeyTime="00:00:00.15" Value="{x:Static Visibility.Collapsed}" />
                                         </ObjectAnimationUsingKeyFrames>
@@ -328,7 +512,6 @@
                                 </BeginStoryboard>
                             </MultiDataTrigger.ExitActions>
                         </MultiDataTrigger>
-
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
                                 <Condition Binding="{Binding Dialog.IsVisible}" Value="True" />
@@ -367,7 +550,6 @@
                                 RenderingBias="Performance" />
                 </Border.Effect>
                 <Border.Background>
-
                     <VisualBrush AlignmentX="Left"
                                  AlignmentY="Top"
                                  Stretch="UniformToFill"

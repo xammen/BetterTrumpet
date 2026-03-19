@@ -17,6 +17,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="UI\Mutable.xaml" />
+                <ResourceDictionary Source="UI\SharedTokens.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <Theme:Manager x:Key="ThemeManager">
@@ -41,9 +42,9 @@
                     </Theme:Ref>
                     <Theme:Ref Key="AcrylicColor_Flyout">
                         <Theme:Ref.Rules>
-                            <Theme:Rule On="UseAccentColor" Value="SystemAccentDark1/0.8" />
+                            <Theme:Rule On="UseAccentColor" Value="SystemAccentDark1/0.95" />
                             <Theme:Rule On="LightTheme" Value="LightChromeMedium/0.8" />
-                            <Theme:Rule Value="ApplicationBackgroundDarkTheme/0.7" />
+                            <Theme:Rule Value="ApplicationBackgroundDarkTheme/0.95" />
                         </Theme:Ref.Rules>
                     </Theme:Ref>
                     <Theme:Ref Key="AcrylicColor_Settings" Value="Light=LightChromeWhite/0.6, Dark=ApplicationBackgroundDarkTheme/0.7" />

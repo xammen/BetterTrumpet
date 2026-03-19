@@ -11,20 +11,18 @@
         Background="Transparent"
         KeyDown="Window_KeyDown">
     <Window.Resources>
-        <!-- ═══ PALETTE (matches Onboarding) ═══ -->
-        <Color x:Key="AccentColor">#3B9EFF</Color>
-        <Color x:Key="BgColor">#FF101014</Color>
-        <Color x:Key="SurfaceColor">#FF18181E</Color>
-        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
-        <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
-        <SolidColorBrush x:Key="T1" Color="#F0FFFFFF"/>
-        <SolidColorBrush x:Key="T2" Color="#70FFFFFF"/>
-        <SolidColorBrush x:Key="T3" Color="#40FFFFFF"/>
+        <!-- Palette now comes from SharedTokens.xaml (via App.xaml MergedDictionaries) -->
+        <!-- Local aliases for backward compatibility with code-behind references -->
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource BT.Accent}"/>
+        <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource BT.Surface}"/>
+        <SolidColorBrush x:Key="T1" Color="{StaticResource BT.T1}"/>
+        <SolidColorBrush x:Key="T2" Color="{StaticResource BT.T2}"/>
+        <SolidColorBrush x:Key="T3" Color="{StaticResource BT.T3}"/>
     </Window.Resources>
 
-    <Border CornerRadius="14" ClipToBounds="True" Background="#FF101014">
+    <Border CornerRadius="14" ClipToBounds="True" Background="{StaticResource BT.BgBrush}">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="48" ShadowDepth="0" Opacity="0.5" Color="Black"/>
+            <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.35" Color="Black"/>
         </Border.Effect>
         <Grid>
             <!-- Gradient mesh (same as onboarding) -->

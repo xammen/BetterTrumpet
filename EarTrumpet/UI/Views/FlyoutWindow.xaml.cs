@@ -40,6 +40,13 @@ namespace EarTrumpet.UI.Views
                 this.EnableRoundedCornersIfApplicable();
             };
             Themes.Manager.Current.ThemeChanged += () => EnableAcrylicIfApplicable(WindowsTaskbar.Current);
+
+            // Device list starts collapsed
+            Loaded += (s, args) =>
+            {
+                if (_viewModel is FlyoutViewModel fvm3)
+                    fvm3.DevicePicker.IsDeviceListExpanded = false;
+            };
         }
 
         public void Initialize()
@@ -217,6 +224,117 @@ else
             {
                 fvm.OpenUpdatePage();
             }
+        }
+
+        private bool _isAnimatingDeviceList;
+
+        private void ToggleDeviceList_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (_isAnimatingDeviceList) { e.Handled = true; return; }
+            if (!(DataContext is FlyoutViewModel fvm)) return;
+
+            var container = FindName("DeviceListContainer") as FrameworkElement;
+            var items = FindName("DeviceListItems") as FrameworkElement;
+            if (container == null || items == null) return;
+
+            var expanding = !fvm.DevicePicker.IsDeviceListExpanded;
+            _isAnimatingDeviceList = true;
+
+            if (expanding)
+            {
+                fvm.DevicePicker.IsDeviceListExpanded = true;
+                items.Measure(new Size(container.ActualWidth > 0 ? container.ActualWidth : 360, double.PositiveInfinity));
+                var targetHeight = items.DesiredSize.Height;
+
+                container.Height = 0;
+                var anim = new System.Windows.Media.Animation.DoubleAnimation(0, targetHeight,
+                    System.TimeSpan.FromMilliseconds(200))
+                { EasingFunction = new System.Windows.Media.Animation.QuadraticEase
+                    { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut } };
+                anim.Completed += (s2, e2) =>
+                {
+                    container.BeginAnimation(HeightProperty, null);
+                    container.Height = double.NaN;
+                    _isAnimatingDeviceList = false;
+                };
+                container.BeginAnimation(HeightProperty, anim);
+            }
+            else
+            {
+                var currentHeight = container.ActualHeight;
+                var anim = new System.Windows.Media.Animation.DoubleAnimation(currentHeight, 0,
+                    System.TimeSpan.FromMilliseconds(180))
+                { EasingFunction = new System.Windows.Media.Animation.QuadraticEase
+                    { EasingMode = System.Windows.Media.Animation.EasingMode.EaseIn } };
+                anim.Completed += (s2, e2) =>
+                {
+                    container.BeginAnimation(HeightProperty, null);
+                    container.Height = 0;
+                    fvm.DevicePicker.IsDeviceListExpanded = false;
+                    _isAnimatingDeviceList = false;
+                };
+                container.BeginAnimation(HeightProperty, anim);
+            }
+
+            e.Handled = true;
+        }
+
+        private void DeviceRow_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var border = sender as FrameworkElement;
+            if (border?.Tag is ViewModels.DeviceViewModel device && DataContext is FlyoutViewModel fvm)
+            {
+                fvm.DevicePicker.SelectedDevice = device;
+                e.Handled = true;
+            }
+        }
+
+        private void PlayPause_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            try { DataModel.MediaSessionService.Instance.PlayPause(); } catch { }
+            e.Handled = true;
+        }
+
+        private void NextTrack_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            try { DataModel.MediaSessionService.Instance.Next(); } catch { }
+            e.Handled = true;
+        }
+
+        private void PreviousTrack_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            try { DataModel.MediaSessionService.Instance.Previous(); } catch { }
+            e.Handled = true;
+        }
+
+        private void UpdateMediaCardColor(System.Windows.Media.Color color)
+        {
+            var gradientStart = FindName("MediaGradientStart") as System.Windows.Media.GradientStop;
+            var glowColor = FindName("GlowColor") as System.Windows.Media.GradientStop;
+            if (gradientStart == null) return;
+
+            // Dim the color to ~30% opacity for the gradient background
+            var dimmed = System.Windows.Media.Color.FromArgb(70, color.R, color.G, color.B);
+            var glow = System.Windows.Media.Color.FromArgb(35, color.R, color.G, color.B);
+
+            // Animate the color transition
+            var colorAnim = new System.Windows.Media.Animation.ColorAnimation(dimmed, System.TimeSpan.FromMilliseconds(600));
+            gradientStart.BeginAnimation(System.Windows.Media.GradientStop.ColorProperty, colorAnim);
+
+            if (glowColor != null)
+            {
+                var glowAnim = new System.Windows.Media.Animation.ColorAnimation(glow, System.TimeSpan.FromMilliseconds(600));
+                glowColor.BeginAnimation(System.Windows.Media.GradientStop.ColorProperty, glowAnim);
+            }
+        }
+
+        private void PinButton_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (DataContext is FlyoutViewModel fvm)
+            {
+                fvm.IsPinned = !fvm.IsPinned;
+            }
+            e.Handled = true;
         }
 
         private void EnableAcrylicIfApplicable(WindowsTaskbar.State taskbar)

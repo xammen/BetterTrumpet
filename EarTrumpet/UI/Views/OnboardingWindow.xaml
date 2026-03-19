@@ -609,49 +609,45 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- ══ PAGE 5: TRAY PIN ══ -->
+                    <!-- ══ PAGE 5: TRAY PIN (peak-end — must be the most premium page) ══ -->
                     <StackPanel x:Name="Page5" VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
                                 Visibility="{Binding IsPage5, Converter={StaticResource BoolVis}}">
                         <StackPanel.RenderTransform>
                             <TranslateTransform x:Name="Page5Translate"/>
                         </StackPanel.RenderTransform>
 
-                        <!-- Pin icon -->
-                        <Border Width="52" Height="52" CornerRadius="26" HorizontalAlignment="Left"
-                                Margin="0,0,0,20">
-                            <Border.Background>
-                                <SolidColorBrush Color="{StaticResource AccentColor}" Opacity="0.15"/>
-                            </Border.Background>
-                            <TextBlock Text="&#xE718;" FontFamily="Segoe MDL2 Assets" FontSize="22"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       Foreground="{StaticResource AccentBrush}"/>
-                        </Border>
+                        <!-- Title centered -->
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingPinTitle}"
+                                   FontSize="22" FontWeight="SemiBold"
+                                   Foreground="{StaticResource T1}" HorizontalAlignment="Center"
+                                   Margin="0,0,0,8"/>
+                        <!-- Subtitle centered -->
+                        <TextBlock FontSize="13" TextWrapping="Wrap" LineHeight="20"
+                                   Foreground="{StaticResource T2}" TextAlignment="Center"
+                                   HorizontalAlignment="Center" MaxWidth="380"
+                                   Margin="0,0,0,20"
+                                   Text="{x:Static resx:Resources.OnboardingPinDesc}"/>
 
-                        <TextBlock Text="{x:Static resx:Resources.OnboardingPinTitle}" FontSize="24" FontWeight="Bold"
-                                   Foreground="{StaticResource T1}" Margin="0,0,0,6"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                            <TextBlock FontSize="13" TextWrapping="Wrap" LineHeight="20" MaxWidth="360"
-                                       Foreground="{StaticResource T2}"
-                                       Text="{x:Static resx:Resources.OnboardingPinDesc}"/>
-                            <!-- Animated bouncing arrow ↓ -->
-                            <TextBlock x:Name="BouncingArrow" Text="&#xE74B;" FontFamily="Segoe MDL2 Assets"
-                                       FontSize="18" Foreground="{StaticResource AccentBrush}"
-                                       VerticalAlignment="Bottom" Margin="12,0,0,0"
-                                       RenderTransformOrigin="0.5,0.5">
-                                <TextBlock.RenderTransform>
-                                    <TranslateTransform x:Name="ArrowBounce" Y="0"/>
-                                </TextBlock.RenderTransform>
-                            </TextBlock>
-                        </StackPanel>
-
-                        <!-- GIF demo -->
-                        <Border CornerRadius="10" ClipToBounds="True" HorizontalAlignment="Left"
-                                MaxWidth="400" MaxHeight="220"
+                        <!-- GIF demo — large, centered, main visual -->
+                        <Border CornerRadius="12" ClipToBounds="True" HorizontalAlignment="Center"
+                                MaxWidth="420" MaxHeight="280"
                                 Background="{StaticResource SurfaceBrush}"
-                                BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1">
+                                BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"
+                                Margin="0,0,0,16">
                             <Image x:Name="TrayPinGif" Stretch="Uniform"
                                    RenderOptions.BitmapScalingMode="Fant"/>
                         </Border>
+
+                        <!-- Animated bouncing arrow ↓ — centered below GIF -->
+                        <TextBlock x:Name="BouncingArrow" Text="&#xE74B;" FontFamily="Segoe MDL2 Assets"
+                                   FontSize="20" Foreground="{StaticResource AccentBrush}"
+                                   HorizontalAlignment="Center"
+                                   RenderTransformOrigin="0.5,0.5">
+                            <TextBlock.RenderTransform>
+                                <TranslateTransform x:Name="ArrowBounce" Y="0"/>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
                     </StackPanel>
                 </Grid>
 
