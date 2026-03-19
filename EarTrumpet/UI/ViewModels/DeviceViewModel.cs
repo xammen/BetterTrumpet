@@ -38,6 +38,10 @@ namespace EarTrumpet.UI.ViewModels
         public string DeviceDescription => ((IAudioDeviceWindowsAudio)_device).DeviceDescription;
         public string EnumeratorName => ((IAudioDeviceWindowsAudio)_device).EnumeratorName;
         public string InterfaceName => ((IAudioDeviceWindowsAudio)_device).InterfaceName;
+        public uint FormFactor => ((IAudioDeviceWindowsAudio)_device).FormFactor;
+        public string DeviceKind => _device.Parent?.Kind;
+        public bool IsDefault => _deviceManager?.Default?.Id == _device.Id;
+        public void NotifyIsDefaultChanged() => RaisePropertyChanged(nameof(IsDefault));
         public ObservableCollection<IAppItemViewModel> Apps { get; }
 
         public bool IsDisplayNameVisible
@@ -109,6 +113,7 @@ namespace EarTrumpet.UI.ViewModels
                 RaisePropertyChanged(nameof(DisplayName));
                 RaisePropertyChanged(nameof(AccessibleName));
             }
+            RaisePropertyChanged(nameof(IsDefault));
         }
 
         public override void UpdatePeakValueForeground()

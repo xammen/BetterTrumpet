@@ -4,12 +4,14 @@ using EarTrumpet.Interop.Helpers;
 using EarTrumpet.UI.Controls;
 using EarTrumpet.UI.ViewModels;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace EarTrumpet.UI.Views
 {
@@ -45,6 +47,76 @@ namespace EarTrumpet.UI.Views
                     App.Settings.SettingsWindowPlacement = placement;
                 }
             };
+
+            // Animate page content on page change
+            DataContextChanged += (s, ev) =>
+            {
+                if (ev.NewValue is SettingsViewModel vm)
+                {
+                    vm.PropertyChanged += OnSettingsViewModelPropertyChanged;
+                }
+            };
+        }
+
+        // ═══════════════════════════════════
+        // Page & Tab transition animations
+        // ═══════════════════════════════════
+
+        private static readonly CubicEase _easeOut = new CubicEase { EasingMode = EasingMode.EaseOut };
+
+        private void OnSettingsViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // Detect page change (sidebar navigation)
+            if (e.PropertyName == "Selected" || e.PropertyName == "Selected.Selected")
+            {
+                AnimatePageIn();
+            }
+        }
+
+        private void AnimatePageIn()
+        {
+            if (PageContent == null) return;
+
+            // Fade in + slight slide up (easing-entrance-ease-out)
+            PageContent.Opacity = 0;
+            PageContent.RenderTransform = new TranslateTransform(0, 12);
+
+            var fade = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(220))
+            {
+                EasingFunction = _easeOut
+            };
+            var slide = new DoubleAnimation(12, 0, TimeSpan.FromMilliseconds(220))
+            {
+                EasingFunction = _easeOut
+            };
+
+            PageContent.BeginAnimation(OpacityProperty, fade);
+            ((TranslateTransform)PageContent.RenderTransform).BeginAnimation(TranslateTransform.YProperty, slide);
+        }
+
+        private void AnimateTabIn(UIElement panel)
+        {
+            if (panel == null) return;
+
+            panel.Opacity = 0;
+            var fade = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(180))
+            {
+                EasingFunction = _easeOut
+            };
+            panel.BeginAnimation(OpacityProperty, fade);
+        }
+
+        private static FrameworkElement FindVisualChildByName(DependencyObject parent, string name)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is FrameworkElement fe && fe.Name == name)
+                    return fe;
+                var found = FindVisualChildByName(child, name);
+                if (found != null) return found;
+            }
+            return null;
         }
 
         private void OnWindowStateChanged(object sender, EventArgs e)
@@ -313,6 +385,14 @@ namespace EarTrumpet.UI.Views
                     colorsVm.UseCustomSliderColors = true;
                 }
                 colorsVm.SelectedTab = tab;
+
+                // Animate the newly visible tab panel (fade in)
+                // Tab panels are inside DataTemplate so we use Dispatcher to find them after visibility change
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    var panel = FindVisualChildByName(this, tab == 0 ? "TabPanelDynamic" : tab == 1 ? "TabPanelPresets" : "TabPanelCustom");
+                    AnimateTabIn(panel);
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
             }
         }
 

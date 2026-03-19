@@ -19,6 +19,28 @@ namespace EarTrumpet.UI.ViewModels
         public event EventHandler<object> StateChanged;
 
         public ModalDialogViewModel Dialog { get; }
+        public DevicePickerViewModel DevicePicker { get; }
+
+        private bool _isMixerTabActive = true;
+        public bool IsMixerTabActive
+        {
+            get => _isMixerTabActive;
+            set
+            {
+                if (_isMixerTabActive != value)
+                {
+                    _isMixerTabActive = value;
+                    RaisePropertyChanged(nameof(IsMixerTabActive));
+                    RaisePropertyChanged(nameof(IsDevicesTabActive));
+                    InvalidateWindowSize();
+                }
+            }
+        }
+        public bool IsDevicesTabActive => !_isMixerTabActive;
+
+        public ICommand SwitchToMixerTab { get; }
+        public ICommand SwitchToDevicesTab { get; }
+
         public bool IsExpanded { get; private set; }
         public bool IsExpandingOrCollapsing { get; private set; }
         public bool CanExpand => _mainViewModel.AllDevices.Count > 1;
@@ -95,6 +117,7 @@ private readonly Action _returnFocusToTray;
             _settings = settings;
             IsExpanded = _settings.IsExpanded;
             Dialog = new ModalDialogViewModel();
+            DevicePicker = new DevicePickerViewModel(mainViewModel);
             Devices = new ObservableCollection<DeviceViewModel>();
             _returnFocusToTray = returnFocusToTray;
             _mainViewModel = mainViewModel;
@@ -113,6 +136,8 @@ private readonly Action _returnFocusToTray;
                 BeginClose(LastInput);
             });
             TogglePin = new RelayCommand(() => IsPinned = !IsPinned);
+            SwitchToMixerTab = new RelayCommand(() => IsMixerTabActive = true);
+            SwitchToDevicesTab = new RelayCommand(() => IsMixerTabActive = false);
             DisplaySettingsChanged = new RelayCommand(() => BeginClose(InputType.Command));
 
             _mh = new MouseHook();
@@ -278,7 +303,7 @@ private readonly Action _returnFocusToTray;
             RaiseDevicesChanged();
         }
 
-        private void InvalidateWindowSize()
+        public void InvalidateWindowSize()
         {
             // We must be async because otherwise SetWindowPos will pump messages before the UI has updated.
             _currentDispatcher.BeginInvoke((Action)(() =>
