@@ -44,6 +44,12 @@ namespace EarTrumpet.DataModel
         private readonly Dispatcher _dispatcher;
         private LegacyMediaPlayerService _legacyService;
 
+        // Thumbnail cache — prevents redundant SMTC stream reads when multiple consumers
+        // request the thumbnail on the same track (MediaPopup, AlbumArt theme, PreloadThumbnail).
+        private BitmapImage _cachedThumbnail;
+        private bool _thumbnailDirty = true;
+        private readonly object _thumbnailLock = new object();
+
         /// <summary>
         /// Event fired when media playback state changes (play/pause/stop)
         /// </summary>
@@ -93,8 +99,6 @@ namespace EarTrumpet.DataModel
 
         private void OnLegacyPlaybackChanged(bool isPlaying)
         {
-            Trace.WriteLine($"MediaSessionService: Legacy playback changed - isPlaying={isPlaying}");
-            
             // Only use legacy if SMTC has no playing session
             if (!CheckIfAnyMediaPlaying())
             {
@@ -103,7 +107,6 @@ namespace EarTrumpet.DataModel
 
                 if (wasPlaying != _isMediaPlaying)
                 {
-                    Trace.WriteLine($"MediaSessionService: Using legacy player state: {_isMediaPlaying}");
                     _dispatcher.BeginInvoke(new Action(() =>
                     {
                         MediaPlaybackChanged?.Invoke(_isMediaPlaying);
@@ -117,7 +120,7 @@ namespace EarTrumpet.DataModel
             // Only use legacy if SMTC has no playing session
             if (!CheckIfAnyMediaPlaying())
             {
-                Trace.WriteLine("MediaSessionService: Legacy track changed");
+                _thumbnailDirty = true;
                 _dispatcher.BeginInvoke(new Action(() =>
                 {
                     MediaTrackChanged?.Invoke();
@@ -247,6 +250,8 @@ namespace EarTrumpet.DataModel
         private void OnMediaPropertiesChanged(GlobalSystemMediaTransportControlsSession sender, MediaPropertiesChangedEventArgs args)
         {
             Trace.WriteLine("MediaSessionService: Media properties changed (track change)");
+            // Invalidate thumbnail cache so next request fetches fresh art
+            _thumbnailDirty = true;
             _dispatcher.BeginInvoke(new Action(() =>
             {
                 MediaTrackChanged?.Invoke();
@@ -291,16 +296,10 @@ namespace EarTrumpet.DataModel
                         var playbackInfo = session.GetPlaybackInfo();
                         if (playbackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
                         {
-                            // Get source app info for debugging
-                            var sourceAppId = session.SourceAppUserModelId;
-                            Trace.WriteLine($"MediaSessionService: Media playing from {sourceAppId}");
                             return true;
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        Trace.WriteLine($"MediaSessionService: Error checking session - {ex.Message}");
-                    }
+                    catch { /* Session may have been disposed — skip silently */ }
                 }
             }
             catch (Exception ex)
@@ -492,70 +491,69 @@ namespace EarTrumpet.DataModel
         }
 
         /// <summary>
-        /// Gets the album art/thumbnail for the currently playing media
+        /// Gets the album art/thumbnail for the currently playing media.
+        /// Results are cached until the next track change to avoid redundant SMTC stream reads.
+        /// Thread-safe: multiple callers will wait for a single fetch, then share the result.
         /// </summary>
         public BitmapImage GetCurrentThumbnail()
+        {
+            // Fast path: return cached thumbnail if still valid
+            if (!_thumbnailDirty && _cachedThumbnail != null)
+                return _cachedThumbnail;
+
+            lock (_thumbnailLock)
+            {
+                // Double-check after acquiring lock (another thread may have fetched it)
+                if (!_thumbnailDirty && _cachedThumbnail != null)
+                    return _cachedThumbnail;
+
+                var result = FetchThumbnailCore();
+                _cachedThumbnail = result;
+                _thumbnailDirty = false;
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Core thumbnail fetching logic — expensive, only called when cache is dirty.
+        /// </summary>
+        private BitmapImage FetchThumbnailCore()
         {
             try
             {
                 var session = GetCurrentSession();
                 if (session == null)
-                {
-                    Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - No SMTC session, trying legacy...");
                     return GetLegacyPlayerIcon();
-                }
 
-                // Get media properties
+                // Get media properties (timeout 1.5s — reduced from 2s)
                 var propsOp = session.TryGetMediaPropertiesAsync();
                 var propsWait = new System.Threading.ManualResetEventSlim(false);
                 propsOp.Completed = (_, __) => propsWait.Set();
                 if (propsOp.Status == AsyncStatus.Started)
-                    propsWait.Wait(TimeSpan.FromMilliseconds(2000));
+                    propsWait.Wait(TimeSpan.FromMilliseconds(1500));
 
                 if (propsOp.Status != AsyncStatus.Completed)
-                {
-                    Trace.WriteLine($"MediaSessionService: GetCurrentThumbnail - Props failed: {propsOp.Status}");
                     return GetLegacyPlayerIcon();
-                }
 
                 var mediaProps = propsOp.GetResults();
-                if (mediaProps == null)
-                {
-                    Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - No media props");
+                if (mediaProps?.Thumbnail == null)
                     return GetLegacyPlayerIcon();
-                }
 
-                if (mediaProps.Thumbnail == null)
-                {
-                    Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - No thumbnail in props, trying legacy...");
-                    return GetLegacyPlayerIcon();
-                }
-
-                Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - Opening thumbnail stream...");
-
-                // Open the thumbnail stream
+                // Open the thumbnail stream (timeout 1.5s)
                 var streamOp = mediaProps.Thumbnail.OpenReadAsync();
                 var streamWait = new System.Threading.ManualResetEventSlim(false);
                 streamOp.Completed = (_, __) => streamWait.Set();
                 if (streamOp.Status == AsyncStatus.Started)
-                    streamWait.Wait(TimeSpan.FromMilliseconds(2000));
+                    streamWait.Wait(TimeSpan.FromMilliseconds(1500));
 
                 if (streamOp.Status != AsyncStatus.Completed)
-                {
-                    Trace.WriteLine($"MediaSessionService: GetCurrentThumbnail - Stream open failed: {streamOp.Status}");
                     return GetLegacyPlayerIcon();
-                }
 
                 var stream = streamOp.GetResults();
                 if (stream == null || stream.Size == 0)
-                {
-                    Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - Stream is null or empty");
                     return GetLegacyPlayerIcon();
-                }
 
-                Trace.WriteLine($"MediaSessionService: GetCurrentThumbnail - Stream size: {stream.Size}");
-
-                // Read the stream
+                // Read the stream (timeout 1.5s)
                 var size = (uint)stream.Size;
                 var buffer = new Windows.Storage.Streams.Buffer(size);
 
@@ -563,36 +561,30 @@ namespace EarTrumpet.DataModel
                 var readWait = new System.Threading.ManualResetEventSlim(false);
                 readOp.Completed = (_, __) => readWait.Set();
                 if (readOp.Status == AsyncStatus.Started)
-                    readWait.Wait(TimeSpan.FromMilliseconds(2000));
+                    readWait.Wait(TimeSpan.FromMilliseconds(1500));
 
                 if (readOp.Status != AsyncStatus.Completed)
-                {
-                    Trace.WriteLine($"MediaSessionService: GetCurrentThumbnail - Read failed: {readOp.Status}");
                     return GetLegacyPlayerIcon();
-                }
 
                 var readBuffer = readOp.GetResults();
                 if (readBuffer == null || readBuffer.Length == 0)
-                {
-                    Trace.WriteLine("MediaSessionService: GetCurrentThumbnail - readBuffer is null or empty");
                     return GetLegacyPlayerIcon();
-                }
-
-                Trace.WriteLine($"MediaSessionService: GetCurrentThumbnail - Read {readBuffer.Length} bytes");
 
                 var bytes = new byte[readBuffer.Length];
                 var dataReader = DataReader.FromBuffer(readBuffer);
                 dataReader.ReadBytes(bytes);
 
+                // Decode at reduced resolution — covers are displayed small, no need for full-res
                 using (var memStream = new MemoryStream(bytes))
                 {
                     var bitmap = new BitmapImage();
                     bitmap.BeginInit();
                     bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.DecodePixelWidth = 300; // Limit decode size — saves CPU+memory
                     bitmap.StreamSource = memStream;
                     bitmap.EndInit();
                     bitmap.Freeze();
-                    Trace.WriteLine($"MediaSessionService: GetCurrentThumbnail - Success: {bitmap.PixelWidth}x{bitmap.PixelHeight}");
+                    Trace.WriteLine($"MediaSessionService: Thumbnail fetched {bitmap.PixelWidth}x{bitmap.PixelHeight} from {bytes.Length} bytes");
                     return bitmap;
                 }
             }
@@ -627,7 +619,7 @@ namespace EarTrumpet.DataModel
                 if (string.IsNullOrEmpty(sourceAppId))
                     return null;
 
-                Trace.WriteLine($"MediaSessionService: GetLegacyPlayerIcon - SourceAppId: {sourceAppId}");
+                // sourceAppId used for player exe path lookup
 
                 // Try to get executable path from legacy service
                 var exePath = _legacyService?.GetPlayerExecutablePath(sourceAppId);
@@ -670,7 +662,7 @@ namespace EarTrumpet.DataModel
                         bitmap.EndInit();
                         bitmap.Freeze();
 
-                        Trace.WriteLine($"MediaSessionService: ExtractIconFromPath - Got icon from {exePath}");
+                        // Icon extracted from player exe
                         return bitmap;
                     }
                 }

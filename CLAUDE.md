@@ -6,7 +6,7 @@ BetterTrumpet is a fork of [EarTrumpet](https://github.com/File-New-Project/EarT
 
 - **Owner**: xammen
 - **Repo**: https://github.com/xammen/BetterTrumpet
-- **Current version**: 3.0.7
+- **Current version**: 3.0.9
 - **Language**: C# / WPF (.NET Framework 4.6.2)
 - **Build system**: MSBuild + GitVersion + Inno Setup
 - **Distribution**: GitHub Releases, Chocolatey, Winget
