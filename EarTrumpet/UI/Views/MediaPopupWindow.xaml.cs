@@ -969,18 +969,12 @@ namespace EarTrumpet.UI.Views
                 var collection = ((App)Application.Current).CollectionViewModel;
                 if (collection == null) return null;
 
-                // Try to get the source app ID from SMTC
+                // Get source app from cached MediaSessionService info (no async calls)
                 string sourceApp = null;
-                try
+                if (MediaSessionService.Instance.IsUsingLegacyPlayer)
                 {
-                    var sessions = Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager.RequestAsync();
-                    // Use cached info from MediaSessionService
-                    if (MediaSessionService.Instance.IsUsingLegacyPlayer)
-                    {
-                        sourceApp = MediaSessionService.Instance.LegacyPlayerName;
-                    }
+                    sourceApp = MediaSessionService.Instance.LegacyPlayerName;
                 }
-                catch { }
 
                 // Search through all devices and apps
                 foreach (var device in collection.AllDevices)

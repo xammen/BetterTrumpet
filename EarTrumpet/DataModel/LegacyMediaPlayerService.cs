@@ -61,8 +61,8 @@ namespace EarTrumpet.DataModel
             }
         }
 
-        private static readonly TimeSpan PollIntervalActive = TimeSpan.FromMilliseconds(500);
-        private static readonly TimeSpan PollIntervalIdle = TimeSpan.FromSeconds(5);
+        private static readonly TimeSpan PollIntervalActive = TimeSpan.FromSeconds(1);
+        private static readonly TimeSpan PollIntervalIdle = TimeSpan.FromSeconds(10);
         private int _idlePollCount;
 
         private readonly DispatcherTimer _pollTimer;
@@ -136,35 +136,23 @@ namespace EarTrumpet.DataModel
                 {
                     _idlePollCount = 0;
                     if (_pollTimer.Interval != PollIntervalActive)
-                    {
                         _pollTimer.Interval = PollIntervalActive;
-                        Trace.WriteLine("LegacyMediaPlayerService: Switched to active polling (500ms)");
-                    }
                 }
                 else
                 {
                     _idlePollCount++;
-                    // After 6 idle polls at active rate (3s), switch to slow polling
-                    if (_idlePollCount > 6 && _pollTimer.Interval != PollIntervalIdle)
-                    {
+                    // After 3 idle polls at active rate, switch to slow polling
+                    if (_idlePollCount > 3 && _pollTimer.Interval != PollIntervalIdle)
                         _pollTimer.Interval = PollIntervalIdle;
-                        Trace.WriteLine("LegacyMediaPlayerService: Switched to idle polling (5s)");
-                    }
                 }
 
                 // Playback state changed
                 if (wasPlaying != _isPlaying)
-                {
-                    Trace.WriteLine($"LegacyMediaPlayerService: State changed - IsPlaying={_isPlaying}, Player={_currentPlayerExeName}");
                     PlaybackChanged?.Invoke(_isPlaying);
-                }
 
                 // Player changed while playing
                 if (_isPlaying && previousPlayer != _currentPlayerExeName && previousPlayer != null)
-                {
-                    Trace.WriteLine($"LegacyMediaPlayerService: Player changed from {previousPlayer} to {_currentPlayerExeName}");
                     TrackChanged?.Invoke();
-                }
             }
             catch (Exception ex)
             {
@@ -209,7 +197,6 @@ namespace EarTrumpet.DataModel
                             isPlaying = true;
                             exeName = procExeName;
                             displayName = group.DisplayName;
-                            Trace.WriteLine($"LegacyMediaPlayerService: Found active player - {exeName} ({displayName})");
                             return;
                         }
                     }
