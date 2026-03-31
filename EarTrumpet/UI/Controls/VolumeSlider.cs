@@ -436,10 +436,11 @@ namespace EarTrumpet.UI.Controls
             var renderArgs = e as System.Windows.Media.RenderingEventArgs;
             var now = renderArgs != null ? renderArgs.RenderingTime : TimeSpan.FromTicks(DateTime.UtcNow.Ticks);
             var elapsed = (now - _lastRenderTime).TotalMilliseconds;
-            _lastRenderTime = now;
             
             // For peak meter updates, respect FPS limit
             // But always process volume animation for responsiveness
+            // Note: only update _lastRenderTime when we actually process peak meters,
+            // otherwise elapsed stays small and we skip most frames
             bool shouldUpdatePeakMeter = elapsed >= _frameInterval;
             
             // Track if we're actually doing any work this frame
@@ -447,7 +448,7 @@ namespace EarTrumpet.UI.Controls
             
             if (shouldUpdatePeakMeter)
             {
-                // _lastRenderTime already updated above
+                _lastRenderTime = now;
                 
                 // Check if peak meters need updating (non-zero targets or current values still animating down)
                 bool peakNeedsUpdate = _targetWidth1 > 0.1 || _targetWidth2 > 0.1 || 
@@ -514,7 +515,9 @@ namespace EarTrumpet.UI.Controls
             
             // Auto-stop animation loop when nothing needs animating
             // This saves significant CPU when the slider is idle
-            if (!didWork && !_isAnimatingValue && !_hasPeakActivity)
+            // Also keep running if there are non-zero targets (data arriving but FPS-skipped this frame)
+            bool hasActiveTargets = _targetWidth1 > 0.1 || _targetWidth2 > 0.1;
+            if (!didWork && !_isAnimatingValue && !_hasPeakActivity && !hasActiveTargets)
             {
                 StopAnimation();
             }
