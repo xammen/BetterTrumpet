@@ -12,7 +12,7 @@ namespace EarTrumpet.UI.Controls
     public class VolumeSlider : Slider
     {
         // Smoothing factor for peak meter: higher = faster response, lower = smoother (0.0 - 1.0)
-        private const double PeakSmoothingFactor = 0.15;
+        private const double PeakSmoothingFactor = 0.35;
         
         // Default smoothing factor for volume slider animation when clicking on track
         // Lower = slower/smoother animation, Higher = faster (0.0 - 1.0)
@@ -441,7 +441,10 @@ namespace EarTrumpet.UI.Controls
             // But always process volume animation for responsiveness
             // Note: only update _lastRenderTime when we actually process peak meters,
             // otherwise elapsed stays small and we skip most frames
-            bool shouldUpdatePeakMeter = elapsed >= _frameInterval;
+            // Use 0.8x tolerance to avoid skipping frames due to float precision
+            // (at 60fps vsync, elapsed ≈ 16.67ms and _frameInterval = 16.67ms — without
+            // tolerance, half the frames get skipped due to timing jitter)
+            bool shouldUpdatePeakMeter = elapsed >= _frameInterval * 0.8;
             
             // Track if we're actually doing any work this frame
             bool didWork = false;
