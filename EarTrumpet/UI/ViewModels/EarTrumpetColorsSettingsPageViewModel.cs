@@ -387,33 +387,65 @@ namespace EarTrumpet.UI.ViewModels
         }
 
         // ═══════════════════════════════════
-        // Album art theme monitoring
+        // Album art theme monitoring — event-driven via MediaTrackChanged
         // ═══════════════════════════════════
-        private DispatcherTimer _albumArtTimer;
+        private DispatcherTimer _albumArtDebounceTimer;
+        private bool _albumArtMonitoring;
 
         private void StartAlbumArtThemeMonitoring()
         {
-            if (_albumArtTimer != null) return;
+            if (_albumArtMonitoring) return;
+            _albumArtMonitoring = true;
 
-            _albumArtTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
-            _albumArtTimer.Tick += OnAlbumArtTimerTick;
-            _albumArtTimer.Start();
+            // Debounce timer — waits 500ms after track change before fetching thumbnail.
+            // Prevents redundant work when multiple events fire in quick succession.
+            _albumArtDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+            _albumArtDebounceTimer.Tick += OnAlbumArtDebounceTick;
 
-            // Also do an immediate check
-            OnAlbumArtTimerTick(null, EventArgs.Empty);
+            // Subscribe to track change events instead of polling
+            MediaSessionService.Instance.MediaTrackChanged += OnAlbumArtTrackChanged;
+            MediaSessionService.Instance.MediaPlaybackChanged += OnAlbumArtPlaybackChanged;
+
+            // Do an immediate check for current track
+            OnAlbumArtDebounceTick(null, EventArgs.Empty);
         }
 
         private void StopAlbumArtThemeMonitoring()
         {
-            _albumArtTimer?.Stop();
-            _albumArtTimer = null;
+            if (!_albumArtMonitoring) return;
+            _albumArtMonitoring = false;
+
+            _albumArtDebounceTimer?.Stop();
+            _albumArtDebounceTimer = null;
+
+            MediaSessionService.Instance.MediaTrackChanged -= OnAlbumArtTrackChanged;
+            MediaSessionService.Instance.MediaPlaybackChanged -= OnAlbumArtPlaybackChanged;
         }
 
-        private void OnAlbumArtTimerTick(object sender, EventArgs e)
+        private void OnAlbumArtTrackChanged()
         {
+            // Restart debounce timer — collapses rapid track changes into one fetch
+            _albumArtDebounceTimer?.Stop();
+            _albumArtDebounceTimer?.Start();
+        }
+
+        private void OnAlbumArtPlaybackChanged(bool isPlaying)
+        {
+            // When playback starts (e.g. resume), refresh theme in case track changed while paused
+            if (isPlaying)
+            {
+                _albumArtDebounceTimer?.Stop();
+                _albumArtDebounceTimer?.Start();
+            }
+        }
+
+        private void OnAlbumArtDebounceTick(object sender, EventArgs e)
+        {
+            _albumArtDebounceTimer?.Stop(); // One-shot — fires once per track change
+
             if (!_settings.UseDynamicAlbumArtTheme || !_settings.UseCustomSliderColors) return;
 
-            // GetCurrentThumbnail() blocks for up to 6s (SMTC async waits) — must run off UI thread
+            // GetCurrentThumbnail uses cache so this is cheap if already fetched by MediaPopup
             System.Threading.Tasks.Task.Run(() =>
             {
                 try
@@ -455,7 +487,7 @@ namespace EarTrumpet.UI.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine($"EarTrumpetColorsSettingsPageViewModel: Album art theme tick failed - {ex.Message}");
+                    Trace.WriteLine($"EarTrumpetColorsSettingsPageViewModel: Album art theme update failed - {ex.Message}");
                 }
             });
         }
@@ -1222,7 +1254,7 @@ namespace EarTrumpet.UI.ViewModels
             }
 
             // Restart album art monitoring if enabled
-            if (_settings.UseDynamicAlbumArtTheme && _albumArtTimer == null)
+            if (_settings.UseDynamicAlbumArtTheme && !_albumArtMonitoring)
             {
                 StartAlbumArtThemeMonitoring();
             }
