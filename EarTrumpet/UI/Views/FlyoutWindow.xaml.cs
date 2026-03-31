@@ -181,19 +181,15 @@ else
             }
 
             var workingAreaHeight = Math.Abs(adjustedWorkingAreaTop - adjustedWorkingAreaBottom) - (yOffset * 2);
+
+            // Round up to avoid sub-pixel scrollbar from DPI rounding.
+            // e.g. content = 523.7 DIPs × 1.25 DPI = 654.625 → truncated to 654 pixels
+            // → WPF sees 523.2 DIPs → 0.5 DIP overflow → phantom scrollbar.
+            flyoutHeight = Math.Ceiling(flyoutHeight);
+
             if (flyoutHeight > workingAreaHeight)
             {
                 flyoutHeight = workingAreaHeight;
-
-                // Constrain the ScrollViewer so WPF knows it must scroll.
-                // Without this, the StackPanel gives infinite height, content extends
-                // beyond the Win32 window, and the bottom goes blank (GitHub #3).
-                BaseVisual.MaxHeight = workingAreaHeight / this.DpiY();
-            }
-            else
-            {
-                // Content fits — no constraint, no scrollbar.
-                BaseVisual.MaxHeight = double.PositiveInfinity;
             }
 
             double top = 0;
@@ -218,6 +214,13 @@ else
                     break;
             }
             this.SetWindowPos(top, left, flyoutHeight, flyoutWidth);
+
+            // Sync WPF Height with the Win32 window size so the ScrollViewer
+            // knows the actual available space and can scroll properly (GitHub #3).
+            // SetWindowPos bypasses WPF, so without this WPF may think it has more
+            // space than it actually does → content renders past the window → blank.
+            Height = flyoutHeight / this.DpiY();
+
             _viewModel.UpdateWindowPos(top, left, flyoutHeight, flyoutWidth);
         }
 
