@@ -68,7 +68,7 @@ namespace EarTrumpet.UI.Helpers
                 // Use Background priority so peak meters and UI input aren't starved
                 _animationTimer = new DispatcherTimer(DispatcherPriority.Background)
                 {
-                    Interval = TimeSpan.FromMilliseconds(80) // ~12 fps — sufficient for tray icon, saves UI thread
+                    Interval = TimeSpan.FromMilliseconds(150) // ~7 fps — tray icons are tiny, 12fps was overkill
                 };
                 _animationTimer.Tick += OnAnimationTick;
 
