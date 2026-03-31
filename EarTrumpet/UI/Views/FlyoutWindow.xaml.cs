@@ -184,6 +184,16 @@ else
             if (flyoutHeight > workingAreaHeight)
             {
                 flyoutHeight = workingAreaHeight;
+
+                // Constrain the ScrollViewer so WPF knows it must scroll.
+                // Without this, the StackPanel gives infinite height, content extends
+                // beyond the Win32 window, and the bottom goes blank (GitHub #3).
+                BaseVisual.MaxHeight = workingAreaHeight / this.DpiY();
+            }
+            else
+            {
+                // Content fits — no constraint, no scrollbar.
+                BaseVisual.MaxHeight = double.PositiveInfinity;
             }
 
             double top = 0;
