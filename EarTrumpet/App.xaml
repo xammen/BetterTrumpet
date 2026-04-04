@@ -113,8 +113,10 @@
             <Thickness x:Key="NoItemsPaneMargin">24</Thickness>
             <bcl:Double x:Key="MutedOpacity">0.4</bcl:Double>
 
-            <bcl:String x:Key="EarTrumpetIconLight">pack://application:,,,/EarTrumpet;component/Assets/Icon-Light.ico</bcl:String>
-            <bcl:String x:Key="EarTrumpetIconDark">pack://application:,,,/EarTrumpet;component/Assets/Icon-Dark.ico</bcl:String>
+            <bcl:String x:Key="EarTrumpetIconLight">pack://application:,,,/Assets/BetterTrumpet.ico</bcl:String>
+            <bcl:String x:Key="EarTrumpetIconDark">pack://application:,,,/Assets/BetterTrumpet.ico</bcl:String>
+            <bcl:String x:Key="EarTrumpetLegacyIconLight">pack://application:,,,/Assets/EarTrumpet-Legacy-Light.ico</bcl:String>
+            <bcl:String x:Key="EarTrumpetLegacyIconDark">pack://application:,,,/Assets/EarTrumpet-Legacy-Dark.ico</bcl:String>
 
             <Style x:Key="Windows10FocusVisualStyle">
                 <Setter Property="Control.Template">
