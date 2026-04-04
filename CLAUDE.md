@@ -6,7 +6,7 @@ BetterTrumpet is a fork of [EarTrumpet](https://github.com/File-New-Project/EarT
 
 - **Owner**: xammen
 - **Repo**: https://github.com/xammen/BetterTrumpet
-- **Current version**: 3.0.9
+- **Current version**: 3.0.10
 - **Language**: C# / WPF (.NET Framework 4.6.2)
 - **Build system**: MSBuild + GitVersion + Inno Setup
 - **Distribution**: GitHub Releases, Chocolatey, Winget
@@ -146,7 +146,7 @@ All user-facing strings use `.resx` resources:
 `EarTrumpetColorsSettingsPageViewModel.cs`:
 - 7 color channels: slider thumb, fill, track bg, peak meter, window bg, text, accent glow
 - 28 built-in presets in 7 categories
-- Dynamic Album Art mode (timer-based, disabled when selecting a preset)
+- Dynamic Album Art mode (event-driven via MediaTrackChanged, debounced 500ms — was timer-based before v3.0.9)
 - Save/load/delete custom themes
 - Export/import as `.bttheme` JSON
 

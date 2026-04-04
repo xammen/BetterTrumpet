@@ -45,7 +45,7 @@ namespace EarTrumpet.UI.Helpers
             _collection = collection;
             _settings = settings;
 
-            _settings.UseLegacyIconChanged += (_, __) => CheckForUpdate();
+            _settings.UseLegacyIconChanged += (_, __) => OnLegacyIconChanged();
             collection.TrayPropertyChanged += OnTrayPropertyChanged;
 
             InitializeAnimation();
@@ -89,6 +89,30 @@ namespace EarTrumpet.UI.Helpers
             }
         }
 
+        private void OnLegacyIconChanged()
+        {
+            try
+            {
+                if (_settings.UseLegacyIcon)
+                {
+                    // Legacy icon doesn't animate — stop animation and force refresh
+                    StopAnimation();
+                }
+                else if (MediaSessionService.Instance.IsMediaPlaying && _volumeIconGenerator != null)
+                {
+                    // Switched back to modern icon while music is playing — restart animation
+                    StartAnimation();
+                    return;
+                }
+                _hash = null; // Force refresh
+                CheckForUpdate();
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"TaskbarIconSource OnLegacyIconChanged error: {ex.Message}");
+            }
+        }
+
         private void OnMediaPlaybackChanged(bool isPlaying)
         {
             Trace.WriteLine($"TaskbarIconSource: Media playback changed - isPlaying={isPlaying}");
@@ -105,7 +129,7 @@ namespace EarTrumpet.UI.Helpers
 
         private void StartAnimation()
         {
-            if (_isAnimating || _volumeIconGenerator == null) return;
+            if (_isAnimating || _volumeIconGenerator == null || _settings.UseLegacyIcon) return;
 
             _isAnimating = true;
             _currentFrame = 0;
@@ -138,7 +162,6 @@ namespace EarTrumpet.UI.Helpers
 
                 if (frame != null)
                 {
-                    // Dispose old icon
                     var oldIcon = Current;
 
                     Current = frame;
@@ -146,7 +169,7 @@ namespace EarTrumpet.UI.Helpers
                     // Notify the shell
                     Changed?.Invoke(this);
 
-                    // Dispose old
+                    // Frames are clones, safe to dispose
                     oldIcon?.Dispose();
                 }
             }
@@ -191,11 +214,10 @@ namespace EarTrumpet.UI.Helpers
             {
                 Trace.WriteLine($"TaskbarIconSource Changed: {nextHash}");
                 _hash = nextHash;
-                using (var old = Current)
-                {
-                    Current = ApplyUpdateBadge(SelectAndLoadIcon(_kind));
-                    Changed?.Invoke(this);
-                }
+                var old = Current;
+                Current = ApplyUpdateBadge(SelectAndLoadIcon(_kind));
+                Changed?.Invoke(this);
+                old?.Dispose();
             }
         }
 
@@ -210,12 +232,8 @@ namespace EarTrumpet.UI.Helpers
 
         private Icon SelectAndLoadIcon(IconKind kind)
         {
-            if (_settings.UseLegacyIcon)
-            {
-                kind = IconKind.EarTrumpet;
-            }
-
             // Use our custom generated icon for speaker states (with waves visible)
+            // Skip when legacy icon is enabled — fall through to system SndVolSSO icons
             if (_volumeIconGenerator != null && !_settings.UseLegacyIcon)
             {
                 bool isLightTheme = SystemSettings.IsSystemLightTheme;
