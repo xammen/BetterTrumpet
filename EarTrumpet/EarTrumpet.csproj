@@ -557,6 +557,8 @@
     <Resource Include="Assets\Logo-Dark.png" />
     <Resource Include="Assets\Logo-Light.png" />
     <Resource Include="Assets\Icon-Dark.ico" />
+    <Resource Include="Assets\EarTrumpet-Legacy-Dark.ico" />
+    <Resource Include="Assets\EarTrumpet-Legacy-Light.ico" />
     <Resource Include="Assets\Welcome.gif" />
     <Resource Include="Assets\TrayPin.gif" />
     <Resource Include="Assets\icon.png" />
