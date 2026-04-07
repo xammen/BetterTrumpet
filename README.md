@@ -1,10 +1,8 @@
 <p align="center">
-  <code>♬⋆.˚ ✩°｡⋆⸜ 🎺</code>
+  <code>♬⋆.˚ ✩°｡⋆⸜ 🎺 ⸝⋆｡°✩ ˚.⋆♬</code>
 </p>
 
----
-
-<h1 align="center">✩°｡⋆⸜ BetterTrumpet ⸝⋆｡°✩</h1>
+<h1 align="center">BetterTrumpet</h1>
 
 <p align="center">
   <a href="https://bettertrumpet.hiii.boo">
@@ -22,481 +20,215 @@
 </p>
 
 <p align="center">
-  <i>windows volume control that doesn't suck</i>
-  <br/>
-  <i>fork of eartrumpet with extra everything ˚ʚ♡ɞ˚</i>
+  <i>Windows volume control that actually feels good to use.</i><br/>
+  <i>A polished fork of EarTrumpet with better onboarding, themes, media controls, profiles, auto-updates, and a CLI that speaks JSON.</i>
+</p>
+
+<p align="center">
+  <a href="#install">Install</a> ·
+  <a href="#highlights">Highlights</a> ·
+  <a href="#cli">CLI</a> ·
+  <a href="#build-from-source">Build</a> ·
+  <a href="#license">License</a>
 </p>
 
 ---
 
-## ✦ what is this?
+## What it is
 
-windows volume mixer is ugly and limited. eartrumpet fixed that. we made it better.
+BetterTrumpet keeps the part that mattered from EarTrumpet: fast per-app audio control.
+Then it adds the polish and automation that Windows should have had in the first place.
 
-custom themes. smooth animations. media popup. volume profiles. undo/redo. CLI. 19 hotkeys. and a changelog window with a shimmer effect because we care about the little things.
-
-```
-                    ┌─────────────────┐
-   system tray  ──► │  ♬⋆.˚ 🎺 ˚.⋆♬   │  ──►  per-app volume
-                    │  BetterTrumpet  │  ──►  custom colors
-                    └─────────────────┘  ──►  media controls
-                                        ──►  volume profiles
-                                        ──►  CLI control
-```
-
----
-
-## ⋆˚✿˖° features
-
-### core (inherited from eartrumpet)
-
-| feature | |
-|---------|---|
-| per-app volume control | ✓ |
-| move apps between devices | ✓ |
-| default device management | ✓ |
-| multi-channel peak metering | ✓ |
-| light/dark mode support | ✓ |
-| configurable hotkeys | ✓ |
-| multilingual (20+ languages) | ✓ |
-
-### ˚₊‧꒰ა new in bettertrumpet v3 ໒꒱ ‧₊˚
-
-| feature | |
-|---------|---|
-| 🎓 premium onboarding wizard | ✓ |
-| 🎨 full theme engine (7 color channels) | ✓ |
-| ↩️ undo / redo volume changes | ✓ |
-| 📌 pin flyout (stays open) | ✓ |
-| 🔄 auto update notifications | ✓ |
-| 🎚️ volume profiles (save/restore/export) | ✓ |
-| ⌨️ quick switch device hotkey | ✓ |
-| 🎵 media popup on tray hover | ✓ |
-| ⚡ CLI with 19 commands | ✓ |
-| 🛡️ crash protection (sentry + health monitor) | ✓ |
-| 🌿 eco mode (battery saver) | ✓ |
-| 🎞️ configurable animations | ✓ |
-| 📦 export / import all settings | ✓ |
-| 📋 what's new changelog window | ✓ |
-
----
-
-## ✩₊˚.⋆ premium onboarding ˚˖𓍢ִ🎓
-
-5-page welcome wizard that actually looks good.
-
-```
-  ╭─────────────────────────────────╮
-  │  ▬▬▬▬▬▬▬▬▬▬░░░░░░░░░░   2/5   │
-  │                                 │
-  │  🎵  Sortie audio               │
-  │                                 │
-  │  ┌──────────────────────────┐   │
-  │  │ 🔊  Speakers (Realtek)  ●│   │
-  │  │     ▌▌▌▌▌▐               │   │
-  │  ├──────────────────────────┤   │
-  │  │ 🎧  Headphones (USB)    ○│   │
-  │  └──────────────────────────┘   │
-  │                                 │
-  │  ◄ Retour            Suivant ► │
-  ╰─────────────────────────────────╯
+```text
+system tray -> BetterTrumpet -> per-app volume
+                           ├── themes
+                           ├── media popup
+                           ├── profiles
+                           ├── undo / redo
+                           └── CLI / updates
 ```
 
-- dark theme matching the app (dona-inspired, `#101014` background, blue accent)
-- progress bar at the top
-- 5 pages: welcome → audio device → appearance → privacy → ready
-- live VU meters on device cards
-- theme preview with mini mixer bars
-- toggle switches for telemetry & startup (no dark pattern — inline reassuring text)
-- staggered checkmarks + confetti on the final page
-- slide transitions between pages
+## Install
 
----
+| Method | Best for |
+| --- | --- |
+| GitHub Releases | The quickest install or the portable zip |
+| Winget | People who prefer the Windows package manager |
+| Chocolatey | Existing Chocolatey users |
+| Build from source | Contributors and local testing |
 
-## ✩₊˚.⋆ media popup ˚˖𓍢ִ໋🎧✧
+### Release
+Download the latest installer or portable build from GitHub Releases.
 
-hover over the tray icon → beautiful floating media player appears
-
-```
-  ╭─────────────────────────────────────╮
-  │                                     │
-  │   ┌─────────────────────────────┐   │
-  │   │     ┌───────────────┐       │   │
-  │   │     │   ♪ ♫ ♪ ♫     │       │   │
-  │   │     │   album art   │       │   │
-  │   │     │   (blurred)   │       │   │
-  │   │     └───────────────┘       │   │
-  │   │                             │   │
-  │   │     ♪ song title ♪          │   │
-  │   │     ━━━━━━━━━━━○────────    │   │
-  │   │     0:42 / 3:21             │   │
-  │   │                             │   │
-  │   │      ⟲   ⏮  ▶  ⏭   ⟳       │   │
-  │   └─────────────────────────────┘   │
-  │                                     │
-  ╰─────────────────────────────────────╯
+### Winget
+```powershell
+winget install --id xmn.BetterTrumpet
 ```
 
-- album art background with configurable blur (0–30px)
-- track progress bar (clickable seek!)
-- shuffle & repeat controls
-- smooth pop-in/pop-out animations
-- expandable cover art view
-- color glow that adapts to album art
-- configurable hover delay (0.5–5s)
-- option to show only when music is playing
-
----
-
-## ✩₊˚.⋆ theme engine 🎨
-
-7 color channels, saved themes, and a dynamic album art mode.
-
-```
-  ┌─────────────────────────────────────────────────────┐
-  │                                                     │
-  │   ✦ slider thumb         your volume knob color     │
-  │   ✦ track fill           filled portion             │
-  │   ✦ track background     empty portion              │
-  │   ✦ peak meter           audio level indicator      │
-  │   ✦ window background    flyout bg color            │
-  │   ✦ text                 label color                │
-  │   ✦ accent glow          glow around elements       │
-  │                                                     │
-  │   presets: cyberpunk, ocean, sunset, forest,         │
-  │           neon, monochrome, or pick your own ˚ʚ♡ɞ˚  │
-  │                                                     │
-  │   ✦ dynamic album art mode: theme adapts to         │
-  │     whatever album art is currently playing          │
-  │                                                     │
-  └─────────────────────────────────────────────────────┘
+### Chocolatey
+```powershell
+choco install bettertrumpet
 ```
 
-save unlimited custom themes. switch between them instantly.
+### Source
+Build the app as x86 Release.
 
----
-
-## ✩₊˚.⋆ undo / redo ↩️
-
-accidentally changed volume? ctrl+z to undo, ctrl+y to redo.
-
-works for all slider changes across all apps and devices. stores a history stack so you can go back multiple steps.
-
----
-
-## ✩₊˚.⋆ pin flyout 📌
-
-click the pin icon (or ctrl+P) to keep the volume flyout open while you work.
-
-no more clicking the tray icon every time you need to adjust something. pin it, leave it, adjust freely.
-
----
-
-## ✩₊˚.⋆ volume profiles 🎚️
-
-save your entire audio setup as a profile. restore it with one click.
-
-```
-  ╭─────────────────────────────────╮
-  │  Volume Profiles                │
-  │                                 │
-  │  ┌──────────────────────────┐   │
-  │  │ 🎮  Gaming              │   │
-  │  │    Discord 80%, Game 100% │  │
-  │  ├──────────────────────────┤   │
-  │  │ 🎵  Music                │   │
-  │  │    Spotify 90%, All 40%  │   │
-  │  ├──────────────────────────┤   │
-  │  │ 💼  Work                 │   │
-  │  │    Teams 100%, All 30%   │   │
-  │  └──────────────────────────┘   │
-  │                                 │
-  │  [ Capture ]  [ Apply ]         │
-  ╰─────────────────────────────────╯
+```powershell
+git clone https://github.com/xammen/BetterTrumpet
+nuget.exe restore EarTrumpet.vs15.sln
+& "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" EarTrumpet\EarTrumpet.csproj /p:Configuration=Release /p:Platform=x86 /p:OutputPath=..\Build\Release /t:Rebuild /v:minimal
 ```
 
-- capture current state of all devices and apps
-- apply profiles instantly
-- rename, delete, reorder
-- export/import as `.btprofile` files
-- accessible from settings UI and CLI
+## First Run
 
----
+1. Launch BetterTrumpet.
+2. Click the tray icon to open the volume flyout.
+3. Hover the tray icon for the media popup.
+4. Right-click for settings and device switching.
+5. Use `Ctrl+P` to pin the flyout.
+6. Use `Ctrl+Z` / `Ctrl+Y` to undo and redo volume changes.
 
-## ✩₊˚.⋆ quick switch device ⌨️
+## Highlights
 
-new hotkey to instantly cycle through your playback devices.
+| Area | What you get |
+| --- | --- |
+| Onboarding | 6-page setup flow for audio, appearance, privacy, ready, and tray pinning |
+| Themes | 7 color channels, presets, custom themes, and dynamic album-art mode |
+| Media popup | Hover player with cover art, seek, shuffle, repeat, and blur |
+| Profiles | Save, restore, export, import, rename, and apply full audio setups |
+| Control | Undo/redo for volume changes, plus a pin mode for the flyout |
+| Automation | Pipe-based CLI with JSON output for scripts and hotkeys |
+| Reliability | Auto-update prompts, crash reporting, and background health monitoring |
+| Performance | Eco mode trims animations and peak meter FPS when you want it lighter |
+| Tray icon | Animated state that reflects audio activity |
 
-set it in settings → shortcuts. press the hotkey and it jumps to the next device. wraps around. that's it.
+## Themes
 
-no more right-clicking the tray, scrolling through a list, clicking the right one. one key. done.
+Three looks, same controls, same workflow.
 
----
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="assets/Windows.png" alt="Windows theme preview" width="240" />
+        <br />
+        <sub>Windows</sub>
+        <br />
+        <sub>Clean, calm, and close to the system look.</sub>
+      </td>
+      <td align="center">
+        <img src="assets/Spotify.png" alt="Spotify theme preview" width="240" />
+        <br />
+        <sub>Spotify</sub>
+        <br />
+        <sub>Brighter accents with a music-first feel.</sub>
+      </td>
+      <td align="center">
+        <img src="assets/pixel.png" alt="Pixel theme preview" width="240" />
+        <br />
+        <sub>Pixel</sub>
+        <br />
+        <sub>Low-key, chunky, and a bit retro.</sub>
+      </td>
+    </tr>
+  </table>
+</div>
 
-## ✩₊˚.⋆ update notifications 🔄
+Pick the look that fits your setup, or switch when the mood changes.
 
-automatic update checking with visual indicators everywhere.
+## CLI
 
-- **tray badge**: small dot on the tray icon when update available
-- **flyout banner**: banner at the top of the volume flyout
-- **context menu**: "Mettre à jour (vX.Y.Z)" entry in right-click menu
-- **configurable channels**: all updates, minor+major only, major only, or none
-- check manually from settings or CLI
+BetterTrumpet exposes a pipe-based CLI. Commands return JSON, and the app must be running for remote commands to work.
 
----
-
-## ✩₊˚.⋆ CLI interface ⚡
-
-19 commands to control everything from the terminal.
-
-```bash
-# volume control
-bettertrumpet set-volume 75
-bettertrumpet get-volume
-bettertrumpet mute
-bettertrumpet unmute
-bettertrumpet toggle-mute
-
-# devices
-bettertrumpet list-devices
-bettertrumpet get-default
-bettertrumpet set-default <id>
-
-# apps
-bettertrumpet list-apps
-bettertrumpet set-app-volume <name> <volume>
-
-# profiles
-bettertrumpet list-profiles
-bettertrumpet apply-profile <name>
-bettertrumpet capture-profile <name>
-
-# settings export/import
-bettertrumpet export-settings [path]
-bettertrumpet import-settings <path>
-
-# updates
-bettertrumpet check-update
-
-# system
-bettertrumpet status
-bettertrumpet version
+```powershell
+BetterTrumpet.exe --list-devices
+BetterTrumpet.exe --set-volume 75
+BetterTrumpet.exe --set-volume +10 --app spotify
+BetterTrumpet.exe --mute --device "Speakers"
+BetterTrumpet.exe --set-default "Headphones"
+BetterTrumpet.exe --set-device spotify.exe "Headphones"
+BetterTrumpet.exe --apply-profile "Night Mode"
 ```
 
-pipe-based IPC — CLI sends commands to the running instance. works from any terminal.
+| Area | Commands |
+| --- | --- |
+| Devices | `--list-devices`, `--list-apps`, `--get-volume`, `--set-volume`, `--mute`, `--unmute`, `--toggle-mute` |
+| Routing | `--get-default`, `--set-default`, `--set-device` |
+| Profiles | `--list-profiles`, `--apply-profile` |
+| Automation | `--watch`, `--ping`, `--check-update`, `--export-settings`, `--import-settings` |
+| Help | `--version`, `--help` |
 
----
+## Settings
 
-## ✩₊˚.⋆ export / import settings 📦
+| Page | What it controls |
+| --- | --- |
+| Shortcuts | Flyout, mixer, settings, volume up/down, device switch |
+| Mouse | Tray icon scroll behavior |
+| Community | Telemetry and logarithmic volume |
+| Legacy | Legacy icon and compatibility options |
+| About | Version, diagnostics, export/import settings |
+| Animations | Motion speed, peak meter FPS, eco mode |
+| Colors | Theme engine, presets, custom themes |
+| Media popup | Hover delay, blur radius, show only while playing |
+| Volume profiles | Save, restore, rename, delete, export/import |
 
-backup and restore your entire configuration.
+### Hotkeys
 
-- exports everything: themes, hotkeys, media popup settings, volume profiles, eco mode, animations, update preferences
-- saves as `.btsettings` (readable JSON)
-- import from file to restore on a new machine
-- available from settings (About page) and CLI
-- skips `RunAtStartup` on import for security
+| Shortcut | Action |
+| --- | --- |
+| `Ctrl+Z` | Undo last volume change |
+| `Ctrl+Y` | Redo last volume change |
+| `Ctrl+P` | Pin / unpin the flyout |
+| configurable | Open flyout, mixer, settings, or switch device |
 
----
+## Onboarding
 
-## ✩₊˚.⋆ what's new changelog 📋
+The onboarding wizard has 6 pages:
 
-after a version update, a "Quoi de neuf" window shows what changed.
+- Welcome
+- Audio
+- Appearance
+- Privacy
+- Ready
+- Tray pin
 
-- dark themed window matching the app (same design language as onboarding)
-- categorized layout: hero feature → audio control → experience → under the hood
-- 2×2 feature cards with icons
-- staggered fade-in animations on load
-- subtle shimmer on the title (single pass, not a loop — we're not aliexpress)
-- doesn't show on first run (onboarding handles that)
-- only shows once per version
+It also covers telemetry, update channels, and startup preferences during setup.
 
----
+## Build From Source
 
-## ✩₊˚.⋆ crash protection & telemetry 🛡️
-
-- **sentry integration** with GDPR-compliant DSN
-- **crash handler** that catches unhandled exceptions
-- **health monitor** running in background
-- **structured logging** throughout the app
-- telemetry is opt-out (default on outside EU, off inside EU — automatic geo detection)
-- no personal data collected, ever
-
----
-
-## ✩₊˚.⋆ eco mode 🌿
-
-reduce CPU/GPU usage when you don't need the eye candy.
-
-| mode | behavior |
-|------|----------|
-| eco mode | reduces peak meter FPS to 20, limits animations |
-| auto eco | automatically activates eco mode on battery power |
-
-manual toggle in settings, or let auto-eco handle it.
-
----
-
-## ✩₊˚.⋆ animated tray icon 🎵
-
-the tray icon comes alive when music is playing!
-
-```
-  ┌────────────────────────────────────┐
-  │                                    │
-  │     static     →    animated       │
-  │                                    │
-  │      🔊        →    🎵 ♪ ♫         │
-  │                                    │
-  │   (no audio)   →  (music playing)  │
-  │                                    │
-  └────────────────────────────────────┘
+```powershell
+nuget.exe restore EarTrumpet.vs15.sln
+& "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" EarTrumpet\EarTrumpet.csproj /p:Configuration=Release /p:Platform=x86 /p:OutputPath=..\Build\Release /t:Rebuild /v:minimal
+powershell -ExecutionPolicy Bypass -File build-portable.ps1
+& 'C:\Users\xammen\AppData\Local\Programs\Inno Setup 6\ISCC.exe' installer.iss
 ```
 
-- dynamic vector-based speaker icon
-- sound waves animate with audio peaks
-- seamlessly toggles based on media state
+## Supported Systems
 
----
+| OS | Status |
+| --- | --- |
+| Windows 10 (1803+) | Supported |
+| Windows 11 | Supported |
 
-## ✩₊˚.⋆ installation
+## Tech Stack
 
-```
-  ┌────────────────────────────────────────────────────┐
-  │                                                    │
-  │   ✦ option 1: download release                     │
-  │      github.com/xammen/BetterTrumpet/releases      │
-  │                                                    │
-  │   ✦ option 2: build from source                    │
-  │      git clone https://github.com/xammen/BetterTrumpet │
-  │      open EarTrumpet.vs15.sln in visual studio     │
-  │      build & run                                   │
-  │                                                    │
-  │   done ♬⋆.˚ ✩°｡⋆⸜ 🎺                               │
-  │                                                    │
-  └────────────────────────────────────────────────────┘
-```
+| Area | Stack |
+| --- | --- |
+| Language | C# / WPF |
+| Framework | .NET Framework 4.6.2 |
+| Audio | Windows Core Audio |
+| Media | Windows Media Session |
+| Packaging | MSBuild + GitVersion + Inno Setup + portable zip |
+| CLI | Named pipe IPC |
+| Crash reporting | Sentry |
 
----
+## Credits
 
-## ₊˚⊹♡ usage
+Based on [EarTrumpet](https://github.com/File-New-Project/EarTrumpet) by David Golden, Rafael Rivera, and Dave Amenta.
 
-1. launch bettertrumpet
-2. click the tray icon → volume flyout
-3. adjust volume per app
-4. right-click for settings & device switching
-5. **hover** the tray icon for media controls
-6. **pin** the flyout to keep it open (ctrl+P)
-7. **ctrl+Z / ctrl+Y** to undo/redo volume changes
+## License
 
-```
-  ╭─────────────────────╮
-  │ 📌  pinned           │
-  │ ♪ spotify     ████░░ │
-  │ ♪ discord     ██████ │
-  │ ♪ chrome      ███░░░ │
-  ├─────────────────────┤
-  │ ♬ master      █████░ │
-  ├─────────────────────┤
-  │ 🔄 Update available  │
-  ╰─────────────────────╯
-```
-
----
-
-## ⸝⸝˚⋆ settings
-
-right-click tray icon → settings
-
-organized in two categories:
-
-### general
-| page | what it does |
-|------|-------------|
-| shortcuts | 6 global hotkeys (flyout, mixer, settings, vol up, vol down, switch device) |
-| mouse | scroll wheel behavior on tray icon |
-| community | telemetry, logarithmic volume |
-| legacy | legacy icon, legacy compatibility |
-| about | version info, diagnostics, export/import settings |
-
-### customization
-| page | what it does |
-|------|-------------|
-| animations | smooth volume animation, speed, peak meter FPS, eco mode |
-| colors | 7-channel theme engine with presets and custom themes |
-| media popup | hover delay, blur radius, show-only-when-playing |
-| volume profiles | create, apply, rename, delete, export/import profiles |
-
----
-
-## ⋆｡°✩ hotkeys
-
-| hotkey | action |
-|--------|--------|
-| configurable | open flyout |
-| configurable | open full mixer |
-| configurable | open settings |
-| configurable | volume up (all devices) |
-| configurable | volume down (all devices) |
-| configurable | switch default playback device |
-| ctrl+Z | undo last volume change |
-| ctrl+Y | redo volume change |
-| ctrl+P | pin/unpin flyout |
-
-all configurable hotkeys are set in settings → shortcuts.
-
----
-
-## 🔧 debug shortcuts
-
-in debug builds, hold these keys while launching bettertrumpet:
-
-| key | action |
-|-----|--------|
-| **Ctrl gauche** | force the onboarding wizard (even if already completed) |
-| **Shift gauche** | force the "what's new" changelog window |
-
-useful for testing the onboarding flow and changelog without uninstalling.
-
----
-
-## ♪₊˚.⋆ supported systems
-
-| os | |
-|---|---|
-| windows 10 (1803+) | ✓ |
-| windows 11 | ✓ |
-
----
-
-## ⋆˙⟡ tech stack
-
-| | |
-|---|---|
-| language | c# / wpf |
-| framework | .net framework 4.6.2 |
-| audio api | windows core audio |
-| media api | windows media session |
-| telemetry | sentry (GDPR-compliant) |
-| packaging | msix |
-| CLI | named pipe IPC |
-
----
-
-## ✩°｡⋆ credits
-
-based on [eartrumpet](https://github.com/File-New-Project/EarTrumpet) by:
-- david golden
-- rafael rivera
-- dave amenta
-
----
-
-## ⋆.˚ license
-
-[mit license](./LICENSE)
-
----
+[MIT License](./LICENSE)
 
 <p align="center">
   <br/>
