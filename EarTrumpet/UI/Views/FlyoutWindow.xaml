@@ -126,6 +126,38 @@
                                   FocusVisualStyle="{x:Null}"
                                   IsTabStop="False"
                                   ItemsSource="{Binding Devices}" />
+                    <Button x:Name="RestoreHiddenAppsButton"
+                            Width="30"
+                            Height="{DynamicResource Mutable_DeviceTitleCellHeight}"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Margin="0,0,54,0"
+                            Panel.ZIndex="5"
+                            Click="RestoreHiddenAppsButton_Click"
+                            ToolTipService.ToolTip="{x:Static resx:Resources.RestoreHiddenAppsForDevice}"
+                            IsTabStop="False">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource ExpandCollapseButtonStyle}" TargetType="Button">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasHiddenAppsForHeaderDevice}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Button.ContextMenu>
+                            <ContextMenu ItemContainerTemplateSelector="{StaticResource MenuSelector}"
+                                         ItemsSource="{Binding RestoreHiddenAppsMenu}"
+                                         UsesItemContainerTemplate="True" />
+                        </Button.ContextMenu>
+                        <TextBlock Text="&#xE18B;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="11"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Theme:Brush.Foreground="{Binding (Theme:Brush.Foreground), RelativeSource={RelativeSource AncestorType=Button}}" />
+                    </Button>
                     <!-- Pin button: sits in the title bar area, right side before chevron -->
                     <Button x:Name="PinButton"
                             Width="30"
@@ -170,7 +202,7 @@
                         </Button.Style>
                         <Button.Content>
                             <Grid>
-                                <TextBlock Margin="12,0,56,0"
+                                <TextBlock Margin="12,0,88,0"
                                            HorizontalAlignment="Left"
                                            Theme:Brush.Foreground="{Binding (Theme:Brush.Foreground), RelativeSource={RelativeSource AncestorType=Button}}"
                                            Style="{StaticResource DeviceTitleTextStyle}"

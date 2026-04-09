@@ -1,4 +1,4 @@
-﻿using EarTrumpet.Extensibility.Hosting;
+using EarTrumpet.Extensibility.Hosting;
 using EarTrumpet.UI.Helpers;
 using System;
 using System.Collections.ObjectModel;
@@ -28,6 +28,8 @@ namespace EarTrumpet.UI.ViewModels
                 Command = new RelayCommand(() => RequestClose.Invoke())
             });
 
+            var canHideEntry = parent.CanHideApp(app);
+
             if (app.IsMovable)
             {
                 var persistedDeviceId = app.PersistedOutputDevice;
@@ -54,6 +56,7 @@ namespace EarTrumpet.UI.ViewModels
                     }),
                 });
                 items.Insert(1, new ContextMenuSeparator());
+
                 Toolbar.Insert(0, new ToolbarItemViewModel
                 {
                     GlyphFontSize = 16,
@@ -63,20 +66,34 @@ namespace EarTrumpet.UI.ViewModels
                 });
             }
 
+            if (canHideEntry)
+            {
+                Toolbar.Insert(0, new ToolbarItemViewModel
+                {
+                    GlyphFontSize = 16,
+                    DisplayName = Properties.Resources.HideAppEntryButtonText,
+                    Glyph = "\uE18B",
+                    Command = new RelayCommand(() =>
+                    {
+                        parent.HideAppOnDevice(app);
+                        RequestClose.Invoke();
+                    }),
+                });
+            }
+
             var contentItems = AddonManager.Host.AppContentItems;
             if (contentItems != null)
             {
                 Addons = new ObservableCollection<object>(contentItems.Select(a => a.GetContentForApp(App.Parent.Id, App.Id, () => RequestClose.Invoke())).ToArray());
-
-                var menuItems = contentItems.SelectMany(a => a.GetContextMenuItemsForApp(app.Parent.Id, app.AppId));
-                if (menuItems.Any())
+                var moreCommandItems = contentItems.SelectMany(a => a.GetContextMenuItemsForApp(app.Parent.Id, app.AppId)).Where(x => x != null).ToList();
+                if (moreCommandItems.Any())
                 {
                     Toolbar.Insert(0, new ToolbarItemViewModel
                     {
                         GlyphFontSize = 16,
                         DisplayName = Properties.Resources.MoreCommandsAccessibleText,
                         Glyph = "\uE10C",
-                        Menu = new ObservableCollection<ContextMenuItem>(menuItems)
+                        Menu = new ObservableCollection<ContextMenuItem>(moreCommandItems)
                     });
                 }
             }

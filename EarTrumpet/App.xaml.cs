@@ -16,9 +16,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 
 namespace EarTrumpet
 {
@@ -44,6 +47,9 @@ namespace EarTrumpet
         private ErrorReporter _errorReporter;
         private MediaPopupWindow _mediaPopup;
         private System.Windows.Threading.DispatcherTimer _mediaPopupDelayTimer;
+        private Popup _trayHoverTooltipPopup;
+        private Border _trayHoverTooltipBorder;
+        private TextBlock _trayHoverTooltipText;
         private PipeServer _pipeServer;
         private CliHandler _cliHandler;
         private DataModel.Audio.IAudioDeviceManager _deviceManager;
@@ -55,6 +61,124 @@ namespace EarTrumpet
         public void OpenMixerWindow()
         {
             _mixerWindow?.OpenOrBringToFront();
+        }
+
+        private void EnsureTrayHoverTooltipPopup()
+        {
+            if (_trayHoverTooltipPopup != null)
+            {
+                return;
+            }
+
+            _trayHoverTooltipText = new TextBlock
+            {
+                Foreground = Brushes.White,
+                FontSize = 12,
+                FontWeight = FontWeights.SemiBold,
+                TextWrapping = TextWrapping.NoWrap,
+            };
+
+            _trayHoverTooltipBorder = new Border
+            {
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(10, 6, 10, 6),
+                Background = new SolidColorBrush(Color.FromArgb(232, 28, 28, 30)),
+                BorderBrush = new SolidColorBrush(Color.FromArgb(70, 255, 255, 255)),
+                BorderThickness = new Thickness(1),
+                Effect = new DropShadowEffect
+                {
+                    BlurRadius = 14,
+                    ShadowDepth = 2,
+                    Opacity = 0.35,
+                    Color = Colors.Black,
+                },
+                Child = _trayHoverTooltipText,
+            };
+
+            _trayHoverTooltipPopup = new Popup
+            {
+                AllowsTransparency = true,
+                PopupAnimation = PopupAnimation.Fade,
+                StaysOpen = true,
+                Placement = PlacementMode.AbsolutePoint,
+                IsHitTestVisible = false,
+                Child = _trayHoverTooltipBorder,
+            };
+        }
+
+        private void ShowTrayHoverTooltip(string text, Rect iconBounds)
+        {
+            EnsureTrayHoverTooltipPopup();
+
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                HideTrayHoverTooltip();
+                return;
+            }
+
+            _trayHoverTooltipText.Text = text;
+            _trayHoverTooltipPopup.IsOpen = false;
+
+            _trayHoverTooltipBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            var desired = _trayHoverTooltipBorder.DesiredSize;
+            var width = Math.Ceiling(desired.Width);
+            var height = Math.Ceiling(desired.Height);
+
+            var popupTop = iconBounds.Top - (_mediaPopup?.Height ?? 185) - height - 12;
+            var popupLeft = iconBounds.Left + (iconBounds.Width / 2) - (width / 2);
+            var workArea = SystemParameters.WorkArea;
+
+            popupLeft = Math.Max(workArea.Left + 4, Math.Min(popupLeft, workArea.Right - width - 4));
+            popupTop = Math.Max(workArea.Top + 4, Math.Min(popupTop, workArea.Bottom - height - 4));
+
+            _trayHoverTooltipPopup.HorizontalOffset = popupLeft;
+            _trayHoverTooltipPopup.VerticalOffset = popupTop;
+            _trayHoverTooltipPopup.IsOpen = true;
+        }
+
+        private void HideTrayHoverTooltip()
+        {
+            if (_trayHoverTooltipPopup != null)
+            {
+                _trayHoverTooltipPopup.IsOpen = false;
+            }
+        }
+
+        private string GetTrayTooltipTextOrEmpty()
+        {
+            if (Settings == null || CollectionViewModel == null || !Settings.ShowAppTooltips)
+            {
+                return string.Empty;
+            }
+
+            return CollectionViewModel.GetTrayToolTip();
+        }
+
+        private void RefreshTrayTooltipPresentation()
+        {
+            if (_trayIcon == null)
+            {
+                return;
+            }
+
+            if (_mediaPopup != null && _mediaPopup.IsShowing && Settings.MediaPopupEnabled)
+            {
+                if (Settings.ShowAppTooltips && _trayIcon.IsMouseOver)
+                {
+                    _trayIcon.SetTooltip(string.Empty);
+                    ShowTrayHoverTooltip(CollectionViewModel.GetTrayToolTip(), _trayIcon.IconBounds);
+                }
+                else
+                {
+                    HideTrayHoverTooltip();
+                    _trayIcon.SetTooltip(string.Empty);
+                }
+
+                return;
+            }
+
+            HideTrayHoverTooltip();
+            _trayIcon.SetTooltip(GetTrayTooltipTextOrEmpty());
         }
 
         private void OnAppStartup(object sender, StartupEventArgs e)
@@ -117,7 +241,8 @@ namespace EarTrumpet
             _trayIconSource = new TaskbarIconSource(CollectionViewModel, Settings);
             _trayIcon = new ShellNotifyIcon(_trayIconSource);
             Exit += (_, __) => _trayIcon.IsVisible = false;
-            CollectionViewModel.TrayPropertyChanged += () => _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
+            CollectionViewModel.TrayPropertyChanged += RefreshTrayTooltipPresentation;
+            Settings.AppTooltipsChanged += () => Dispatcher.BeginInvoke((Action)RefreshTrayTooltipPresentation);
 
             _flyoutViewModel = new FlyoutViewModel(CollectionViewModel, () => _trayIcon.SetFocus(), Settings);
             FlyoutWindow = new FlyoutWindow(_flyoutViewModel);
@@ -138,8 +263,8 @@ namespace EarTrumpet
             _trayIcon.SecondaryInvoke += (_, args) => _trayIcon.ShowContextMenu(GetTrayContextMenuItems(), args.Point);
             _trayIcon.TertiaryInvoke += (_, __) => CollectionViewModel.Default?.ToggleMute.Execute(null);
             _trayIcon.Scrolled += trayIconScrolled;
-            _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
             _trayIcon.IsVisible = true;
+            RefreshTrayTooltipPresentation();
 
             // ══════════════════════════════════════════════════════════════
             // STARTUP PHASE 3: Features (each isolated — failure = feature disabled)
@@ -250,10 +375,11 @@ namespace EarTrumpet
                 }
 
                 _mediaPopup.ShowPopup(_trayIcon.IconBounds);
+                RefreshTrayTooltipPresentation();
             };
             _mediaPopup.PopupHidden += (_, __) =>
             {
-                _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
+                RefreshTrayTooltipPresentation();
             };
             _trayIcon.MouseHoverChanged += (_, isOver) =>
             {
@@ -261,8 +387,11 @@ namespace EarTrumpet
 
                 if (isOver)
                 {
-                    _trayIcon.SetTooltip("");
-                    if (!_mediaPopup.IsShowing)
+                    if (_mediaPopup.IsShowing)
+                    {
+                        RefreshTrayTooltipPresentation();
+                    }
+                    else
                     {
                         _mediaPopupDelayTimer.Start();
                     }
@@ -270,11 +399,8 @@ namespace EarTrumpet
                 else
                 {
                     _mediaPopupDelayTimer.Stop();
-                    if (!_mediaPopup.IsShowing)
-                    {
-                        _trayIcon.SetTooltip(CollectionViewModel.GetTrayToolTip());
-                    }
                     _mediaPopup.StartHideTimer();
+                    RefreshTrayTooltipPresentation();
                 }
             };
         }
@@ -381,6 +507,52 @@ namespace EarTrumpet
                 {
                     DisplayName = EarTrumpet.Properties.Resources.ContextMenuNoDevices,
                     IsEnabled = false,
+                });
+            }
+
+            var hiddenByDevice = CollectionViewModel.AllDevices
+                .Where(device => device.HiddenAppsCount > 0)
+                .OrderBy(device => device.DisplayName)
+                .ToList();
+
+            if (hiddenByDevice.Any())
+            {
+                var hiddenChildren = hiddenByDevice.Select(device =>
+                {
+                    var perDeviceEntries = CollectionViewModel.GetHiddenAppsForDevice(device.Id);
+                    var perDeviceChildren = perDeviceEntries.Select(entry => new ContextMenuItem
+                    {
+                        DisplayName = CollectionViewModel.GetHiddenAppLabel(entry),
+                        Command = new RelayCommand(() => CollectionViewModel.UnhideAppOnDevice(device.Id, entry.AppId, entry.ExeName)),
+                    }).ToList();
+
+                    perDeviceChildren.Add(new ContextMenuSeparator());
+                    perDeviceChildren.Add(new ContextMenuItem
+                    {
+                        DisplayName = EarTrumpet.Properties.Resources.RestoreHiddenAppsForDeviceAll,
+                        Command = new RelayCommand(() => CollectionViewModel.UnhideAllAppsForDevice(device.Id)),
+                    });
+
+                    return new ContextMenuItem
+                    {
+                        DisplayName = string.Format(EarTrumpet.Properties.Resources.ContextMenuRestoreHiddenAppsForDeviceFormat, device.DisplayName, device.HiddenAppsCount),
+                        Children = perDeviceChildren,
+                    };
+                }).ToList();
+
+                hiddenChildren.Add(new ContextMenuSeparator());
+                hiddenChildren.Add(new ContextMenuItem
+                {
+                    DisplayName = EarTrumpet.Properties.Resources.ContextMenuRestoreAllHiddenApps,
+                    Command = new RelayCommand(() => CollectionViewModel.UnhideAllApps()),
+                });
+
+                ret.Add(new ContextMenuSeparator());
+                ret.Add(new ContextMenuItem
+                {
+                    DisplayName = string.Format(EarTrumpet.Properties.Resources.ContextMenuHiddenAppsTitleFormat, hiddenByDevice.Sum(device => device.HiddenAppsCount)),
+                    Glyph = "\xE738",
+                    Children = hiddenChildren,
                 });
             }
 

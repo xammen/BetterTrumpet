@@ -33,6 +33,7 @@ namespace EarTrumpet.UI.ViewModels
         public DeviceCollectionViewModel(IAudioDeviceManager deviceManager, AppSettings settings)
         {
             _settings = settings;
+            _settings.HiddenAppsChanged += OnHiddenAppsChanged;
             _deviceManager = deviceManager;
             _deviceManager.DefaultChanged += OnDefaultChanged;
             _deviceManager.Devices.CollectionChanged += OnCollectionChanged;
@@ -103,8 +104,78 @@ namespace EarTrumpet.UI.ViewModels
 
         protected virtual void AddDevice(IAudioDevice device)
         {
-            var newDevice = new DeviceViewModel(this, _deviceManager, device);
+            var newDevice = new DeviceViewModel(this, _deviceManager, _settings, device);
             AllDevices.AddSorted(newDevice, DeviceViewModel.CompareByDisplayName);
+        }
+
+        public bool CanHideApp(IAppItemViewModel app)
+        {
+            return app != null && app.Parent != null && !(app is TemporaryAppItemViewModel);
+        }
+
+        public void HideAppOnDevice(IAppItemViewModel app)
+        {
+            if (!CanHideApp(app))
+            {
+                return;
+            }
+
+            _settings.HideAppForDevice(app.Parent.Id, app.AppId, app.ExeName, app.DisplayName);
+        }
+
+        public List<AppSettings.HiddenAppEntry> GetHiddenAppsForDevice(string deviceId)
+        {
+            return _settings.GetHiddenAppsForDevice(deviceId);
+        }
+
+        public void UnhideAppOnDevice(string deviceId, string appId, string exeName)
+        {
+            _settings.UnhideAppForDevice(deviceId, appId, exeName);
+        }
+
+        public string GetHiddenAppLabel(AppSettings.HiddenAppEntry entry)
+        {
+            if (!string.IsNullOrWhiteSpace(entry?.DisplayName))
+            {
+                return entry.DisplayName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(entry?.ExeName))
+            {
+                return entry.ExeName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(entry?.AppId))
+            {
+                return entry.AppId;
+            }
+
+            return Properties.Resources.SettingsHiddenAppsUnknown;
+        }
+
+        public void UnhideAllAppsForDevice(string deviceId)
+        {
+            _settings.UnhideAppsForDevice(deviceId);
+        }
+
+        public void UnhideAllApps()
+        {
+            _settings.UnhideAllApps();
+        }
+
+        public int GetTotalHiddenAppsCount()
+        {
+            return AllDevices.Sum(device => device.HiddenAppsCount);
+        }
+
+        private void OnHiddenAppsChanged()
+        {
+            foreach (var device in AllDevices)
+            {
+                device.RefreshHiddenApps();
+            }
+
+            TrayPropertyChanged?.Invoke();
         }
 
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

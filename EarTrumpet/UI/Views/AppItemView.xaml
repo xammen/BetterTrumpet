@@ -5,13 +5,17 @@
              xmlns:ctl="clr-namespace:EarTrumpet.UI.Controls"
              Height="{DynamicResource Mutable_AppItemCellHeight}"
              IsTabStop="False">
-    <Grid Name="GridRoot" Background="Transparent">
+    <Grid Name="GridRoot"
+          Background="Transparent"
+          PreviewMouseLeftButtonDown="GridRoot_PreviewMouseLeftButtonDown">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{DynamicResource Mutable_IconCellWidth}" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="{DynamicResource Mutable_VolumeCellWidth}" />
         </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0" Margin="{StaticResource DeviceOrAppIconMargin}">
+        <Grid x:Name="IconCell"
+              Grid.Column="0"
+              Margin="{StaticResource DeviceOrAppIconMargin}">
             <Border Width="{DynamicResource Mutable_AppIconSize}"
                     Height="{DynamicResource Mutable_AppIconSize}"
                     HorizontalAlignment="Center">
@@ -60,8 +64,13 @@
                     Width="{DynamicResource Mutable_AppIconSize}"
                     Height="{DynamicResource Mutable_AppIconSize}"
                     Command="{Binding ToggleMute}"
-                    IsTabStop="False"
-                    ToolTip="{Binding DisplayName}">
+                    PreviewMouseDown="MuteButton_PreviewMouseDown"
+                    ToolTip="{Binding DisplayName}"
+                    ToolTipService.Placement="Right"
+                    ToolTipService.InitialShowDelay="0"
+                    ToolTipOpening="MuteButton_ToolTipOpening"
+                    ToolTipClosing="MuteButton_ToolTipClosing"
+                    IsTabStop="False">
                 <Button.Style>
                     <Style BasedOn="{StaticResource MuteButton}" TargetType="Button">
                         <Style.Triggers>
