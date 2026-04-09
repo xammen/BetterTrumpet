@@ -215,3 +215,24 @@ _pkginfo.txt
 /artifacts/sideload
 /Tools
 nul
+
+# Release / local-only files
+/CLAUDE.md
+/AGENTS.md
+/temp_bt.exe
+/.impeccable.md
+/pr-body*.txt
+/release-notes-*.txt
+/upload-winget*.ps1
+/fix-winget.ps1
+/bettertrumpet.3.0.*.nupkg
+/bettertrumpet.3.0.11.nupkg
+/*.nupkg
+/chocolatey/bettertrumpet.3.0.*.nupkg
+/dist/
+/EarTrumpet/..BuildRelease/
+/undefined/
+/winget-pkgs/
+/manifests/x/xmn/BetterTrumpet/3.0.9/
+/manifests/x/xmn/BetterTrumpet/3.0.10/
+/manifests/x/xmn/BetterTrumpet/3.1.0-beta/
