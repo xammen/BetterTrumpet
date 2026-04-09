@@ -233,6 +233,7 @@
                 <Setter Property="Theme:Brush.Background" Value="Theme={Theme}ChromeMediumLow, HighContrast=Window" />
                 <Setter Property="Theme:Brush.Foreground" Value="Theme=ApplicationText{Theme}Theme, HighContrast=WindowText" />
                 <Setter Property="Theme:Brush.BorderBrush" Value="Theme={Theme}ChromeDisabledLow, HighContrast=WindowFrame" />
+                <Setter Property="Opacity" Value="0.92" />
             </Style>
             <Style x:Key="CaptionButtonStyle" TargetType="Button">
                 <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True" />

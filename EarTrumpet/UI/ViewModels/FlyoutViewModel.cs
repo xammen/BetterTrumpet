@@ -27,6 +27,8 @@ namespace EarTrumpet.UI.ViewModels
         public ObservableCollection<DeviceViewModel> Devices { get; private set; }
         public ICommand ExpandCollapse { get; private set; }
         public ICommand TogglePin { get; private set; }
+        public ObservableCollection<ContextMenuItem> RestoreHiddenAppsMenu { get; }
+        public bool HasHiddenAppsForHeaderDevice => RestoreHiddenAppsMenu.Count > 0;
         public InputType LastInput { get; private set; }
         public ICommand DisplaySettingsChanged { get; }
 
@@ -96,10 +98,12 @@ private readonly Action _returnFocusToTray;
             IsExpanded = _settings.IsExpanded;
             Dialog = new ModalDialogViewModel();
             Devices = new ObservableCollection<DeviceViewModel>();
+            RestoreHiddenAppsMenu = new ObservableCollection<ContextMenuItem>();
             _returnFocusToTray = returnFocusToTray;
             _mainViewModel = mainViewModel;
             _mainViewModel.DefaultChanged += OnDefaultPlaybackDeviceChanged;
             _mainViewModel.AllDevices.CollectionChanged += AllDevices_CollectionChanged;
+            _settings.HiddenAppsChanged += OnHiddenAppsChanged;
             AllDevices_CollectionChanged(null, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 
 // This timer is used to enable clicking on the tray icon while the flyout is open, and not causing a
@@ -205,7 +209,55 @@ private readonly Action _returnFocusToTray;
             RaisePropertyChanged(nameof(IsExpanded));
             RaisePropertyChanged(nameof(CanExpand));
             RaisePropertyChanged(nameof(DeviceNameText));
+            RebuildRestoreHiddenAppsMenu();
             InvalidateWindowSize();
+        }
+
+        private void OnHiddenAppsChanged()
+        {
+            if (_currentDispatcher.CheckAccess())
+            {
+                RebuildRestoreHiddenAppsMenu();
+            }
+            else
+            {
+                _currentDispatcher.BeginInvoke((Action)(RebuildRestoreHiddenAppsMenu));
+            }
+        }
+
+        private void RebuildRestoreHiddenAppsMenu()
+        {
+            RestoreHiddenAppsMenu.Clear();
+
+            var headerDevice = Devices.FirstOrDefault();
+            if (headerDevice == null)
+            {
+                RaisePropertyChanged(nameof(HasHiddenAppsForHeaderDevice));
+                return;
+            }
+
+            var hiddenEntries = _mainViewModel.GetHiddenAppsForDevice(headerDevice.Id);
+            foreach (var entry in hiddenEntries)
+            {
+                var localEntry = entry;
+                RestoreHiddenAppsMenu.Add(new ContextMenuItem
+                {
+                    DisplayName = _mainViewModel.GetHiddenAppLabel(localEntry),
+                    Command = new RelayCommand(() => _mainViewModel.UnhideAppOnDevice(headerDevice.Id, localEntry.AppId, localEntry.ExeName)),
+                });
+            }
+
+            if (hiddenEntries.Any())
+            {
+                RestoreHiddenAppsMenu.Add(new ContextMenuSeparator());
+                RestoreHiddenAppsMenu.Add(new ContextMenuItem
+                {
+                    DisplayName = Properties.Resources.RestoreHiddenAppsForDeviceAll,
+                    Command = new RelayCommand(() => _mainViewModel.UnhideAllAppsForDevice(headerDevice.Id)),
+                });
+            }
+
+            RaisePropertyChanged(nameof(HasHiddenAppsForHeaderDevice));
         }
 
         private void OnDefaultPlaybackDeviceChanged(object sender, DeviceViewModel e)
@@ -515,6 +567,7 @@ public void OpenFlyout(InputType inputType)
                     // Unsubscribe events
                     _mainViewModel.DefaultChanged -= OnDefaultPlaybackDeviceChanged;
                     _mainViewModel.AllDevices.CollectionChanged -= AllDevices_CollectionChanged;
+                    _settings.HiddenAppsChanged -= OnHiddenAppsChanged;
 
                     foreach (var device in Devices)
                     {

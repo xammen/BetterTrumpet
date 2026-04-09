@@ -32,6 +32,7 @@ namespace EarTrumpet.DataModel
                 ["IsExpanded"] = settings.IsExpanded,
                 ["UseScrollWheelInTray"] = settings.UseScrollWheelInTray,
                 ["UseGlobalMouseWheelHook"] = settings.UseGlobalMouseWheelHook,
+                ["ShowAppTooltips"] = settings.ShowAppTooltips,
                 ["IsTelemetryEnabled"] = settings.IsTelemetryEnabled,
                 ["RunAtStartup"] = settings.RunAtStartup,
 
@@ -194,6 +195,7 @@ namespace EarTrumpet.DataModel
             TrySet(data, "IsExpanded", (bool v) => settings.IsExpanded = v);
             TrySet(data, "UseScrollWheelInTray", (bool v) => settings.UseScrollWheelInTray = v);
             TrySet(data, "UseGlobalMouseWheelHook", (bool v) => settings.UseGlobalMouseWheelHook = v);
+            TrySet(data, "ShowAppTooltips", (bool v) => settings.ShowAppTooltips = v);
             TrySet(data, "IsTelemetryEnabled", (bool v) => settings.IsTelemetryEnabled = v);
             // Skip RunAtStartup on import — security sensitive, user should set it themselves
 

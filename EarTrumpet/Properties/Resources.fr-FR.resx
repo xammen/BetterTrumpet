@@ -126,6 +126,15 @@
   <data name="ContextMenuSendFeedback" xml:space="preserve">
     <value>Envoyer des commentaires</value>
   </data>
+  <data name="ContextMenuHiddenAppsTitleFormat" xml:space="preserve">
+    <value>Entrées d'app cachées ({0})</value>
+  </data>
+  <data name="ContextMenuRestoreAllHiddenApps" xml:space="preserve">
+    <value>Restaurer toutes les entrées d'app cachées</value>
+  </data>
+  <data name="ContextMenuRestoreHiddenAppsForDeviceFormat" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
   <data name="FullWindowTitleText" xml:space="preserve">
     <value>Mélangeur de volume BetterTrumpet</value>
   </data>
@@ -192,6 +201,9 @@
   <data name="MoveButtonAccessibleText" xml:space="preserve">
     <value>Attribuer cette application à un périphérique de lecture</value>
   </data>
+  <data name="HideAppEntryButtonText" xml:space="preserve">
+    <value>Masquer cette entrée d'application</value>
+  </data>
   <data name="SettingsOpenEarTrumpetText" xml:space="preserve">
     <value>Ouvrir le menu déroulant</value>
   </data>
@@ -200,6 +212,12 @@
   </data>
   <data name="MoreCommandsAccessibleText" xml:space="preserve">
     <value>Plus de commandes</value>
+  </data>
+  <data name="RestoreHiddenAppsForDevice" xml:space="preserve">
+    <value>Restaurer les entrées d'app cachées sur ce périphérique</value>
+  </data>
+  <data name="RestoreHiddenAppsForDeviceAll" xml:space="preserve">
+    <value>Tout restaurer sur ce périphérique</value>
   </data>
   <data name="MutedText" xml:space="preserve">
     <value>En sourdine</value>
@@ -821,6 +839,15 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
   <data name="SettingsScrollWheelGlobalTip" xml:space="preserve">
     <value>Contrôle le volume avec la molette partout à l'écran.</value>
   </data>
+  <data name="SettingsAppTooltips" xml:space="preserve">
+    <value>Infobulles des icônes</value>
+  </data>
+  <data name="SettingsAppTooltipsDesc" xml:space="preserve">
+    <value>Afficher ou masquer les infobulles au survol des icônes de barre d'état et d'app.</value>
+  </data>
+  <data name="SettingsShowAppTooltips" xml:space="preserve">
+    <value>Afficher les infobulles des icônes</value>
+  </data>
   <data name="SettingsVolumeScale" xml:space="preserve">
     <value>Échelle de volume</value>
   </data>
@@ -937,6 +964,27 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
   </data>
   <data name="SettingsRunAtStartup" xml:space="preserve">
     <value>Lancer au démarrage de Windows</value>
+  </data>
+  <data name="SettingsHiddenAppsTitle" xml:space="preserve">
+    <value>Entrées d'application cachées</value>
+  </data>
+  <data name="SettingsHiddenAppsDesc" xml:space="preserve">
+    <value>Masquez les doublons d'apps par périphérique et restaurez-les à tout moment.</value>
+  </data>
+  <data name="SettingsHiddenAppsSummaryFormat" xml:space="preserve">
+    <value>{0} entrée(s) d'app cachée(s)</value>
+  </data>
+  <data name="SettingsHiddenAppsNone" xml:space="preserve">
+    <value>Aucune entrée d'application cachée</value>
+  </data>
+  <data name="SettingsRestoreHiddenApps" xml:space="preserve">
+    <value>Restaurer les entrées cachées</value>
+  </data>
+  <data name="SettingsHiddenAppsUnknown" xml:space="preserve">
+    <value>Entrée d'application inconnue</value>
+  </data>
+  <data name="HiddenAppsOnDeviceTooltip" xml:space="preserve">
+    <value>Nombre d'entrées d'application cachées sur ce périphérique</value>
   </data>
   <data name="SettingsMediaPopup" xml:space="preserve">
     <value>Popup média</value>

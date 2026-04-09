@@ -126,6 +126,15 @@
   <data name="ContextMenuSendFeedback" xml:space="preserve">
     <value>Send feedback</value>
   </data>
+  <data name="ContextMenuHiddenAppsTitleFormat" xml:space="preserve">
+    <value>Hidden app entries ({0})</value>
+  </data>
+  <data name="ContextMenuRestoreAllHiddenApps" xml:space="preserve">
+    <value>Restore all hidden app entries</value>
+  </data>
+  <data name="ContextMenuRestoreHiddenAppsForDeviceFormat" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
   <data name="FullWindowTitleText" xml:space="preserve">
     <value>Volume Mixer</value>
   </data>
@@ -192,6 +201,9 @@
   <data name="MoveButtonAccessibleText" xml:space="preserve">
     <value>Assign this app to a playback device</value>
   </data>
+  <data name="HideAppEntryButtonText" xml:space="preserve">
+    <value>Hide this app entry</value>
+  </data>
   <data name="SettingsOpenEarTrumpetText" xml:space="preserve">
     <value>Open Taskbar flyout</value>
   </data>
@@ -200,6 +212,12 @@
   </data>
   <data name="MoreCommandsAccessibleText" xml:space="preserve">
     <value>More commands</value>
+  </data>
+  <data name="RestoreHiddenAppsForDevice" xml:space="preserve">
+    <value>Restore hidden app entries on this device</value>
+  </data>
+  <data name="RestoreHiddenAppsForDeviceAll" xml:space="preserve">
+    <value>Restore all on this device</value>
   </data>
   <data name="MutedText" xml:space="preserve">
     <value>Muted</value>
@@ -824,6 +842,15 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
   <data name="SettingsScrollWheelGlobalTip" xml:space="preserve">
     <value>Enables volume control via scroll wheel anywhere on screen when holding a modifier key.</value>
   </data>
+  <data name="SettingsAppTooltips" xml:space="preserve">
+    <value>Icon Tooltips</value>
+  </data>
+  <data name="SettingsAppTooltipsDesc" xml:space="preserve">
+    <value>Show or hide tooltips when hovering tray and app icons.</value>
+  </data>
+  <data name="SettingsShowAppTooltips" xml:space="preserve">
+    <value>Show icon tooltips</value>
+  </data>
   <data name="SettingsVolumeScale" xml:space="preserve">
     <value>Volume Scale</value>
   </data>
@@ -940,6 +967,27 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
   </data>
   <data name="SettingsRunAtStartup" xml:space="preserve">
     <value>Run at Windows startup</value>
+  </data>
+  <data name="SettingsHiddenAppsTitle" xml:space="preserve">
+    <value>Hidden App Entries</value>
+  </data>
+  <data name="SettingsHiddenAppsDesc" xml:space="preserve">
+    <value>Hide noisy app duplicates per device and restore them anytime.</value>
+  </data>
+  <data name="SettingsHiddenAppsSummaryFormat" xml:space="preserve">
+    <value>{0} hidden app entry(ies)</value>
+  </data>
+  <data name="SettingsHiddenAppsNone" xml:space="preserve">
+    <value>No hidden app entries</value>
+  </data>
+  <data name="SettingsRestoreHiddenApps" xml:space="preserve">
+    <value>Restore hidden app entries</value>
+  </data>
+  <data name="SettingsHiddenAppsUnknown" xml:space="preserve">
+    <value>Unknown app entry</value>
+  </data>
+  <data name="HiddenAppsOnDeviceTooltip" xml:space="preserve">
+    <value>Number of hidden app entries on this device</value>
   </data>
   <data name="SettingsMediaPopup" xml:space="preserve">
     <value>Media Popup</value>
