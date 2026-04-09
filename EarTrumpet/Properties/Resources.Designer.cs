@@ -446,6 +446,12 @@ namespace EarTrumpet.Properties {
                 return ResourceManager.GetString("ContextMenuExitTitle", resourceCulture);
             }
         }
+
+        public static string ContextMenuHiddenAppsTitleFormat {
+            get {
+                return ResourceManager.GetString("ContextMenuHiddenAppsTitleFormat", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to No playback devices found.
@@ -462,6 +468,18 @@ namespace EarTrumpet.Properties {
         public static string ContextMenuSendFeedback {
             get {
                 return ResourceManager.GetString("ContextMenuSendFeedback", resourceCulture);
+            }
+        }
+
+        public static string ContextMenuRestoreAllHiddenApps {
+            get {
+                return ResourceManager.GetString("ContextMenuRestoreAllHiddenApps", resourceCulture);
+            }
+        }
+
+        public static string ContextMenuRestoreHiddenAppsForDeviceFormat {
+            get {
+                return ResourceManager.GetString("ContextMenuRestoreHiddenAppsForDeviceFormat", resourceCulture);
             }
         }
         
@@ -734,6 +752,18 @@ namespace EarTrumpet.Properties {
         public static string FullWindowTitleText {
             get {
                 return ResourceManager.GetString("FullWindowTitleText", resourceCulture);
+            }
+        }
+
+        public static string HiddenAppsOnDeviceTooltip {
+            get {
+                return ResourceManager.GetString("HiddenAppsOnDeviceTooltip", resourceCulture);
+            }
+        }
+
+        public static string HideAppEntryButtonText {
+            get {
+                return ResourceManager.GetString("HideAppEntryButtonText", resourceCulture);
             }
         }
         
@@ -1184,6 +1214,18 @@ namespace EarTrumpet.Properties {
         public static string RecordingDevicesText {
             get {
                 return ResourceManager.GetString("RecordingDevicesText", resourceCulture);
+            }
+        }
+
+        public static string RestoreHiddenAppsForDevice {
+            get {
+                return ResourceManager.GetString("RestoreHiddenAppsForDevice", resourceCulture);
+            }
+        }
+
+        public static string RestoreHiddenAppsForDeviceAll {
+            get {
+                return ResourceManager.GetString("RestoreHiddenAppsForDeviceAll", resourceCulture);
             }
         }
         
@@ -1964,6 +2006,15 @@ namespace EarTrumpet.Properties {
         public static string SettingsScrollWheelGlobalTip {
             get { return ResourceManager.GetString("SettingsScrollWheelGlobalTip", resourceCulture); }
         }
+        public static string SettingsAppTooltips {
+            get { return ResourceManager.GetString("SettingsAppTooltips", resourceCulture); }
+        }
+        public static string SettingsAppTooltipsDesc {
+            get { return ResourceManager.GetString("SettingsAppTooltipsDesc", resourceCulture); }
+        }
+        public static string SettingsShowAppTooltips {
+            get { return ResourceManager.GetString("SettingsShowAppTooltips", resourceCulture); }
+        }
         public static string SettingsVolumeScale {
             get { return ResourceManager.GetString("SettingsVolumeScale", resourceCulture); }
         }
@@ -1987,6 +2038,24 @@ namespace EarTrumpet.Properties {
         }
         public static string SettingsRunAtStartup {
             get { return ResourceManager.GetString("SettingsRunAtStartup", resourceCulture); }
+        }
+        public static string SettingsHiddenAppsTitle {
+            get { return ResourceManager.GetString("SettingsHiddenAppsTitle", resourceCulture); }
+        }
+        public static string SettingsHiddenAppsDesc {
+            get { return ResourceManager.GetString("SettingsHiddenAppsDesc", resourceCulture); }
+        }
+        public static string SettingsHiddenAppsSummaryFormat {
+            get { return ResourceManager.GetString("SettingsHiddenAppsSummaryFormat", resourceCulture); }
+        }
+        public static string SettingsHiddenAppsNone {
+            get { return ResourceManager.GetString("SettingsHiddenAppsNone", resourceCulture); }
+        }
+        public static string SettingsHiddenAppsUnknown {
+            get { return ResourceManager.GetString("SettingsHiddenAppsUnknown", resourceCulture); }
+        }
+        public static string SettingsRestoreHiddenApps {
+            get { return ResourceManager.GetString("SettingsRestoreHiddenApps", resourceCulture); }
         }
         public static string SettingsMediaPopup {
             get { return ResourceManager.GetString("SettingsMediaPopup", resourceCulture); }

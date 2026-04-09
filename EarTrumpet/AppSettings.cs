@@ -2,6 +2,7 @@ using EarTrumpet.DataModel;
 using EarTrumpet.DataModel.Storage;
 using EarTrumpet.Interop.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using static EarTrumpet.Interop.User32;
@@ -32,8 +33,22 @@ namespace EarTrumpet
         public event Action AbsoluteVolumeDownHotkeyTyped;
         public event Action SwitchDeviceHotkeyTyped;
         public event Action CustomSliderColorsChanged;
+        public event Action HiddenAppsChanged;
 
         private ISettingsBag _settings = StorageFactory.GetSettings();
+        private const string HiddenAppEntriesJsonKey = "HiddenAppEntriesJson";
+        private readonly object _hiddenAppsSync = new object();
+        private bool _hiddenAppsLoaded;
+        private List<HiddenAppEntry> _hiddenAppEntries = new List<HiddenAppEntry>();
+
+        public class HiddenAppEntry
+        {
+            public string DeviceId { get; set; }
+            public string AppId { get; set; }
+            public string ExeName { get; set; }
+            public string DisplayName { get; set; }
+            public DateTime HiddenAtUtc { get; set; }
+        }
 
         /// <summary>
         /// Safely parses a color string from settings, returning fallback on failure.
@@ -180,6 +195,302 @@ namespace EarTrumpet
             set => _settings.Set("IsExpanded", value);
         }
 
+        public int HiddenAppsCount
+        {
+            get
+            {
+                lock (_hiddenAppsSync)
+                {
+                    EnsureHiddenAppsLoaded();
+                    return _hiddenAppEntries.Count;
+                }
+            }
+        }
+
+        public bool IsAppHiddenForDevice(string deviceId, string appId, string exeName)
+        {
+            var normalizedDeviceId = NormalizeHiddenKeyValue(deviceId);
+            if (string.IsNullOrEmpty(normalizedDeviceId))
+            {
+                return false;
+            }
+
+            var normalizedAppId = NormalizeHiddenKeyValue(appId);
+            var normalizedExeName = NormalizeHiddenKeyValue(exeName);
+
+            if (string.IsNullOrEmpty(normalizedAppId) && string.IsNullOrEmpty(normalizedExeName))
+            {
+                return false;
+            }
+
+            lock (_hiddenAppsSync)
+            {
+                EnsureHiddenAppsLoaded();
+                return _hiddenAppEntries.Any(entry =>
+                    entry.DeviceId == normalizedDeviceId &&
+                    ((normalizedAppId.Length > 0 && entry.AppId == normalizedAppId) ||
+                     (normalizedExeName.Length > 0 && entry.ExeName == normalizedExeName)));
+            }
+        }
+
+        public int GetHiddenAppCountForDevice(string deviceId)
+        {
+            var normalizedDeviceId = NormalizeHiddenKeyValue(deviceId);
+            if (string.IsNullOrEmpty(normalizedDeviceId))
+            {
+                return 0;
+            }
+
+            lock (_hiddenAppsSync)
+            {
+                EnsureHiddenAppsLoaded();
+                return _hiddenAppEntries.Count(entry => entry.DeviceId == normalizedDeviceId);
+            }
+        }
+
+        public List<HiddenAppEntry> GetHiddenAppsForDevice(string deviceId)
+        {
+            var normalizedDeviceId = NormalizeHiddenKeyValue(deviceId);
+            if (string.IsNullOrEmpty(normalizedDeviceId))
+            {
+                return new List<HiddenAppEntry>();
+            }
+
+            lock (_hiddenAppsSync)
+            {
+                EnsureHiddenAppsLoaded();
+                return _hiddenAppEntries
+                    .Where(entry => entry.DeviceId == normalizedDeviceId)
+                    .OrderBy(entry => entry.DisplayName)
+                    .ThenBy(entry => entry.ExeName)
+                    .ThenBy(entry => entry.AppId)
+                    .Select(entry => new HiddenAppEntry
+                    {
+                        DeviceId = entry.DeviceId,
+                        AppId = entry.AppId,
+                        ExeName = entry.ExeName,
+                        DisplayName = entry.DisplayName,
+                        HiddenAtUtc = entry.HiddenAtUtc,
+                    })
+                    .ToList();
+            }
+        }
+
+        public List<HiddenAppEntry> GetHiddenApps()
+        {
+            lock (_hiddenAppsSync)
+            {
+                EnsureHiddenAppsLoaded();
+                return _hiddenAppEntries
+                    .OrderBy(entry => entry.DeviceId)
+                    .ThenBy(entry => entry.DisplayName)
+                    .ThenBy(entry => entry.ExeName)
+                    .ThenBy(entry => entry.AppId)
+                    .Select(entry => new HiddenAppEntry
+                    {
+                        DeviceId = entry.DeviceId,
+                        AppId = entry.AppId,
+                        ExeName = entry.ExeName,
+                        DisplayName = entry.DisplayName,
+                        HiddenAtUtc = entry.HiddenAtUtc,
+                    })
+                    .ToList();
+            }
+        }
+
+        public void HideAppForDevice(string deviceId, string appId, string exeName, string displayName = null)
+        {
+            var normalizedDeviceId = NormalizeHiddenKeyValue(deviceId);
+            var normalizedAppId = NormalizeHiddenKeyValue(appId);
+            var normalizedExeName = NormalizeHiddenKeyValue(exeName);
+            var safeDisplayName = string.IsNullOrWhiteSpace(displayName) ? string.Empty : displayName.Trim();
+
+            if (string.IsNullOrEmpty(normalizedDeviceId) || (string.IsNullOrEmpty(normalizedAppId) && string.IsNullOrEmpty(normalizedExeName)))
+            {
+                return;
+            }
+
+            bool changed = false;
+            lock (_hiddenAppsSync)
+            {
+                EnsureHiddenAppsLoaded();
+
+                bool alreadyExists = _hiddenAppEntries.Any(entry =>
+                    entry.DeviceId == normalizedDeviceId &&
+                    entry.AppId == normalizedAppId &&
+                    entry.ExeName == normalizedExeName);
+
+                if (!alreadyExists)
+                {
+                    _hiddenAppEntries.Add(new HiddenAppEntry
+                    {
+                        DeviceId = normalizedDeviceId,
+                        AppId = normalizedAppId,
+                        ExeName = normalizedExeName,
+                        DisplayName = safeDisplayName,
+                        HiddenAtUtc = DateTime.UtcNow,
+                    });
+
+                    SaveHiddenAppsUnsafe();
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                HiddenAppsChanged?.Invoke();
+            }
+        }
+
+        public void UnhideAppsForDevice(string deviceId)
+        {
+            var normalizedDeviceId = NormalizeHiddenKeyValue(deviceId);
+            if (string.IsNullOrEmpty(normalizedDeviceId))
+            {
+                return;
+            }
+
+            bool changed = false;
+            lock (_hiddenAppsSync)
+            {
+                EnsureHiddenAppsLoaded();
+                changed = _hiddenAppEntries.RemoveAll(entry => entry.DeviceId == normalizedDeviceId) > 0;
+                if (changed)
+                {
+                    SaveHiddenAppsUnsafe();
+                }
+            }
+
+            if (changed)
+            {
+                HiddenAppsChanged?.Invoke();
+            }
+        }
+
+        public void UnhideAppForDevice(string deviceId, string appId, string exeName)
+        {
+            var normalizedDeviceId = NormalizeHiddenKeyValue(deviceId);
+            var normalizedAppId = NormalizeHiddenKeyValue(appId);
+            var normalizedExeName = NormalizeHiddenKeyValue(exeName);
+
+            if (string.IsNullOrEmpty(normalizedDeviceId) || (string.IsNullOrEmpty(normalizedAppId) && string.IsNullOrEmpty(normalizedExeName)))
+            {
+                return;
+            }
+
+            bool changed = false;
+            lock (_hiddenAppsSync)
+            {
+                EnsureHiddenAppsLoaded();
+                changed = _hiddenAppEntries.RemoveAll(entry =>
+                    entry.DeviceId == normalizedDeviceId &&
+                    entry.AppId == normalizedAppId &&
+                    entry.ExeName == normalizedExeName) > 0;
+
+                if (changed)
+                {
+                    SaveHiddenAppsUnsafe();
+                }
+            }
+
+            if (changed)
+            {
+                HiddenAppsChanged?.Invoke();
+            }
+        }
+
+        public void UnhideAllApps()
+        {
+            bool changed = false;
+            lock (_hiddenAppsSync)
+            {
+                EnsureHiddenAppsLoaded();
+                if (_hiddenAppEntries.Count > 0)
+                {
+                    _hiddenAppEntries.Clear();
+                    SaveHiddenAppsUnsafe();
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                HiddenAppsChanged?.Invoke();
+            }
+        }
+
+        private void EnsureHiddenAppsLoaded()
+        {
+            if (_hiddenAppsLoaded)
+            {
+                return;
+            }
+
+            try
+            {
+                var json = _settings.Get(HiddenAppEntriesJsonKey, "[]");
+                var loaded = Newtonsoft.Json.JsonConvert.DeserializeObject<List<HiddenAppEntry>>(json) ?? new List<HiddenAppEntry>();
+                _hiddenAppEntries = NormalizeHiddenEntries(loaded);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"AppSettings EnsureHiddenAppsLoaded failed: {ex.Message}");
+                _hiddenAppEntries = new List<HiddenAppEntry>();
+            }
+
+            _hiddenAppsLoaded = true;
+        }
+
+        private void SaveHiddenAppsUnsafe()
+        {
+            _settings.Set(HiddenAppEntriesJsonKey, Newtonsoft.Json.JsonConvert.SerializeObject(_hiddenAppEntries));
+        }
+
+        private List<HiddenAppEntry> NormalizeHiddenEntries(List<HiddenAppEntry> entries)
+        {
+            var dedup = new HashSet<string>(StringComparer.Ordinal);
+            var normalizedEntries = new List<HiddenAppEntry>();
+
+            foreach (var entry in entries)
+            {
+                if (entry == null)
+                {
+                    continue;
+                }
+
+                var normalizedDeviceId = NormalizeHiddenKeyValue(entry.DeviceId);
+                var normalizedAppId = NormalizeHiddenKeyValue(entry.AppId);
+                var normalizedExeName = NormalizeHiddenKeyValue(entry.ExeName);
+
+                if (string.IsNullOrEmpty(normalizedDeviceId) || (string.IsNullOrEmpty(normalizedAppId) && string.IsNullOrEmpty(normalizedExeName)))
+                {
+                    continue;
+                }
+
+                var key = normalizedDeviceId + "|" + normalizedAppId + "|" + normalizedExeName;
+                if (!dedup.Add(key))
+                {
+                    continue;
+                }
+
+                normalizedEntries.Add(new HiddenAppEntry
+                {
+                    DeviceId = normalizedDeviceId,
+                    AppId = normalizedAppId,
+                    ExeName = normalizedExeName,
+                    DisplayName = string.IsNullOrWhiteSpace(entry.DisplayName) ? string.Empty : entry.DisplayName.Trim(),
+                    HiddenAtUtc = entry.HiddenAtUtc,
+                });
+            }
+
+            return normalizedEntries;
+        }
+
+        private static string NormalizeHiddenKeyValue(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim().ToLowerInvariant();
+        }
+
         public bool UseScrollWheelInTray
         {
             get => _settings.Get("UseScrollWheelInTray", true);
@@ -190,6 +501,18 @@ namespace EarTrumpet
         {
             get => _settings.Get("UseGlobalMouseWheelHook", false);
             set => _settings.Set("UseGlobalMouseWheelHook", value);
+        }
+
+        public event Action AppTooltipsChanged;
+
+        public bool ShowAppTooltips
+        {
+            get => _settings.Get("ShowAppTooltips", true);
+            set
+            {
+                _settings.Set("ShowAppTooltips", value);
+                AppTooltipsChanged?.Invoke();
+            }
         }
 
         public bool HasShownFirstRun

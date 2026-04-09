@@ -1839,6 +1839,78 @@
                         <CheckBox HorizontalAlignment="Left"
                                   Content="{x:Static resx:Resources.SettingsUseLegacyEarTrumpetIcon}"
                                   IsChecked="{Binding UseLegacyIcon, Mode=TwoWay}" />
+
+                        <CheckBox HorizontalAlignment="Left" Margin="0,10,0,0"
+                                  Content="{x:Static resx:Resources.SettingsShowAppTooltips}"
+                                  IsChecked="{Binding ShowAppTooltips, Mode=TwoWay}"
+                                  ToolTip="{x:Static resx:Resources.SettingsAppTooltipsDesc}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Hidden app entries -->
+                <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
+                        Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                            <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
+                                    Background="#15FFFFFF">
+                                <TextBlock Text="&#xE738;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="White" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{x:Static resx:Resources.SettingsHiddenAppsTitle}" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsHiddenAppsDesc}"
+                                           Style="{StaticResource BodySubText}" FontSize="12" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding HiddenAppsSummaryText}" Style="{StaticResource BodySubText}" FontSize="12" Margin="0,0,0,10" />
+
+                        <Border Margin="0,0,0,10" Padding="10" CornerRadius="8" Background="#14000000">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasHiddenApps}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <ScrollViewer MaxHeight="160" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl ItemsSource="{Binding HiddenApps}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Orientation="Vertical">
+                                                    <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="12" />
+                                                    <TextBlock Text="{Binding DeviceName}" Style="{StaticResource BodySubText}" FontSize="11" />
+                                                </StackPanel>
+
+                                                <Button Grid.Column="1"
+                                                        Margin="10,0,0,0"
+                                                        Padding="8,3"
+                                                        VerticalAlignment="Center"
+                                                        Content="{x:Static resx:Resources.SettingsProfileApply}"
+                                                        Command="{Binding DataContext.RestoreHiddenAppEntryCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                        CommandParameter="{Binding}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Border>
+
+                        <Button HorizontalAlignment="Left"
+                                Content="{x:Static resx:Resources.SettingsRestoreHiddenApps}"
+                                Command="{Binding RestoreHiddenAppsCommand}"
+                                IsEnabled="{Binding HasHiddenApps}" />
                     </StackPanel>
                 </Border>
 

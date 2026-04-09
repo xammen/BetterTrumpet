@@ -232,6 +232,16 @@ else
             }
         }
 
+        private void RestoreHiddenAppsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.ContextMenu != null)
+            {
+                element.ContextMenu.PlacementTarget = element;
+                element.ContextMenu.IsOpen = true;
+                e.Handled = true;
+            }
+        }
+
         private void EnableAcrylicIfApplicable(WindowsTaskbar.State taskbar)
         {
             // Note: Enable when in Opening as well as Open in case we get a theme change during a show cycle.

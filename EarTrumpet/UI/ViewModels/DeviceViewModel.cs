@@ -39,6 +39,20 @@ namespace EarTrumpet.UI.ViewModels
         public string EnumeratorName => ((IAudioDeviceWindowsAudio)_device).EnumeratorName;
         public string InterfaceName => ((IAudioDeviceWindowsAudio)_device).InterfaceName;
         public ObservableCollection<IAppItemViewModel> Apps { get; }
+        public int HiddenAppsCount
+        {
+            get => _hiddenAppsCount;
+            private set
+            {
+                if (_hiddenAppsCount != value)
+                {
+                    _hiddenAppsCount = value;
+                    RaisePropertyChanged(nameof(HiddenAppsCount));
+                    RaisePropertyChanged(nameof(HasHiddenApps));
+                }
+            }
+        }
+        public bool HasHiddenApps => HiddenAppsCount > 0;
 
         public bool IsDisplayNameVisible
         {
@@ -69,12 +83,15 @@ namespace EarTrumpet.UI.ViewModels
         protected readonly IAudioDevice _device;
         protected readonly IAudioDeviceManager _deviceManager;
         protected readonly WeakReference<DeviceCollectionViewModel> _parent;
+        private readonly AppSettings _settings;
         private bool _isDisplayNameVisible;
         private DeviceIconKind _iconKind;
+        private int _hiddenAppsCount;
 
-        public DeviceViewModel(DeviceCollectionViewModel parent, IAudioDeviceManager deviceManager, IAudioDevice device) : base(device)
+        public DeviceViewModel(DeviceCollectionViewModel parent, IAudioDeviceManager deviceManager, AppSettings settings, IAudioDevice device) : base(device)
         {
             _deviceManager = deviceManager;
+            _settings = settings;
             _device = device;
             _parent = new WeakReference<DeviceCollectionViewModel>(parent);
             Apps = new ObservableCollection<IAppItemViewModel>();
@@ -82,10 +99,8 @@ namespace EarTrumpet.UI.ViewModels
             _device.PropertyChanged += OnPropertyChanged;
             _device.Groups.CollectionChanged += OnCollectionChanged;
 
-            foreach (var session in _device.Groups)
-            {
-                Apps.AddSorted(new AppItemViewModel(this, session), AppItemViewModel.CompareByExeName);
-            }
+            RebuildAppsCollection();
+            RefreshHiddenCount();
 
             UpdateMasterVolumeIcon();
         }
@@ -186,6 +201,11 @@ namespace EarTrumpet.UI.ViewModels
 
         private void AddSession(IAudioDeviceSession session)
         {
+            if (_settings != null && _settings.IsAppHiddenForDevice(_device.Id, session.AppId, session.ExeName))
+            {
+                return;
+            }
+
             var newSession = new AppItemViewModel(this, session);
 
             foreach (var app in Apps)
@@ -200,6 +220,26 @@ namespace EarTrumpet.UI.ViewModels
             }
 
             Apps.AddSorted(newSession, AppItemViewModel.CompareByExeName);
+        }
+
+        private void RebuildAppsCollection()
+        {
+            Apps.Clear();
+            foreach (var session in _device.Groups)
+            {
+                AddSession(session);
+            }
+        }
+
+        private void RefreshHiddenCount()
+        {
+            HiddenAppsCount = _settings?.GetHiddenAppCountForDevice(_device.Id) ?? 0;
+        }
+
+        internal void RefreshHiddenApps()
+        {
+            RebuildAppsCollection();
+            RefreshHiddenCount();
         }
 
         public void AppMovingToThisDevice(TemporaryAppItemViewModel app)
@@ -221,7 +261,8 @@ namespace EarTrumpet.UI.ViewModels
                 }
             }
 
-            if (!hasExistingAppGroup)
+            var isHiddenOnThisDevice = _settings != null && _settings.IsAppHiddenForDevice(_device.Id, app.AppId, app.ExeName);
+            if (!hasExistingAppGroup && !isHiddenOnThisDevice)
             {
                 Apps.AddSorted(app, AppItemViewModel.CompareByExeName);
             }
