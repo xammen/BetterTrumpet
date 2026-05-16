@@ -32,6 +32,7 @@ namespace EarTrumpet
         public event Action AbsoluteVolumeUpHotkeyTyped;
         public event Action AbsoluteVolumeDownHotkeyTyped;
         public event Action SwitchDeviceHotkeyTyped;
+        public event Action<string> QuickTrumpetPresetHotkeyTyped;
         public event Action CustomSliderColorsChanged;
         public event Action HiddenAppsChanged;
 
@@ -39,7 +40,11 @@ namespace EarTrumpet
         private const string HiddenAppEntriesJsonKey = "HiddenAppEntriesJson";
         private readonly object _hiddenAppsSync = new object();
         private bool _hiddenAppsLoaded;
+        private bool _hotkeyPressHandlerRegistered;
+        private DateTime _lastQuickTrumpetHotkeyAt = DateTime.MinValue;
+        private string _lastQuickTrumpetHotkey;
         private List<HiddenAppEntry> _hiddenAppEntries = new List<HiddenAppEntry>();
+        private List<HotkeyData> _quickTrumpetHotkeys = new List<HotkeyData>();
 
         public class HiddenAppEntry
         {
@@ -71,7 +76,14 @@ namespace EarTrumpet
             HotkeyManager.Current.Register(AbsoluteVolumeUpHotkey);
             HotkeyManager.Current.Register(AbsoluteVolumeDownHotkey);
             HotkeyManager.Current.Register(SwitchDeviceHotkey);
+            RegisterQuickTrumpetHotkeys();
 
+            if (_hotkeyPressHandlerRegistered)
+            {
+                return;
+            }
+
+            _hotkeyPressHandlerRegistered = true;
             HotkeyManager.Current.KeyPressed += (hotkey) =>
             {
                 if (hotkey.Equals(FlyoutHotkey))
@@ -104,7 +116,59 @@ namespace EarTrumpet
                     Trace.WriteLine("AppSettings SwitchDeviceHotkeyTyped");
                     SwitchDeviceHotkeyTyped?.Invoke();
                 }
+                else
+                {
+                    var profile = GetQuickTrumpetHotkeyProfiles().FirstOrDefault(p => p.Hotkey != null && p.Hotkey.Equals(hotkey));
+                    if (profile != null)
+                    {
+                        var profileKey = string.IsNullOrWhiteSpace(profile.Slug) ? profile.Name : profile.Slug;
+                        var now = DateTime.UtcNow;
+                        if (string.Equals(_lastQuickTrumpetHotkey, profileKey, StringComparison.OrdinalIgnoreCase) &&
+                            (now - _lastQuickTrumpetHotkeyAt).TotalMilliseconds < 700)
+                        {
+                            return;
+                        }
+
+                        _lastQuickTrumpetHotkey = profileKey;
+                        _lastQuickTrumpetHotkeyAt = now;
+                        Trace.WriteLine($"AppSettings QuickTrumpetPresetHotkeyTyped {profile.Name}");
+                        QuickTrumpetPresetHotkeyTyped?.Invoke(profileKey);
+                    }
+                }
             };
+        }
+
+        public void RegisterQuickTrumpetHotkeys()
+        {
+            foreach (var hotkey in _quickTrumpetHotkeys)
+            {
+                HotkeyManager.Current.Unregister(hotkey);
+            }
+
+            _quickTrumpetHotkeys = GetQuickTrumpetHotkeyProfiles()
+                .Select(p => p.Hotkey)
+                .Where(h => h != null && !h.IsEmpty)
+                .ToList();
+
+            foreach (var hotkey in _quickTrumpetHotkeys)
+            {
+                HotkeyManager.Current.Register(hotkey);
+            }
+        }
+
+        private List<VolumeProfileService.VolumeProfile> GetQuickTrumpetHotkeyProfiles()
+        {
+            try
+            {
+                var json = VolumeProfilesJson;
+                if (string.IsNullOrWhiteSpace(json) || json == "[]") return new List<VolumeProfileService.VolumeProfile>();
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<List<VolumeProfileService.VolumeProfile>>(json) ?? new List<VolumeProfileService.VolumeProfile>();
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"AppSettings GetQuickTrumpetHotkeyProfiles failed: {ex.Message}");
+                return new List<VolumeProfileService.VolumeProfile>();
+            }
         }
 
         public HotkeyData FlyoutHotkey
@@ -762,7 +826,17 @@ namespace EarTrumpet
         public string VolumeProfilesJson
         {
             get => _settings.Get("VolumeProfilesJson", "[]");
-            set => _settings.Set("VolumeProfilesJson", value);
+            set
+            {
+                _settings.Set("VolumeProfilesJson", value);
+                RegisterQuickTrumpetHotkeys();
+            }
+        }
+
+        public bool ShowQuickTrumpetConfirmation
+        {
+            get => _settings.Get("ShowQuickTrumpetConfirmation", true);
+            set => _settings.Set("ShowQuickTrumpetConfirmation", value);
         }
 
         // Dynamic album art theme mode

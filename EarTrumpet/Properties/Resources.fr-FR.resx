@@ -1021,19 +1021,40 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
   </data>
   <!-- Settings - Profiles page -->
   <data name="SettingsSaveCurrentVolumes" xml:space="preserve">
-    <value>Sauvegarder les volumes</value>
+    <value>Sauvegarder le setup actuel</value>
   </data>
   <data name="SettingsSaveCurrentVolumesDesc" xml:space="preserve">
-    <value>Capturer les volumes des applis</value>
+    <value>Créer un preset QuickTrumpet depuis le périphérique actuel et ses applis</value>
   </data>
   <data name="SettingsSavedProfiles" xml:space="preserve">
-    <value>Profils sauvegardés</value>
+    <value>Presets QuickTrumpet</value>
   </data>
   <data name="SettingsSavedProfilesDesc" xml:space="preserve">
-    <value>Sélectionner un profil à appliquer</value>
+    <value>Appliquer depuis BetterTrumpet, un raccourci, Raycast ou le CLI bt</value>
   </data>
   <data name="SettingsProfileDeviceCount" xml:space="preserve">
     <value>{0} périphérique(s) | {1}</value>
+  </data>
+  <data name="QuickTrumpetAppliedTitle" xml:space="preserve">
+    <value>QuickTrumpet appliqué</value>
+  </data>
+  <data name="QuickTrumpetAppliedMessage" xml:space="preserve">
+    <value>{0} appliqué. {1} appli(s), {2} périphérique(s).</value>
+  </data>
+  <data name="SettingsQuickTrumpetConfirmation" xml:space="preserve">
+    <value>Afficher une confirmation quand un preset est appliqué</value>
+  </data>
+  <data name="SettingsQuickTrumpetAllDevices" xml:space="preserve">
+    <value>Inclure tous les périphériques dans ce preset</value>
+  </data>
+  <data name="SettingsQuickTrumpetShortcut" xml:space="preserve">
+    <value>Raccourci</value>
+  </data>
+  <data name="SettingsQuickTrumpetShortcutDesc" xml:space="preserve">
+    <value>Géré ici avec le preset, pour garder Raycast, CLI et raccourcis clavier au même endroit.</value>
+  </data>
+  <data name="SettingsQuickTrumpetAppsOnly" xml:space="preserve">
+    <value>Appliquer uniquement les volumes et mutes des applis</value>
   </data>
   <!-- Settings - About page -->
   <data name="SettingsAboutSubtitle" xml:space="preserve">

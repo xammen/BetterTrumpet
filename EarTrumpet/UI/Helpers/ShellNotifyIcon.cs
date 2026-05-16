@@ -102,6 +102,21 @@ namespace EarTrumpet.UI.Helpers
             Update();
         }
 
+        public void ShowNotification(string title, string message)
+        {
+            if (!_isVisible) return;
+
+            var data = MakeData();
+            data.uFlags |= NotifyIconFlags.NIF_INFO;
+            data.szInfoTitle = title ?? string.Empty;
+            data.szInfo = message ?? string.Empty;
+            data.dwInfoFlags = 0;
+            if (!Shell32.Shell_NotifyIconW(Shell32.NotifyIconMessage.NIM_MODIFY, ref data))
+            {
+                Trace.WriteLine($"ShellNotifyIcon ShowNotification Failed: {(uint)Marshal.GetLastWin32Error()}");
+            }
+        }
+
         private NOTIFYICONDATAW MakeData()
         {
             return new NOTIFYICONDATAW

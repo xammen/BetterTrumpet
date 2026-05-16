@@ -430,10 +430,11 @@ BetterTrumpet.exe --set-device spotify "Headphones (BEACN Mic)"
 
 ### `--list-profiles`
 
-List all saved volume profiles.
+List all saved QuickTrumpet presets. `bt presets` is the preferred modern alias.
 
 ```
 BetterTrumpet.exe --list-profiles
+bt presets
 ```
 
 ```json
@@ -455,10 +456,12 @@ BetterTrumpet.exe --list-profiles
 
 ### `--apply-profile`
 
-Apply a saved volume profile. Restores all device and app volumes to the values stored in the profile.
+Apply a saved QuickTrumpet preset. Restores device/app volumes and routes matching apps back to their captured device where possible.
 
 ```
 BetterTrumpet.exe --apply-profile "Night Mode"
+bt apply focus
+bt focus
 ```
 
 ```json
@@ -469,6 +472,18 @@ BetterTrumpet.exe --apply-profile "Night Mode"
   "appsRestored": 7
 }
 ```
+
+### `bt save`
+
+Save the current default device and its apps as a QuickTrumpet preset. Use `--all-devices` to capture every device at once, or `--apps-only` when the preset should leave device volume/mute untouched.
+
+```powershell
+bt save focus
+bt save discord --apps-only
+bt save streaming --all-devices
+```
+
+Raycast can run the direct alias form, for example `bt focus`, to apply the `focus` preset.
 
 ---
 

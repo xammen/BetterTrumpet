@@ -2133,6 +2133,12 @@
                                 </StackPanel>
                             </Border>
                         </Grid>
+                        <CheckBox Content="{x:Static resx:Resources.SettingsQuickTrumpetAllDevices}"
+                                  IsChecked="{Binding CaptureAllDevices, Mode=TwoWay}"
+                                  Margin="0,10,0,0" />
+                        <CheckBox Content="{x:Static resx:Resources.SettingsQuickTrumpetConfirmation}"
+                                  IsChecked="{Binding ShowQuickTrumpetConfirmation, Mode=TwoWay}"
+                                  Margin="0,8,0,0" />
                     </StackPanel>
                 </Border>
 
@@ -2206,6 +2212,16 @@
                         <!-- Selected profile details -->
                         <TextBlock Text="{Binding SelectedProfileDetails}" FontSize="11" Foreground="#60FFFFFF"
                                    Margin="0,8,0,0" Visibility="{Binding HasSelectedProfile, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                        <StackPanel Margin="0,10,0,0" Visibility="{Binding HasSelectedProfile, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <CheckBox Content="{x:Static resx:Resources.SettingsQuickTrumpetAppsOnly}"
+                                      IsChecked="{Binding SelectedProfileApplyAppsOnly, Mode=TwoWay}"
+                                      Margin="0,0,0,10" />
+                            <TextBlock Text="{x:Static resx:Resources.SettingsQuickTrumpetShortcut}" FontSize="12" Margin="0,0,0,6" />
+                            <ContentControl Content="{Binding SelectedProfileHotkey}" IsTabStop="False" />
+                            <TextBlock Text="{x:Static resx:Resources.SettingsQuickTrumpetShortcutDesc}"
+                                       Style="{StaticResource BodySubText}" FontSize="11" Margin="0,6,0,0" />
+                        </StackPanel>
 
                         <!-- Action buttons -->
                         <StackPanel Orientation="Horizontal" Margin="0,12,0,0">

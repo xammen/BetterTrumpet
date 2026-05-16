@@ -65,6 +65,10 @@ namespace EarTrumpet.CLI
                 case "set-device":
                 case "list-profiles":
                 case "apply-profile":
+                case "presets":
+                case "save":
+                case "apply":
+                case "delete":
                 case "watch":
                 case "check-update":
                 case "export-settings":
@@ -76,7 +80,14 @@ namespace EarTrumpet.CLI
                     return true;
 
                 default:
-                    // Unknown arg — might be a file association or WPF startup, let it through
+                    // Treat a plain argument as a QuickTrumpet preset alias, e.g. `bt focus`.
+                    if (!cliArgs[0].StartsWith("-") && !cliArgs[0].StartsWith("/"))
+                    {
+                        AttachConsole(ATTACH_PARENT_PROCESS);
+                        HandleRemoteCommand(cliArgs);
+                        FreeConsole();
+                        return true;
+                    }
                     return false;
             }
         }
@@ -138,6 +149,10 @@ namespace EarTrumpet.CLI
             Console.WriteLine("  --set-device APP_EXE DEVICE_NAME        Route app audio to specific device");
             Console.WriteLine("  --list-profiles                         List saved volume profiles");
             Console.WriteLine("  --apply-profile NAME                    Apply a saved volume profile");
+            Console.WriteLine("  presets                                 List QuickTrumpet presets");
+            Console.WriteLine("  save NAME [--all-devices] [--apps-only] Save current setup as a QuickTrumpet preset");
+            Console.WriteLine("  apply NAME                              Apply a QuickTrumpet preset");
+            Console.WriteLine("  NAME                                    Apply a QuickTrumpet preset directly");
             Console.WriteLine("  --watch                                 Snapshot all devices/volumes (JSON)");
             Console.WriteLine("  --check-update                          Check for new version on GitHub");
             Console.WriteLine("  --export-settings [path]                Export all settings to .btsettings file");
@@ -155,6 +170,10 @@ namespace EarTrumpet.CLI
             Console.WriteLine("  BetterTrumpet.exe --set-default \"Headphones (BEACN Mic)\"");
             Console.WriteLine("  BetterTrumpet.exe --set-device spotify.exe \"Headphones\"");
             Console.WriteLine("  BetterTrumpet.exe --apply-profile \"Night Mode\"");
+            Console.WriteLine("  bt save focus");
+            Console.WriteLine("  bt save discord --apps-only");
+            Console.WriteLine("  bt save streaming --all-devices");
+            Console.WriteLine("  bt focus");
             Console.WriteLine();
             Console.WriteLine("Note: BetterTrumpet must be running for remote commands to work.");
             Console.WriteLine("All output is JSON for easy scripting and automation.");

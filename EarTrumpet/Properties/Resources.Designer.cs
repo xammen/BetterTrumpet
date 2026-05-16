@@ -2132,6 +2132,27 @@ namespace EarTrumpet.Properties {
         public static string SettingsProfileSave {
             get { return ResourceManager.GetString("SettingsProfileSave", resourceCulture); }
         }
+        public static string QuickTrumpetAppliedTitle {
+            get { return ResourceManager.GetString("QuickTrumpetAppliedTitle", resourceCulture); }
+        }
+        public static string QuickTrumpetAppliedMessage {
+            get { return ResourceManager.GetString("QuickTrumpetAppliedMessage", resourceCulture); }
+        }
+        public static string SettingsQuickTrumpetConfirmation {
+            get { return ResourceManager.GetString("SettingsQuickTrumpetConfirmation", resourceCulture); }
+        }
+        public static string SettingsQuickTrumpetAllDevices {
+            get { return ResourceManager.GetString("SettingsQuickTrumpetAllDevices", resourceCulture); }
+        }
+        public static string SettingsQuickTrumpetShortcut {
+            get { return ResourceManager.GetString("SettingsQuickTrumpetShortcut", resourceCulture); }
+        }
+        public static string SettingsQuickTrumpetShortcutDesc {
+            get { return ResourceManager.GetString("SettingsQuickTrumpetShortcutDesc", resourceCulture); }
+        }
+        public static string SettingsQuickTrumpetAppsOnly {
+            get { return ResourceManager.GetString("SettingsQuickTrumpetAppsOnly", resourceCulture); }
+        }
         public static string SettingsAboutSubtitle {
             get { return ResourceManager.GetString("SettingsAboutSubtitle", resourceCulture); }
         }
