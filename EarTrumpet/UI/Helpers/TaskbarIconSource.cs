@@ -65,10 +65,10 @@ namespace EarTrumpet.UI.Helpers
                 _volumeIconGenerator = new VolumeIconGenerator(iconSize, 16);
                 Trace.WriteLine($"TaskbarIconSource: VolumeIconGenerator created with {_volumeIconGenerator.FrameCount} frames");
 
-                // Use Background priority so peak meters and UI input aren't starved
-                _animationTimer = new DispatcherTimer(DispatcherPriority.Background)
+                // Keep the tray animation responsive even when the UI is otherwise idle.
+                _animationTimer = new DispatcherTimer(DispatcherPriority.Render)
                 {
-                    Interval = TimeSpan.FromMilliseconds(150) // ~7 fps — tray icons are tiny, 12fps was overkill
+                    Interval = TimeSpan.FromMilliseconds(50) // Smooth enough for the tiny tray icon
                 };
                 _animationTimer.Tick += OnAnimationTick;
 
