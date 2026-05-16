@@ -110,10 +110,18 @@ namespace EarTrumpet.CLI
                         return DispatchToUI(() => SetDeviceForApp(args));
 
                     case "list-profiles":
+                    case "presets":
                         return ListProfiles();
 
                     case "apply-profile":
+                    case "apply":
                         return DispatchToUI(() => ApplyProfile(args));
+
+                    case "save":
+                        return DispatchToUI(() => SaveProfile(args));
+
+                    case "delete":
+                        return DeleteProfile(args);
 
                     case "watch":
                         return DispatchToUI(() => WatchSnapshot());
@@ -128,7 +136,7 @@ namespace EarTrumpet.CLI
                         return ImportSettings(args);
 
                     default:
-                        return Error($"unknown command: {cmd}");
+                        return DispatchToUI(() => ApplyProfile(parts));
                 }
             }
             catch (Exception ex)
@@ -567,7 +575,9 @@ namespace EarTrumpet.CLI
                 var result = profiles?.Select(p => new
                 {
                     name = p.Name,
+                    slug = string.IsNullOrWhiteSpace(p.Slug) ? VolumeProfileService.ToSlug(p.Name) : p.Slug,
                     devices = p.Devices?.Count ?? 0,
+                    apps = p.Devices?.Sum(d => d.Apps?.Count ?? 0) ?? 0,
                     createdAt = p.CreatedAt
                 }).ToList();
 
@@ -592,25 +602,83 @@ namespace EarTrumpet.CLI
 
             try
             {
-                var json = settings.VolumeProfilesJson;
-                if (string.IsNullOrWhiteSpace(json)) return Error("no profiles saved");
-
-                var profiles = JsonConvert.DeserializeObject<List<VolumeProfileService.VolumeProfile>>(json);
-                var profile = profiles?.FirstOrDefault(p =>
-                    string.Equals(p.Name, profileName, StringComparison.OrdinalIgnoreCase));
-
-                if (profile == null)
-                    return Error($"profile not found: {profileName}");
-
                 var service = new VolumeProfileService(settings);
-                service.ApplyProfile(profile, collection);
+                var profile = service.FindProfile(profileName);
+                if (profile == null)
+                    return Error($"QuickTrumpet preset not found: {profileName}");
 
-                return JsonConvert.SerializeObject(new { ok = true, name = profile.Name, devices = profile.Devices?.Count ?? 0 });
+                var result = service.ApplyProfile(profile, collection, _getDeviceManager() as IAudioDeviceManagerWindowsAudio);
+
+                return JsonConvert.SerializeObject(new
+                {
+                    ok = true,
+                    preset = profile.Name,
+                    slug = string.IsNullOrWhiteSpace(profile.Slug) ? VolumeProfileService.ToSlug(profile.Name) : profile.Slug,
+                    devicesApplied = result.DevicesApplied,
+                    appsApplied = result.AppsApplied,
+                    appsMissing = result.AppsMissing,
+                    appsRouted = result.AppsRouted,
+                    warnings = result.Warnings
+                });
             }
             catch (Exception ex)
             {
                 return Error($"failed to apply profile: {ex.Message}");
             }
+        }
+
+        private string SaveProfile(List<string> args)
+        {
+            if (args.Count == 0) return Error("usage: save NAME [--all-devices] [--apps-only]");
+
+            var captureAllDevices = args.Any(a => string.Equals(a, "--all-devices", StringComparison.OrdinalIgnoreCase));
+            var applyAppsOnly = args.Any(a => string.Equals(a, "--apps-only", StringComparison.OrdinalIgnoreCase));
+            var nameParts = args.Where(a =>
+                !string.Equals(a, "--all-devices", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(a, "--apps-only", StringComparison.OrdinalIgnoreCase)).ToList();
+            var profileName = string.Join(" ", nameParts).Trim();
+            if (string.IsNullOrWhiteSpace(profileName)) return Error("usage: save NAME [--all-devices] [--apps-only]");
+
+            var settings = _getSettings();
+            if (settings == null) return Error("settings not available");
+
+            var collection = _getCollection();
+            if (collection == null) return Error("audio not ready");
+
+            var service = new VolumeProfileService(settings);
+            var profile = service.CaptureCurrentState(
+                profileName,
+                collection,
+                captureAllDevices ? VolumeProfileService.CaptureScope.AllDevices : VolumeProfileService.CaptureScope.CurrentDevice);
+            profile.ApplyAppsOnly = applyAppsOnly;
+            service.SaveProfile(profile);
+
+            return JsonConvert.SerializeObject(new
+            {
+                ok = true,
+                preset = profile.Name,
+                slug = profile.Slug,
+                captureScope = profile.CaptureScope.ToString(),
+                applyAppsOnly = profile.ApplyAppsOnly,
+                devices = profile.Devices?.Count ?? 0,
+                apps = profile.Devices?.Sum(d => d.Apps?.Count ?? 0) ?? 0
+            });
+        }
+
+        private string DeleteProfile(List<string> args)
+        {
+            if (args.Count == 0) return Error("usage: delete NAME");
+
+            var settings = _getSettings();
+            if (settings == null) return Error("settings not available");
+
+            var profileName = string.Join(" ", args);
+            var service = new VolumeProfileService(settings);
+            var profile = service.FindProfile(profileName);
+            if (profile == null) return Error($"QuickTrumpet preset not found: {profileName}");
+
+            service.DeleteProfile(profile);
+            return JsonConvert.SerializeObject(new { ok = true, preset = profile.Name });
         }
 
         private string ExportSettings(List<string> args)

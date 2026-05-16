@@ -79,6 +79,7 @@ namespace EarTrumpet.DataModel
 
                 // Volume Profiles (embedded)
                 ["VolumeProfilesJson"] = settings.VolumeProfilesJson,
+                ["ShowQuickTrumpetConfirmation"] = settings.ShowQuickTrumpetConfirmation,
             };
 
             return data;
@@ -232,6 +233,7 @@ namespace EarTrumpet.DataModel
             // Updates
             TrySet(data, "AutoCheckForUpdates", (bool v) => settings.AutoCheckForUpdates = v);
             TrySet(data, "UpdateNotifyChannel", (int v) => settings.UpdateNotifyChannel = (UpdateChannel)v);
+            TrySet(data, "ShowQuickTrumpetConfirmation", (bool v) => settings.ShowQuickTrumpetConfirmation = v);
 
             // Hotkeys
             TrySetHotkey(data, "FlyoutHotkey", h => settings.FlyoutHotkey = h);

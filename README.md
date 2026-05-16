@@ -148,13 +148,16 @@ BetterTrumpet.exe --mute --device "Speakers"
 BetterTrumpet.exe --set-default "Headphones"
 BetterTrumpet.exe --set-device spotify.exe "Headphones"
 BetterTrumpet.exe --apply-profile "Night Mode"
+bt save focus
+bt save discord --apps-only
+bt focus
 ```
 
 | Area | Commands |
 | --- | --- |
 | Devices | `--list-devices`, `--list-apps`, `--get-volume`, `--set-volume`, `--mute`, `--unmute`, `--toggle-mute` |
 | Routing | `--get-default`, `--set-default`, `--set-device` |
-| Profiles | `--list-profiles`, `--apply-profile` |
+| QuickTrumpet | `presets`, `save`, `apply`, direct preset aliases like `bt focus`, plus compatible `--list-profiles`, `--apply-profile` |
 | Automation | `--watch`, `--ping`, `--check-update`, `--export-settings`, `--import-settings` |
 | Help | `--version`, `--help` |
 

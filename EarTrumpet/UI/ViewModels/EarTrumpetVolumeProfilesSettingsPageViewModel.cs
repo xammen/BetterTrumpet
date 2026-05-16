@@ -1,4 +1,6 @@
 using EarTrumpet.DataModel;
+using EarTrumpet.DataModel.WindowsAudio;
+using EarTrumpet.Interop.Helpers;
 using EarTrumpet.UI.Helpers;
 using System;
 using System.Collections.ObjectModel;
@@ -26,6 +28,8 @@ namespace EarTrumpet.UI.ViewModels
                 RaisePropertyChanged(nameof(SelectedProfile));
                 RaisePropertyChanged(nameof(HasSelectedProfile));
                 RaisePropertyChanged(nameof(SelectedProfileDetails));
+                RaisePropertyChanged(nameof(SelectedProfileApplyAppsOnly));
+                UpdateSelectedProfileHotkey();
             }
         }
 
@@ -38,7 +42,54 @@ namespace EarTrumpet.UI.ViewModels
                 if (_selectedProfile == null) return "";
                 var devices = _selectedProfile.Devices?.Count ?? 0;
                 var apps = _selectedProfile.Devices?.Sum(d => d.Apps?.Count ?? 0) ?? 0;
-                return $"{devices} device(s), {apps} app(s) | {_selectedProfile.CreatedAt}";
+                var slug = string.IsNullOrWhiteSpace(_selectedProfile.Slug) ? VolumeProfileService.ToSlug(_selectedProfile.Name) : _selectedProfile.Slug;
+                var mode = _selectedProfile.ApplyAppsOnly ? "apps only" : "devices + apps";
+                return $"bt {slug} | {mode} | {devices} device(s), {apps} app(s) | {_selectedProfile.CreatedAt}";
+            }
+        }
+
+        private bool _captureAllDevices;
+        public bool CaptureAllDevices
+        {
+            get => _captureAllDevices;
+            set
+            {
+                _captureAllDevices = value;
+                RaisePropertyChanged(nameof(CaptureAllDevices));
+            }
+        }
+
+        public bool ShowQuickTrumpetConfirmation
+        {
+            get => _settings.ShowQuickTrumpetConfirmation;
+            set
+            {
+                _settings.ShowQuickTrumpetConfirmation = value;
+                RaisePropertyChanged(nameof(ShowQuickTrumpetConfirmation));
+            }
+        }
+
+        public bool SelectedProfileApplyAppsOnly
+        {
+            get => _selectedProfile?.ApplyAppsOnly ?? false;
+            set
+            {
+                if (_selectedProfile == null || _selectedProfile.ApplyAppsOnly == value) return;
+                _selectedProfile.ApplyAppsOnly = value;
+                _profileService.SaveProfile(_selectedProfile);
+                RaisePropertyChanged(nameof(SelectedProfileApplyAppsOnly));
+                RaisePropertyChanged(nameof(SelectedProfileDetails));
+            }
+        }
+
+        private HotkeyViewModel _selectedProfileHotkey;
+        public HotkeyViewModel SelectedProfileHotkey
+        {
+            get => _selectedProfileHotkey;
+            private set
+            {
+                _selectedProfileHotkey = value;
+                RaisePropertyChanged(nameof(SelectedProfileHotkey));
             }
         }
 
@@ -63,8 +114,8 @@ namespace EarTrumpet.UI.ViewModels
         public EarTrumpetVolumeProfilesSettingsPageViewModel(AppSettings settings) : base(null)
         {
             _settings = settings;
-            Title = "Volume Profiles";
-            Subtitle = "Save and restore device volume snapshots.";
+            Title = "QuickTrumpet";
+            Subtitle = "Save and apply audio presets from BetterTrumpet, hotkeys, or Raycast.";
             Glyph = "\xE9CE"; // Save icon
 
             _profileService = new VolumeProfileService(settings);
@@ -98,13 +149,36 @@ namespace EarTrumpet.UI.ViewModels
             var collection = GetCollectionViewModel();
             if (collection == null) return;
 
-            var profile = _profileService.CaptureCurrentState(name, collection);
+            var profile = _profileService.CaptureCurrentState(
+                name,
+                collection,
+                CaptureAllDevices ? VolumeProfileService.CaptureScope.AllDevices : VolumeProfileService.CaptureScope.CurrentDevice);
             _profileService.SaveProfile(profile);
             SelectedProfile = profile;
             NewProfileName = "";
 
             RaisePropertyChanged(nameof(Profiles));
             Trace.WriteLine($"VolumeProfilesVM: Saved profile '{name}'");
+        }
+
+        private void UpdateSelectedProfileHotkey()
+        {
+            if (_selectedProfile == null)
+            {
+                SelectedProfileHotkey = null;
+                return;
+            }
+
+            if (_selectedProfile.Hotkey == null)
+            {
+                _selectedProfile.Hotkey = new HotkeyData();
+            }
+
+            SelectedProfileHotkey = new HotkeyViewModel(_selectedProfile.Hotkey, newHotkey =>
+            {
+                _selectedProfile.Hotkey = newHotkey;
+                _profileService.SaveProfile(_selectedProfile);
+            });
         }
 
         private void ApplySelectedProfile()
@@ -115,14 +189,19 @@ namespace EarTrumpet.UI.ViewModels
             if (collection == null) return;
 
             var result = MessageBox.Show(
-                $"Apply profile \"{_selectedProfile.Name}\"?\n\nThis will change volumes for all matching devices and apps.",
-                "Apply Volume Profile",
+                $"Apply QuickTrumpet preset \"{_selectedProfile.Name}\"?\n\n" +
+                (_selectedProfile.ApplyAppsOnly
+                    ? "This will only change matching app volumes and mute states."
+                    : "This will change matching device and app volumes."),
+                "Apply QuickTrumpet Preset",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
-                _profileService.ApplyProfile(_selectedProfile, collection);
+                var app = (App)Application.Current;
+                var applyResult = _profileService.ApplyProfile(_selectedProfile, collection, app.AudioDeviceManager as IAudioDeviceManagerWindowsAudio);
+                app.ShowQuickTrumpetConfirmation(_selectedProfile.Name, applyResult);
             }
         }
 
@@ -131,8 +210,8 @@ namespace EarTrumpet.UI.ViewModels
             if (_selectedProfile == null) return;
 
             var result = MessageBox.Show(
-                $"Delete profile \"{_selectedProfile.Name}\"?",
-                "Delete Volume Profile",
+                $"Delete QuickTrumpet preset \"{_selectedProfile.Name}\"?",
+                "Delete QuickTrumpet Preset",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
 
@@ -153,7 +232,7 @@ namespace EarTrumpet.UI.ViewModels
             {
                 var dlg = new Microsoft.Win32.SaveFileDialog
                 {
-                    Title = "Export Volume Profile",
+                    Title = "Export QuickTrumpet Preset",
                     Filter = "BetterTrumpet Profile (*.btprofile)|*.btprofile|JSON Files (*.json)|*.json",
                     DefaultExt = ".btprofile",
                     FileName = SanitizeFileName(_selectedProfile.Name)

@@ -1024,19 +1024,40 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
   </data>
   <!-- Settings - Profiles page -->
   <data name="SettingsSaveCurrentVolumes" xml:space="preserve">
-    <value>Save Current Volumes</value>
+    <value>Save current setup</value>
   </data>
   <data name="SettingsSaveCurrentVolumesDesc" xml:space="preserve">
-    <value>Snapshot device and app volumes</value>
+    <value>Create a QuickTrumpet preset from the current device and its apps</value>
   </data>
   <data name="SettingsSavedProfiles" xml:space="preserve">
-    <value>Saved Profiles</value>
+    <value>QuickTrumpet presets</value>
   </data>
   <data name="SettingsSavedProfilesDesc" xml:space="preserve">
-    <value>Select a profile to apply or manage</value>
+    <value>Apply from BetterTrumpet, a hotkey, Raycast, or the bt CLI</value>
   </data>
   <data name="SettingsProfileDeviceCount" xml:space="preserve">
     <value>{0} device(s) | {1}</value>
+  </data>
+  <data name="QuickTrumpetAppliedTitle" xml:space="preserve">
+    <value>QuickTrumpet applied</value>
+  </data>
+  <data name="QuickTrumpetAppliedMessage" xml:space="preserve">
+    <value>{0} applied. {1} app(s), {2} device(s).</value>
+  </data>
+  <data name="SettingsQuickTrumpetConfirmation" xml:space="preserve">
+    <value>Show confirmation when a preset is applied</value>
+  </data>
+  <data name="SettingsQuickTrumpetAllDevices" xml:space="preserve">
+    <value>Include all devices in this preset</value>
+  </data>
+  <data name="SettingsQuickTrumpetShortcut" xml:space="preserve">
+    <value>Shortcut</value>
+  </data>
+  <data name="SettingsQuickTrumpetShortcutDesc" xml:space="preserve">
+    <value>Managed here with the preset, so Raycast, CLI, and keyboard workflows stay together.</value>
+  </data>
+  <data name="SettingsQuickTrumpetAppsOnly" xml:space="preserve">
+    <value>Only apply app volumes and mute states</value>
   </data>
   <!-- Settings - About page -->
   <data name="SettingsAboutSubtitle" xml:space="preserve">

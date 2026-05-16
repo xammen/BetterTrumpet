@@ -36,6 +36,7 @@ namespace EarTrumpet
 
         public FlyoutWindow FlyoutWindow { get; private set; }
         public DeviceCollectionViewModel CollectionViewModel { get; private set; }
+        public DataModel.Audio.IAudioDeviceManager AudioDeviceManager => _deviceManager;
 
         private static readonly Stopwatch s_appTimer = Stopwatch.StartNew();
         private FlyoutViewModel _flyoutViewModel;
@@ -61,6 +62,17 @@ namespace EarTrumpet
         public void OpenMixerWindow()
         {
             _mixerWindow?.OpenOrBringToFront();
+        }
+
+        public void ShowQuickTrumpetConfirmation(string presetName, VolumeProfileService.ApplyProfileResult result)
+        {
+            if (!Settings.ShowQuickTrumpetConfirmation) return;
+
+            var apps = result?.AppsApplied ?? 0;
+            var devices = result?.DevicesApplied ?? 0;
+            _trayIcon?.ShowNotification(
+                EarTrumpet.Properties.Resources.QuickTrumpetAppliedTitle,
+                string.Format(EarTrumpet.Properties.Resources.QuickTrumpetAppliedMessage, presetName, apps, devices));
         }
 
         private void EnsureTrayHoverTooltipPopup()
@@ -292,6 +304,7 @@ namespace EarTrumpet
                 Settings.AbsoluteVolumeUpHotkeyTyped += AbsoluteVolumeIncrement;
                 Settings.AbsoluteVolumeDownHotkeyTyped += AbsoluteVolumeDecrement;
                 Settings.SwitchDeviceHotkeyTyped += CycleDefaultDevice;
+                Settings.QuickTrumpetPresetHotkeyTyped += ApplyQuickTrumpetPreset;
                 Settings.RegisterHotkeys();
             }
             catch (Exception ex) { Trace.WriteLine($"Startup: Hotkeys registration failed: {ex.Message}"); }
@@ -706,6 +719,23 @@ namespace EarTrumpet
             var next = list[(idx + 1) % list.Count];
             _deviceManager.Default = next;
             Trace.WriteLine($"CycleDefaultDevice: switched to '{next.DisplayName}'");
+        }
+
+        private void ApplyQuickTrumpetPreset(string nameOrSlug)
+        {
+            try
+            {
+                var service = new VolumeProfileService(Settings);
+                var profile = service.FindProfile(nameOrSlug);
+                if (profile == null || CollectionViewModel == null) return;
+
+                var result = service.ApplyProfile(profile, CollectionViewModel, _deviceManager as IAudioDeviceManagerWindowsAudio);
+                ShowQuickTrumpetConfirmation(profile.Name, result);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"ApplyQuickTrumpetPreset failed: {ex.Message}");
+            }
         }
     }
 }
