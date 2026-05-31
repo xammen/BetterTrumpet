@@ -257,7 +257,7 @@ namespace EarTrumpet
             Settings.AppTooltipsChanged += () => Dispatcher.BeginInvoke((Action)RefreshTrayTooltipPresentation);
 
             _flyoutViewModel = new FlyoutViewModel(CollectionViewModel, () => _trayIcon.SetFocus(), Settings);
-            FlyoutWindow = new FlyoutWindow(_flyoutViewModel);
+            FlyoutWindow = new FlyoutWindow(_flyoutViewModel, TryGetTrayIconBounds);
             // Initialize the FlyoutWindow last because its Show/Hide cycle will pump messages, causing UI frames
             // to be executed, breaking the assumption that startup is complete.
             FlyoutWindow.Initialize();
@@ -719,6 +719,17 @@ namespace EarTrumpet
             var next = list[(idx + 1) % list.Count];
             _deviceManager.Default = next;
             Trace.WriteLine($"CycleDefaultDevice: switched to '{next.DisplayName}'");
+        }
+
+        private Rect? TryGetTrayIconBounds()
+        {
+            Rect bounds;
+            if (_trayIcon != null && _trayIcon.TryGetIconBounds(out bounds))
+            {
+                return bounds;
+            }
+
+            return null;
         }
 
         private void ApplyQuickTrumpetPreset(string nameOrSlug)

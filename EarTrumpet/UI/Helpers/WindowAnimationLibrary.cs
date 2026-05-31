@@ -11,10 +11,10 @@ namespace EarTrumpet.UI.Helpers
 {
     public class WindowAnimationLibrary
     {
-        // Windows 11 style: snappy, fluid animations
-        const int _animationOffset = 6;
-        const int _entranceDurationMs = 150;
-        const int _exitDurationMs = 100;
+        // Windows 11 style: short, directional movement that feels tied to the taskbar.
+        const int _animationOffset = 8;
+        const int _entranceDurationMs = 165;
+        const int _exitDurationMs = 105;
 
         public static void BeginFlyoutEntranceAnimation(Window window, WindowsTaskbar.State taskbar, Action completed)
         {
@@ -37,8 +37,7 @@ namespace EarTrumpet.UI.Helpers
                 return;
             }
 
-            // Snappy quadratic easing for fluid feel
-            var easingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+            var easingFunction = new CubicEase { EasingMode = EasingMode.EaseOut };
 
             var moveAnimation = new DoubleAnimation
             {
@@ -143,8 +142,7 @@ namespace EarTrumpet.UI.Helpers
                 return;
             }
 
-            // Snappy quadratic easing for fluid feel
-            var easingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn };
+            var easingFunction = new CubicEase { EasingMode = EasingMode.EaseIn };
 
             var moveAnimation = new DoubleAnimation
             {
@@ -174,7 +172,7 @@ namespace EarTrumpet.UI.Helpers
                     moveAnimation.To = window.Left - _animationOffset;
                     break;
                 case WindowsTaskbar.Position.Right:
-                    moveAnimation.To = window.Left - _animationOffset;
+                    moveAnimation.To = window.Left + _animationOffset;
                     break;
                 case WindowsTaskbar.Position.Top:
                     moveAnimation.To = window.Top - _animationOffset;
