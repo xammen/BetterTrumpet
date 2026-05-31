@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -192,23 +193,38 @@ namespace EarTrumpet.DataModel
         private void OnCurrentSessionChanged(GlobalSystemMediaTransportControlsSessionManager sender, CurrentSessionChangedEventArgs args)
         {
             Trace.WriteLine("MediaSessionService: Current session changed");
-            SubscribeToAllSessions();
-            UpdatePlaybackState();
+            _dispatcher.BeginInvoke(new Action(() =>
+            {
+                SubscribeToAllSessions();
+                UpdatePlaybackState();
+            }));
         }
 
         private void OnSessionsChanged(GlobalSystemMediaTransportControlsSessionManager sender, SessionsChangedEventArgs args)
         {
             Trace.WriteLine("MediaSessionService: Sessions changed");
-            SubscribeToAllSessions();
-            UpdatePlaybackState();
+            _dispatcher.BeginInvoke(new Action(() =>
+            {
+                SubscribeToAllSessions();
+                UpdatePlaybackState();
+            }));
         }
 
         private void SubscribeToAllSessions()
         {
             try
             {
-                var sessions = _sessionManager?.GetSessions();
-                if (sessions == null) return;
+                var sessionList = _sessionManager?.GetSessions();
+                if (sessionList == null) return;
+
+                GlobalSystemMediaTransportControlsSession[] sessions;
+                try
+                {
+                    sessions = new GlobalSystemMediaTransportControlsSession[sessionList.Count];
+                    for (int i = 0; i < sessionList.Count; i++)
+                        sessions[i] = sessionList[i];
+                }
+                catch { return; }
 
                 foreach (var session in sessions)
                 {
@@ -236,7 +252,7 @@ namespace EarTrumpet.DataModel
 
         private void OnPlaybackInfoChanged(GlobalSystemMediaTransportControlsSession sender, PlaybackInfoChangedEventArgs args)
         {
-            UpdatePlaybackState();
+            _dispatcher.BeginInvoke(new Action(() => UpdatePlaybackState()));
         }
 
         private void OnTimelinePropertiesChanged(GlobalSystemMediaTransportControlsSession sender, TimelinePropertiesChangedEventArgs args)
@@ -282,18 +298,28 @@ namespace EarTrumpet.DataModel
             }
         }
 
+        [HandleProcessCorruptedStateExceptions]
         private bool CheckIfAnyMediaPlaying()
         {
             try
             {
-                var sessions = _sessionManager?.GetSessions();
-                if (sessions == null) return false;
+                var sessionList = _sessionManager?.GetSessions();
+                if (sessionList == null) return false;
+
+                GlobalSystemMediaTransportControlsSession[] sessions;
+                try
+                {
+                    sessions = new GlobalSystemMediaTransportControlsSession[sessionList.Count];
+                    for (int i = 0; i < sessionList.Count; i++)
+                        sessions[i] = sessionList[i];
+                }
+                catch { return false; }
 
                 foreach (var session in sessions)
                 {
                     try
                     {
-                        var playbackInfo = session.GetPlaybackInfo();
+                        var playbackInfo = session?.GetPlaybackInfo();
                         if (playbackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
                         {
                             return true;
@@ -302,10 +328,7 @@ namespace EarTrumpet.DataModel
                     catch { /* Session may have been disposed — skip silently */ }
                 }
             }
-            catch (Exception ex)
-            {
-                Trace.WriteLine($"MediaSessionService: Error in CheckIfAnyMediaPlaying - {ex.Message}");
-            }
+            catch { /* WinRT COM corruption — skip */ }
 
             return false;
         }

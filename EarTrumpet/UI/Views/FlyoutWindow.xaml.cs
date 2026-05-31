@@ -5,16 +5,19 @@ using EarTrumpet.UI.Helpers;
 using EarTrumpet.UI.ViewModels;
 using System;
 using System.Windows;
+using Forms = System.Windows.Forms;
 
 namespace EarTrumpet.UI.Views
 {
     public partial class FlyoutWindow
     {
         private readonly IFlyoutViewModel _viewModel;
+        private readonly Func<Rect?> _trayIconBoundsProvider;
 
-        public FlyoutWindow(IFlyoutViewModel viewModel)
+        public FlyoutWindow(IFlyoutViewModel viewModel, Func<Rect?> trayIconBoundsProvider = null)
         {
             _viewModel = viewModel;
+            _trayIconBoundsProvider = trayIconBoundsProvider;
             DataContext = _viewModel;
 
             InitializeComponent();
@@ -117,8 +120,11 @@ else
 
         private void PositionWindowRelativeToTaskbar(WindowsTaskbar.State taskbar)
         {
+            var trayIconBounds = GetTrayIconBoundsForPositioning();
+            var containingScreen = GetContainingScreen(taskbar, trayIconBounds);
+
             // We're not ready if we don't have a taskbar and monitor. (e.g. RDP transition)
-            if (taskbar.ContainingScreen == null)
+            if (containingScreen == null)
             {
                 return;
             }
@@ -128,17 +134,17 @@ else
             LayoutRoot.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
 
             // Working area accounts for normal taskbar and docked windows.
-            var adjustedWorkingAreaRight = taskbar.ContainingScreen.WorkingArea.Right;
-            var adjustedWorkingAreaLeft = taskbar.ContainingScreen.WorkingArea.Left;
-            var adjustedWorkingAreaTop = taskbar.ContainingScreen.WorkingArea.Top;
-            var adjustedWorkingAreaBottom = taskbar.ContainingScreen.WorkingArea.Bottom;
+            var adjustedWorkingAreaRight = containingScreen.WorkingArea.Right;
+            var adjustedWorkingAreaLeft = containingScreen.WorkingArea.Left;
+            var adjustedWorkingAreaTop = containingScreen.WorkingArea.Top;
+            var adjustedWorkingAreaBottom = containingScreen.WorkingArea.Bottom;
 
             // Taskbar won't carve space out for itself if it's configured to auto-hide, so manually
             // adjust the working area to compensate. This is only done if the working area edge
             // reaches into Taskbar space. This accounts for 0..n docked windows that may not
             // push the working area out far enough.
 
-            if (taskbar.IsAutoHideEnabled)
+            if (taskbar.IsAutoHideEnabled && taskbar.ContainingScreen != null && taskbar.ContainingScreen.DeviceName == containingScreen.DeviceName)
             {
                 switch (taskbar.Location)
                 {
@@ -194,25 +200,29 @@ else
 
             double top = 0;
             double left = 0;
+            var isIconAnchored = trayIconBounds.HasValue;
             switch (taskbar.Location)
             {
                 case WindowsTaskbar.Position.Left:
-                    top = adjustedWorkingAreaBottom - flyoutHeight;
+                    top = isIconAnchored ? trayIconBounds.Value.Top + (trayIconBounds.Value.Height / 2) - (flyoutHeight / 2) : adjustedWorkingAreaBottom - flyoutHeight;
                     left = adjustedWorkingAreaLeft;
                     break;
                 case WindowsTaskbar.Position.Right:
-                    top = adjustedWorkingAreaBottom - flyoutHeight;
+                    top = isIconAnchored ? trayIconBounds.Value.Top + (trayIconBounds.Value.Height / 2) - (flyoutHeight / 2) : adjustedWorkingAreaBottom - flyoutHeight;
                     left = adjustedWorkingAreaRight - flyoutWidth;
                     break;
                 case WindowsTaskbar.Position.Top:
                     top = adjustedWorkingAreaTop + xOffset;
-                    left = FlowDirection == FlowDirection.LeftToRight ? adjustedWorkingAreaRight - flyoutWidth - xOffset : adjustedWorkingAreaLeft + xOffset;
+                    left = isIconAnchored ? trayIconBounds.Value.Left + (trayIconBounds.Value.Width / 2) - (flyoutWidth / 2) : FlowDirection == FlowDirection.LeftToRight ? adjustedWorkingAreaRight - flyoutWidth - xOffset : adjustedWorkingAreaLeft + xOffset;
                     break;
                 case WindowsTaskbar.Position.Bottom:
                     top = adjustedWorkingAreaBottom - flyoutHeight - yOffset;
-                    left = FlowDirection == FlowDirection.LeftToRight ? adjustedWorkingAreaRight - flyoutWidth - xOffset : adjustedWorkingAreaLeft + xOffset;
+                    left = isIconAnchored ? trayIconBounds.Value.Left + (trayIconBounds.Value.Width / 2) - (flyoutWidth / 2) : FlowDirection == FlowDirection.LeftToRight ? adjustedWorkingAreaRight - flyoutWidth - xOffset : adjustedWorkingAreaLeft + xOffset;
                     break;
             }
+
+            left = Clamp(left, adjustedWorkingAreaLeft + xOffset, adjustedWorkingAreaRight - flyoutWidth - xOffset);
+            top = Clamp(top, adjustedWorkingAreaTop + yOffset, adjustedWorkingAreaBottom - flyoutHeight - yOffset);
             this.SetWindowPos(top, left, flyoutHeight, flyoutWidth);
 
             // Sync WPF Height with the Win32 window size so the ScrollViewer
@@ -222,6 +232,50 @@ else
             Height = flyoutHeight / this.DpiY();
 
             _viewModel.UpdateWindowPos(top, left, flyoutHeight, flyoutWidth);
+        }
+
+        private Rect? GetTrayIconBoundsForPositioning()
+        {
+            if (!WasOpenedFromMouse() || _trayIconBoundsProvider == null)
+            {
+                return null;
+            }
+
+            var bounds = _trayIconBoundsProvider();
+            if (!bounds.HasValue || bounds.Value.IsEmpty || bounds.Value.Width <= 0 || bounds.Value.Height <= 0)
+            {
+                return null;
+            }
+
+            return bounds;
+        }
+
+        private bool WasOpenedFromMouse()
+        {
+            var flyoutViewModel = _viewModel as FlyoutViewModel;
+            return flyoutViewModel != null && flyoutViewModel.WasLastInputMouse;
+        }
+
+        private static Forms.Screen GetContainingScreen(WindowsTaskbar.State taskbar, Rect? trayIconBounds)
+        {
+            if (trayIconBounds.HasValue)
+            {
+                return Forms.Screen.FromPoint(new System.Drawing.Point(
+                    (int)(trayIconBounds.Value.Left + (trayIconBounds.Value.Width / 2)),
+                    (int)(trayIconBounds.Value.Top + (trayIconBounds.Value.Height / 2))));
+            }
+
+            return taskbar.ContainingScreen;
+        }
+
+        private static double Clamp(double value, double min, double max)
+        {
+            if (max < min)
+            {
+                return min;
+            }
+
+            return Math.Max(min, Math.Min(max, value));
         }
 
         private void UpdateBanner_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
