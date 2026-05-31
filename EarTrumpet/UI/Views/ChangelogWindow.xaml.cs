@@ -1,8 +1,10 @@
 using EarTrumpet.Properties;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -17,10 +19,12 @@ namespace EarTrumpet.UI.Views
         private const string GitHubApiUrl = "https://api.github.com/repos/xammen/BetterTrumpet/releases/latest";
 
         private static readonly Color _accent = Color.FromRgb(0x3B, 0x9E, 0xFF);
-        private static readonly Brush _t1 = new SolidColorBrush(Color.FromArgb(0xF0, 0xFF, 0xFF, 0xFF));
-        private static readonly Brush _t2 = new SolidColorBrush(Color.FromArgb(0x70, 0xFF, 0xFF, 0xFF));
-        private static readonly Brush _t3 = new SolidColorBrush(Color.FromArgb(0x40, 0xFF, 0xFF, 0xFF));
+        private static readonly Brush _textPrimary = new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
+        private static readonly Brush _textSecondary = new SolidColorBrush(Color.FromArgb(0xB0, 0xFF, 0xFF, 0xFF));
+        private static readonly Brush _textMuted = new SolidColorBrush(Color.FromArgb(0x60, 0xFF, 0xFF, 0xFF));
         private static readonly Brush _surfaceBrush = new SolidColorBrush(Color.FromRgb(0x18, 0x18, 0x1E));
+        private static readonly Brush _cardBorder = new SolidColorBrush(Color.FromArgb(0x15, 0xFF, 0xFF, 0xFF));
+        private static readonly Brush _divider = new SolidColorBrush(Color.FromArgb(0x10, 0xFF, 0xFF, 0xFF));
 
         public ChangelogWindow()
         {
@@ -31,7 +35,6 @@ namespace EarTrumpet.UI.Views
 
         private async void OnLoaded(object sender, RoutedEventArgs e)
         {
-            // Show loading state
             AddLoadingIndicator();
 
             try
@@ -61,24 +64,20 @@ namespace EarTrumpet.UI.Views
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"ChangelogWindow: Failed to fetch release notes — {ex.Message}");
+                Trace.WriteLine($"ChangelogWindow: Failed to fetch release notes - {ex.Message}");
                 ContentPanel.Children.Clear();
                 AddFallbackContent(Properties.Resources.ChangelogLoadError);
             }
 
-            // Animate content in
             AnimateContentIn();
             ApplyTitleShimmer();
         }
 
-        /// <summary>
-        /// Parse GitHub release markdown into WPF UI elements.
-        /// Handles: ## H2, ### H3, **bold**, - bullet, plain text
-        /// </summary>
         private void ParseMarkdownToUI(string markdown)
         {
             var lines = markdown.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
             StackPanel currentSection = null;
+            var introLines = new List<string>();
 
             foreach (var rawLine in lines)
             {
@@ -87,93 +86,184 @@ namespace EarTrumpet.UI.Views
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
 
-                // ## H2 — Main title → skip (version badge already shows it)
                 if (line.StartsWith("## "))
                     continue;
 
-                // ### H3 — Section header → new section card
+                if (IsMarkdownImageOrLinkOnly(line))
+                    continue;
+
                 if (line.StartsWith("### "))
                 {
+                    FlushIntro(introLines);
+                    introLines.Clear();
+
                     var title = line.Substring(4).Trim();
-                    AddSectionHeader(GetSectionGlyph(title), title);
                     currentSection = new StackPanel();
-                    var card = new Border
-                    {
-                        CornerRadius = new CornerRadius(10),
-                        Background = _surfaceBrush,
-                        BorderBrush = new SolidColorBrush(Color.FromArgb(0x08, 0xFF, 0xFF, 0xFF)),
-                        BorderThickness = new Thickness(1),
-                        Padding = new Thickness(4, 8, 4, 8),
-                        Margin = new Thickness(0, 0, 0, 8),
-                        Child = currentSection,
-                    };
+                    var card = CreateSectionCard(title, currentSection);
                     ContentPanel.Children.Add(card);
                     continue;
                 }
 
-                // - Bullet item → add to current section card
                 if (line.StartsWith("- "))
                 {
+                    FlushIntro(introLines);
+                    introLines.Clear();
+
                     var text = line.Substring(2).Trim();
-                    var target = currentSection ?? ContentPanel;
-                    AddBulletRow(target, text);
+
+                    if (currentSection == null)
+                    {
+                        currentSection = new StackPanel();
+                        var card = CreateSectionCard("", currentSection);
+                        ContentPanel.Children.Add(card);
+                    }
+
+                    AddBulletRow(currentSection, text);
                     continue;
                 }
 
-                // Plain text → add to current section or root
-                var target2 = currentSection ?? ContentPanel;
-                target2.Children.Add(new TextBlock
+                if (currentSection == null)
                 {
-                    Text = StripMarkdownFormatting(line),
-                    FontSize = 12,
-                    Foreground = _t3,
-                    TextWrapping = TextWrapping.Wrap,
-                    LineHeight = 18,
-                    Margin = new Thickness(14, 4, 14, 4),
-                });
+                    introLines.Add(StripMarkdownLinks(line));
+                }
+                else
+                {
+                    AddParagraph(currentSection, StripMarkdownLinks(line));
+                }
             }
+
+            FlushIntro(introLines);
         }
 
-        /// <summary>
-        /// Renders a bullet row inside a section card.
-        /// Parses **bold** — description into a compact two-line layout.
-        /// </summary>
+        private void FlushIntro(List<string> lines)
+        {
+            if (lines.Count == 0) return;
+
+            var text = string.Join(" ", lines).Trim();
+            if (string.IsNullOrWhiteSpace(text)) return;
+
+            var tb = new TextBlock
+            {
+                Text = text,
+                FontSize = 14,
+                Foreground = _textSecondary,
+                TextWrapping = TextWrapping.Wrap,
+                LineHeight = 24,
+                Margin = new Thickness(0, 0, 0, 28),
+            };
+
+            ContentPanel.Children.Add(tb);
+        }
+
+        private Border CreateSectionCard(string title, StackPanel content)
+        {
+            var root = new StackPanel();
+
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                var header = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Margin = new Thickness(20, 18, 20, 0),
+                };
+
+                header.Children.Add(new TextBlock
+                {
+                    Text = GetSectionGlyph(title),
+                    FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                    FontSize = 14,
+                    Foreground = new SolidColorBrush(_accent),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(0, 0, 10, 0),
+                });
+
+                header.Children.Add(new TextBlock
+                {
+                    Text = title,
+                    FontSize = 15,
+                    FontWeight = FontWeights.Bold,
+                    Foreground = _textPrimary,
+                    VerticalAlignment = VerticalAlignment.Center,
+                });
+
+                root.Children.Add(header);
+
+                root.Children.Add(new Border
+                {
+                    Height = 1,
+                    Background = _divider,
+                    Margin = new Thickness(20, 14, 20, 4),
+                });
+            }
+
+            root.Children.Add(content);
+
+            return new Border
+            {
+                CornerRadius = new CornerRadius(12),
+                Background = _surfaceBrush,
+                BorderBrush = _cardBorder,
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(0, 2, 0, 10),
+                Margin = new Thickness(0, 0, 0, 20),
+                Child = root,
+            };
+        }
+
+        private void AddParagraph(Panel parent, string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return;
+
+            var tb = new TextBlock
+            {
+                FontSize = 13,
+                Foreground = _textMuted,
+                TextWrapping = TextWrapping.Wrap,
+                LineHeight = 20,
+                Margin = new Thickness(20, 8, 20, 8),
+            };
+
+            ParseInlineMarkdown(tb, text);
+            parent.Children.Add(tb);
+        }
+
         private void AddBulletRow(Panel parent, string markdownText)
         {
-            var row = new Grid { Margin = new Thickness(10, 6, 10, 6) };
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(16) });
+            var cleanText = StripMarkdownLinks(markdownText);
+            if (string.IsNullOrWhiteSpace(cleanText))
+                return;
+
+            var row = new Grid { Margin = new Thickness(20, 10, 20, 10) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(20) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            // Accent dot
             var dot = new Border
             {
-                Width = 5, Height = 5,
-                CornerRadius = new CornerRadius(2.5),
+                Width = 6,
+                Height = 6,
+                CornerRadius = new CornerRadius(3),
                 Background = new SolidColorBrush(_accent),
                 VerticalAlignment = VerticalAlignment.Top,
-                Margin = new Thickness(0, 5, 0, 0),
+                Margin = new Thickness(0, 7, 0, 0),
             };
             Grid.SetColumn(dot, 0);
             row.Children.Add(dot);
 
-            // Text content
             var textBlock = new TextBlock
             {
-                FontSize = 12,
-                Foreground = _t2,
+                FontSize = 13,
+                Foreground = _textSecondary,
                 TextWrapping = TextWrapping.Wrap,
-                LineHeight = 18,
+                LineHeight = 22,
             };
-            ParseInlineMarkdown(textBlock, markdownText);
+            ParseInlineMarkdown(textBlock, cleanText);
             Grid.SetColumn(textBlock, 1);
             row.Children.Add(textBlock);
 
             parent.Children.Add(row);
         }
 
-        /// <summary>
-        /// Parse **bold** and regular text into TextBlock inlines.
-        /// </summary>
         private void ParseInlineMarkdown(TextBlock textBlock, string text)
         {
             int pos = 0;
@@ -182,22 +272,19 @@ namespace EarTrumpet.UI.Views
                 int boldStart = text.IndexOf("**", pos);
                 if (boldStart < 0)
                 {
-                    // Rest is plain text
-                    textBlock.Inlines.Add(new System.Windows.Documents.Run(text.Substring(pos)) { Foreground = _t2 });
+                    textBlock.Inlines.Add(new System.Windows.Documents.Run(text.Substring(pos)) { Foreground = textBlock.Foreground });
                     break;
                 }
 
-                // Plain text before bold
                 if (boldStart > pos)
                 {
-                    textBlock.Inlines.Add(new System.Windows.Documents.Run(text.Substring(pos, boldStart - pos)) { Foreground = _t2 });
+                    textBlock.Inlines.Add(new System.Windows.Documents.Run(text.Substring(pos, boldStart - pos)) { Foreground = textBlock.Foreground });
                 }
 
                 int boldEnd = text.IndexOf("**", boldStart + 2);
                 if (boldEnd < 0)
                 {
-                    // Unclosed bold — treat rest as plain
-                    textBlock.Inlines.Add(new System.Windows.Documents.Run(text.Substring(boldStart)) { Foreground = _t2 });
+                    textBlock.Inlines.Add(new System.Windows.Documents.Run(text.Substring(boldStart)) { Foreground = textBlock.Foreground });
                     break;
                 }
 
@@ -205,58 +292,36 @@ namespace EarTrumpet.UI.Views
                 textBlock.Inlines.Add(new System.Windows.Documents.Run(boldText)
                 {
                     FontWeight = FontWeights.SemiBold,
-                    Foreground = _t1,
+                    Foreground = _textPrimary,
                 });
 
                 pos = boldEnd + 2;
             }
         }
 
-        private string StripMarkdownFormatting(string text)
+        private bool IsMarkdownImageOrLinkOnly(string text)
         {
-            return text.Replace("**", "");
+            var trimmed = text.Trim();
+            return Regex.IsMatch(trimmed, @"^!\[[^\]]*\]\([^\)]*\)$") ||
+                   Regex.IsMatch(trimmed, @"^\[[^\]]+\]\([^\)]*\)$");
+        }
+
+        private string StripMarkdownLinks(string text)
+        {
+            var withoutImages = Regex.Replace(text, @"!\[[^\]]*\]\([^\)]*\)", "");
+            return Regex.Replace(withoutImages, @"\[([^\]]+)\]\([^\)]*\)", "$1").Trim();
         }
 
         private string GetSectionGlyph(string sectionTitle)
         {
             var lower = sectionTitle.ToLowerInvariant();
-            if (lower.Contains("fix")) return "\xE90F";       // wrench
-            if (lower.Contains("new") || lower.Contains("feat") || lower.Contains("nouveau")) return "\xE710"; // add
-            if (lower.Contains("break")) return "\xE7BA";     // warning
-            if (lower.Contains("perf")) return "\xE9F5";      // speedometer
-            if (lower.Contains("under") || lower.Contains("capot") || lower.Contains("tech")) return "\xE756"; // code
-            if (lower.Contains("onboard")) return "\xE7BE";   // graduation
-            return "\xE81C"; // bullet list
-        }
-
-        private void AddSectionHeader(string glyph, string title)
-        {
-            var sp = new StackPanel
-            {
-                Orientation = Orientation.Horizontal,
-                Margin = new Thickness(0, 12, 0, 10),
-            };
-
-            sp.Children.Add(new TextBlock
-            {
-                Text = glyph,
-                FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                FontSize = 13,
-                Foreground = new SolidColorBrush(_accent),
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(0, 0, 10, 0),
-            });
-
-            sp.Children.Add(new TextBlock
-            {
-                Text = title,
-                FontSize = 14,
-                FontWeight = FontWeights.SemiBold,
-                Foreground = _t1,
-                VerticalAlignment = VerticalAlignment.Center,
-            });
-
-            ContentPanel.Children.Add(sp);
+            if (lower.Contains("fix")) return "\xE90F";
+            if (lower.Contains("new") || lower.Contains("feat") || lower.Contains("nouveau")) return "\xE710";
+            if (lower.Contains("break")) return "\xE7BA";
+            if (lower.Contains("perf")) return "\xE9F5";
+            if (lower.Contains("under") || lower.Contains("capot") || lower.Contains("tech")) return "\xE756";
+            if (lower.Contains("onboard")) return "\xE7BE";
+            return "\xE81C";
         }
 
         private void AddLoadingIndicator()
@@ -266,7 +331,7 @@ namespace EarTrumpet.UI.Views
             {
                 Text = Properties.Resources.ChangelogLoading,
                 FontSize = 13,
-                Foreground = _t3,
+                Foreground = _textMuted,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Margin = new Thickness(0, 40, 0, 0),
             });
@@ -278,7 +343,7 @@ namespace EarTrumpet.UI.Views
             {
                 Text = message,
                 FontSize = 13,
-                Foreground = _t2,
+                Foreground = _textSecondary,
                 TextWrapping = TextWrapping.Wrap,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 TextAlignment = TextAlignment.Center,
@@ -292,16 +357,16 @@ namespace EarTrumpet.UI.Views
             foreach (UIElement child in ContentPanel.Children)
             {
                 child.Opacity = 0;
-                child.RenderTransform = new TranslateTransform(0, 20);
+                child.RenderTransform = new TranslateTransform(0, 16);
 
-                var fade = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(300))
+                var fade = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(350))
                 {
-                    BeginTime = TimeSpan.FromMilliseconds(80 * i),
+                    BeginTime = TimeSpan.FromMilliseconds(60 * i),
                     EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
                 };
-                var slide = new DoubleAnimation(20, 0, TimeSpan.FromMilliseconds(350))
+                var slide = new DoubleAnimation(16, 0, TimeSpan.FromMilliseconds(400))
                 {
-                    BeginTime = TimeSpan.FromMilliseconds(80 * i),
+                    BeginTime = TimeSpan.FromMilliseconds(60 * i),
                     EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
                 };
 
@@ -311,9 +376,6 @@ namespace EarTrumpet.UI.Views
             }
         }
 
-        /// <summary>
-        /// A single slow light sweep across "Quoi de neuf", then settles to plain white.
-        /// </summary>
         private void ApplyTitleShimmer()
         {
             var baseColor = Color.FromArgb(0xF0, 0xFF, 0xFF, 0xFF);
@@ -347,12 +409,11 @@ namespace EarTrumpet.UI.Views
             };
             sweep.Completed += (s, ev) =>
             {
-                MainTitle.Foreground = _t1;
+                MainTitle.Foreground = _textPrimary;
             };
             transform.BeginAnimation(TranslateTransform.XProperty, sweep);
         }
 
-        // ═══ Events ═══
         private void TitleBar_Drag(object sender, MouseButtonEventArgs e)
         {
             if (e.ButtonState == MouseButtonState.Pressed) DragMove();

@@ -102,6 +102,18 @@ namespace EarTrumpet.UI.Helpers
             Update();
         }
 
+        public bool TryGetIconBounds(out Rect bounds)
+        {
+            if (TryRefreshIconLocation())
+            {
+                bounds = IconBounds;
+                return true;
+            }
+
+            bounds = Rect.Empty;
+            return false;
+        }
+
         public void ShowNotification(string title, string message)
         {
             if (!_isVisible) return;
@@ -234,6 +246,13 @@ namespace EarTrumpet.UI.Helpers
 
         private void OnNotifyIconMouseMove()
         {
+            TryRefreshIconLocation();
+            _cursorPosition = System.Windows.Forms.Cursor.Position;
+            IsCursorWithinNotifyIconBounds();
+        }
+
+        private bool TryRefreshIconLocation()
+        {
             var id = new NOTIFYICONIDENTIFIER
             {
                 cbSize = Marshal.SizeOf(typeof(NOTIFYICONIDENTIFIER)),
@@ -243,13 +262,11 @@ namespace EarTrumpet.UI.Helpers
             if (Shell32.Shell_NotifyIconGetRect(ref id, out RECT location) == 0)
             {
                 _iconLocation = location;
-                _cursorPosition = System.Windows.Forms.Cursor.Position;
-                IsCursorWithinNotifyIconBounds();
+                return true;
             }
-            else
-            {
-                _iconLocation = default(RECT);
-            }
+
+            _iconLocation = default(RECT);
+            return false;
         }
 
         private bool IsCursorWithinNotifyIconBounds()

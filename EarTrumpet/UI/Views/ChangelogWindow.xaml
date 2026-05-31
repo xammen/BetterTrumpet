@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:resx="clr-namespace:EarTrumpet.Properties"
         Title="What's New in BetterTrumpet"
-        Width="540" Height="680"
+        Width="640" Height="720"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="None"
@@ -18,7 +18,7 @@
         <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
         <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
         <SolidColorBrush x:Key="T1" Color="#F0FFFFFF"/>
-        <SolidColorBrush x:Key="T2" Color="#70FFFFFF"/>
+        <SolidColorBrush x:Key="T2" Color="#B0FFFFFF"/>
         <SolidColorBrush x:Key="T3" Color="#40FFFFFF"/>
     </Window.Resources>
 
@@ -28,8 +28,8 @@
         </Border.Effect>
         <Grid>
             <!-- Gradient mesh (same as onboarding) -->
-            <Border CornerRadius="14,14,0,0" VerticalAlignment="Top" Height="200"
-                    IsHitTestVisible="False" Opacity="0.5">
+            <Border CornerRadius="14,14,0,0" VerticalAlignment="Top" Height="260"
+                    IsHitTestVisible="False" Opacity="0.35">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                         <GradientStop Color="#1A1565C0" Offset="0"/>
@@ -72,7 +72,7 @@
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
 
-                    <StackPanel Margin="48,36,48,0">
+                    <StackPanel Margin="60,36,60,0">
                         <!-- Version badge -->
                         <Border HorizontalAlignment="Left" CornerRadius="12" Padding="12,5"
                                 Margin="0,0,0,16">
@@ -91,25 +91,49 @@
                 </Grid>
 
                 <!-- ═══ CONTENT ═══ -->
-                <ScrollViewer Grid.Row="1" Margin="48,24,40,0"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel x:Name="ContentPanel" Margin="0,0,8,16"/>
-                </ScrollViewer>
+                <Grid Grid.Row="1" Margin="60,28,48,0" ClipToBounds="True">
+                    <ScrollViewer ClipToBounds="True"
+                                  Padding="0,10,8,24"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  CanContentScroll="False">
+                        <StackPanel x:Name="ContentPanel" Margin="0,0,0,4"/>
+                    </ScrollViewer>
+
+                    <Border Height="18" VerticalAlignment="Top" IsHitTestVisible="False">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#FF101014" Offset="0"/>
+                                <GradientStop Color="#00101014" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <Border Height="24" VerticalAlignment="Bottom" IsHitTestVisible="False">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#00101014" Offset="0"/>
+                                <GradientStop Color="#FF101014" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                </Grid>
 
                 <!-- ═══ BOTTOM BAR ═══ -->
-                <Grid Grid.Row="2" Margin="48,0,48,0" VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <Grid Grid.Row="2" Margin="60,0,60,0">
+                    <Border VerticalAlignment="Top" BorderThickness="0,1,0,0" BorderBrush="#08FFFFFF"/>
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" VerticalAlignment="Center"
-                               FontSize="11" Foreground="{StaticResource T3}"
-                               Text="{x:Static resx:Resources.ChangelogThanks}"/>
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                                   FontSize="11" Foreground="{StaticResource T3}"
+                                   Text="{x:Static resx:Resources.ChangelogThanks}"/>
 
-                    <Border Grid.Column="1" CornerRadius="20" Cursor="Hand"
-                            MouseLeftButtonDown="Continue_Click" Padding="28,10">
+                        <Border Grid.Column="1" CornerRadius="20" Cursor="Hand"
+                                MouseLeftButtonDown="Continue_Click" Padding="28,10">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
@@ -128,5 +152,6 @@
                 </Grid>
             </Grid>
         </Grid>
-    </Border>
+    </Grid>
+</Border>
 </Window>

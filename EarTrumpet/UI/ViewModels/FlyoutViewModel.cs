@@ -30,6 +30,7 @@ namespace EarTrumpet.UI.ViewModels
         public ObservableCollection<ContextMenuItem> RestoreHiddenAppsMenu { get; }
         public bool HasHiddenAppsForHeaderDevice => RestoreHiddenAppsMenu.Count > 0;
         public InputType LastInput { get; private set; }
+        public bool WasLastInputMouse => LastInput == InputType.Mouse;
         public ICommand DisplaySettingsChanged { get; }
 
         private bool _isUpdateAvailable;
@@ -89,6 +90,8 @@ namespace EarTrumpet.UI.ViewModels
 private readonly Action _returnFocusToTray;
         private readonly AppSettings _settings;
         private bool _closedDuringOpen;
+        private bool _openAfterClose;
+        private InputType _openAfterCloseInput;
         private MouseHook _mh;
         private Rect _winRect;
 
@@ -131,7 +134,7 @@ private readonly Action _returnFocusToTray;
         private void OnDeBounceTimerTick(object sender, EventArgs e)
         {
             Debug.Assert(State == FlyoutViewState.Closing_Stage2);
-            _deBounceTimer.IsEnabled = false;
+            _deBounceTimer.Stop();
             ChangeState(FlyoutViewState.Hidden);
         }
 
@@ -369,12 +372,18 @@ private readonly Action _returnFocusToTray;
                 case FlyoutViewState.Closing_Stage2:
                     _deBounceTimer.Start();
                     break;
-case FlyoutViewState.Hidden:
+                case FlyoutViewState.Hidden:
                     if (IsExpandingOrCollapsing)
                     {
                         IsExpandingOrCollapsing = false;
                         DoExpandCollapse();
                         BeginOpen(LastInput);
+                    }
+                    else if (_openAfterClose)
+                    {
+                        var inputType = _openAfterCloseInput;
+                        _openAfterClose = false;
+                        BeginOpen(inputType);
                     }
                     break;
             }
@@ -466,7 +475,7 @@ case FlyoutViewState.Hidden:
             _mh.UnHook();
         }
 
-public void OpenFlyout(InputType inputType)
+        public void OpenFlyout(InputType inputType)
         {
             switch (State)
             {
@@ -475,6 +484,16 @@ public void OpenFlyout(InputType inputType)
                     break;
                 case FlyoutViewState.Open:
                     BeginClose(inputType);
+                    break;
+                case FlyoutViewState.Closing_Stage1:
+                    _openAfterClose = true;
+                    _openAfterCloseInput = inputType;
+                    break;
+                case FlyoutViewState.Closing_Stage2:
+                    _openAfterClose = true;
+                    _openAfterCloseInput = inputType;
+                    _deBounceTimer.Stop();
+                    ChangeState(FlyoutViewState.Hidden);
                     break;
             }
         }
