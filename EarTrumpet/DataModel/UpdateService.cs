@@ -175,9 +175,17 @@ namespace EarTrumpet.DataModel
 
         /// <summary>
         /// Start the update check cycle: delay then check, then every 6h.
+        /// Only runs if auto-updates are enabled.
         /// </summary>
         public void Start()
         {
+            // Don't start timer if updates are disabled
+            if (Channel == UpdateChannel.None)
+            {
+                Trace.WriteLine("UpdateService: Auto-updates disabled (Channel=None), skipping timer");
+                return;
+            }
+
             // Delayed first check
             var startupTimer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher)
             {
@@ -187,11 +195,15 @@ namespace EarTrumpet.DataModel
             {
                 startupTimer.Stop();
                 CheckForUpdateAsync();
-                _timer.Start();
+                // Don't start recurring timer if updates are disabled
+                if (Channel != UpdateChannel.None)
+                {
+                    _timer.Start();
+                }
             };
             startupTimer.Start();
 
-            Trace.WriteLine($"UpdateService: Started, first check in {StartupDelay.TotalSeconds}s, then every {CheckInterval.TotalHours}h");
+            Trace.WriteLine($"UpdateService: Started, first check in {StartupDelay.TotalSeconds}s, then every {CheckInterval.TotalHours}h (Channel={Channel})");
         }
 
         public void Stop()

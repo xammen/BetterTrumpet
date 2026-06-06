@@ -63,7 +63,8 @@ namespace EarTrumpet.DataModel
 
         private static readonly TimeSpan PollIntervalActive = TimeSpan.FromSeconds(1);
         private static readonly TimeSpan PollIntervalIdle = TimeSpan.FromSeconds(10);
-        private int _idlePollCount;
+        private int _consecutiveEmptyPolls;
+        private const int MaxEmptyPollsBeforeStop = 5;
 
         private readonly DispatcherTimer _pollTimer;
         private IAudioDeviceManager _playbackDeviceManager;
@@ -72,6 +73,7 @@ namespace EarTrumpet.DataModel
         private string _currentPlayerDisplayName;
         private bool _disposed;
         private bool _isInitialized;
+        private bool _isPolling;
 
         public event Action<bool> PlaybackChanged;
         public event Action TrackChanged;
@@ -109,12 +111,61 @@ namespace EarTrumpet.DataModel
             {
                 _playbackDeviceManager = WindowsAudioFactory.Create(AudioDeviceKind.Playback);
                 _isInitialized = true;
-                _pollTimer.Start();
-                Trace.WriteLine("LegacyMediaPlayerService: Initialized and polling started");
+
+                // Subscribe to device events to detect when audio sessions appear
+                _playbackDeviceManager.Loaded += OnDeviceManagerLoaded;
+
+                // Start with on-demand polling (only when sessions exist)
+                StartPollingIfNeeded();
+
+                Trace.WriteLine("LegacyMediaPlayerService: Initialized with on-demand polling");
             }
             catch (Exception ex)
             {
                 Trace.WriteLine($"LegacyMediaPlayerService: Init failed - {ex.Message}");
+            }
+        }
+
+        private void OnDeviceManagerLoaded(object sender, EventArgs e)
+        {
+            // Device manager loaded - check if we need to start polling
+            StartPollingIfNeeded();
+        }
+
+        private void StartPollingIfNeeded()
+        {
+            if (!_isInitialized || _isPolling || _playbackDeviceManager == null)
+                return;
+
+            try
+            {
+                // Check if any audio sessions exist
+                bool hasAnySessions = false;
+                var devices = _playbackDeviceManager?.Devices;
+                if (devices != null)
+                {
+                    foreach (var device in devices.ToArray())
+                    {
+                        var groups = device.Groups;
+                        if (groups != null && groups.Count > 0)
+                        {
+                            hasAnySessions = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (hasAnySessions)
+                {
+                    _isPolling = true;
+                    _consecutiveEmptyPolls = 0;
+                    _pollTimer.Start();
+                    Trace.WriteLine("LegacyMediaPlayerService: Started polling (audio sessions detected)");
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"LegacyMediaPlayerService: StartPollingIfNeeded error - {ex.Message}");
             }
         }
 
@@ -131,19 +182,22 @@ namespace EarTrumpet.DataModel
                 // Find active legacy media player
                 FindActiveLegacyPlayer(out _isPlaying, out _currentPlayerExeName, out _currentPlayerDisplayName);
 
-                // Adaptive polling: fast when active, slow when idle
-                if (_isPlaying)
+                // On-demand polling: stop after 5 consecutive empty polls
+                if (!_isPlaying)
                 {
-                    _idlePollCount = 0;
-                    if (_pollTimer.Interval != PollIntervalActive)
-                        _pollTimer.Interval = PollIntervalActive;
+                    _consecutiveEmptyPolls++;
+                    if (_consecutiveEmptyPolls >= MaxEmptyPollsBeforeStop)
+                    {
+                        _pollTimer.Stop();
+                        _isPolling = false;
+                        Trace.WriteLine($"LegacyMediaPlayerService: Stopped polling after {MaxEmptyPollsBeforeStop} empty polls");
+                    }
                 }
                 else
                 {
-                    _idlePollCount++;
-                    // After 3 idle polls at active rate, switch to slow polling
-                    if (_idlePollCount > 3 && _pollTimer.Interval != PollIntervalIdle)
-                        _pollTimer.Interval = PollIntervalIdle;
+                    _consecutiveEmptyPolls = 0;
+                    if (_pollTimer.Interval != PollIntervalActive)
+                        _pollTimer.Interval = PollIntervalActive;
                 }
 
                 // Playback state changed

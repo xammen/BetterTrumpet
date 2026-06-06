@@ -21,6 +21,7 @@ namespace EarTrumpet.UI.ViewModels
         public event Action TrayPropertyChanged;
 
         public ObservableCollection<DeviceViewModel> AllDevices { get; private set; } = new ObservableCollection<DeviceViewModel>();
+        public ObservableCollection<DeviceViewModel> VisibleDevices { get; private set; } = new ObservableCollection<DeviceViewModel>();
         public DeviceViewModel Default { get; private set; }
 
         private readonly IAudioDeviceManager _deviceManager;
@@ -34,6 +35,7 @@ namespace EarTrumpet.UI.ViewModels
         {
             _settings = settings;
             _settings.HiddenAppsChanged += OnHiddenAppsChanged;
+            _settings.HiddenDevicesChanged += OnHiddenDevicesChanged;
             _deviceManager = deviceManager;
             _deviceManager.DefaultChanged += OnDefaultChanged;
             _deviceManager.Devices.CollectionChanged += OnCollectionChanged;
@@ -106,6 +108,66 @@ namespace EarTrumpet.UI.ViewModels
         {
             var newDevice = new DeviceViewModel(this, _deviceManager, _settings, device);
             AllDevices.AddSorted(newDevice, DeviceViewModel.CompareByDisplayName);
+
+            // Add to VisibleDevices only if not hidden
+            if (!_settings.IsDeviceHidden(device.Id))
+            {
+                VisibleDevices.AddSorted(newDevice, DeviceViewModel.CompareByDisplayName);
+            }
+        }
+
+        public bool CanHideDevice(DeviceViewModel device)
+        {
+            // Don't allow hiding if it's the only visible device or if it's the default device
+            return device != null && VisibleDevices.Count > 1 && device != Default;
+        }
+
+        public void HideDevice(DeviceViewModel device)
+        {
+            if (!CanHideDevice(device))
+            {
+                return;
+            }
+
+            _settings.HideDevice(device.Id, device.DisplayName);
+        }
+
+        public List<AppSettings.HiddenDeviceEntry> GetHiddenDevices()
+        {
+            return _settings.GetHiddenDevices();
+        }
+
+        public void UnhideDevice(string deviceId)
+        {
+            _settings.UnhideDevice(deviceId);
+        }
+
+        public void UnhideAllDevices()
+        {
+            _settings.UnhideAllDevices();
+        }
+
+        public int GetTotalHiddenDevicesCount()
+        {
+            return _settings.HiddenDevicesCount;
+        }
+
+        private void OnHiddenDevicesChanged()
+        {
+            RefreshVisibleDevices();
+            TrayPropertyChanged?.Invoke();
+        }
+
+        private void RefreshVisibleDevices()
+        {
+            VisibleDevices.Clear();
+            foreach (var device in AllDevices)
+            {
+                if (!_settings.IsDeviceHidden(device.Id))
+                {
+                    VisibleDevices.Add(device);
+                }
+            }
         }
 
         public bool CanHideApp(IAppItemViewModel app)
@@ -197,11 +259,13 @@ namespace EarTrumpet.UI.ViewModels
                     if (allExisting != null)
                     {
                         AllDevices.Remove(allExisting);
+                        VisibleDevices.Remove(allExisting);
                     }
                     break;
 
                 case NotifyCollectionChangedAction.Reset:
                     AllDevices.Clear();
+                    VisibleDevices.Clear();
                     foreach (var device in _deviceManager.Devices)
                     {
                         AddDevice(device);

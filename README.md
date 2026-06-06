@@ -151,14 +151,17 @@ BetterTrumpet.exe --apply-profile "Night Mode"
 bt save focus
 bt save discord --apps-only
 bt focus
+bt volume discord 67
+bt batch --set-volume 67 --app discord --set-volume 30 --app vivaldi
+bt doctor
 ```
 
 | Area | Commands |
 | --- | --- |
-| Devices | `--list-devices`, `--list-apps`, `--get-volume`, `--set-volume`, `--mute`, `--unmute`, `--toggle-mute` |
+| Devices | `--list-devices`, `--list-apps`, `--get-volume`, `--set-volume`, `volume`, `--mute`, `mute`, `--unmute`, `unmute`, `--toggle-mute` |
 | Routing | `--get-default`, `--set-default`, `--set-device` |
-| QuickTrumpet | `presets`, `save`, `apply`, direct preset aliases like `bt focus`, plus compatible `--list-profiles`, `--apply-profile` |
-| Automation | `--watch`, `--ping`, `--check-update`, `--export-settings`, `--import-settings` |
+| QuickTrumpet | `presets`, `save`, `apply`, `mode`, direct preset aliases like `bt focus`, plus compatible `--list-profiles`, `--apply-profile` |
+| Automation | `batch`, `doctor`, `--watch`, `--ping`, `--check-update`, `--export-settings`, `--import-settings` |
 | Help | `--version`, `--help` |
 
 ## Settings

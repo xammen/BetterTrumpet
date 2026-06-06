@@ -1,4 +1,4 @@
-next-version: 3.0.12
+next-version: 3.0.13
 assembly-versioning-scheme: MajorMinorPatchTag
 branches:
   feature:

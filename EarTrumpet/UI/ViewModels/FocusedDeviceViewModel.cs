@@ -34,6 +34,31 @@ namespace EarTrumpet.UI.ViewModels
 
             var menuItems = new List<ContextMenuItem>();
 
+            // Add set as default device option
+            menuItems.Add(new ContextMenuItem
+            {
+                DisplayName = Properties.Resources.SetAsDefaultDeviceText,
+                Command = new RelayCommand(() =>
+                {
+                    device.MakeDefaultDevice();
+                    RequestClose.Invoke();
+                }),
+            });
+
+            // Add hide device option
+            if (mainViewModel.CanHideDevice(device))
+            {
+                menuItems.Add(new ContextMenuItem
+                {
+                    DisplayName = Properties.Resources.HideDeviceButtonText,
+                    Command = new RelayCommand(() =>
+                    {
+                        mainViewModel.HideDevice(device);
+                        RequestClose.Invoke();
+                    }),
+                });
+            }
+
             if (device.HasHiddenApps)
             {
                 var hiddenEntries = mainViewModel.GetHiddenAppsForDevice(device.Id);

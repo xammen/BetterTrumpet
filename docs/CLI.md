@@ -65,18 +65,24 @@ BetterTrumpet.exe --set-default "Headphones"
 | `--help` | Show help text | No |
 | `--version` | Print version string | No |
 | `--ping` | Check if BetterTrumpet is running | Yes |
+| `doctor` | Diagnose CLI/audio readiness | Yes |
+| `batch <commands...>` | Run multiple commands and return one JSON result | Yes |
 | `--list-devices` | List all audio devices with nested apps | Yes |
 | `--list-apps` | List all audio apps (deduplicated) | Yes |
 | `--get-volume` | Get volume of default device or specific target | Yes |
 | `--set-volume <value>` | Set volume (absolute or relative) | Yes |
+| `volume [app] <value>` | Friendly alias for `--set-volume` | Yes |
 | `--mute` | Mute a device or app | Yes |
+| `mute <app>` | Friendly app mute alias | Yes |
 | `--unmute` | Unmute a device or app | Yes |
+| `unmute <app>` | Friendly app unmute alias | Yes |
 | `--toggle-mute` | Toggle mute on a device | Yes |
 | `--get-default` | Show the current default playback device | Yes |
 | `--set-default <name>` | Change the system default playback device | Yes |
 | `--set-device <app> <device>` | Route an app's audio to a specific device | Yes |
 | `--list-profiles` | List saved volume profiles | Yes |
 | `--apply-profile <name>` | Apply a saved volume profile | Yes |
+| `mode <name>` | Apply a QuickTrumpet preset by mode name | Yes |
 | `--watch` | Snapshot all devices/apps with timestamp | Yes |
 
 ---

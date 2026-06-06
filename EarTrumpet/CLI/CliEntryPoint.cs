@@ -74,6 +74,16 @@ namespace EarTrumpet.CLI
                 case "export-settings":
                 case "import-settings":
                 case "ping":
+                case "doctor":
+                case "batch":
+                case "volume":
+                case "mode":
+                case "profile":
+                case "preset":
+                case "device":
+                case "apps":
+                case "update":
+                case "settings":
                     AttachConsole(ATTACH_PARENT_PROCESS);
                     HandleRemoteCommand(cliArgs);
                     FreeConsole();
@@ -158,6 +168,11 @@ namespace EarTrumpet.CLI
             Console.WriteLine("  --export-settings [path]                Export all settings to .btsettings file");
             Console.WriteLine("  --import-settings <path>                Import settings from .btsettings file");
             Console.WriteLine("  --ping                                  Check if BetterTrumpet is running");
+            Console.WriteLine("  doctor                                  Diagnose CLI/audio readiness (JSON)");
+            Console.WriteLine("  batch <commands...>                     Run multiple CLI commands sequentially");
+            Console.WriteLine("  volume [APP] VALUE                      Friendly alias for set-volume");
+            Console.WriteLine("  mute APP | unmute APP                   Friendly app mute aliases");
+            Console.WriteLine("  mode NAME                               Apply a QuickTrumpet preset");
             Console.WriteLine("  --version                               Show version");
             Console.WriteLine("  --help                                  Show this help");
             Console.WriteLine();
@@ -174,6 +189,9 @@ namespace EarTrumpet.CLI
             Console.WriteLine("  bt save discord --apps-only");
             Console.WriteLine("  bt save streaming --all-devices");
             Console.WriteLine("  bt focus");
+            Console.WriteLine("  bt volume discord 67");
+            Console.WriteLine("  bt batch --set-volume 67 --app discord --set-volume 30 --app vivaldi");
+            Console.WriteLine("  bt mode Discord");
             Console.WriteLine();
             Console.WriteLine("Note: BetterTrumpet must be running for remote commands to work.");
             Console.WriteLine("All output is JSON for easy scripting and automation.");

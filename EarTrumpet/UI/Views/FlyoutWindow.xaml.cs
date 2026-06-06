@@ -5,6 +5,7 @@ using EarTrumpet.UI.Helpers;
 using EarTrumpet.UI.ViewModels;
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using Forms = System.Windows.Forms;
 
 namespace EarTrumpet.UI.Views
@@ -53,6 +54,16 @@ namespace EarTrumpet.UI.Views
             this.ApplyExtendedWindowStyle(User32.WS_EX_TOOLWINDOW);
 
             _viewModel.ChangeState(FlyoutViewState.Hidden);
+
+            // Force theme refresh after initialization to ensure all brushes are correctly applied
+            // This fixes backdrop color not showing correctly on first startup (GitHub #13)
+            Themes.Manager.Current.NotifyThemeChanged();
+
+            // Force immediate acrylic refresh after theme notification to ensure backdrop renders correctly
+            Dispatcher.BeginInvoke(new System.Action(() =>
+            {
+                EnableAcrylicIfApplicable(WindowsTaskbar.Current);
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
         private void OnStateChanged(object sender, object e)
@@ -293,6 +304,24 @@ else
                 element.ContextMenu.PlacementTarget = element;
                 element.ContextMenu.IsOpen = true;
                 e.Handled = true;
+            }
+        }
+
+        private void RestoreHiddenDevicesButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.ContextMenu != null)
+            {
+                element.ContextMenu.PlacementTarget = element;
+                element.ContextMenu.IsOpen = true;
+                e.Handled = true;
+            }
+        }
+
+        private void SetAsDefaultDevice_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem && menuItem.DataContext is DeviceViewModel device)
+            {
+                device.MakeDefaultDevice();
             }
         }
 

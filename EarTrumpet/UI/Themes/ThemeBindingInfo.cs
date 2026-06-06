@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
 
@@ -30,6 +31,15 @@ namespace EarTrumpet.UI.Themes
             {
                 ((FrameworkContentElement)element).Loaded += Element_Loaded;
             }
+
+            // Listen for Options.Source property changes to handle the case where
+            // the brush is created before Options.Source has propagated from the parent.
+            // This fixes the backdrop not rendering correctly on startup (GitHub #13).
+            var descriptor = DependencyPropertyDescriptor.FromProperty(Options.SourceProperty, element.GetType());
+            if (descriptor != null)
+            {
+                descriptor.AddValueChanged(element, OnOptionsSourceChanged);
+            }
         }
 
         public void Leaving()
@@ -37,6 +47,7 @@ namespace EarTrumpet.UI.Themes
             if (_element.TryGetTarget(out var element))
             {
                 UnregisterLoaded(element);
+                UnregisterOptionsSourceChanged(element);
 
                 if (_isAttached)
                 {
@@ -71,15 +82,37 @@ namespace EarTrumpet.UI.Themes
             }
         }
 
+        private void UnregisterOptionsSourceChanged(DependencyObject element)
+        {
+            var descriptor = DependencyPropertyDescriptor.FromProperty(Options.SourceProperty, element.GetType());
+            if (descriptor != null)
+            {
+                descriptor.RemoveValueChanged(element, OnOptionsSourceChanged);
+            }
+        }
+
+        private void OnOptionsSourceChanged(object sender, EventArgs e)
+        {
+            if (_element.TryGetTarget(out var element))
+            {
+                // Only apply if we haven't attached yet, or if we need to reapply due to theme change
+                // This prevents duplicate application when the property inherits during construction
+                ApplyValue(element);
+            }
+        }
+
         public void ApplyValue(DependencyObject element)
         {
             var type = Options.GetSource(element);
             if (type != null)
             {
-                _isAttached = true;
-                _initialValue = (T)ReadPropertyValue(element);
+                if (!_isAttached)
+                {
+                    _isAttached = true;
+                    _initialValue = (T)ReadPropertyValue(element);
+                    Manager.Current.ThemeChanged += ThemeChanged;
+                }
                 WritePropertyValue(element, _applyCallback.Invoke(element, _value));
-                Manager.Current.ThemeChanged += ThemeChanged;
             }
         }
 

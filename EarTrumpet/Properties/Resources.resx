@@ -135,6 +135,12 @@
   <data name="ContextMenuRestoreHiddenAppsForDeviceFormat" xml:space="preserve">
     <value>{0} ({1})</value>
   </data>
+  <data name="ContextMenuHiddenDevicesTitleFormat" xml:space="preserve">
+    <value>Hidden devices ({0})</value>
+  </data>
+  <data name="ContextMenuRestoreAllHiddenDevices" xml:space="preserve">
+    <value>Show all hidden devices</value>
+  </data>
   <data name="FullWindowTitleText" xml:space="preserve">
     <value>Volume Mixer</value>
   </data>
@@ -218,6 +224,18 @@
   </data>
   <data name="RestoreHiddenAppsForDeviceAll" xml:space="preserve">
     <value>Restore all on this device</value>
+  </data>
+  <data name="HideDeviceButtonText" xml:space="preserve">
+    <value>Hide this device</value>
+  </data>
+  <data name="SetAsDefaultDeviceText" xml:space="preserve">
+    <value>Set as default device</value>
+  </data>
+  <data name="RestoreHiddenDevices" xml:space="preserve">
+    <value>Show hidden devices</value>
+  </data>
+  <data name="RestoreHiddenDevicesAll" xml:space="preserve">
+    <value>Show all hidden devices</value>
   </data>
   <data name="MutedText" xml:space="preserve">
     <value>Muted</value>
@@ -1376,5 +1394,20 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
   </data>
   <data name="ColorLabelPreview" xml:space="preserve">
     <value>Preview</value>
+  </data>
+  <data name="SettingsRememberAppVolumes" xml:space="preserve">
+    <value>Remember application volumes</value>
+  </data>
+  <data name="SettingsRememberAppVolumesDesc" xml:space="preserve">
+    <value>Automatically restore volume levels when applications restart</value>
+  </data>
+  <data name="SettingsRememberAppVolumesEnable" xml:space="preserve">
+    <value>Remember volume levels per application</value>
+  </data>
+  <data name="SettingsClearSavedVolumes" xml:space="preserve">
+    <value>Clear saved volumes</value>
+  </data>
+  <data name="SettingsSavedVolumesCount" xml:space="preserve">
+    <value>Saved volumes:</value>
   </data>
 </root>

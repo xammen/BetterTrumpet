@@ -4,6 +4,7 @@ using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.Interop.MMDeviceAPI;
 using EarTrumpet.UI.ViewModels;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -69,6 +70,8 @@ namespace EarTrumpet.CLI
             if (parts.Count == 0)
                 return Error("empty command");
 
+            parts = NormalizeCommand(parts);
+
             var cmd = parts[0].ToLowerInvariant();
             var args = parts.Skip(1).ToList();
 
@@ -78,6 +81,12 @@ namespace EarTrumpet.CLI
                 {
                     case "ping":
                         return JsonConvert.SerializeObject(new { status = "ok", version = App.PackageVersion?.ToString() ?? "unknown" });
+
+                    case "doctor":
+                        return DispatchToUI(() => Doctor());
+
+                    case "batch":
+                        return Batch(args);
 
                     case "list-devices":
                         return DispatchToUI(() => ListDevices());
@@ -284,17 +293,11 @@ namespace EarTrumpet.CLI
             var collection = _getCollection();
             if (collection == null) return Error("audio not ready");
 
-            foreach (var device in collection.AllDevices)
+            var app = FindApp(collection, exeName);
+            if (app != null)
             {
-                var app = device.Apps.FirstOrDefault(a =>
-                    string.Equals(a.ExeName, exeName, StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(a.DisplayName, exeName, StringComparison.OrdinalIgnoreCase));
-
-                if (app != null)
-                {
-                    app.Volume = volume;
-                    return JsonConvert.SerializeObject(new { ok = true, app = app.DisplayName, volume });
-                }
+                app.Volume = volume;
+                return JsonConvert.SerializeObject(new { ok = true, app = app.DisplayName, volume });
             }
 
             return Error($"app not found: {exeName}");
@@ -305,18 +308,12 @@ namespace EarTrumpet.CLI
             var collection = _getCollection();
             if (collection == null) return Error("audio not ready");
 
-            foreach (var device in collection.AllDevices)
+            var app = FindApp(collection, exeName);
+            if (app != null)
             {
-                var app = device.Apps.FirstOrDefault(a =>
-                    string.Equals(a.ExeName, exeName, StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(a.DisplayName, exeName, StringComparison.OrdinalIgnoreCase));
-
-                if (app != null)
-                {
-                    int newVolume = Math.Max(0, Math.Min(100, app.Volume + delta));
-                    app.Volume = newVolume;
-                    return JsonConvert.SerializeObject(new { ok = true, app = app.DisplayName, volume = newVolume, delta });
-                }
+                int newVolume = Math.Max(0, Math.Min(100, app.Volume + delta));
+                app.Volume = newVolume;
+                return JsonConvert.SerializeObject(new { ok = true, app = app.DisplayName, volume = newVolume, delta });
             }
 
             return Error($"app not found: {exeName}");
@@ -331,15 +328,11 @@ namespace EarTrumpet.CLI
                 var collection = _getCollection();
                 if (collection == null) return Error("audio not ready");
 
-                foreach (var device in collection.AllDevices)
+                var app = FindApp(collection, appName);
+                if (app != null)
                 {
-                    var app = device.Apps.FirstOrDefault(a =>
-                        string.Equals(a.ExeName, appName, StringComparison.OrdinalIgnoreCase));
-                    if (app != null)
-                    {
-                        app.IsMuted = mute;
-                        return JsonConvert.SerializeObject(new { ok = true, app = app.DisplayName, isMuted = mute });
-                    }
+                    app.IsMuted = mute;
+                    return JsonConvert.SerializeObject(new { ok = true, app = app.DisplayName, isMuted = mute });
                 }
                 return Error($"app not found: {appName}");
             }
@@ -431,8 +424,7 @@ namespace EarTrumpet.CLI
             {
                 foreach (var app in device.Apps)
                 {
-                    if (string.Equals(app.ExeName, appExe, StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(app.DisplayName, appExe, StringComparison.OrdinalIgnoreCase))
+                    if (AppMatches(app, appExe))
                     {
                         try
                         {
@@ -531,6 +523,79 @@ namespace EarTrumpet.CLI
                 timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
                 devices = snapshot
             });
+        }
+
+        private string Doctor()
+        {
+            var settings = _getSettings();
+            var collection = _getCollection();
+            var manager = _getDeviceManager();
+            var profiles = 0;
+
+            try
+            {
+                var json = settings?.VolumeProfilesJson;
+                if (!string.IsNullOrWhiteSpace(json) && json != "[]")
+                {
+                    profiles = JsonConvert.DeserializeObject<List<VolumeProfileService.VolumeProfile>>(json)?.Count ?? 0;
+                }
+            }
+            catch
+            {
+                // Doctor should report degraded state, not fail the whole command.
+            }
+
+            return JsonConvert.SerializeObject(new
+            {
+                ok = collection != null && manager != null,
+                version = App.PackageVersion?.ToString() ?? "unknown",
+                audioReady = collection != null,
+                deviceManagerReady = manager != null,
+                settingsReady = settings != null,
+                defaultDevice = collection?.Default?.DisplayName,
+                devices = collection?.AllDevices?.Count() ?? 0,
+                apps = collection?.AllDevices?.Sum(d => d.Apps?.Count() ?? 0) ?? 0,
+                presets = profiles
+            });
+        }
+
+        private string Batch(List<string> args)
+        {
+            if (args.Count == 0) return Error("usage: batch <command...> [<command...>]");
+
+            var commands = SplitBatchCommands(args);
+            if (commands.Count == 0) return Error("usage: batch <command...> [<command...>]");
+
+            var results = new List<object>();
+            var allOk = true;
+
+            foreach (var commandParts in commands)
+            {
+                var commandLine = string.Join(" ", commandParts.Select(QuoteIfNeeded));
+                var response = ProcessCommand(commandLine);
+                JToken parsed;
+                try
+                {
+                    parsed = JToken.Parse(response);
+                }
+                catch
+                {
+                    parsed = JValue.CreateString(response);
+                }
+
+                if (parsed.Type == JTokenType.Object && parsed["error"] != null)
+                {
+                    allOk = false;
+                }
+
+                results.Add(new
+                {
+                    command = commandLine,
+                    response = parsed
+                });
+            }
+
+            return JsonConvert.SerializeObject(new { ok = allOk, results });
         }
 
         private string CheckUpdate()
@@ -738,6 +803,209 @@ namespace EarTrumpet.CLI
             return collection.AllDevices.FirstOrDefault(d => d.Id == deviceArg)
                 ?? collection.AllDevices.FirstOrDefault(d =>
                     d.DisplayName.IndexOf(deviceArg, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
+        private static IAppItemViewModel FindApp(DeviceCollectionViewModel collection, string appName)
+        {
+            if (collection == null || string.IsNullOrWhiteSpace(appName)) return null;
+
+            var apps = collection.AllDevices.SelectMany(d => d.Apps).ToList();
+            return apps.FirstOrDefault(a => AppMatchesExact(a, appName))
+                ?? apps.FirstOrDefault(a => AppMatchesPartial(a, appName));
+        }
+
+        private static bool AppMatches(IAppItemViewModel app, string appName)
+        {
+            return AppMatchesExact(app, appName) || AppMatchesPartial(app, appName);
+        }
+
+        private static bool AppMatchesExact(IAppItemViewModel app, string appName)
+        {
+            if (app == null || string.IsNullOrWhiteSpace(appName)) return false;
+
+            var exeName = app.ExeName ?? string.Empty;
+            var exeNoExt = System.IO.Path.GetFileNameWithoutExtension(exeName);
+            return string.Equals(exeName, appName, StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(exeNoExt, appName, StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(app.DisplayName, appName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool AppMatchesPartial(IAppItemViewModel app, string appName)
+        {
+            if (app == null || string.IsNullOrWhiteSpace(appName)) return false;
+
+            var exeName = app.ExeName ?? string.Empty;
+            var displayName = app.DisplayName ?? string.Empty;
+            return exeName.IndexOf(appName, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   displayName.IndexOf(appName, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static List<List<string>> SplitBatchCommands(List<string> args)
+        {
+            var commands = new List<List<string>>();
+            List<string> current = null;
+
+            foreach (var arg in args)
+            {
+                if (IsBatchCommandStart(arg))
+                {
+                    if (current != null && current.Count > 0)
+                    {
+                        commands.Add(current);
+                    }
+
+                    current = new List<string> { TrimCommandPrefix(arg) };
+                }
+                else
+                {
+                    if (current == null)
+                    {
+                        current = new List<string>();
+                    }
+                    current.Add(arg);
+                }
+            }
+
+            if (current != null && current.Count > 0)
+            {
+                commands.Add(current);
+            }
+
+            return commands;
+        }
+
+        private static bool IsBatchCommandStart(string value)
+        {
+            var command = TrimCommandPrefix(value).ToLowerInvariant();
+            switch (command)
+            {
+                case "list-devices":
+                case "list-apps":
+                case "get-volume":
+                case "set-volume":
+                case "mute":
+                case "unmute":
+                case "toggle-mute":
+                case "get-default":
+                case "set-default":
+                case "set-device":
+                case "presets":
+                case "apply":
+                case "apply-profile":
+                case "save":
+                case "delete":
+                case "watch":
+                case "check-update":
+                case "doctor":
+                case "volume":
+                case "mode":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private static string TrimCommandPrefix(string value)
+        {
+            return value?.TrimStart('-', '/') ?? string.Empty;
+        }
+
+        private static string QuoteIfNeeded(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "\"\"";
+            return value.IndexOf(' ') >= 0 ? $"\"{value}\"" : value;
+        }
+
+        private static List<string> NormalizeCommand(List<string> parts)
+        {
+            if (parts == null || parts.Count == 0) return parts;
+
+            var first = TrimCommandPrefix(parts[0]).ToLowerInvariant();
+            var rest = parts.Skip(1).ToList();
+
+            switch (first)
+            {
+                case "mode":
+                    return new[] { "apply" }.Concat(rest).ToList();
+
+                case "volume":
+                    return NormalizeVolumeAlias(rest);
+
+                case "mute":
+                case "unmute":
+                    if (rest.Count == 1 && !rest[0].StartsWith("-") && !rest[0].StartsWith("/"))
+                    {
+                        return new[] { first, "--app", rest[0] }.ToList();
+                    }
+                    return new[] { first }.Concat(rest).ToList();
+
+                case "profile":
+                case "preset":
+                    return NormalizeProfileAlias(rest);
+
+                case "device":
+                    return NormalizeDeviceAlias(rest);
+
+                case "apps":
+                    if (rest.Count == 0 || string.Equals(rest[0], "list", StringComparison.OrdinalIgnoreCase)) return new List<string> { "list-apps" };
+                    break;
+
+                case "update":
+                    if (rest.Count > 0 && string.Equals(rest[0], "check", StringComparison.OrdinalIgnoreCase)) return new List<string> { "check-update" };
+                    break;
+
+                case "settings":
+                    if (rest.Count > 0 && string.Equals(rest[0], "export", StringComparison.OrdinalIgnoreCase)) return new[] { "export-settings" }.Concat(rest.Skip(1)).ToList();
+                    if (rest.Count > 0 && string.Equals(rest[0], "import", StringComparison.OrdinalIgnoreCase)) return new[] { "import-settings" }.Concat(rest.Skip(1)).ToList();
+                    break;
+            }
+
+            parts[0] = TrimCommandPrefix(parts[0]);
+            return parts;
+        }
+
+        private static List<string> NormalizeVolumeAlias(List<string> args)
+        {
+            if (args.Count == 0) return new List<string> { "get-volume" };
+
+            if (string.Equals(args[0], "get", StringComparison.OrdinalIgnoreCase))
+            {
+                return new[] { "get-volume" }.Concat(args.Skip(1)).ToList();
+            }
+
+            if (string.Equals(args[0], "set", StringComparison.OrdinalIgnoreCase))
+            {
+                args = args.Skip(1).ToList();
+            }
+
+            if (args.Count == 1)
+            {
+                return new List<string> { "set-volume", args[0] };
+            }
+
+            if (args.Count >= 2)
+            {
+                return new[] { "set-volume", args[1], "--app", args[0] }.Concat(args.Skip(2)).ToList();
+            }
+
+            return new List<string> { "get-volume" };
+        }
+
+        private static List<string> NormalizeProfileAlias(List<string> args)
+        {
+            if (args.Count == 0 || string.Equals(args[0], "list", StringComparison.OrdinalIgnoreCase)) return new List<string> { "presets" };
+            if (string.Equals(args[0], "load", StringComparison.OrdinalIgnoreCase) || string.Equals(args[0], "apply", StringComparison.OrdinalIgnoreCase)) return new[] { "apply" }.Concat(args.Skip(1)).ToList();
+            if (string.Equals(args[0], "save", StringComparison.OrdinalIgnoreCase)) return new[] { "save" }.Concat(args.Skip(1)).ToList();
+            if (string.Equals(args[0], "delete", StringComparison.OrdinalIgnoreCase)) return new[] { "delete" }.Concat(args.Skip(1)).ToList();
+            return new[] { "apply" }.Concat(args).ToList();
+        }
+
+        private static List<string> NormalizeDeviceAlias(List<string> args)
+        {
+            if (args.Count == 0 || string.Equals(args[0], "list", StringComparison.OrdinalIgnoreCase)) return new List<string> { "list-devices" };
+            if (string.Equals(args[0], "default", StringComparison.OrdinalIgnoreCase)) return new List<string> { "get-default" };
+            if (string.Equals(args[0], "set-default", StringComparison.OrdinalIgnoreCase) || string.Equals(args[0], "default-to", StringComparison.OrdinalIgnoreCase)) return new[] { "set-default" }.Concat(args.Skip(1)).ToList();
+            return new[] { "set-default" }.Concat(args).ToList();
         }
 
         private static string GetArg(List<string> args, string flag)

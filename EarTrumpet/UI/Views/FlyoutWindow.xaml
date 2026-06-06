@@ -180,6 +180,12 @@
                     <Button Height="{DynamicResource Mutable_DeviceTitleCellHeight}"
                             Command="{Binding ExpandCollapse}"
                             IsEnabled="{Binding CanExpand}">
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="{x:Static resx:Resources.SetAsDefaultDeviceText}"
+                                          Click="SetAsDefaultDevice_Click" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
                         <Button.Style>
                             <Style BasedOn="{StaticResource ExpandCollapseButtonStyle}" TargetType="{x:Type Button}">
                                 <Style.Triggers>

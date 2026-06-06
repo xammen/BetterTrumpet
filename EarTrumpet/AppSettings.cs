@@ -35,15 +35,20 @@ namespace EarTrumpet
         public event Action<string> QuickTrumpetPresetHotkeyTyped;
         public event Action CustomSliderColorsChanged;
         public event Action HiddenAppsChanged;
+        public event Action HiddenDevicesChanged;
 
         private ISettingsBag _settings = StorageFactory.GetSettings();
         private const string HiddenAppEntriesJsonKey = "HiddenAppEntriesJson";
+        private const string HiddenDeviceEntriesJsonKey = "HiddenDeviceEntriesJson";
         private readonly object _hiddenAppsSync = new object();
+        private readonly object _hiddenDevicesSync = new object();
         private bool _hiddenAppsLoaded;
+        private bool _hiddenDevicesLoaded;
         private bool _hotkeyPressHandlerRegistered;
         private DateTime _lastQuickTrumpetHotkeyAt = DateTime.MinValue;
         private string _lastQuickTrumpetHotkey;
         private List<HiddenAppEntry> _hiddenAppEntries = new List<HiddenAppEntry>();
+        private List<HiddenDeviceEntry> _hiddenDeviceEntries = new List<HiddenDeviceEntry>();
         private List<HotkeyData> _quickTrumpetHotkeys = new List<HotkeyData>();
 
         public class HiddenAppEntry
@@ -51,6 +56,13 @@ namespace EarTrumpet
             public string DeviceId { get; set; }
             public string AppId { get; set; }
             public string ExeName { get; set; }
+            public string DisplayName { get; set; }
+            public DateTime HiddenAtUtc { get; set; }
+        }
+
+        public class HiddenDeviceEntry
+        {
+            public string DeviceId { get; set; }
             public string DisplayName { get; set; }
             public DateTime HiddenAtUtc { get; set; }
         }
@@ -553,6 +565,197 @@ namespace EarTrumpet
         private static string NormalizeHiddenKeyValue(string value)
         {
             return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim().ToLowerInvariant();
+        }
+
+        // Hidden Devices Methods
+        public int HiddenDevicesCount
+        {
+            get
+            {
+                lock (_hiddenDevicesSync)
+                {
+                    EnsureHiddenDevicesLoaded();
+                    return _hiddenDeviceEntries.Count;
+                }
+            }
+        }
+
+        public bool IsDeviceHidden(string deviceId)
+        {
+            var normalizedDeviceId = NormalizeHiddenKeyValue(deviceId);
+            if (string.IsNullOrEmpty(normalizedDeviceId))
+            {
+                return false;
+            }
+
+            lock (_hiddenDevicesSync)
+            {
+                EnsureHiddenDevicesLoaded();
+                return _hiddenDeviceEntries.Any(entry => entry.DeviceId == normalizedDeviceId);
+            }
+        }
+
+        public List<HiddenDeviceEntry> GetHiddenDevices()
+        {
+            lock (_hiddenDevicesSync)
+            {
+                EnsureHiddenDevicesLoaded();
+                return _hiddenDeviceEntries
+                    .OrderBy(entry => entry.DisplayName)
+                    .ThenBy(entry => entry.DeviceId)
+                    .Select(entry => new HiddenDeviceEntry
+                    {
+                        DeviceId = entry.DeviceId,
+                        DisplayName = entry.DisplayName,
+                        HiddenAtUtc = entry.HiddenAtUtc,
+                    })
+                    .ToList();
+            }
+        }
+
+        public void HideDevice(string deviceId, string displayName = null)
+        {
+            var normalizedDeviceId = NormalizeHiddenKeyValue(deviceId);
+            var safeDisplayName = string.IsNullOrWhiteSpace(displayName) ? string.Empty : displayName.Trim();
+
+            if (string.IsNullOrEmpty(normalizedDeviceId))
+            {
+                return;
+            }
+
+            bool changed = false;
+            lock (_hiddenDevicesSync)
+            {
+                EnsureHiddenDevicesLoaded();
+
+                bool alreadyExists = _hiddenDeviceEntries.Any(entry => entry.DeviceId == normalizedDeviceId);
+
+                if (!alreadyExists)
+                {
+                    _hiddenDeviceEntries.Add(new HiddenDeviceEntry
+                    {
+                        DeviceId = normalizedDeviceId,
+                        DisplayName = safeDisplayName,
+                        HiddenAtUtc = DateTime.UtcNow,
+                    });
+
+                    SaveHiddenDevicesUnsafe();
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                HiddenDevicesChanged?.Invoke();
+            }
+        }
+
+        public void UnhideDevice(string deviceId)
+        {
+            var normalizedDeviceId = NormalizeHiddenKeyValue(deviceId);
+            if (string.IsNullOrEmpty(normalizedDeviceId))
+            {
+                return;
+            }
+
+            bool changed = false;
+            lock (_hiddenDevicesSync)
+            {
+                EnsureHiddenDevicesLoaded();
+                changed = _hiddenDeviceEntries.RemoveAll(entry => entry.DeviceId == normalizedDeviceId) > 0;
+
+                if (changed)
+                {
+                    SaveHiddenDevicesUnsafe();
+                }
+            }
+
+            if (changed)
+            {
+                HiddenDevicesChanged?.Invoke();
+            }
+        }
+
+        public void UnhideAllDevices()
+        {
+            bool changed = false;
+            lock (_hiddenDevicesSync)
+            {
+                EnsureHiddenDevicesLoaded();
+                if (_hiddenDeviceEntries.Count > 0)
+                {
+                    _hiddenDeviceEntries.Clear();
+                    SaveHiddenDevicesUnsafe();
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                HiddenDevicesChanged?.Invoke();
+            }
+        }
+
+        private void EnsureHiddenDevicesLoaded()
+        {
+            if (_hiddenDevicesLoaded)
+            {
+                return;
+            }
+
+            try
+            {
+                var json = _settings.Get(HiddenDeviceEntriesJsonKey, "[]");
+                var loaded = Newtonsoft.Json.JsonConvert.DeserializeObject<List<HiddenDeviceEntry>>(json) ?? new List<HiddenDeviceEntry>();
+                _hiddenDeviceEntries = NormalizeHiddenDeviceEntries(loaded);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"AppSettings EnsureHiddenDevicesLoaded failed: {ex.Message}");
+                _hiddenDeviceEntries = new List<HiddenDeviceEntry>();
+            }
+
+            _hiddenDevicesLoaded = true;
+        }
+
+        private void SaveHiddenDevicesUnsafe()
+        {
+            _settings.Set(HiddenDeviceEntriesJsonKey, Newtonsoft.Json.JsonConvert.SerializeObject(_hiddenDeviceEntries));
+        }
+
+        private List<HiddenDeviceEntry> NormalizeHiddenDeviceEntries(List<HiddenDeviceEntry> entries)
+        {
+            var dedup = new HashSet<string>(StringComparer.Ordinal);
+            var normalizedEntries = new List<HiddenDeviceEntry>();
+
+            foreach (var entry in entries)
+            {
+                if (entry == null)
+                {
+                    continue;
+                }
+
+                var normalizedDeviceId = NormalizeHiddenKeyValue(entry.DeviceId);
+
+                if (string.IsNullOrEmpty(normalizedDeviceId))
+                {
+                    continue;
+                }
+
+                if (!dedup.Add(normalizedDeviceId))
+                {
+                    continue;
+                }
+
+                normalizedEntries.Add(new HiddenDeviceEntry
+                {
+                    DeviceId = normalizedDeviceId,
+                    DisplayName = string.IsNullOrWhiteSpace(entry.DisplayName) ? string.Empty : entry.DisplayName.Trim(),
+                    HiddenAtUtc = entry.HiddenAtUtc,
+                });
+            }
+
+            return normalizedEntries;
         }
 
         public bool UseScrollWheelInTray
