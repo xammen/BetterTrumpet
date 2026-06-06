@@ -21,14 +21,16 @@ namespace EarTrumpet.UI.ViewModels
         public ModalDialogViewModel Dialog { get; }
         public bool IsExpanded { get; private set; }
         public bool IsExpandingOrCollapsing { get; private set; }
-        public bool CanExpand => _mainViewModel.AllDevices.Count > 1;
+        public bool CanExpand => _mainViewModel.VisibleDevices.Count > 1;
         public string DeviceNameText => Devices.Count > 0 ? Devices[0].DisplayName : null;
         public FlyoutViewState State { get; private set; }
         public ObservableCollection<DeviceViewModel> Devices { get; private set; }
         public ICommand ExpandCollapse { get; private set; }
         public ICommand TogglePin { get; private set; }
         public ObservableCollection<ContextMenuItem> RestoreHiddenAppsMenu { get; }
+        public ObservableCollection<ContextMenuItem> RestoreHiddenDevicesMenu { get; }
         public bool HasHiddenAppsForHeaderDevice => RestoreHiddenAppsMenu.Count > 0;
+        public bool HasHiddenDevices => RestoreHiddenDevicesMenu.Count > 0;
         public InputType LastInput { get; private set; }
         public bool WasLastInputMouse => LastInput == InputType.Mouse;
         public ICommand DisplaySettingsChanged { get; }
@@ -102,11 +104,13 @@ private readonly Action _returnFocusToTray;
             Dialog = new ModalDialogViewModel();
             Devices = new ObservableCollection<DeviceViewModel>();
             RestoreHiddenAppsMenu = new ObservableCollection<ContextMenuItem>();
+            RestoreHiddenDevicesMenu = new ObservableCollection<ContextMenuItem>();
             _returnFocusToTray = returnFocusToTray;
             _mainViewModel = mainViewModel;
             _mainViewModel.DefaultChanged += OnDefaultPlaybackDeviceChanged;
-            _mainViewModel.AllDevices.CollectionChanged += AllDevices_CollectionChanged;
+            _mainViewModel.VisibleDevices.CollectionChanged += AllDevices_CollectionChanged;
             _settings.HiddenAppsChanged += OnHiddenAppsChanged;
+            _settings.HiddenDevicesChanged += OnHiddenDevicesChanged;
             AllDevices_CollectionChanged(null, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 
 // This timer is used to enable clicking on the tray icon while the flyout is open, and not causing a
@@ -191,7 +195,7 @@ private readonly Action _returnFocusToTray;
                         RemoveDevice(Devices[i].Id);
                     }
 
-                    foreach (var device in _mainViewModel.AllDevices)
+                    foreach (var device in _mainViewModel.VisibleDevices)
                     {
                         AddDevice(device);
                     }
@@ -213,6 +217,7 @@ private readonly Action _returnFocusToTray;
             RaisePropertyChanged(nameof(CanExpand));
             RaisePropertyChanged(nameof(DeviceNameText));
             RebuildRestoreHiddenAppsMenu();
+            RebuildRestoreHiddenDevicesMenu();
             InvalidateWindowSize();
         }
 
@@ -225,6 +230,18 @@ private readonly Action _returnFocusToTray;
             else
             {
                 _currentDispatcher.BeginInvoke((Action)(RebuildRestoreHiddenAppsMenu));
+            }
+        }
+
+        private void OnHiddenDevicesChanged()
+        {
+            if (_currentDispatcher.CheckAccess())
+            {
+                RebuildRestoreHiddenDevicesMenu();
+            }
+            else
+            {
+                _currentDispatcher.BeginInvoke((Action)(RebuildRestoreHiddenDevicesMenu));
             }
         }
 
@@ -263,6 +280,35 @@ private readonly Action _returnFocusToTray;
             RaisePropertyChanged(nameof(HasHiddenAppsForHeaderDevice));
         }
 
+        private void RebuildRestoreHiddenDevicesMenu()
+        {
+            RestoreHiddenDevicesMenu.Clear();
+
+            var hiddenDevices = _mainViewModel.GetHiddenDevices();
+            foreach (var device in hiddenDevices)
+            {
+                var localDevice = device;
+                var displayName = string.IsNullOrWhiteSpace(device.DisplayName) ? device.DeviceId : device.DisplayName;
+                RestoreHiddenDevicesMenu.Add(new ContextMenuItem
+                {
+                    DisplayName = displayName,
+                    Command = new RelayCommand(() => _mainViewModel.UnhideDevice(localDevice.DeviceId)),
+                });
+            }
+
+            if (hiddenDevices.Any())
+            {
+                RestoreHiddenDevicesMenu.Add(new ContextMenuSeparator());
+                RestoreHiddenDevicesMenu.Add(new ContextMenuItem
+                {
+                    DisplayName = Properties.Resources.RestoreHiddenDevicesAll,
+                    Command = new RelayCommand(() => _mainViewModel.UnhideAllDevices()),
+                });
+            }
+
+            RaisePropertyChanged(nameof(HasHiddenDevices));
+        }
+
         private void OnDefaultPlaybackDeviceChanged(object sender, DeviceViewModel e)
         {
             // No longer any devices.
@@ -276,10 +322,10 @@ private readonly Action _returnFocusToTray;
             }
             else
             {
-                var foundAllDevice = _mainViewModel.AllDevices.FirstOrDefault(d => d.Id == e.Id);
+                var foundAllDevice = _mainViewModel.VisibleDevices.FirstOrDefault(d => d.Id == e.Id);
                 if (foundAllDevice != null)
                 {
-                    // We found the device in AllDevices which was not in Devices.
+                    // We found the device in VisibleDevices which was not in Devices.
                     // Thus: We are collapsed and can dump the single device in Devices:
                     Devices.Clear();
                     foundAllDevice.Apps.CollectionChanged += Apps_CollectionChanged;
@@ -306,7 +352,7 @@ private readonly Action _returnFocusToTray;
             if (IsExpanded)
             {
                 // Add any that aren't existing.
-                foreach (var device in _mainViewModel.AllDevices)
+                foreach (var device in _mainViewModel.VisibleDevices)
                 {
                     if (!Devices.Contains(device))
                     {
@@ -585,8 +631,9 @@ private readonly Action _returnFocusToTray;
 
                     // Unsubscribe events
                     _mainViewModel.DefaultChanged -= OnDefaultPlaybackDeviceChanged;
-                    _mainViewModel.AllDevices.CollectionChanged -= AllDevices_CollectionChanged;
+                    _mainViewModel.VisibleDevices.CollectionChanged -= AllDevices_CollectionChanged;
                     _settings.HiddenAppsChanged -= OnHiddenAppsChanged;
+                    _settings.HiddenDevicesChanged -= OnHiddenDevicesChanged;
 
                     foreach (var device in Devices)
                     {

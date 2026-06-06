@@ -482,7 +482,19 @@ namespace EarTrumpet.Properties {
                 return ResourceManager.GetString("ContextMenuRestoreHiddenAppsForDeviceFormat", resourceCulture);
             }
         }
-        
+
+        public static string ContextMenuHiddenDevicesTitleFormat {
+            get {
+                return ResourceManager.GetString("ContextMenuHiddenDevicesTitleFormat", resourceCulture);
+            }
+        }
+
+        public static string ContextMenuRestoreAllHiddenDevices {
+            get {
+                return ResourceManager.GetString("ContextMenuRestoreAllHiddenDevices", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to I use this action&apos;s context menu item.
         /// </summary>
@@ -766,7 +778,25 @@ namespace EarTrumpet.Properties {
                 return ResourceManager.GetString("HideAppEntryButtonText", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Hide this device.
+        /// </summary>
+        public static string HideDeviceButtonText {
+            get {
+                return ResourceManager.GetString("HideDeviceButtonText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Set as default device.
+        /// </summary>
+        public static string SetAsDefaultDeviceText {
+            get {
+                return ResourceManager.GetString("SetAsDefaultDeviceText", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Home.
         /// </summary>
@@ -1228,7 +1258,25 @@ namespace EarTrumpet.Properties {
                 return ResourceManager.GetString("RestoreHiddenAppsForDeviceAll", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Show hidden devices.
+        /// </summary>
+        public static string RestoreHiddenDevices {
+            get {
+                return ResourceManager.GetString("RestoreHiddenDevices", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Show all hidden devices.
+        /// </summary>
+        public static string RestoreHiddenDevicesAll {
+            get {
+                return ResourceManager.GetString("RestoreHiddenDevicesAll", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Remove this action.
         /// </summary>

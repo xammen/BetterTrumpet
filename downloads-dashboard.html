@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bettertrumpet - stats</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --text: #e0e0e0;
+            --text-muted: #666666;
+            --text-dim: #444444;
+            --accent: #888888;
+            --border: #222222;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 48px;
+        }
+
+        .header h1 {
+            font-size: 1rem;
+            font-weight: normal;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .header h1::before {
+            content: '~/stats/';
+            color: var(--text-muted);
+        }
+
+        .header .subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Stats Overview */
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            margin-bottom: 48px;
+        }
+
+        .stat-item {
+            background: var(--bg);
+            padding: 24px;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: lowercase;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            color: var(--text);
+        }
+
+        .stat-value.small {
+            font-size: 1rem;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: lowercase;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Distribution */
+        .dist-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 600px) {
+            .dist-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dist-item {
+            padding: 16px 0;
+        }
+
+        .dist-name {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+        }
+
+        .dist-value {
+            font-size: 1.25rem;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .dist-bar {
+            height: 2px;
+            background: var(--bg-tertiary);
+            position: relative;
+        }
+
+        .dist-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 1s ease;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-wrapper {
+            height: 300px;
+        }
+
+        /* Timeline */
+        .timeline {
+            border-left: 1px solid var(--border);
+            margin-left: 8px;
+        }
+
+        .timeline-item {
+            padding: 12px 0 12px 24px;
+            position: relative;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: 18px;
+            width: 5px;
+            height: 5px;
+            background: var(--text-muted);
+            border-radius: 50%;
+        }
+
+        .timeline-item.major::before {
+            background: var(--text);
+        }
+
+        .timeline-version {
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .timeline-meta {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .timeline-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            font-size: 0.65rem;
+            margin-left: 8px;
+            text-transform: uppercase;
+        }
+
+        .timeline-badge.beta {
+            color: var(--text-muted);
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            color: var(--text-muted);
+            font-weight: normal;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.75rem;
+            text-transform: lowercase;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        td:first-child {
+            color: var(--text);
+        }
+
+        tr:hover td {
+            background: var(--bg-secondary);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 64px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            color: var(--text-dim);
+            font-size: 0.75rem;
+        }
+
+        .footer a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: var(--text);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-dim);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>downloads</h1>
+            <div class="subtitle">stats for bettertrumpet — total: 2,020 downloads</div>
+        </header>
+
+        <!-- Overview Stats -->
+        <div class="stats-overview">
+            <div class="stat-item">
+                <div class="stat-label">total</div>
+                <div class="stat-value">2,020</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">github</div>
+                <div class="stat-value">1,573</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">chocolatey</div>
+                <div class="stat-value">274</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">winget</div>
+                <div class="stat-value small">~173</div>
+            </div>
+        </div>
+
+        <!-- Distribution -->
+        <div class="section">
+            <div class="section-title">distribution</div>
+            <div class="dist-grid">
+                <div class="dist-item">
+                    <div class="dist-name">github releases</div>
+                    <div class="dist-value">78%</div>
+                    <div class="dist-bar">
+                        <div class="dist-bar-fill" style="width: 78%"></div>
+                    </div>
+                </div>
+                <div class="dist-item">
+                    <div class="dist-name">chocolatey</div>
+                    <div class="dist-value">14%</div>
+                    <div class="dist-bar">
+                        <div class="dist-bar-fill" style="width: 14%"></div>
+                    </div>
+                </div>
+                <div class="dist-item">
+                    <div class="dist-name">winget</div>
+                    <div class="dist-value">8%</div>
+                    <div class="dist-bar">
+                        <div class="dist-bar-fill" style="width: 8%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="section">
+            <div class="section-title">adoption curve (cumulative)</div>
+            <div class="chart-container">
+                <div class="chart-wrapper">
+                    <canvas id="downloadsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="section">
+            <div class="section-title">release history</div>
+            <div class="timeline" id="timeline">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="section">
+            <div class="section-title">version details</div>
+            <div class="chart-container" style="padding: 0; overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>version</th>
+                            <th>date</th>
+                            <th>setup</th>
+                            <th>portable</th>
+                            <th>total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="versionTable">
+                        <!-- Generated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div>last updated: 2026-04-24</div>
+            <div style="margin-top: 4px;">
+                data from <a href="https://github.com/xammen/BetterTrumpet">github</a>, 
+                <a href="https://community.chocolatey.org/packages/bettertrumpet">chocolatey</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Données des releases avec cumul target
+        const releases = [
+            { date: '2026-01-04', version: 'v2.2.0', cumulative: 53 },
+            { date: '2026-01-06', version: 'v2.2.1', cumulative: 152 },
+            { date: '2026-01-10', version: 'v2.3.0', cumulative: 156 },
+            { date: '2026-01-10', version: 'v2.3.1', cumulative: 651 },
+            { date: '2026-02-22', version: 'v2.4.0', cumulative: 899 },
+            { date: '2026-03-16', version: 'v3.0.0', cumulative: 899 },
+            { date: '2026-03-17', version: 'v3.0.1', cumulative: 899 },
+            { date: '2026-03-17', version: 'v3.0.2', cumulative: 899 },
+            { date: '2026-03-17', version: 'v3.0.3', cumulative: 899 },
+            { date: '2026-03-17', version: 'v3.0.4', cumulative: 899 },
+            { date: '2026-03-17', version: 'v3.0.5', cumulative: 902 },
+            { date: '2026-03-17', version: 'v3.0.6', cumulative: 902 },
+            { date: '2026-03-17', version: 'v3.0.7', cumulative: 903 },
+            { date: '2026-03-17', version: 'v3.0.8', cumulative: 1026 },
+            { date: '2026-03-19', version: 'v3.1.0-beta', cumulative: 1036 },
+            { date: '2026-03-31', version: 'v3.0.9', cumulative: 1158 },
+            { date: '2026-04-04', version: 'v3.0.10', cumulative: 1367 },
+            { date: '2026-04-09', version: 'v3.0.11', cumulative: 1573 },
+            { date: new Date().toISOString().split('T')[0], version: 'today', cumulative: 2020 }
+        ];
+
+        // Générer les données pour le graphique
+        const labels = [];
+        const dataPoints = [];
+        const pointRadius = [];
+        const pointBackground = [];
+
+        for (let i = 0; i < releases.length; i++) {
+            const r = releases[i];
+            labels.push(r.date);
+            dataPoints.push(r.cumulative);
+            
+            // Point plus gros pour les releases, petit pour les autres
+            if (i === 0 || i === releases.length - 1 || r.version.includes('v2.3.1') || r.version.includes('v2.4.0') || r.version.includes('v3.0.11')) {
+                pointRadius.push(6);
+                pointBackground.push('#e0e0e0');
+            } else if (r.version.includes('beta')) {
+                pointRadius.push(4);
+                pointBackground.push('#666666');
+            } else {
+                pointRadius.push(3);
+                pointBackground.push('#444444');
+            }
+        }
+
+        // Chart
+        const ctx = document.getElementById('downloadsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'downloads',
+                    data: dataPoints,
+                    borderColor: '#666666',
+                    backgroundColor: 'rgba(102, 102, 102, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: pointRadius,
+                    pointBackgroundColor: pointBackground,
+                    pointBorderColor: '#0a0a0a',
+                    pointBorderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1a1a1a',
+                        titleColor: '#e0e0e0',
+                        bodyColor: '#888888',
+                        borderColor: '#333333',
+                        borderWidth: 1,
+                        cornerRadius: 0,
+                        callbacks: {
+                            title: function(context) {
+                                return context[0].label;
+                            },
+                            label: function(context) {
+                                const idx = context.dataIndex;
+                                const release = releases[idx];
+                                return `${release.version}: ${context.parsed.y.toLocaleString()} downloads`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: { size: 9 }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#222222' },
+                        ticks: { 
+                            font: { size: 10 },
+                            callback: function(value) {
+                                return value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Timeline
+        const timelineContainer = document.getElementById('timeline');
+        const majorReleases = ['v2.3.1', 'v2.4.0', 'v3.0.8', 'v3.0.11'];
+        
+        releases.slice(0, -1).forEach(release => {
+            const isMajor = majorReleases.includes(release.version);
+            const item = document.createElement('div');
+            item.className = 'timeline-item' + (isMajor ? ' major' : '');
+            item.innerHTML = `
+                <div class="timeline-version">
+                    ${release.version}
+                    ${release.version.includes('beta') ? '<span class="timeline-badge beta">beta</span>' : ''}
+                </div>
+                <div class="timeline-meta">${release.date} — ${release.cumulative.toLocaleString()} cumulative</div>
+            `;
+            timelineContainer.appendChild(item);
+        });
+
+        // Table
+        const tableBody = document.getElementById('versionTable');
+        const releaseData = [
+            { version: 'v3.0.11', date: '2026-04-09', setup: 210, portable: 26 },
+            { version: 'v3.0.10', date: '2026-04-04', setup: 199, portable: 10 },
+            { version: 'v3.0.9', date: '2026-03-31', setup: 113, portable: 9 },
+            { version: 'v3.1.0-beta', date: '2026-03-19', setup: 7, portable: 3, isBeta: true },
+            { version: 'v3.0.8', date: '2026-03-17', setup: 111, portable: 12 },
+            { version: 'v3.0.7', date: '2026-03-17', setup: 1, portable: 0 },
+            { version: 'v3.0.6', date: '2026-03-17', setup: 0, portable: 0 },
+            { version: 'v3.0.5', date: '2026-03-17', setup: 3, portable: 0 },
+            { version: 'v3.0.4', date: '2026-03-17', setup: 0, portable: 0 },
+            { version: 'v3.0.3', date: '2026-03-17', setup: 0, portable: 0 },
+            { version: 'v3.0.2', date: '2026-03-17', setup: 0, portable: 0 },
+            { version: 'v3.0.1', date: '2026-03-17', setup: 0, portable: 0 },
+            { version: 'v3.0.0', date: '2026-03-16', setup: 0, portable: 0 },
+            { version: 'v2.4.0', date: '2026-02-22', setup: 248, portable: 0 },
+            { version: 'v2.3.1', date: '2026-01-10', setup: 495, portable: 0 },
+            { version: 'v2.3.0', date: '2026-01-10', setup: 4, portable: 0 },
+            { version: 'v2.2.1', date: '2026-01-06', setup: 99, portable: 0 },
+            { version: 'v2.2.0', date: '2026-01-04', setup: 53, portable: 0 },
+        ];
+
+        releaseData.forEach(release => {
+            const total = release.setup + release.portable;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${release.version}${release.isBeta ? ' <span style="color:#666;font-size:0.75rem;">(beta)</span>' : ''}</td>
+                <td>${release.date}</td>
+                <td>${release.setup || '-'}</td>
+                <td>${release.portable || '-'}</td>
+                <td>${total || '-'}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    </script>
+</body>
+</html>
