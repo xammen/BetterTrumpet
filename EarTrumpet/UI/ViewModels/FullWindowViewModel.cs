@@ -11,7 +11,7 @@ namespace EarTrumpet.UI.ViewModels
     {
         public static readonly int SmallDeviceCountLimit = 3;
 
-        public ObservableCollection<DeviceViewModel> AllDevices => _mainViewModel.AllDevices;
+        public ObservableCollection<DeviceViewModel> AllDevices => _mainViewModel.VisibleDevices;
         public ModalDialogViewModel Dialog { get; }
         public ICommand DisplaySettingsChanged { get; }
         public bool IsManyDevicesMode => AllDevices.Count > SmallDeviceCountLimit;
@@ -24,7 +24,7 @@ namespace EarTrumpet.UI.ViewModels
             Dialog = new ModalDialogViewModel();
             _mainViewModel = mainViewModel;
             _mainViewModel.OnFullWindowOpened();
-            _mainViewModel.AllDevices.CollectionChanged += OnDevicesChanged;
+            _mainViewModel.VisibleDevices.CollectionChanged += OnDevicesChanged;
 
             DisplaySettingsChanged = new RelayCommand(() => Dialog.IsVisible = false);
         }

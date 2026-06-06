@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -244,29 +245,54 @@ namespace EarTrumpet
 
         private void ContinueStartup()
         {
+            // ══════════════════════════════════════════════════════════════
+            // PHASE 1: Instant Tray Icon (0-500ms)
+            // Show tray icon immediately with loading state
+            // ══════════════════════════════════════════════════════════════
             ((UI.Themes.Manager)Resources["ThemeManager"]).Load();
 
+            // Start audio device manager initialization in background (non-blocking)
             _deviceManager = WindowsAudioFactory.Create(AudioDeviceKind.Playback);
-            _deviceManager.Loaded += (_, __) => CompleteStartup();
             CollectionViewModel = new DeviceCollectionViewModel(_deviceManager, Settings);
 
+            // Show tray icon immediately (even before audio is ready)
             _trayIconSource = new TaskbarIconSource(CollectionViewModel, Settings);
             _trayIcon = new ShellNotifyIcon(_trayIconSource);
+            _trayIcon.SetTooltip("BetterTrumpet (Loading...)");
+            _trayIcon.IsVisible = true; // Tray icon visible NOW
             Exit += (_, __) => _trayIcon.IsVisible = false;
-            CollectionViewModel.TrayPropertyChanged += RefreshTrayTooltipPresentation;
-            Settings.AppTooltipsChanged += () => Dispatcher.BeginInvoke((Action)RefreshTrayTooltipPresentation);
 
-            _flyoutViewModel = new FlyoutViewModel(CollectionViewModel, () => _trayIcon.SetFocus(), Settings);
-            FlyoutWindow = new FlyoutWindow(_flyoutViewModel, TryGetTrayIconBounds);
-            // Initialize the FlyoutWindow last because its Show/Hide cycle will pump messages, causing UI frames
-            // to be executed, breaking the assumption that startup is complete.
-            FlyoutWindow.Initialize();
+            Trace.WriteLine($"Startup: Tray icon visible at {Duration.TotalMilliseconds:F0}ms");
+
+            // ══════════════════════════════════════════════════════════════
+            // PHASE 2: Audio Background Loading (500ms-2s)
+            // When audio loads, connect to UI and initialize FlyoutWindow + features
+            // ══════════════════════════════════════════════════════════════
+            _deviceManager.Loaded += (_, __) =>
+            {
+                Trace.WriteLine($"Startup: Audio loaded at {Duration.TotalMilliseconds:F0}ms");
+
+                // Connect audio data to tray icon
+                CollectionViewModel.TrayPropertyChanged += RefreshTrayTooltipPresentation;
+                Settings.AppTooltipsChanged += () => Dispatcher.BeginInvoke((Action)RefreshTrayTooltipPresentation);
+                RefreshTrayTooltipPresentation(); // Update tooltip with real data
+
+                // Initialize FlyoutWindow now that audio is ready
+                _flyoutViewModel = new FlyoutViewModel(CollectionViewModel, () => _trayIcon.SetFocus(), Settings);
+                FlyoutWindow = new FlyoutWindow(_flyoutViewModel, TryGetTrayIconBounds);
+                FlyoutWindow.Initialize();
+
+                Trace.WriteLine($"Startup: FlyoutWindow initialized at {Duration.TotalMilliseconds:F0}ms");
+
+                // Complete startup with all remaining features in parallel
+                CompleteStartup();
+            };
         }
 
         private void CompleteStartup()
         {
             // ══════════════════════════════════════════════════════════════
-            // STARTUP PHASE 2: UI (degraded mode if fails)
+            // STARTUP PHASE 3: UI Components (critical for interaction)
             // ══════════════════════════════════════════════════════════════
             _mixerWindow = new WindowHolder(CreateMixerExperience);
             _settingsWindow = new WindowHolder(CreateSettingsExperience);
@@ -275,131 +301,203 @@ namespace EarTrumpet
             _trayIcon.SecondaryInvoke += (_, args) => _trayIcon.ShowContextMenu(GetTrayContextMenuItems(), args.Point);
             _trayIcon.TertiaryInvoke += (_, __) => CollectionViewModel.Default?.ToggleMute.Execute(null);
             _trayIcon.Scrolled += trayIconScrolled;
-            _trayIcon.IsVisible = true;
-            RefreshTrayTooltipPresentation();
+            // Tray icon is already visible from ContinueStartup
+
+            Trace.WriteLine($"Startup: UI components ready at {Duration.TotalMilliseconds:F0}ms");
 
             // ══════════════════════════════════════════════════════════════
-            // STARTUP PHASE 3: Features (each isolated — failure = feature disabled)
+            // STARTUP PHASE 4: Parallel Feature Loading (background)
+            // Load non-critical features in parallel for maximum performance
             // ══════════════════════════════════════════════════════════════
-
-            // 3a. Addons
-            try
+            Task.Run(() =>
             {
-                AddonManager.Load(shouldLoadInternalAddons: HasDevIdentity);
-                Exit += (_, __) => AddonManager.Shutdown();
-            }
-            catch (Exception ex) { Trace.WriteLine($"Startup: Addons failed to load: {ex.Message}"); }
+                var tasks = new List<Task>();
+
+                // Task 1: Addons
+                tasks.Add(Task.Run(() =>
+                {
+                    try
+                    {
+                        AddonManager.Load(shouldLoadInternalAddons: HasDevIdentity);
+                        Dispatcher.BeginInvoke((Action)(() => Exit += (_, __) => AddonManager.Shutdown()));
+                        Trace.WriteLine($"Startup: Addons loaded at {Duration.TotalMilliseconds:F0}ms");
+                    }
+                    catch (Exception ex) { Trace.WriteLine($"Startup: Addons failed to load: {ex.Message}"); }
 
 #if DEBUG
-            try { DebugHelpers.Add(); }
-            catch (Exception ex) { Trace.WriteLine($"Startup: DebugHelpers failed: {ex.Message}"); }
+                    try
+                    {
+                        Dispatcher.BeginInvoke((Action)(() => DebugHelpers.Add()));
+                        Trace.WriteLine($"Startup: DebugHelpers loaded at {Duration.TotalMilliseconds:F0}ms");
+                    }
+                    catch (Exception ex) { Trace.WriteLine($"Startup: DebugHelpers failed: {ex.Message}"); }
 #endif
+                }));
 
-            // 3b. Hotkeys
-            try
-            {
-                Settings.FlyoutHotkeyTyped += () => _flyoutViewModel.OpenFlyout(InputType.Keyboard);
-                Settings.MixerHotkeyTyped += () => _mixerWindow.OpenOrClose();
-                Settings.SettingsHotkeyTyped += () => _settingsWindow.OpenOrBringToFront();
-                Settings.AbsoluteVolumeUpHotkeyTyped += AbsoluteVolumeIncrement;
-                Settings.AbsoluteVolumeDownHotkeyTyped += AbsoluteVolumeDecrement;
-                Settings.SwitchDeviceHotkeyTyped += CycleDefaultDevice;
-                Settings.QuickTrumpetPresetHotkeyTyped += ApplyQuickTrumpetPreset;
-                Settings.RegisterHotkeys();
-            }
-            catch (Exception ex) { Trace.WriteLine($"Startup: Hotkeys registration failed: {ex.Message}"); }
-
-            // 3c. Media popup
-            try
-            {
-                _mediaPopup = new MediaPopupWindow(Settings);
-                InitializeMediaPopup();
-            }
-            catch (Exception ex) { Trace.WriteLine($"Startup: MediaPopup failed: {ex.Message}"); }
-
-            // 3d. Health monitoring
-            try { HealthMonitor.Start(); }
-            catch (Exception ex) { Trace.WriteLine($"Startup: HealthMonitor failed: {ex.Message}"); }
-
-            // 3f. Update checker
-            try
-            {
-                _updateService = new DataModel.UpdateService();
-                _updateService.Channel = Settings.UpdateNotifyChannel;
-                _flyoutViewModel.SetUpdateService(_updateService);
-                _updateService.UpdateAvailableChanged += () =>
+                // Task 2: Hotkeys
+                tasks.Add(Task.Run(() =>
                 {
-                    if (_trayIconSource != null) _trayIconSource.ShowUpdateBadge = _updateService.IsUpdateAvailable;
-                };
-                if (Settings.AutoCheckForUpdates && Settings.UpdateNotifyChannel != DataModel.UpdateChannel.None)
+                    try
+                    {
+                        Dispatcher.Invoke((Action)(() =>
+                        {
+                            Settings.FlyoutHotkeyTyped += () => _flyoutViewModel.OpenFlyout(InputType.Keyboard);
+                            Settings.MixerHotkeyTyped += () => _mixerWindow.OpenOrClose();
+                            Settings.SettingsHotkeyTyped += () => _settingsWindow.OpenOrBringToFront();
+                            Settings.AbsoluteVolumeUpHotkeyTyped += AbsoluteVolumeIncrement;
+                            Settings.AbsoluteVolumeDownHotkeyTyped += AbsoluteVolumeDecrement;
+                            Settings.SwitchDeviceHotkeyTyped += CycleDefaultDevice;
+                            Settings.QuickTrumpetPresetHotkeyTyped += ApplyQuickTrumpetPreset;
+                            Settings.RegisterHotkeys();
+                        }));
+                        Trace.WriteLine($"Startup: Hotkeys registered at {Duration.TotalMilliseconds:F0}ms");
+                    }
+                    catch (Exception ex) { Trace.WriteLine($"Startup: Hotkeys registration failed: {ex.Message}"); }
+                }));
+
+                // Task 3: Media popup (only if enabled)
+                if (Settings.MediaPopupEnabled)
                 {
-                    _updateService.Start();
+                    tasks.Add(Task.Run(() =>
+                    {
+                        try
+                        {
+                            Dispatcher.Invoke((Action)(() =>
+                            {
+                                _mediaPopup = new MediaPopupWindow(Settings);
+                                InitializeMediaPopup();
+                            }));
+                            Trace.WriteLine($"Startup: MediaPopup initialized at {Duration.TotalMilliseconds:F0}ms");
+                        }
+                        catch (Exception ex) { Trace.WriteLine($"Startup: MediaPopup failed: {ex.Message}"); }
+                    }));
                 }
-            }
-            catch (Exception ex) { Trace.WriteLine($"Startup: UpdateService failed: {ex.Message}"); }
+                else
+                {
+                    Trace.WriteLine("Startup: MediaPopup skipped (feature disabled)");
+                }
 
-            // 3g. CLI pipe server
-            try
-            {
-                _cliHandler = new CliHandler(() => CollectionViewModel, () => Settings, () => _deviceManager);
-                if (_updateService != null) _cliHandler.SetUpdateServiceProvider(() => _updateService);
-                _pipeServer = new PipeServer();
-                _pipeServer.CommandReceived += _cliHandler.ProcessCommand;
-                _pipeServer.Start();
-                Exit += (_, __) => _pipeServer?.Dispose();
-            }
-            catch (Exception ex) { Trace.WriteLine($"Startup: PipeServer failed: {ex.Message}"); }
+                // Task 4: Health monitoring
+                tasks.Add(Task.Run(() =>
+                {
+                    try
+                    {
+                        HealthMonitor.Start();
+                        Trace.WriteLine($"Startup: HealthMonitor started at {Duration.TotalMilliseconds:F0}ms");
+                    }
+                    catch (Exception ex) { Trace.WriteLine($"Startup: HealthMonitor failed: {ex.Message}"); }
+                }));
 
-            // 3e. First-run experience
-            try { DisplayFirstRunExperience(); }
-            catch (Exception ex) { Trace.WriteLine($"Startup: FirstRun dialog failed: {ex.Message}"); }
+                // Task 5: Update checker
+                tasks.Add(Task.Run(() =>
+                {
+                    try
+                    {
+                        Dispatcher.Invoke((Action)(() =>
+                        {
+                            _updateService = new DataModel.UpdateService();
+                            _updateService.Channel = Settings.UpdateNotifyChannel;
+                            _flyoutViewModel.SetUpdateService(_updateService);
+                            _updateService.UpdateAvailableChanged += () =>
+                            {
+                                if (_trayIconSource != null) _trayIconSource.ShowUpdateBadge = _updateService.IsUpdateAvailable;
+                            };
+                            if (Settings.AutoCheckForUpdates && Settings.UpdateNotifyChannel != DataModel.UpdateChannel.None)
+                            {
+                                _updateService.Start();
+                            }
+                        }));
+                        Trace.WriteLine($"Startup: UpdateService initialized at {Duration.TotalMilliseconds:F0}ms");
+                    }
+                    catch (Exception ex) { Trace.WriteLine($"Startup: UpdateService failed: {ex.Message}"); }
+                }));
 
-            // 3h. What's New changelog (show after version upgrade, not on first run)
-            try { DisplayChangelogIfUpdated(); }
-            catch (Exception ex) { Trace.WriteLine($"Startup: Changelog failed: {ex.Message}"); }
+                // Task 6: CLI pipe server
+                tasks.Add(Task.Run(() =>
+                {
+                    try
+                    {
+                        Dispatcher.Invoke((Action)(() =>
+                        {
+                            _cliHandler = new CliHandler(() => CollectionViewModel, () => Settings, () => _deviceManager);
+                            if (_updateService != null) _cliHandler.SetUpdateServiceProvider(() => _updateService);
+                            _pipeServer = new PipeServer();
+                            _pipeServer.CommandReceived += _cliHandler.ProcessCommand;
+                            _pipeServer.Start();
+                            Exit += (_, __) => _pipeServer?.Dispose();
+                        }));
+                        Trace.WriteLine($"Startup: PipeServer started at {Duration.TotalMilliseconds:F0}ms");
+                    }
+                    catch (Exception ex) { Trace.WriteLine($"Startup: PipeServer failed: {ex.Message}"); }
+                }));
 
-            Trace.WriteLine($"Startup: Complete in {Duration.TotalMilliseconds:F0}ms");
+                // Wait for all parallel tasks to complete
+                Task.WhenAll(tasks).ContinueWith(_ =>
+                {
+                    Trace.WriteLine($"Startup: All background tasks completed at {Duration.TotalMilliseconds:F0}ms");
+
+                    // Display first-run and changelog on UI thread (must be sequential, not parallel)
+                    Dispatcher.BeginInvoke((Action)(() =>
+                    {
+                        try { DisplayFirstRunExperience(); }
+                        catch (Exception ex) { Trace.WriteLine($"Startup: FirstRun dialog failed: {ex.Message}"); }
+
+                        try { DisplayChangelogIfUpdated(); }
+                        catch (Exception ex) { Trace.WriteLine($"Startup: Changelog failed: {ex.Message}"); }
+
+                        Trace.WriteLine($"Startup: Complete in {Duration.TotalMilliseconds:F0}ms");
+                    }));
+                });
+            });
         }
 
         /// <summary>
         /// Sets up media popup hover behavior. Isolated from CompleteStartup for clarity.
+        /// Timer creation deferred to first Show() call for lazy initialization.
         /// </summary>
         private void InitializeMediaPopup()
         {
             if (_mediaPopup == null) return;
 
-            _mediaPopupDelayTimer = new System.Windows.Threading.DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(Settings.MediaPopupHoverDelay)
-            };
-
-            Settings.MediaPopupSettingsChanged += () =>
-            {
-                _mediaPopupDelayTimer.Interval = TimeSpan.FromSeconds(Settings.MediaPopupHoverDelay);
-            };
-
-            _mediaPopupDelayTimer.Tick += (s, e) =>
-            {
-                _mediaPopupDelayTimer.Stop();
-
-                if (Settings.MediaPopupShowOnlyWhenPlaying && !DataModel.MediaSessionService.Instance.IsMediaPlaying)
-                {
-                    return;
-                }
-
-                _mediaPopup.ShowPopup(_trayIcon.IconBounds);
-                RefreshTrayTooltipPresentation();
-            };
-            _mediaPopup.PopupHidden += (_, __) =>
-            {
-                RefreshTrayTooltipPresentation();
-            };
+            // Timer will be created on first Show() call - deferred initialization
             _trayIcon.MouseHoverChanged += (_, isOver) =>
             {
                 if (!Settings.MediaPopupEnabled) return;
 
                 if (isOver)
                 {
+                    // Lazy-create timer on first hover
+                    if (_mediaPopupDelayTimer == null)
+                    {
+                        _mediaPopupDelayTimer = new System.Windows.Threading.DispatcherTimer
+                        {
+                            Interval = TimeSpan.FromSeconds(Settings.MediaPopupHoverDelay)
+                        };
+
+                        Settings.MediaPopupSettingsChanged += () =>
+                        {
+                            if (_mediaPopupDelayTimer != null)
+                            {
+                                _mediaPopupDelayTimer.Interval = TimeSpan.FromSeconds(Settings.MediaPopupHoverDelay);
+                            }
+                        };
+
+                        _mediaPopupDelayTimer.Tick += (s, e) =>
+                        {
+                            _mediaPopupDelayTimer.Stop();
+
+                            if (Settings.MediaPopupShowOnlyWhenPlaying && !DataModel.MediaSessionService.Instance.IsMediaPlaying)
+                            {
+                                return;
+                            }
+
+                            _mediaPopup.ShowPopup(_trayIcon.IconBounds);
+                            RefreshTrayTooltipPresentation();
+                        };
+
+                        Trace.WriteLine("MediaPopup: Timer created on first hover (lazy init)");
+                    }
+
                     if (_mediaPopup.IsShowing)
                     {
                         RefreshTrayTooltipPresentation();
@@ -411,10 +509,15 @@ namespace EarTrumpet
                 }
                 else
                 {
-                    _mediaPopupDelayTimer.Stop();
+                    _mediaPopupDelayTimer?.Stop();
                     _mediaPopup.StartHideTimer();
                     RefreshTrayTooltipPresentation();
                 }
+            };
+
+            _mediaPopup.PopupHidden += (_, __) =>
+            {
+                RefreshTrayTooltipPresentation();
             };
         }
 
@@ -566,6 +669,36 @@ namespace EarTrumpet
                     DisplayName = string.Format(EarTrumpet.Properties.Resources.ContextMenuHiddenAppsTitleFormat, hiddenByDevice.Sum(device => device.HiddenAppsCount)),
                     Glyph = "\xE738",
                     Children = hiddenChildren,
+                });
+            }
+
+            var hiddenDevicesCount = CollectionViewModel.GetTotalHiddenDevicesCount();
+            if (hiddenDevicesCount > 0)
+            {
+                var hiddenDevices = CollectionViewModel.GetHiddenDevices();
+                var hiddenDeviceChildren = hiddenDevices.Select(entry => new ContextMenuItem
+                {
+                    DisplayName = entry.DisplayName ?? entry.DeviceId,
+                    Command = new RelayCommand(() => CollectionViewModel.UnhideDevice(entry.DeviceId)),
+                }).ToList();
+
+                hiddenDeviceChildren.Add(new ContextMenuSeparator());
+                hiddenDeviceChildren.Add(new ContextMenuItem
+                {
+                    DisplayName = EarTrumpet.Properties.Resources.ContextMenuRestoreAllHiddenDevices,
+                    Command = new RelayCommand(() => CollectionViewModel.UnhideAllDevices()),
+                });
+
+                if (!hiddenByDevice.Any())
+                {
+                    ret.Add(new ContextMenuSeparator());
+                }
+
+                ret.Add(new ContextMenuItem
+                {
+                    DisplayName = string.Format(EarTrumpet.Properties.Resources.ContextMenuHiddenDevicesTitleFormat, hiddenDevicesCount),
+                    Glyph = "\xE8EA",
+                    Children = hiddenDeviceChildren,
                 });
             }
 
