@@ -543,6 +543,12 @@ namespace EarTrumpet.Properties {
             }
         }
 
+        public static string SettingsMoreOptions {
+            get {
+                return ResourceManager.GetString("SettingsMoreOptions", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to is.
         /// </summary>

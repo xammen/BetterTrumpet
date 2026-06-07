@@ -1485,4 +1485,7 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
   <data name="SettingsProfileDeviceCountFormat" xml:space="preserve">
     <value>{0} device(s) | {1}</value>
   </data>
+  <data name="SettingsMoreOptions" xml:space="preserve">
+    <value>More options</value>
+  </data>
 </root>

@@ -819,6 +819,7 @@
                                            Theme:Brush.Foreground="Theme=Text, HighContrast=Text" />
                                 <!-- Randomize button -->
                                 <Border Grid.Column="1" Width="32" Height="32" CornerRadius="8" Cursor="Hand"
+                                        AutomationProperties.Name="{x:Static resx:Resources.SettingsRandomizeTooltip}"
                                         ToolTip="{x:Static resx:Resources.SettingsRandomizeTooltip}" MouseLeftButtonDown="RandomizeColors_Click">
                                     <Border.Style>
                                         <Style TargetType="Border">
@@ -1549,6 +1550,8 @@
                                     </StackPanel>
                                     <!-- Overflow "..." button -->
                                     <Border Grid.Column="2" x:Name="OverflowButton" Width="32" Height="32" CornerRadius="8" Cursor="Hand"
+                                            AutomationProperties.Name="{x:Static resx:Resources.SettingsMoreOptions}"
+                                            ToolTip="{x:Static resx:Resources.SettingsMoreOptions}"
                                             MouseLeftButtonDown="OverflowMenu_Click">
                                         <Border.Style>
                                             <Style TargetType="Border">

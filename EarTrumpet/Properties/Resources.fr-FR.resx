@@ -1488,4 +1488,7 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
   <data name="SettingsProfileDeviceCountFormat" xml:space="preserve">
     <value>{0} périphérique(s) | {1}</value>
   </data>
+  <data name="SettingsMoreOptions" xml:space="preserve">
+    <value>Plus d'options</value>
+  </data>
 </root>
