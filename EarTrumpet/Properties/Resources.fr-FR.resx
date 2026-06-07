@@ -229,7 +229,7 @@
     <value>Windows Classique</value>
   </data>
   <data name="AboutThisAddonText" xml:space="preserve">
-    <value>À propos du complèment {Name}</value>
+    <value>À propos du complément {Name}</value>
   </data>
   <data name="AddonNameText" xml:space="preserve">
     <value>Nom:</value>
@@ -238,7 +238,7 @@
     <value>Ouvrir les Paramètres Windows</value>
   </data>
   <data name="AddonUninstallDescriptionText" xml:space="preserve">
-    <value>Ce complèment peut être désinstallé avec l'application Paramètres Windows.</value>
+    <value>Ce complément peut être désinstallé avec l'application Paramètres Windows.</value>
   </data>
   <data name="AddonUninstallTitle" xml:space="preserve">
     <value>Désinstaller</value>
@@ -396,13 +396,13 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>J'utilise cette action de l'élément du menu contextuel</value>
   </data>
   <data name="DefaultDeviceCondition_AddText" xml:space="preserve">
-    <value>Si le périphérique de lecture par défaut n'est ou n'est pas</value>
+    <value>Si le périphérique de lecture par défaut est ou n'est pas</value>
   </data>
   <data name="DefaultDeviceCondition_LinkText" xml:space="preserve">
     <value>{Device} {Option} appareil par défaut</value>
   </data>
   <data name="DefaultPlaybackDeviceText" xml:space="preserve">
-    <value>Appareil de lecture par défaut</value>
+    <value>Périphérique de lecture par défaut</value>
   </data>
   <data name="DeviceEventTrigger_AddText" xml:space="preserve">
     <value>Un périphérique audio est ajouté, retiré, défini par défaut, ...</value>
@@ -768,14 +768,14 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Couleur de fond :</value>
   </data>
   <data name="SettingsPeakMeterColor" xml:space="preserve">
-    <value>Couleur du mètre de pic :</value>
+    <value>Couleur du VU-mètre :</value>
   </data>
   <!-- Settings - Appearance page -->
   <data name="SettingsCustomColors" xml:space="preserve">
     <value>Couleurs personnalisées</value>
   </data>
   <data name="SettingsCustomColorsDesc" xml:space="preserve">
-    <value>Personnaliser l'apparence des sliders</value>
+    <value>Personnaliser l'apparence des curseurs</value>
   </data>
   <data name="SettingsTabDynamic" xml:space="preserve">
     <value>Dynamique</value>
@@ -793,7 +793,7 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Palette de couleurs</value>
   </data>
   <data name="SettingsSliderColors" xml:space="preserve">
-    <value>Couleurs des sliders</value>
+    <value>Couleurs des curseurs</value>
   </data>
   <data name="SettingsWindowColors" xml:space="preserve">
     <value>Couleurs de la fenêtre</value>
@@ -966,7 +966,7 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Rafraîchissement de la visualisation audio</value>
   </data>
   <data name="SettingsPeakMeterStyle" xml:space="preserve">
-    <value>Style du vu-mètre</value>
+    <value>Style du VU-mètre</value>
   </data>
   <data name="SettingsPeakMeterStyleDesc" xml:space="preserve">
     <value>Choisir l'apparence de l'indicateur audio</value>
@@ -1075,13 +1075,13 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
   </data>
   <!-- Settings - Profiles page -->
   <data name="SettingsSaveCurrentVolumes" xml:space="preserve">
-    <value>Sauvegarder le setup actuel</value>
+    <value>Sauvegarder la configuration actuelle</value>
   </data>
   <data name="SettingsSaveCurrentVolumesDesc" xml:space="preserve">
-    <value>Créer un preset QuickTrumpet depuis le périphérique actuel et ses applis</value>
+    <value>Créer un préréglage QuickTrumpet depuis le périphérique actuel et ses applis</value>
   </data>
   <data name="SettingsSavedProfiles" xml:space="preserve">
-    <value>Presets QuickTrumpet</value>
+    <value>Préréglages QuickTrumpet</value>
   </data>
   <data name="SettingsSavedProfilesDesc" xml:space="preserve">
     <value>Appliquer depuis BetterTrumpet, un raccourci, Raycast ou le CLI bt</value>
@@ -1096,16 +1096,16 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>{0} appliqué. {1} appli(s), {2} périphérique(s).</value>
   </data>
   <data name="SettingsQuickTrumpetConfirmation" xml:space="preserve">
-    <value>Afficher une confirmation quand un preset est appliqué</value>
+    <value>Afficher une confirmation quand un préréglage est appliqué</value>
   </data>
   <data name="SettingsQuickTrumpetAllDevices" xml:space="preserve">
-    <value>Inclure tous les périphériques dans ce preset</value>
+    <value>Inclure tous les périphériques dans ce préréglage</value>
   </data>
   <data name="SettingsQuickTrumpetShortcut" xml:space="preserve">
     <value>Raccourci</value>
   </data>
   <data name="SettingsQuickTrumpetShortcutDesc" xml:space="preserve">
-    <value>Géré ici avec le preset, pour garder Raycast, CLI et raccourcis clavier au même endroit.</value>
+    <value>Géré ici avec le préréglage, pour garder Raycast, CLI et raccourcis clavier au même endroit.</value>
   </data>
   <data name="SettingsQuickTrumpetAppsOnly" xml:space="preserve">
     <value>Appliquer uniquement les volumes et mutes des applis</value>
@@ -1327,7 +1327,7 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Personnalisé</value>
   </data>
   <data name="OnboardingCustomThemeDesc" xml:space="preserve">
-    <value>Couleurs custom</value>
+    <value>Couleurs personnalisées</value>
   </data>
   <data name="OnboardingSkip" xml:space="preserve">
     <value>Passer</value>
@@ -1427,5 +1427,65 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
   </data>
   <data name="ColorLabelPreview" xml:space="preserve">
     <value>Aperçu</value>
+  </data>
+  <data name="AppDisplayName" xml:space="preserve">
+    <value>BetterTrumpet</value>
+  </data>
+  <data name="ContextMenuHiddenDevicesTitleFormat" xml:space="preserve">
+    <value>Périphériques masqués ({0})</value>
+  </data>
+  <data name="ContextMenuRestoreAllHiddenDevices" xml:space="preserve">
+    <value>Afficher tous les périphériques masqués</value>
+  </data>
+  <data name="ForkAttributionText" xml:space="preserve">
+    <value>Fork d'EarTrumpet par File-New-Project</value>
+  </data>
+  <data name="HideDeviceButtonText" xml:space="preserve">
+    <value>Masquer ce périphérique</value>
+  </data>
+  <data name="RestoreHiddenDevices" xml:space="preserve">
+    <value>Afficher les périphériques masqués</value>
+  </data>
+  <data name="RestoreHiddenDevicesAll" xml:space="preserve">
+    <value>Afficher tous les périphériques masqués</value>
+  </data>
+  <data name="SetAsDefaultDeviceText" xml:space="preserve">
+    <value>Définir comme périphérique par défaut</value>
+  </data>
+  <data name="SettingsClearSavedVolumes" xml:space="preserve">
+    <value>Effacer les volumes enregistrés</value>
+  </data>
+  <data name="SettingsRememberAppVolumes" xml:space="preserve">
+    <value>Mémoriser les volumes des applications</value>
+  </data>
+  <data name="SettingsRememberAppVolumesDesc" xml:space="preserve">
+    <value>Restaurer automatiquement les niveaux de volume au redémarrage des applications</value>
+  </data>
+  <data name="SettingsRememberAppVolumesEnable" xml:space="preserve">
+    <value>Mémoriser les niveaux de volume par application</value>
+  </data>
+  <data name="SettingsSavedVolumesCount" xml:space="preserve">
+    <value>Volumes enregistrés :</value>
+  </data>
+  <data name="SettingsExperimentalBadge" xml:space="preserve">
+    <value>Expérimental</value>
+  </data>
+  <data name="PeakMeterStyleClassic" xml:space="preserve">
+    <value>Classique</value>
+  </data>
+  <data name="PeakMeterStyleDotted" xml:space="preserve">
+    <value>Pointillé</value>
+  </data>
+  <data name="PeakMeterStyleBlocks" xml:space="preserve">
+    <value>Blocs</value>
+  </data>
+  <data name="PeakMeterStyleBars" xml:space="preserve">
+    <value>Barres</value>
+  </data>
+  <data name="PeakMeterStyleWave" xml:space="preserve">
+    <value>Onde</value>
+  </data>
+  <data name="SettingsProfileDeviceCountFormat" xml:space="preserve">
+    <value>{0} périphérique(s) | {1}</value>
   </data>
 </root>

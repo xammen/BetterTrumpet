@@ -1464,4 +1464,25 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
   <data name="SettingsSavedVolumesCount" xml:space="preserve">
     <value>Saved volumes:</value>
   </data>
+  <data name="SettingsExperimentalBadge" xml:space="preserve">
+    <value>Experimental</value>
+  </data>
+  <data name="PeakMeterStyleClassic" xml:space="preserve">
+    <value>Classic</value>
+  </data>
+  <data name="PeakMeterStyleDotted" xml:space="preserve">
+    <value>Dotted</value>
+  </data>
+  <data name="PeakMeterStyleBlocks" xml:space="preserve">
+    <value>Blocks</value>
+  </data>
+  <data name="PeakMeterStyleBars" xml:space="preserve">
+    <value>Bars</value>
+  </data>
+  <data name="PeakMeterStyleWave" xml:space="preserve">
+    <value>Wave</value>
+  </data>
+  <data name="SettingsProfileDeviceCountFormat" xml:space="preserve">
+    <value>{0} device(s) | {1}</value>
+  </data>
 </root>

@@ -501,6 +501,48 @@ namespace EarTrumpet.Properties {
             }
         }
 
+        public static string SettingsExperimentalBadge {
+            get {
+                return ResourceManager.GetString("SettingsExperimentalBadge", resourceCulture);
+            }
+        }
+
+        public static string PeakMeterStyleClassic {
+            get {
+                return ResourceManager.GetString("PeakMeterStyleClassic", resourceCulture);
+            }
+        }
+
+        public static string PeakMeterStyleDotted {
+            get {
+                return ResourceManager.GetString("PeakMeterStyleDotted", resourceCulture);
+            }
+        }
+
+        public static string PeakMeterStyleBlocks {
+            get {
+                return ResourceManager.GetString("PeakMeterStyleBlocks", resourceCulture);
+            }
+        }
+
+        public static string PeakMeterStyleBars {
+            get {
+                return ResourceManager.GetString("PeakMeterStyleBars", resourceCulture);
+            }
+        }
+
+        public static string PeakMeterStyleWave {
+            get {
+                return ResourceManager.GetString("PeakMeterStyleWave", resourceCulture);
+            }
+        }
+
+        public static string SettingsProfileDeviceCountFormat {
+            get {
+                return ResourceManager.GetString("SettingsProfileDeviceCountFormat", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to is.
         /// </summary>

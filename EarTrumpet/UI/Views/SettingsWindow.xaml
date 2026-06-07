@@ -551,7 +551,7 @@
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{x:Static resx:Resources.SettingsPeakMeterStyle}" FontSize="15" FontWeight="SemiBold" />
                                         <Border CornerRadius="4" Background="#30FFA500" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
-                                            <TextBlock Text="Experimental" FontSize="9" FontWeight="Bold" Foreground="#FFA500" />
+                                            <TextBlock Text="{x:Static resx:Resources.SettingsExperimentalBadge}" FontSize="9" FontWeight="Bold" Foreground="#FFA500" />
                                         </Border>
                                     </StackPanel>
                                     <TextBlock Text="{x:Static resx:Resources.SettingsPeakMeterStyleDesc}"
@@ -590,7 +590,7 @@
                                                 <Border Width="48" Height="4" CornerRadius="2" Background="White" Opacity="0.6" Margin="0,0,0,2" HorizontalAlignment="Left" />
                                                 <Border Width="36" Height="4" CornerRadius="2" Background="White" Opacity="0.6" HorizontalAlignment="Left" />
                                             </StackPanel>
-                                            <TextBlock Text="Classic" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
+                                            <TextBlock Text="{x:Static resx:Resources.PeakMeterStyleClassic}" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
                                         </StackPanel>
                                     </Border>
 
@@ -623,7 +623,7 @@
                                                     <Border Width="3" Height="2" Background="White" Opacity="0.15" />
                                                 </StackPanel>
                                             </Grid>
-                                            <TextBlock Text="Dotted" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
+                                            <TextBlock Text="{x:Static resx:Resources.PeakMeterStyleDotted}" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
                                         </StackPanel>
                                     </Border>
 
@@ -654,7 +654,7 @@
                                                     <Border Width="6" Height="3" Background="White" Opacity="0.15" />
                                                 </StackPanel>
                                             </Grid>
-                                            <TextBlock Text="Blocks" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
+                                            <TextBlock Text="{x:Static resx:Resources.PeakMeterStyleBlocks}" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
                                         </StackPanel>
                                     </Border>
 
@@ -678,7 +678,7 @@
                                             <Grid Height="14" VerticalAlignment="Center">
                                                 <Border Width="48" Height="1.5" CornerRadius="1" Background="White" Opacity="0.4" HorizontalAlignment="Left" VerticalAlignment="Center" />
                                             </Grid>
-                                            <TextBlock Text="Bars" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
+                                            <TextBlock Text="{x:Static resx:Resources.PeakMeterStyleBars}" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
                                         </StackPanel>
                                     </Border>
 
@@ -708,7 +708,7 @@
                                                     <Border Width="5" Height="2" CornerRadius="1" Background="White" Opacity="0.15" />
                                                 </StackPanel>
                                             </Grid>
-                                            <TextBlock Text="Wave" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
+                                            <TextBlock Text="{x:Static resx:Resources.PeakMeterStyleWave}" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
                                         </StackPanel>
                                     </Border>
                                 </Grid>
@@ -2202,7 +2202,7 @@
                                             <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" />
                                             <TextBlock FontSize="11" Foreground="#80FFFFFF">
                                                 <TextBlock.Text>
-                                                    <MultiBinding StringFormat="{}{0} device(s) | {1}">
+                                                    <MultiBinding StringFormat="{x:Static resx:Resources.SettingsProfileDeviceCountFormat}">
                                                         <Binding Path="Devices.Count" />
                                                         <Binding Path="CreatedAt" />
                                                     </MultiBinding>
