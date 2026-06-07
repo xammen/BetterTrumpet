@@ -253,7 +253,7 @@
     <value>Éditeur:</value>
   </data>
   <data name="SettingsDescriptionText" xml:space="preserve">
-    <value>Configurer les raccourcis et obtenir de l'aide</value>
+    <value>Démarrage, volume, souris, raccourcis et préréglages</value>
   </data>
   <data name="SettingsTitle" xml:space="preserve">
     <value>BetterTrumpet Paramètres</value>
@@ -696,10 +696,64 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Personnalisation</value>
   </data>
   <data name="CustomizationCategoryTitle" xml:space="preserve">
-    <value>BetterSettings</value>
+    <value>Apparence</value>
   </data>
   <data name="CustomizationCategoryDescription" xml:space="preserve">
-    <value>Performance, apparence et contrôles média</value>
+    <value>Thème, couleurs, popup média et performance</value>
+  </data>
+  <data name="AppCategoryTitle" xml:space="preserve">
+    <value>Application</value>
+  </data>
+  <data name="AppCategoryDescription" xml:space="preserve">
+    <value>Version, mises à jour et confidentialité</value>
+  </data>
+  <data name="GeneralSettingsPageText" xml:space="preserve">
+    <value>Général</value>
+  </data>
+  <data name="GeneralSettingsPageSubtitle" xml:space="preserve">
+    <value>Démarrage, icône de la barre d'état, info-bulles et applications masquées.</value>
+  </data>
+  <data name="VolumeMouseSettingsPageText" xml:space="preserve">
+    <value>Volume et souris</value>
+  </data>
+  <data name="VolumeMouseSettingsPageSubtitle" xml:space="preserve">
+    <value>Comportement de la molette et échelle du volume.</value>
+  </data>
+  <data name="PerformanceSettingsPageText" xml:space="preserve">
+    <value>Performance</value>
+  </data>
+  <data name="PerformanceSettingsPageSubtitle" xml:space="preserve">
+    <value>Réglez la fréquence de rafraîchissement, les animations et l'usage de la batterie.</value>
+  </data>
+  <data name="AppearanceSettingsPageText" xml:space="preserve">
+    <value>Apparence</value>
+  </data>
+  <data name="AppearanceSettingsPageSubtitle" xml:space="preserve">
+    <value>Personnalisez l'apparence de BetterTrumpet sur votre bureau.</value>
+  </data>
+  <data name="MediaPopupSettingsPageText" xml:space="preserve">
+    <value>Popup média</value>
+  </data>
+  <data name="MediaPopupSettingsPageSubtitle" xml:space="preserve">
+    <value>Contrôlez l'affichage des commandes média au survol de la barre d'état.</value>
+  </data>
+  <data name="QuickTrumpetSettingsPageText" xml:space="preserve">
+    <value>QuickTrumpet</value>
+  </data>
+  <data name="QuickTrumpetSettingsPageSubtitle" xml:space="preserve">
+    <value>Enregistrez et appliquez des préréglages audio depuis BetterTrumpet, des raccourcis ou Raycast.</value>
+  </data>
+  <data name="UpdatesSettingsPageText" xml:space="preserve">
+    <value>Mises à jour</value>
+  </data>
+  <data name="UpdatesSettingsPageSubtitle" xml:space="preserve">
+    <value>Choisissez quand être notifié et installez les nouvelles versions.</value>
+  </data>
+  <data name="PrivacySettingsPageText" xml:space="preserve">
+    <value>Confidentialité et données</value>
+  </data>
+  <data name="PrivacySettingsPageSubtitle" xml:space="preserve">
+    <value>Télémétrie, sauvegarde des paramètres et diagnostics.</value>
   </data>
   <data name="SettingsUseCustomSliderColors" xml:space="preserve">
     <value>Utiliser des couleurs personnalisées</value>

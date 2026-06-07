@@ -19,6 +19,11 @@ namespace EarTrumpet.UI.ViewModels
         public ICommand ImportSettingsCommand { get; }
         public string AboutText { get; }
 
+        /// <summary>
+        /// Copyright line with a dynamic year so it never goes stale.
+        /// </summary>
+        public string CopyrightText => $"© {DateTime.Now.Year} xmn";
+
         public bool IsTelemetryEnabled
         {
             get => _settings.IsTelemetryEnabled;

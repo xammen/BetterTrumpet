@@ -392,7 +392,115 @@ namespace EarTrumpet.Properties {
                 return ResourceManager.GetString("CommunitySettingsPageText", resourceCulture);
             }
         }
-        
+
+        public static string AppCategoryTitle {
+            get {
+                return ResourceManager.GetString("AppCategoryTitle", resourceCulture);
+            }
+        }
+
+        public static string AppCategoryDescription {
+            get {
+                return ResourceManager.GetString("AppCategoryDescription", resourceCulture);
+            }
+        }
+
+        public static string GeneralSettingsPageText {
+            get {
+                return ResourceManager.GetString("GeneralSettingsPageText", resourceCulture);
+            }
+        }
+
+        public static string GeneralSettingsPageSubtitle {
+            get {
+                return ResourceManager.GetString("GeneralSettingsPageSubtitle", resourceCulture);
+            }
+        }
+
+        public static string VolumeMouseSettingsPageText {
+            get {
+                return ResourceManager.GetString("VolumeMouseSettingsPageText", resourceCulture);
+            }
+        }
+
+        public static string VolumeMouseSettingsPageSubtitle {
+            get {
+                return ResourceManager.GetString("VolumeMouseSettingsPageSubtitle", resourceCulture);
+            }
+        }
+
+        public static string PerformanceSettingsPageText {
+            get {
+                return ResourceManager.GetString("PerformanceSettingsPageText", resourceCulture);
+            }
+        }
+
+        public static string PerformanceSettingsPageSubtitle {
+            get {
+                return ResourceManager.GetString("PerformanceSettingsPageSubtitle", resourceCulture);
+            }
+        }
+
+        public static string AppearanceSettingsPageText {
+            get {
+                return ResourceManager.GetString("AppearanceSettingsPageText", resourceCulture);
+            }
+        }
+
+        public static string AppearanceSettingsPageSubtitle {
+            get {
+                return ResourceManager.GetString("AppearanceSettingsPageSubtitle", resourceCulture);
+            }
+        }
+
+        public static string MediaPopupSettingsPageText {
+            get {
+                return ResourceManager.GetString("MediaPopupSettingsPageText", resourceCulture);
+            }
+        }
+
+        public static string MediaPopupSettingsPageSubtitle {
+            get {
+                return ResourceManager.GetString("MediaPopupSettingsPageSubtitle", resourceCulture);
+            }
+        }
+
+        public static string QuickTrumpetSettingsPageText {
+            get {
+                return ResourceManager.GetString("QuickTrumpetSettingsPageText", resourceCulture);
+            }
+        }
+
+        public static string QuickTrumpetSettingsPageSubtitle {
+            get {
+                return ResourceManager.GetString("QuickTrumpetSettingsPageSubtitle", resourceCulture);
+            }
+        }
+
+        public static string UpdatesSettingsPageText {
+            get {
+                return ResourceManager.GetString("UpdatesSettingsPageText", resourceCulture);
+            }
+        }
+
+        public static string UpdatesSettingsPageSubtitle {
+            get {
+                return ResourceManager.GetString("UpdatesSettingsPageSubtitle", resourceCulture);
+            }
+        }
+
+        public static string PrivacySettingsPageText {
+            get {
+                return ResourceManager.GetString("PrivacySettingsPageText", resourceCulture);
+            }
+        }
+
+        public static string PrivacySettingsPageSubtitle {
+            get {
+                return ResourceManager.GetString("PrivacySettingsPageSubtitle", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to is.
         /// </summary>

@@ -753,36 +753,52 @@ namespace EarTrumpet
 
         private Window CreateSettingsExperience()
         {
-            var defaultCategory = new SettingsCategoryViewModel(
+            // General — the everyday settings: startup/tray, volume & mouse behavior,
+            // keyboard shortcuts, and QuickTrumpet volume presets.
+            var generalCategory = new SettingsCategoryViewModel(
                 EarTrumpet.Properties.Resources.SettingsCategoryTitle,
-                "\xE71D",
+                "\xE713", // Settings (gear) icon
                 EarTrumpet.Properties.Resources.SettingsDescriptionText,
                 null,
                 new SettingsPageViewModel[]
                     {
-                        new EarTrumpetShortcutsPageViewModel(Settings),
-                        new EarTrumpetMouseSettingsPageViewModel(Settings),
-                        new EarTrumpetCommunitySettingsPageViewModel(Settings),
                         new EarTrumpetLegacySettingsPageViewModel(Settings),
-                        CreateAboutPage()
+                        new EarTrumpetMouseSettingsPageViewModel(Settings),
+                        new EarTrumpetShortcutsPageViewModel(Settings),
+                        new EarTrumpetVolumeProfilesSettingsPageViewModel(Settings)
                     });
 
-            var customizationCategory = new SettingsCategoryViewModel(
+            // Appearance — how BetterTrumpet looks and performs: colors/theme,
+            // the now-playing media popup, and rendering performance.
+            var appearanceCategory = new SettingsCategoryViewModel(
                 EarTrumpet.Properties.Resources.CustomizationCategoryTitle,
                 "\xE790", // Paintbrush icon
                 EarTrumpet.Properties.Resources.CustomizationCategoryDescription,
                 null,
                 new SettingsPageViewModel[]
                     {
-                        new EarTrumpetAnimationSettingsPageViewModel(Settings),
                         new EarTrumpetColorsSettingsPageViewModel(Settings),
                         new EarTrumpetMediaPopupSettingsPageViewModel(Settings),
-                        new EarTrumpetVolumeProfilesSettingsPageViewModel(Settings)
+                        new EarTrumpetAnimationSettingsPageViewModel(Settings)
+                    });
+
+            // Application — about the app itself: version, updates, privacy/data.
+            var applicationCategory = new SettingsCategoryViewModel(
+                EarTrumpet.Properties.Resources.AppCategoryTitle,
+                "\xE946", // Info icon
+                EarTrumpet.Properties.Resources.AppCategoryDescription,
+                null,
+                new SettingsPageViewModel[]
+                    {
+                        CreateUpdatesPage(),
+                        CreatePrivacyPage(),
+                        CreateAboutPage()
                     });
 
             var allCategories = new List<SettingsCategoryViewModel>();
-            allCategories.Add(defaultCategory);
-            allCategories.Add(customizationCategory);
+            allCategories.Add(generalCategory);
+            allCategories.Add(appearanceCategory);
+            allCategories.Add(applicationCategory);
 
             if (AddonManager.Host.SettingsItems != null)
             {
@@ -808,6 +824,20 @@ namespace EarTrumpet
         private EarTrumpetAboutPageViewModel CreateAboutPage()
         {
             var vm = new EarTrumpetAboutPageViewModel(() => _errorReporter.DisplayDiagnosticData(), Settings);
+            if (_updateService != null) vm.SetUpdateService(_updateService);
+            return vm;
+        }
+
+        private EarTrumpetUpdatesPageViewModel CreateUpdatesPage()
+        {
+            var vm = new EarTrumpetUpdatesPageViewModel(() => _errorReporter.DisplayDiagnosticData(), Settings);
+            if (_updateService != null) vm.SetUpdateService(_updateService);
+            return vm;
+        }
+
+        private EarTrumpetPrivacyPageViewModel CreatePrivacyPage()
+        {
+            var vm = new EarTrumpetPrivacyPageViewModel(() => _errorReporter.DisplayDiagnosticData(), Settings);
             if (_updateService != null) vm.SetUpdateService(_updateService);
             return vm;
         }

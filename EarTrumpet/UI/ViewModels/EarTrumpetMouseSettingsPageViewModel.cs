@@ -16,13 +16,22 @@ namespace EarTrumpet.UI.ViewModels
             set => _settings.UseGlobalMouseWheelHook = value;
         }
 
+        // Logarithmic volume scaling (perceptual loudness). Merged here from the
+        // former standalone "Community" page so all volume-adjustment behavior
+        // lives in one place.
+        public bool UseLogarithmicVolume
+        {
+            get => _settings.UseLogarithmicVolume;
+            set => _settings.UseLogarithmicVolume = value;
+        }
+
         private readonly AppSettings _settings;
 
         public EarTrumpetMouseSettingsPageViewModel(AppSettings settings) : base(null)
         {
             _settings = settings;
-            Title = Properties.Resources.MouseSettingsPageText;
-            Subtitle = "Adjust scroll wheel and mouse behavior.";
+            Title = Properties.Resources.VolumeMouseSettingsPageText;
+            Subtitle = Properties.Resources.VolumeMouseSettingsPageSubtitle;
             Glyph = "\xE962";
         }
     }

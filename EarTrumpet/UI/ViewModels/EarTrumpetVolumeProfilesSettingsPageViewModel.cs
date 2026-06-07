@@ -114,8 +114,8 @@ namespace EarTrumpet.UI.ViewModels
         public EarTrumpetVolumeProfilesSettingsPageViewModel(AppSettings settings) : base(null)
         {
             _settings = settings;
-            Title = "QuickTrumpet";
-            Subtitle = "Save and apply audio presets from BetterTrumpet, hotkeys, or Raycast.";
+            Title = Properties.Resources.QuickTrumpetSettingsPageText;
+            Subtitle = Properties.Resources.QuickTrumpetSettingsPageSubtitle;
             Glyph = "\xE9CE"; // Save icon
 
             _profileService = new VolumeProfileService(settings);

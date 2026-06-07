@@ -271,7 +271,7 @@
     <value>Publisher:</value>
   </data>
   <data name="SettingsDescriptionText" xml:space="preserve">
-    <value>Configure shortcuts and get help</value>
+    <value>Startup, volume, mouse, shortcuts, and presets</value>
   </data>
   <data name="SettingsTitle" xml:space="preserve">
     <value>BetterTrumpet Settings</value>
@@ -717,10 +717,64 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
     <value>Customization</value>
   </data>
   <data name="CustomizationCategoryTitle" xml:space="preserve">
-    <value>BetterSettings</value>
+    <value>Appearance</value>
   </data>
   <data name="CustomizationCategoryDescription" xml:space="preserve">
-    <value>Performance, appearance, and media controls</value>
+    <value>Theme, colors, media popup, and performance</value>
+  </data>
+  <data name="AppCategoryTitle" xml:space="preserve">
+    <value>Application</value>
+  </data>
+  <data name="AppCategoryDescription" xml:space="preserve">
+    <value>Version, updates, and privacy</value>
+  </data>
+  <data name="GeneralSettingsPageText" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="GeneralSettingsPageSubtitle" xml:space="preserve">
+    <value>Startup, tray icon, tooltips, and hidden apps.</value>
+  </data>
+  <data name="VolumeMouseSettingsPageText" xml:space="preserve">
+    <value>Volume &amp; mouse</value>
+  </data>
+  <data name="VolumeMouseSettingsPageSubtitle" xml:space="preserve">
+    <value>Scroll wheel behavior and volume scaling.</value>
+  </data>
+  <data name="PerformanceSettingsPageText" xml:space="preserve">
+    <value>Performance</value>
+  </data>
+  <data name="PerformanceSettingsPageSubtitle" xml:space="preserve">
+    <value>Tune refresh rates, animations, and battery usage.</value>
+  </data>
+  <data name="AppearanceSettingsPageText" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="AppearanceSettingsPageSubtitle" xml:space="preserve">
+    <value>Customize how BetterTrumpet looks on your desktop.</value>
+  </data>
+  <data name="MediaPopupSettingsPageText" xml:space="preserve">
+    <value>Media popup</value>
+  </data>
+  <data name="MediaPopupSettingsPageSubtitle" xml:space="preserve">
+    <value>Control how media controls appear on tray hover.</value>
+  </data>
+  <data name="QuickTrumpetSettingsPageText" xml:space="preserve">
+    <value>QuickTrumpet</value>
+  </data>
+  <data name="QuickTrumpetSettingsPageSubtitle" xml:space="preserve">
+    <value>Save and apply audio presets from BetterTrumpet, hotkeys, or Raycast.</value>
+  </data>
+  <data name="UpdatesSettingsPageText" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="UpdatesSettingsPageSubtitle" xml:space="preserve">
+    <value>Choose when to be notified and install new versions.</value>
+  </data>
+  <data name="PrivacySettingsPageText" xml:space="preserve">
+    <value>Privacy &amp; data</value>
+  </data>
+  <data name="PrivacySettingsPageSubtitle" xml:space="preserve">
+    <value>Telemetry, settings backup, and diagnostics.</value>
   </data>
   <data name="SettingsUseCustomSliderColors" xml:space="preserve">
     <value>Use custom slider colors</value>

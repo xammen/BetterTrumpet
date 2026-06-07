@@ -54,9 +54,9 @@ namespace EarTrumpet.UI.ViewModels
         public EarTrumpetLegacySettingsPageViewModel(AppSettings settings) : base(null)
         {
             _settings = settings;
-            Title = Properties.Resources.LegacySettingsPageText;
-            Subtitle = "Startup behavior, tray icon, tooltips, and hidden app controls.";
-            Glyph = "\xE825";
+            Title = Properties.Resources.GeneralSettingsPageText;
+            Subtitle = Properties.Resources.GeneralSettingsPageSubtitle;
+            Glyph = "\xE7E8";
 
             _settings.HiddenAppsChanged += OnHiddenAppsChanged;
 

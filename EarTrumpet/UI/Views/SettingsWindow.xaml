@@ -244,6 +244,34 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Volume scaling (moved here from the former "Community" page) -->
+                <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
+                        Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                            <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
+                                    Background="#15FFFFFF">
+                                <TextBlock Text="&#xE9E9;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="White" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{x:Static resx:Resources.SettingsVolumeScale}" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsVolumeScaleDesc}"
+                                           Style="{StaticResource BodySubText}" FontSize="12" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <CheckBox HorizontalAlignment="Left"
+                                  Content="{x:Static resx:Resources.SettingsUseLogarithmicVolume}"
+                                  IsChecked="{Binding UseLogarithmicVolume, Mode=TwoWay}"
+                                  ToolTip="{x:Static resx:Resources.SettingsLogVolumeDesc}" />
+                        <TextBlock Style="{StaticResource BodySubText}" FontSize="11" Opacity="0.5" Margin="0,8,0,0"
+                                   TextWrapping="Wrap"
+                                   Text="{x:Static resx:Resources.SettingsLogVolumeDesc}" />
+                    </StackPanel>
+                </Border>
+
             </StackPanel>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:EarTrumpetCommunitySettingsPageViewModel}">
@@ -255,7 +283,7 @@
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
                                     Background="#15FFFFFF">
-                                <TextBlock Text="&#xE902;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                <TextBlock Text="&#xE9E9;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="White" />
                             </Border>
@@ -378,10 +406,12 @@
                                 </StackPanel>
                             </StackPanel>
 
-                            <!-- Eco Mode override warning — amber accent -->
+                            <!-- Eco Mode override warning — amber accent. Only shown when Eco Mode
+                                 is effectively active and is forcing the refresh rate down. -->
                             <Border Padding="12,8" CornerRadius="6" Margin="0,0,0,16"
                                     Background="{StaticResource WarningAmberDimBrush}"
-                                    BorderBrush="#40FFA726" BorderThickness="1">
+                                    BorderBrush="#40FFA726" BorderThickness="1"
+                                    Visibility="{Binding IsPeakMeterOverridden, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="14"
                                                VerticalAlignment="Center" Margin="0,0,8,0"
@@ -648,7 +678,7 @@
                                             <Grid Height="14" VerticalAlignment="Center">
                                                 <Border Width="48" Height="1.5" CornerRadius="1" Background="White" Opacity="0.4" HorizontalAlignment="Left" VerticalAlignment="Center" />
                                             </Grid>
-                                            <TextBlock Text="Line" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
+                                            <TextBlock Text="Bars" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
                                         </StackPanel>
                                     </Border>
 
@@ -678,7 +708,7 @@
                                                     <Border Width="5" Height="2" CornerRadius="1" Background="White" Opacity="0.15" />
                                                 </StackPanel>
                                             </Grid>
-                                            <TextBlock Text="Dashes" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
+                                            <TextBlock Text="Wave" FontSize="10" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.7" />
                                         </StackPanel>
                                     </Border>
                                 </Grid>
@@ -2289,37 +2319,41 @@
                                Text="{x:Static resx:Resources.ForkAttributionText}" />
                     <TextBlock Style="{StaticResource BodyText}"
                                Opacity="0.5"
-                               Text="&#169; 2026 xmn" />
+                               Text="{Binding CopyrightText}" />
                 </StackPanel>
 
-                <!-- Telemetry card -->
-                <Border Margin="12,0,12,20"
-                        Padding="16"
-                        CornerRadius="8"
-                        Background="#1AFFFFFF">
-                    <StackPanel>
-                        <TextBlock FontSize="14" FontWeight="SemiBold"
-                                   Margin="0,0,0,4"
-                                   Text="{x:Static resx:Resources.PrivacyCheckboxText}" />
-                        <TextBlock FontSize="12" Opacity="0.5" TextWrapping="Wrap"
-                                   Margin="0,0,0,10"
-                                   Text="{Binding TelemetryDescription}" />
-                        <StackPanel Orientation="Horizontal">
-                            <CheckBox IsChecked="{Binding IsTelemetryEnabled, Mode=TwoWay}"
-                                      VerticalAlignment="Center" />
-                            <TextBlock Margin="8,0,0,0"
-                                       VerticalAlignment="Center"
-                                       FontSize="12"
-                                       Text="{Binding TelemetryStatusText}" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
+                <!-- Links -->
+                <StackPanel Margin="12,0,12,0">
+                    <TextBlock Style="{StaticResource HyperlinkBlock}" Margin="0,0,0,4">
+                        <Hyperlink Command="{Binding OpenPrivacyPolicyCommand}">
+                            <Run Text="{x:Static resx:Resources.PrivacyPolicyText}" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource HyperlinkBlock}" Margin="0,0,0,4">
+                        <Hyperlink Command="{Binding OpenAboutCommand}">
+                            <Run Text="{x:Static resx:Resources.WebsiteText}" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource HyperlinkBlock}" Margin="0,0,0,4">
+                        <Hyperlink Command="{Binding OpenFeedbackCommand}">
+                            <Run Text="{x:Static resx:Resources.ContextMenuSendFeedback}" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource HyperlinkBlock}" Margin="0,0,0,4">
+                        <Hyperlink Command="{Binding OpenDiagnosticsCommand}">
+                            <Run Text="{x:Static resx:Resources.TroubleshootEarTrumpetText}" />
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
 
+        <!-- Updates Page (split from the former monolithic About page) -->
+        <DataTemplate DataType="{x:Type vm:EarTrumpetUpdatesPageViewModel}">
+            <StackPanel Orientation="Vertical" Margin="0,0,16,0">
                 <!-- Update notifications card -->
-                <Border Margin="12,0,12,20"
-                        Padding="16"
-                        CornerRadius="8"
-                        Background="#1AFFFFFF">
+                <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
+                        Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
@@ -2518,36 +2552,44 @@
                         </Grid>
                     </StackPanel>
                 </Border>
+            </StackPanel>
+        </DataTemplate>
 
-                <!-- Links -->
-                <StackPanel Margin="12,0,12,0">
-                    <TextBlock Style="{StaticResource HyperlinkBlock}" Margin="0,0,0,4">
-                        <Hyperlink Command="{Binding OpenPrivacyPolicyCommand}">
-                            <Run Text="{x:Static resx:Resources.PrivacyPolicyText}" />
-                        </Hyperlink>
-                    </TextBlock>
-                    <TextBlock Style="{StaticResource HyperlinkBlock}" Margin="0,0,0,4">
-                        <Hyperlink Command="{Binding OpenAboutCommand}">
-                            <Run Text="{x:Static resx:Resources.WebsiteText}" />
-                        </Hyperlink>
-                    </TextBlock>
-                    <TextBlock Style="{StaticResource HyperlinkBlock}" Margin="0,0,0,4">
-                        <Hyperlink Command="{Binding OpenFeedbackCommand}">
-                            <Run Text="{x:Static resx:Resources.ContextMenuSendFeedback}" />
-                        </Hyperlink>
-                    </TextBlock>
-                    <TextBlock Style="{StaticResource HyperlinkBlock}" Margin="0,0,0,4">
-                        <Hyperlink Command="{Binding OpenDiagnosticsCommand}">
-                            <Run Text="{x:Static resx:Resources.TroubleshootEarTrumpetText}" />
-                        </Hyperlink>
-                    </TextBlock>
-                </StackPanel>
+        <!-- Privacy & Data Page (split from the former monolithic About page) -->
+        <DataTemplate DataType="{x:Type vm:EarTrumpetPrivacyPageViewModel}">
+            <StackPanel Orientation="Vertical" Margin="0,0,16,0">
+
+                <!-- Telemetry card -->
+                <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
+                        Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
+                                    Background="#15FFFFFF">
+                                <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="White" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{x:Static resx:Resources.PrivacyCheckboxText}" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding TelemetryDescription}"
+                                           Style="{StaticResource BodySubText}" FontSize="12" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <CheckBox IsChecked="{Binding IsTelemetryEnabled, Mode=TwoWay}"
+                                      VerticalAlignment="Center" />
+                            <TextBlock Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="12"
+                                       Text="{Binding TelemetryStatusText}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
 
                 <!-- Export & Import settings card -->
-                <Border Margin="12,0,12,20"
-                        Padding="16"
-                        CornerRadius="8"
-                        Background="#1AFFFFFF">
+                <Border Margin="0,0,0,20" Padding="20" CornerRadius="10"
+                        Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                             <Border Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
@@ -2557,7 +2599,7 @@
                                            Foreground="White" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="{x:Static resx:Resources.SettingsExportImport}" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Static resx:Resources.SettingsExportImport}" FontSize="15" FontWeight="SemiBold" />
                                 <TextBlock Text="{x:Static resx:Resources.SettingsExportImportDesc}"
                                            Style="{StaticResource BodySubText}" FontSize="12" />
                             </StackPanel>
@@ -2584,9 +2626,7 @@
                 </Border>
 
                 <!-- Health info (for power users) -->
-                <Border Margin="12,20,12,0"
-                        Padding="12"
-                        CornerRadius="6"
+                <Border Margin="0,0,0,20" Padding="12" CornerRadius="6"
                         Background="#0DFFFFFF">
                     <TextBlock FontSize="11" Opacity="0.4" FontFamily="Consolas"
                                Text="{Binding HealthSummary}" />

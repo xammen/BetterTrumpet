@@ -13,6 +13,7 @@ namespace EarTrumpet.UI.ViewModels
                 _settings.EcoMode = value;
                 RaisePropertyChanged(nameof(EcoMode));
                 RaisePropertyChanged(nameof(EffectiveFpsText));
+                RaisePropertyChanged(nameof(IsPeakMeterOverridden));
             }
         }
 
@@ -25,11 +26,17 @@ namespace EarTrumpet.UI.ViewModels
                 _settings.AutoEcoMode = value;
                 RaisePropertyChanged(nameof(AutoEcoMode));
                 RaisePropertyChanged(nameof(EffectiveFpsText));
+                RaisePropertyChanged(nameof(IsPeakMeterOverridden));
             }
         }
 
         // Show current battery status
         public bool IsOnBattery => _settings.IsOnBatteryPower;
+
+        // True when Eco Mode is effectively active and is forcing the peak-meter
+        // refresh rate down, overriding whatever the user picked in the selector.
+        // Drives the visibility of the amber "overridden" notice on the page.
+        public bool IsPeakMeterOverridden => _settings.IsEffectiveEcoMode;
 
         // Show effective FPS based on eco mode
         public string EffectiveFpsText
@@ -108,8 +115,8 @@ namespace EarTrumpet.UI.ViewModels
         public EarTrumpetAnimationSettingsPageViewModel(AppSettings settings) : base(null)
         {
             _settings = settings;
-            Title = "Performance";
-            Subtitle = "Tune refresh rates, animations, and battery usage.";
+            Title = Properties.Resources.PerformanceSettingsPageText;
+            Subtitle = Properties.Resources.PerformanceSettingsPageSubtitle;
             Glyph = "\xE945"; // Speedometer icon
         }
     }

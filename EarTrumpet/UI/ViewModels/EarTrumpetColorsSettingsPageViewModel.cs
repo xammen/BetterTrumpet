@@ -569,8 +569,8 @@ namespace EarTrumpet.UI.ViewModels
         public EarTrumpetColorsSettingsPageViewModel(AppSettings settings) : base(null)
         {
             _settings = settings;
-            Title = "Appearance";
-            Subtitle = "Customize how BetterTrumpet looks on your desktop.";
+            Title = Properties.Resources.AppearanceSettingsPageText;
+            Subtitle = Properties.Resources.AppearanceSettingsPageSubtitle;
             Glyph = "\xE790"; // Paintbrush icon
 
             AvailableThemes = new ObservableCollection<ColorTheme>(ThemeRegistry.AllThemes);
