@@ -262,36 +262,6 @@
 
             </StackPanel>
         </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:EarTrumpetCommunitySettingsPageViewModel}">
-            <StackPanel Orientation="Vertical" Margin="0,0,16,0">
-
-                <Border Style="{StaticResource SectionCardBorder}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                            <Border Style="{StaticResource SectionIconBorder}">
-                                <TextBlock Text="&#xE9E9;" FontFamily="Segoe MDL2 Assets" FontSize="18"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           Foreground="White" />
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="{x:Static resx:Resources.SettingsVolumeScale}" FontSize="15" FontWeight="SemiBold" />
-                                <TextBlock Text="{x:Static resx:Resources.SettingsVolumeScaleDesc}"
-                                           Style="{StaticResource BodySubText}" FontSize="12" />
-                            </StackPanel>
-                        </StackPanel>
-
-                        <CheckBox HorizontalAlignment="Left"
-                                  Content="{x:Static resx:Resources.SettingsUseLogarithmicVolume}"
-                                  IsChecked="{Binding UseLogarithmicVolume, Mode=TwoWay}"
-                                  ToolTip="{x:Static resx:Resources.SettingsLogVolumeDesc}" />
-                        <TextBlock Style="{StaticResource BodySubText}" FontSize="11" Opacity="0.5" Margin="0,8,0,0"
-                                   TextWrapping="Wrap"
-                                   Text="{x:Static resx:Resources.SettingsLogVolumeDesc}" />
-                    </StackPanel>
-                </Border>
-
-            </StackPanel>
-        </DataTemplate>
         <!-- Performance Settings Page -->
         <DataTemplate DataType="{x:Type vm:EarTrumpetAnimationSettingsPageViewModel}">
             <StackPanel Orientation="Vertical" Margin="0,0,16,0">
