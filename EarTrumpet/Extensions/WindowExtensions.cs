@@ -36,6 +36,45 @@ namespace EarTrumpet.Extensions
             }
         }
 
+        /// <summary>
+        /// Returns true when the DWM system backdrop (native Mica/Acrylic) is available.
+        /// Requires Windows 11 22H2 (build 22621) or later.
+        /// </summary>
+        public static bool IsSystemBackdropSupported =>
+            Environment.OSVersion.IsAtLeast(OSVersions.Windows11_22H2);
+
+        /// <summary>
+        /// Applies a DWM-composited system backdrop to the window (GPU, same material as
+        /// native Win11 UI). The window must NOT use AllowsTransparency=true and its WPF
+        /// Background must be transparent for the backdrop to show through. No-op on
+        /// unsupported OSes, so callers can keep their existing fallback path.
+        /// </summary>
+        internal static void TrySetSystemBackdrop(this Window window, DwmApi.DWM_SYSTEMBACKDROP_TYPE type)
+        {
+            if (!IsSystemBackdropSupported)
+            {
+                return;
+            }
+
+            int value = (int)type;
+            DwmApi.DwmSetWindowAttribute(window.GetHandle(), DwmApi.DWMWA_SYSTEMBACKDROP_TYPE, ref value, Marshal.SizeOf(value));
+        }
+
+        /// <summary>
+        /// Aligns the DWM-drawn titlebar/border with the app theme (affects the native
+        /// 1px border color around backdrop windows). Safe no-op pre-Win11.
+        /// </summary>
+        public static void SetImmersiveDarkMode(this Window window, bool dark)
+        {
+            if (!Environment.OSVersion.IsAtLeast(OSVersions.Windows11))
+            {
+                return;
+            }
+
+            int value = dark ? 1 : 0;
+            DwmApi.DwmSetWindowAttribute(window.GetHandle(), DwmApi.DWMWA_USE_IMMERSIVE_DARK_MODE, ref value, Marshal.SizeOf(value));
+        }
+
         public static void RemoveWindowStyle(this Window window, int styleToRemove)
         {
             var currentStyle = User32.GetWindowLong(window.GetHandle(), User32.GWL.GWL_STYLE);

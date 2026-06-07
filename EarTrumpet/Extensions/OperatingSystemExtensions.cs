@@ -10,6 +10,7 @@ namespace EarTrumpet.Extensions
         Version19H1 = 18362,
         Version21H2 = 21390,
         Windows11 = 22000,
+        Windows11_22H2 = 22621, // floor for DWMWA_SYSTEMBACKDROP_TYPE (native Mica/Acrylic)
     }
 
     public static class OperatingSystemExtensions

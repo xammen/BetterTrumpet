@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -298,7 +297,6 @@ namespace EarTrumpet.DataModel
             }
         }
 
-        [HandleProcessCorruptedStateExceptions]
         private bool CheckIfAnyMediaPlaying()
         {
             try
