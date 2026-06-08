@@ -18,13 +18,24 @@ namespace EarTrumpet.UI.Views
     {
         private const string GitHubApiUrl = "https://api.github.com/repos/xammen/BetterTrumpet/releases/latest";
 
-        private static readonly Color _accent = Color.FromRgb(0x3B, 0x9E, 0xFF);
-        private static readonly Brush _textPrimary = new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
-        private static readonly Brush _textSecondary = new SolidColorBrush(Color.FromArgb(0xB0, 0xFF, 0xFF, 0xFF));
-        private static readonly Brush _textMuted = new SolidColorBrush(Color.FromArgb(0x60, 0xFF, 0xFF, 0xFF));
-        private static readonly Brush _surfaceBrush = new SolidColorBrush(Color.FromRgb(0x18, 0x18, 0x1E));
-        private static readonly Brush _cardBorder = new SolidColorBrush(Color.FromArgb(0x15, 0xFF, 0xFF, 0xFF));
-        private static readonly Brush _divider = new SolidColorBrush(Color.FromArgb(0x10, 0xFF, 0xFF, 0xFF));
+        private static readonly Brush _textPrimary;
+        private static readonly Brush _textSecondary;
+        private static readonly Brush _textMuted;
+        private static readonly Brush _surfaceBrush;
+        private static readonly Brush _cardBorder;
+        private static readonly Brush _divider;
+        private static readonly Brush _accentBrush;
+
+        static ChangelogWindow()
+        {
+            _textPrimary = new SolidColorBrush(Color.FromArgb(0xF0, 0xFF, 0xFF, 0xFF));
+            _textSecondary = new SolidColorBrush(Color.FromArgb(0xB0, 0xFF, 0xFF, 0xFF));
+            _textMuted = new SolidColorBrush(Color.FromArgb(0x70, 0xFF, 0xFF, 0xFF));
+            _surfaceBrush = new SolidColorBrush(Color.FromRgb(0x18, 0x18, 0x1E));
+            _cardBorder = new SolidColorBrush(Color.FromArgb(0x12, 0xFF, 0xFF, 0xFF));
+            _divider = new SolidColorBrush(Color.FromArgb(0x10, 0xFF, 0xFF, 0xFF));
+            _accentBrush = new SolidColorBrush(Color.FromRgb(0x3B, 0x9E, 0xFF));
+        }
 
         public ChangelogWindow()
         {
@@ -48,7 +59,6 @@ namespace EarTrumpet.UI.Views
                     var json = JObject.Parse(response);
 
                     var body = json["body"]?.ToString() ?? "";
-                    var tagName = json["tag_name"]?.ToString() ?? "";
 
                     ContentPanel.Children.Clear();
 
@@ -70,7 +80,6 @@ namespace EarTrumpet.UI.Views
             }
 
             AnimateContentIn();
-            ApplyTitleShimmer();
         }
 
         private void ParseMarkdownToUI(string markdown)
@@ -148,8 +157,8 @@ namespace EarTrumpet.UI.Views
                 FontSize = 14,
                 Foreground = _textSecondary,
                 TextWrapping = TextWrapping.Wrap,
-                LineHeight = 24,
-                Margin = new Thickness(0, 0, 0, 28),
+                LineHeight = 22,
+                Margin = new Thickness(0, 0, 0, 24),
             };
 
             ContentPanel.Children.Add(tb);
@@ -164,15 +173,15 @@ namespace EarTrumpet.UI.Views
                 var header = new StackPanel
                 {
                     Orientation = Orientation.Horizontal,
-                    Margin = new Thickness(20, 18, 20, 0),
+                    Margin = new Thickness(20, 16, 20, 0),
                 };
 
                 header.Children.Add(new TextBlock
                 {
                     Text = GetSectionGlyph(title),
                     FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                    FontSize = 14,
-                    Foreground = new SolidColorBrush(_accent),
+                    FontSize = 15,
+                    Foreground = _accentBrush,
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(0, 0, 10, 0),
                 });
@@ -180,8 +189,8 @@ namespace EarTrumpet.UI.Views
                 header.Children.Add(new TextBlock
                 {
                     Text = title,
-                    FontSize = 15,
-                    FontWeight = FontWeights.Bold,
+                    FontSize = 16,
+                    FontWeight = FontWeights.SemiBold,
                     Foreground = _textPrimary,
                     VerticalAlignment = VerticalAlignment.Center,
                 });
@@ -192,7 +201,7 @@ namespace EarTrumpet.UI.Views
                 {
                     Height = 1,
                     Background = _divider,
-                    Margin = new Thickness(20, 14, 20, 4),
+                    Margin = new Thickness(20, 12, 20, 4),
                 });
             }
 
@@ -200,12 +209,12 @@ namespace EarTrumpet.UI.Views
 
             return new Border
             {
-                CornerRadius = new CornerRadius(12),
+                CornerRadius = new CornerRadius(8),
                 Background = _surfaceBrush,
                 BorderBrush = _cardBorder,
                 BorderThickness = new Thickness(1),
-                Padding = new Thickness(0, 2, 0, 10),
-                Margin = new Thickness(0, 0, 0, 20),
+                Padding = new Thickness(0, 0, 0, 8),
+                Margin = new Thickness(0, 0, 0, 16),
                 Child = root,
             };
         }
@@ -234,7 +243,7 @@ namespace EarTrumpet.UI.Views
             if (string.IsNullOrWhiteSpace(cleanText))
                 return;
 
-            var row = new Grid { Margin = new Thickness(20, 10, 20, 10) };
+            var row = new Grid { Margin = new Thickness(20, 8, 20, 8) };
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(20) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
@@ -243,7 +252,7 @@ namespace EarTrumpet.UI.Views
                 Width = 6,
                 Height = 6,
                 CornerRadius = new CornerRadius(3),
-                Background = new SolidColorBrush(_accent),
+                Background = _accentBrush,
                 VerticalAlignment = VerticalAlignment.Top,
                 Margin = new Thickness(0, 7, 0, 0),
             };
@@ -252,7 +261,7 @@ namespace EarTrumpet.UI.Views
 
             var textBlock = new TextBlock
             {
-                FontSize = 13,
+                FontSize = 14,
                 Foreground = _textSecondary,
                 TextWrapping = TextWrapping.Wrap,
                 LineHeight = 22,
@@ -320,7 +329,6 @@ namespace EarTrumpet.UI.Views
             if (lower.Contains("break")) return "\xE7BA";
             if (lower.Contains("perf")) return "\xE9F5";
             if (lower.Contains("under") || lower.Contains("capot") || lower.Contains("tech")) return "\xE756";
-            if (lower.Contains("onboard")) return "\xE7BE";
             return "\xE81C";
         }
 
@@ -330,7 +338,7 @@ namespace EarTrumpet.UI.Views
             ContentPanel.Children.Add(new TextBlock
             {
                 Text = Properties.Resources.ChangelogLoading,
-                FontSize = 13,
+                FontSize = 14,
                 Foreground = _textMuted,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Margin = new Thickness(0, 40, 0, 0),
@@ -342,7 +350,7 @@ namespace EarTrumpet.UI.Views
             ContentPanel.Children.Add(new TextBlock
             {
                 Text = message,
-                FontSize = 13,
+                FontSize = 14,
                 Foreground = _textSecondary,
                 TextWrapping = TextWrapping.Wrap,
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -357,16 +365,16 @@ namespace EarTrumpet.UI.Views
             foreach (UIElement child in ContentPanel.Children)
             {
                 child.Opacity = 0;
-                child.RenderTransform = new TranslateTransform(0, 16);
+                child.RenderTransform = new TranslateTransform(0, 12);
 
-                var fade = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(350))
+                var fade = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(300))
                 {
-                    BeginTime = TimeSpan.FromMilliseconds(60 * i),
+                    BeginTime = TimeSpan.FromMilliseconds(40 * i),
                     EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
                 };
-                var slide = new DoubleAnimation(16, 0, TimeSpan.FromMilliseconds(400))
+                var slide = new DoubleAnimation(12, 0, TimeSpan.FromMilliseconds(300))
                 {
-                    BeginTime = TimeSpan.FromMilliseconds(60 * i),
+                    BeginTime = TimeSpan.FromMilliseconds(40 * i),
                     EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
                 };
 
@@ -374,44 +382,6 @@ namespace EarTrumpet.UI.Views
                 ((TranslateTransform)child.RenderTransform).BeginAnimation(TranslateTransform.YProperty, slide);
                 i++;
             }
-        }
-
-        private void ApplyTitleShimmer()
-        {
-            var baseColor = Color.FromArgb(0xF0, 0xFF, 0xFF, 0xFF);
-            var glint = Color.FromArgb(0xFF, 0xBB, 0xDD, 0xFF);
-
-            var brush = new LinearGradientBrush
-            {
-                StartPoint = new Point(0, 0.5),
-                EndPoint = new Point(1, 0.5),
-                MappingMode = BrushMappingMode.RelativeToBoundingBox,
-            };
-            brush.GradientStops.Add(new GradientStop(baseColor, 0.0));
-            brush.GradientStops.Add(new GradientStop(baseColor, 0.4));
-            brush.GradientStops.Add(new GradientStop(glint, 0.48));
-            brush.GradientStops.Add(new GradientStop(Colors.White, 0.5));
-            brush.GradientStops.Add(new GradientStop(glint, 0.52));
-            brush.GradientStops.Add(new GradientStop(baseColor, 0.6));
-            brush.GradientStops.Add(new GradientStop(baseColor, 1.0));
-
-            var transform = new TranslateTransform(-350, 0);
-            brush.Transform = transform;
-            MainTitle.Foreground = brush;
-
-            var sweep = new DoubleAnimation
-            {
-                From = -350,
-                To = 500,
-                Duration = TimeSpan.FromSeconds(1.8),
-                BeginTime = TimeSpan.FromSeconds(0.6),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut },
-            };
-            sweep.Completed += (s, ev) =>
-            {
-                MainTitle.Foreground = _textPrimary;
-            };
-            transform.BeginAnimation(TranslateTransform.XProperty, sweep);
         }
 
         private void TitleBar_Drag(object sender, MouseButtonEventArgs e)

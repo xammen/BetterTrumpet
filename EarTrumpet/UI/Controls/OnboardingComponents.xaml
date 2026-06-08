@@ -1,0 +1,235 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:Theme="clr-namespace:EarTrumpet.UI.Themes">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- Onboarding Components — Clean, Native Windows 11 Design                 -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- ═══ COLORS ═══ -->
+    <Color x:Key="Onboarding.Accent">#3B9EFF</Color>
+    <Color x:Key="Onboarding.AccentHover">#5BB0FF</Color>
+    <Color x:Key="Onboarding.Background">#FF101014</Color>
+    <Color x:Key="Onboarding.Surface">#FF18181E</Color>
+    <Color x:Key="Onboarding.SurfaceHover">#FF1F2028</Color>
+    <Color x:Key="Onboarding.Border">#12FFFFFF</Color>
+
+    <SolidColorBrush x:Key="Onboarding.AccentBrush" Color="{StaticResource Onboarding.Accent}"/>
+    <SolidColorBrush x:Key="Onboarding.SurfaceBrush" Color="{StaticResource Onboarding.Surface}"/>
+    <SolidColorBrush x:Key="Onboarding.BorderBrush" Color="{StaticResource Onboarding.Border}"/>
+    <SolidColorBrush x:Key="Onboarding.Text.Primary" Color="#F0FFFFFF"/>
+    <SolidColorBrush x:Key="Onboarding.Text.Secondary" Color="#B0FFFFFF"/>
+    <SolidColorBrush x:Key="Onboarding.Text.Tertiary" Color="#70FFFFFF"/>
+    <SolidColorBrush x:Key="Onboarding.Text.Muted" Color="#40FFFFFF"/>
+
+    <!-- ═══ SECTION TITLE ═══ -->
+    <Style x:Key="Onboarding.SectionTitle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource Onboarding.Text.Primary}"/>
+        <Setter Property="Margin" Value="0,0,0,8"/>
+    </Style>
+
+    <!-- ═══ SECTION SUBTITLE ═══ -->
+    <Style x:Key="Onboarding.SectionSubtitle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Foreground" Value="{StaticResource Onboarding.Text.Secondary}"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="LineHeight" Value="22"/>
+        <Setter Property="Margin" Value="0,0,0,24"/>
+    </Style>
+
+    <!-- ═══ CARD ═══ -->
+    <Style x:Key="Onboarding.Card" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource Onboarding.SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Onboarding.BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="16,14"/>
+    </Style>
+
+    <!-- ═══ SELECTABLE CARD (for theme selection, etc.) ═══ -->
+    <Style x:Key="Onboarding.SelectableCard" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource Onboarding.SurfaceBrush}"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Onboarding.BorderBrush}"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <SolidColorBrush Color="{StaticResource Onboarding.SurfaceHover}"/>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+            <Trigger Property="Tag" Value="Selected">
+                <Setter Property="BorderBrush" Value="{StaticResource Onboarding.AccentBrush}"/>
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <SolidColorBrush Color="#1A3B9EFF"/>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ═══ RADIO BUTTON (Windows 11 style) ═══ -->
+    <Style x:Key="Onboarding.RadioButton" TargetType="RadioButton">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="{StaticResource Onboarding.Text.Primary}"/>
+        <Setter Property="Padding" Value="12,10"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Root"
+                            Background="{StaticResource Onboarding.SurfaceBrush}"
+                            BorderBrush="{StaticResource Onboarding.BorderBrush}"
+                            BorderThickness="1.5"
+                            CornerRadius="6"
+                            Padding="{TemplateBinding Padding}"
+                            Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter Grid.Column="0" VerticalAlignment="Center"/>
+                            <Ellipse x:Name="Check" Grid.Column="1"
+                                     Width="18" Height="18"
+                                     Fill="{StaticResource Onboarding.AccentBrush}"
+                                     Visibility="Collapsed"
+                                     Margin="12,0,0,0">
+                                <Ellipse.OpacityMask>
+                                    <VisualBrush>
+                                        <VisualBrush.Visual>
+                                            <Grid Background="White" Width="18" Height="18">
+                                                <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets"
+                                                          FontSize="12" Foreground="Black"
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Ellipse.OpacityMask>
+                            </Ellipse>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Onboarding.AccentBrush}"/>
+                            <Setter TargetName="Root" Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="#1A3B9EFF"/>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter TargetName="Check" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{StaticResource Onboarding.SurfaceHover}"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══ TOGGLE SWITCH ═══ -->
+    <Style x:Key="Onboarding.Toggle" TargetType="CheckBox">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid Width="44" Height="24">
+                        <Border x:Name="Track" CornerRadius="12" Background="#20FFFFFF"/>
+                        <Border x:Name="Thumb" Width="18" Height="18" CornerRadius="9"
+                                Background="#CCFFFFFF" HorizontalAlignment="Left" Margin="3,0,0,0"
+                                VerticalAlignment="Center">
+                            <Border.RenderTransform>
+                                <TranslateTransform X="0"/>
+                            </Border.RenderTransform>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Thumb"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(TranslateTransform.X)"
+                                            To="20" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <ColorAnimation Storyboard.TargetName="Track"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="{StaticResource Onboarding.Accent}" Duration="0:0:0.15"/>
+                                        <ColorAnimation Storyboard.TargetName="Thumb"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="White" Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Thumb"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(TranslateTransform.X)"
+                                            To="0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <ColorAnimation Storyboard.TargetName="Track"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="#20FFFFFF" Duration="0:0:0.15"/>
+                                        <ColorAnimation Storyboard.TargetName="Thumb"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="#CCFFFFFF" Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══ PRIMARY BUTTON ═══ -->
+    <Style x:Key="Onboarding.PrimaryButton" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource Onboarding.AccentBrush}"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Padding" Value="24,11"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <SolidColorBrush Color="{StaticResource Onboarding.AccentHover}"/>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ═══ SECONDARY BUTTON ═══ -->
+    <Style x:Key="Onboarding.SecondaryButton" TargetType="Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Padding" Value="16,10"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#10FFFFFF"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

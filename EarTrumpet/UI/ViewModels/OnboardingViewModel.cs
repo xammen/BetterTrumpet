@@ -14,7 +14,7 @@ namespace EarTrumpet.UI.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler Completed;
 
-        public const int PageCount = 6;
+        public const int PageCount = 4;
 
         // Navigation
         public int CurrentPage
@@ -30,8 +30,6 @@ namespace EarTrumpet.UI.ViewModels
                     Raise(nameof(IsPage1));
                     Raise(nameof(IsPage2));
                     Raise(nameof(IsPage3));
-                    Raise(nameof(IsPage4));
-                    Raise(nameof(IsPage5));
                     Raise(nameof(CanGoBack));
                     Raise(nameof(NextButtonText));
                     Raise(nameof(SubtitleText));
@@ -45,10 +43,8 @@ namespace EarTrumpet.UI.ViewModels
         public bool IsPage1 => _currentPage == 1;
         public bool IsPage2 => _currentPage == 2;
         public bool IsPage3 => _currentPage == 3;
-        public bool IsPage4 => _currentPage == 4;
-        public bool IsPage5 => _currentPage == 5;
-        public bool CanGoBack => _currentPage > 0 && _currentPage < 5;
-        public bool IsLastPage => _currentPage == 5;
+        public bool CanGoBack => _currentPage > 0 && _currentPage < 3;
+        public bool IsLastPage => _currentPage == 3;
 
         /// <summary>Progress 0.0 → 1.0 for the top bar</summary>
         public double Progress => (double)(_currentPage + 1) / PageCount;
@@ -59,7 +55,7 @@ namespace EarTrumpet.UI.ViewModels
             {
                 switch (_currentPage)
                 {
-                    case 5: return Properties.Resources.OnboardingDone;
+                    case 3: return Properties.Resources.OnboardingDone;
                     default: return Properties.Resources.OnboardingContinue;
                 }
             }
@@ -72,11 +68,9 @@ namespace EarTrumpet.UI.ViewModels
                 switch (_currentPage)
                 {
                     case 0: return Properties.Resources.OnboardingSubtitleWelcome;
-                    case 1: return Properties.Resources.OnboardingSubtitleAudio;
-                    case 2: return Properties.Resources.OnboardingSubtitleAppearance;
-                    case 3: return Properties.Resources.OnboardingSubtitlePrivacy;
-                    case 4: return "";
-                    case 5: return "";
+                    case 1: return "Choose your default device and appearance";
+                    case 2: return Properties.Resources.OnboardingSubtitlePrivacy;
+                    case 3: return "";
                     default: return "";
                 }
             }
@@ -201,17 +195,15 @@ namespace EarTrumpet.UI.ViewModels
             {
                 case 1:
                     ApplyDefaultDevice();
-                    break;
-                case 2:
                     ApplyTheme();
                     break;
-                case 3:
+                case 2:
                     // Apply telemetry choice only when leaving the Privacy page
                     _settings.IsTelemetryEnabled = IsTelemetryEnabled;
                     break;
             }
 
-            if (_currentPage < 5)
+            if (_currentPage < 3)
             {
                 CurrentPage++;
             }

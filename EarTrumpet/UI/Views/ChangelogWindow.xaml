@@ -3,155 +3,104 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:resx="clr-namespace:EarTrumpet.Properties"
         Title="What's New in BetterTrumpet"
-        Width="640" Height="720"
+        Width="620" Height="680"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
         KeyDown="Window_KeyDown">
+
     <Window.Resources>
-        <!-- ═══ PALETTE (matches Onboarding) ═══ -->
-        <Color x:Key="AccentColor">#3B9EFF</Color>
-        <Color x:Key="BgColor">#FF101014</Color>
-        <Color x:Key="SurfaceColor">#FF18181E</Color>
-        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
-        <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
-        <SolidColorBrush x:Key="T1" Color="#F0FFFFFF"/>
-        <SolidColorBrush x:Key="T2" Color="#B0FFFFFF"/>
-        <SolidColorBrush x:Key="T3" Color="#40FFFFFF"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/EarTrumpet;component/UI/Controls/OnboardingComponents.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Window.Resources>
 
-    <Border CornerRadius="14" ClipToBounds="True" Background="#FF101014">
+    <Border CornerRadius="12" ClipToBounds="True"
+            Background="{StaticResource Onboarding.SurfaceBrush}"
+            BorderBrush="#08FFFFFF" BorderThickness="1">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="48" ShadowDepth="0" Opacity="0.5" Color="Black"/>
+            <DropShadowEffect BlurRadius="32" ShadowDepth="0" Opacity="0.4" Color="Black"/>
         </Border.Effect>
+
         <Grid>
-            <!-- Gradient mesh (same as onboarding) -->
-            <Border CornerRadius="14,14,0,0" VerticalAlignment="Top" Height="260"
-                    IsHitTestVisible="False" Opacity="0.35">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#1A1565C0" Offset="0"/>
-                        <GradientStop Color="#1A2196F3" Offset="0.3"/>
-                        <GradientStop Color="#1000BCD4" Offset="0.6"/>
-                        <GradientStop Color="#087C4DFF" Offset="0.85"/>
-                        <GradientStop Color="#00000000" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.Background>
-            </Border>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="80"/>
+            </Grid.RowDefinitions>
 
-            <!-- Inner stroke -->
-            <Border CornerRadius="14" BorderThickness="1" BorderBrush="#08FFFFFF" IsHitTestVisible="False"/>
+            <!-- ═══ HEADER ═══ -->
+            <Grid Grid.Row="0" Margin="0,0,0,0" MouseLeftButtonDown="TitleBar_Drag">
+                <!-- Close button -->
+                <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,16,0"
+                        Width="32" Height="32" CornerRadius="6" Cursor="Hand"
+                        MouseLeftButtonDown="Close_Click">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#10FFFFFF"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="11"
+                               Foreground="{StaticResource Onboarding.Text.Tertiary}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
 
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="72"/>
-                </Grid.RowDefinitions>
-
-                <!-- ═══ HEADER ═══ -->
-                <Grid Grid.Row="0" Margin="0,0,0,0" MouseLeftButtonDown="TitleBar_Drag">
-                    <!-- Close button -->
-                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,14,14,0"
-                            Width="28" Height="28" CornerRadius="6" Cursor="Hand"
-                            MouseLeftButtonDown="Close_Click">
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#15FFFFFF"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10"
-                                   Foreground="{StaticResource T3}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <StackPanel Margin="56,40,56,0">
+                    <!-- Version badge -->
+                    <Border HorizontalAlignment="Left" CornerRadius="6" Padding="12,6" Margin="0,0,0,16"
+                            Background="#0A3B9EFF">
+                        <TextBlock x:Name="VersionBadge" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{StaticResource Onboarding.AccentBrush}"/>
                     </Border>
 
-                    <StackPanel Margin="60,36,60,0">
-                        <!-- Version badge -->
-                        <Border HorizontalAlignment="Left" CornerRadius="12" Padding="12,5"
-                                Margin="0,0,0,16">
-                            <Border.Background>
-                                <SolidColorBrush Color="{StaticResource AccentColor}" Opacity="0.12"/>
-                            </Border.Background>
-                            <TextBlock x:Name="VersionBadge" FontSize="11" FontWeight="SemiBold"
-                                       Foreground="{StaticResource AccentBrush}"/>
-                        </Border>
+                    <TextBlock x:Name="MainTitle" Text="{x:Static resx:Resources.ChangelogTitle}"
+                               FontSize="28" FontWeight="Bold"
+                               Foreground="{StaticResource Onboarding.Text.Primary}" Margin="0,0,0,6"/>
+                    <TextBlock Text="{x:Static resx:Resources.ChangelogSubtitle}"
+                               FontSize="14"
+                               Foreground="{StaticResource Onboarding.Text.Secondary}" Margin="0,0,0,0"/>
+                </StackPanel>
+            </Grid>
 
-                        <TextBlock x:Name="MainTitle" Text="{x:Static resx:Resources.ChangelogTitle}" FontSize="28" FontWeight="Bold"
-                                   Foreground="{StaticResource T1}" Margin="0,0,0,6"/>
-                        <TextBlock Text="{x:Static resx:Resources.ChangelogSubtitle}"
-                                   FontSize="13" Foreground="{StaticResource T2}" Margin="0,0,0,0"/>
-                    </StackPanel>
-                </Grid>
+            <!-- ═══ CONTENT ═══ -->
+            <ScrollViewer Grid.Row="1" Margin="56,28,48,0"
+                          Padding="0,0,8,0"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel x:Name="ContentPanel"/>
+            </ScrollViewer>
 
-                <!-- ═══ CONTENT ═══ -->
-                <Grid Grid.Row="1" Margin="60,28,48,0" ClipToBounds="True">
-                    <ScrollViewer ClipToBounds="True"
-                                  Padding="0,10,8,24"
-                                  VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled"
-                                  CanContentScroll="False">
-                        <StackPanel x:Name="ContentPanel" Margin="0,0,0,4"/>
-                    </ScrollViewer>
+            <!-- ═══ BOTTOM BAR ═══ -->
+            <Grid Grid.Row="2" Margin="56,0,56,0">
+                <Border VerticalAlignment="Top" Height="1" Background="#08FFFFFF"/>
+                <Grid VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                    <Border Height="18" VerticalAlignment="Top" IsHitTestVisible="False">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                <GradientStop Color="#FF101014" Offset="0"/>
-                                <GradientStop Color="#00101014" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                    </Border>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                               FontSize="12"
+                               Foreground="{StaticResource Onboarding.Text.Muted}"
+                               Text="{x:Static resx:Resources.ChangelogThanks}"/>
 
-                    <Border Height="24" VerticalAlignment="Bottom" IsHitTestVisible="False">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                <GradientStop Color="#00101014" Offset="0"/>
-                                <GradientStop Color="#FF101014" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                    </Border>
-                </Grid>
-
-                <!-- ═══ BOTTOM BAR ═══ -->
-                <Grid Grid.Row="2" Margin="60,0,60,0">
-                    <Border VerticalAlignment="Top" BorderThickness="0,1,0,0" BorderBrush="#08FFFFFF"/>
-                    <Grid VerticalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Column="0" VerticalAlignment="Center"
-                                   FontSize="11" Foreground="{StaticResource T3}"
-                                   Text="{x:Static resx:Resources.ChangelogThanks}"/>
-
-                        <Border Grid.Column="1" CornerRadius="20" Cursor="Hand"
-                                MouseLeftButtonDown="Continue_Click" Padding="28,10">
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background">
-                                            <Setter.Value><SolidColorBrush Color="#5BB0FF"/></Setter.Value>
-                                        </Setter>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <TextBlock Text="{x:Static resx:Resources.ChangelogContinue}" FontSize="13" FontWeight="SemiBold"
+                    <Border Grid.Column="1" Style="{StaticResource Onboarding.PrimaryButton}"
+                            MouseLeftButtonDown="Continue_Click">
+                        <TextBlock Text="{x:Static resx:Resources.ChangelogContinue}"
+                                   FontSize="13" FontWeight="SemiBold"
                                    Foreground="#FF0E0E12"/>
                     </Border>
                 </Grid>
             </Grid>
         </Grid>
-    </Grid>
-</Border>
+    </Border>
 </Window>
