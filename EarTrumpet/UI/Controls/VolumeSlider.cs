@@ -1,7 +1,6 @@
 using System;
 using System.ComponentModel;
 using System.IO;
-using System.Media;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -30,7 +29,7 @@ namespace EarTrumpet.UI.Controls
         private double _lastSoundValue = -1;
         private DateTime _lastSoundTime = DateTime.MinValue;
         private const int SoundThrottleMs = 50; // Min time between sounds
-        private static SoundPlayer _tickPlayer; // Static to reuse across sliders
+        private static System.Windows.Media.MediaPlayer _tickPlayer; // Static to reuse across sliders
 
         public float PeakValue1
         {
@@ -776,21 +775,39 @@ namespace EarTrumpet.UI.Controls
 
             try
             {
-                // Initialize SoundPlayer if needed
+                // Initialize MediaPlayer if needed
                 if (_tickPlayer == null)
                 {
-                    // Load WAV from embedded resources
+                    _tickPlayer = new System.Windows.Media.MediaPlayer();
+
+                    // MediaPlayer can't read from pack:// URIs directly, so we extract to a temp file
                     var streamResourceInfo = Application.GetResourceStream(new Uri("pack://application:,,,/Assets/tick.wav"));
                     if (streamResourceInfo != null)
                     {
-                        _tickPlayer = new SoundPlayer(streamResourceInfo.Stream);
-                        _tickPlayer.Load(); // Preload to avoid delays
+                        var tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "bettertrumpet_tick.wav");
+
+                        // Write to temp file if it doesn't exist
+                        if (!System.IO.File.Exists(tempPath))
+                        {
+                            using (var fileStream = System.IO.File.Create(tempPath))
+                            {
+                                streamResourceInfo.Stream.CopyTo(fileStream);
+                            }
+                        }
+
+                        _tickPlayer.Open(new Uri(tempPath, UriKind.Absolute));
                     }
                 }
 
-                // Play the sound (async, non-blocking)
+                // Set volume based on slider value (0-100 -> 0.0-1.0)
+                // Add a minimum volume of 0.1 so it's always audible even at low levels
                 if (_tickPlayer != null)
                 {
+                    var volumePercent = newValue / 100.0;
+                    _tickPlayer.Volume = Math.Max(0.1, volumePercent);
+
+                    // Reset to beginning and play
+                    _tickPlayer.Position = TimeSpan.Zero;
                     _tickPlayer.Play();
                 }
             }
