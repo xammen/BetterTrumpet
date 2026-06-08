@@ -746,9 +746,48 @@ namespace EarTrumpet
                 {
                     new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.FullWindowTitleText, Command = new RelayCommand(_mixerWindow.OpenOrBringToFront) },
                     new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.SettingsWindowText, Command = new RelayCommand(_settingsWindow.OpenOrBringToFront) },
+                    new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.CheckForUpdatesText, Glyph = "\xE895", Command = new RelayCommand(CheckForUpdatesFromTray) },
                     new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.ContextMenuExitTitle, Command = new RelayCommand(Shutdown) },
                 });
             return ret;
+        }
+
+        private async void CheckForUpdatesFromTray()
+        {
+            if (_updateService == null) return;
+
+            // Show checking notification with premium animation
+            var checkingToast = UI.Views.ToastNotification.Show(
+                EarTrumpet.Properties.Resources.CheckingForUpdatesText,
+                "\xE895" // Sync icon
+            );
+
+            _updateService.CheckForUpdateAsync();
+
+            // Wait for the check to complete
+            await System.Threading.Tasks.Task.Delay(2000);
+
+            // Close the checking toast
+            checkingToast.Close();
+
+            // Wait a tiny bit for smooth transition
+            await System.Threading.Tasks.Task.Delay(200);
+
+            // Show result with new toast
+            if (_updateService.IsUpdateAvailable)
+            {
+                UI.Views.ToastNotification.Show(
+                    string.Format(EarTrumpet.Properties.Resources.UpdateAvailableText, _updateService.LatestVersion),
+                    "\xE896" // Download icon
+                );
+            }
+            else
+            {
+                UI.Views.ToastNotification.Show(
+                    EarTrumpet.Properties.Resources.NoUpdatesAvailableText,
+                    "\xE73E" // Checkmark icon
+                );
+            }
         }
 
         private Window CreateSettingsExperience()

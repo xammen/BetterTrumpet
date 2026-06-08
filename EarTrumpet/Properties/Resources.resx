@@ -895,6 +895,18 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
   <data name="AboutReportBug" xml:space="preserve">
     <value>Report a Bug</value>
   </data>
+  <data name="CheckForUpdatesText" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="CheckingForUpdatesText" xml:space="preserve">
+    <value>Checking for updates...</value>
+  </data>
+  <data name="UpdateAvailableText" xml:space="preserve">
+    <value>Update available: {0}</value>
+  </data>
+  <data name="NoUpdatesAvailableText" xml:space="preserve">
+    <value>You're up to date!</value>
+  </data>
   <data name="SettingsAnimationSpeedLabel" xml:space="preserve">
     <value>Animation speed</value>
   </data>

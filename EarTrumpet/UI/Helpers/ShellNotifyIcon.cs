@@ -129,6 +129,11 @@ namespace EarTrumpet.UI.Helpers
             }
         }
 
+        public void ShowToast(string message, string icon = null)
+        {
+            ShowNotification("BetterTrumpet", message);
+        }
+
         private NOTIFYICONDATAW MakeData()
         {
             return new NOTIFYICONDATAW

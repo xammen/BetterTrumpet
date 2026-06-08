@@ -2700,5 +2700,17 @@ namespace EarTrumpet.Properties {
         public static string SettingsVolumeTickSoundTip {
             get { return ResourceManager.GetString("SettingsVolumeTickSoundTip", resourceCulture); }
         }
+        public static string CheckForUpdatesText {
+            get { return ResourceManager.GetString("CheckForUpdatesText", resourceCulture); }
+        }
+        public static string CheckingForUpdatesText {
+            get { return ResourceManager.GetString("CheckingForUpdatesText", resourceCulture); }
+        }
+        public static string UpdateAvailableText {
+            get { return ResourceManager.GetString("UpdateAvailableText", resourceCulture); }
+        }
+        public static string NoUpdatesAvailableText {
+            get { return ResourceManager.GetString("NoUpdatesAvailableText", resourceCulture); }
+        }
     }
 }
