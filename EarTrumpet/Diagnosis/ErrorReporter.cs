@@ -3,6 +3,7 @@ using Sentry;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Windows;
 
 namespace EarTrumpet.Diagnosis
 {
@@ -157,7 +158,69 @@ namespace EarTrumpet.Diagnosis
 
         public void DisplayDiagnosticData()
         {
-            LocalDataExporter.DumpAndShowData(_listener.GetLogText());
+            try
+            {
+                var bundlePath = ExportDiagnosticBundle(null, "manual-export", includeLiveSnapshot: true);
+                CopyPathToClipboard(bundlePath);
+                LocalDataExporter.ShowInExplorer(bundlePath);
+
+                MessageBox.Show(
+                    string.Format(EarTrumpet.Properties.Resources.DiagnosticsExportSuccessMessage, bundlePath),
+                    EarTrumpet.Properties.Resources.DiagnosticsExportSuccessTitle,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"ErrorReporter DisplayDiagnosticData failed: {ex}");
+
+                MessageBox.Show(
+                    string.Format(EarTrumpet.Properties.Resources.DiagnosticsExportFailedMessage, ex.Message),
+                    EarTrumpet.Properties.Resources.DiagnosticsExportFailedTitle,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
+        public static string ExportDiagnosticBundle(Exception exception = null, string reason = null, bool includeLiveSnapshot = true)
+        {
+            if (s_instance != null)
+            {
+                return s_instance.ExportDiagnosticBundleInstance(exception, reason, includeLiveSnapshot);
+            }
+
+            return LocalDataExporter.CreateSupportBundle(
+                null,
+                GetLogDirectory(),
+                exception,
+                reason,
+                includeLiveSnapshot);
+        }
+
+        private string ExportDiagnosticBundleInstance(Exception exception, string reason, bool includeLiveSnapshot)
+        {
+            Trace.Flush();
+
+            return LocalDataExporter.CreateSupportBundle(
+                _listener.GetLogText(),
+                GetLogDirectoryPath(),
+                exception,
+                reason,
+                includeLiveSnapshot);
+        }
+
+        public static void CopyPathToClipboard(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) return;
+
+            try
+            {
+                Clipboard.SetText(path);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"ErrorReporter CopyPathToClipboard failed: {ex.Message}");
+            }
         }
 
         /// <summary>

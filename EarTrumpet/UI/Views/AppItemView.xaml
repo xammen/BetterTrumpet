@@ -4,10 +4,15 @@
              xmlns:Theme="clr-namespace:EarTrumpet.UI.Themes"
              xmlns:ctl="clr-namespace:EarTrumpet.UI.Controls"
              Height="{DynamicResource Mutable_AppItemCellHeight}"
+             ClipToBounds="True"
              IsTabStop="False">
     <Grid Name="GridRoot"
           Background="Transparent"
+          RenderTransformOrigin="0.5,0.5"
           PreviewMouseLeftButtonDown="GridRoot_PreviewMouseLeftButtonDown">
+        <Grid.RenderTransform>
+            <ScaleTransform ScaleX="1" ScaleY="1" />
+        </Grid.RenderTransform>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{DynamicResource Mutable_IconCellWidth}" />
             <ColumnDefinition Width="*" />
@@ -16,7 +21,8 @@
         <Grid x:Name="IconCell"
               Grid.Column="0"
               Margin="{StaticResource DeviceOrAppIconMargin}">
-            <Border Width="{DynamicResource Mutable_AppIconSize}"
+            <Border x:Name="AppIconHost"
+                    Width="{DynamicResource Mutable_AppIconSize}"
                     Height="{DynamicResource Mutable_AppIconSize}"
                     HorizontalAlignment="Center">
                 <Border.Style>
@@ -89,12 +95,13 @@
                 </Button.Content>
             </Button>
         </Grid>
-        <ctl:VolumeSlider Grid.Column="1"
+        <ctl:VolumeSlider x:Name="VolumeControl"
+                          Grid.Column="1"
                           PeakValue1="{Binding PeakValue1}"
                           PeakValue2="{Binding PeakValue2}"
                           Value="{Binding Volume, Mode=TwoWay}">
             <ctl:VolumeSlider.Style>
-                <Style BasedOn="{StaticResource {x:Type Slider}}" TargetType="Slider">
+                <Style BasedOn="{StaticResource {x:Type ctl:VolumeSlider}}" TargetType="{x:Type ctl:VolumeSlider}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsMuted}" Value="True">
                             <Setter Property="Opacity" Value="{StaticResource MutedOpacity}" />
@@ -103,7 +110,7 @@
                 </Style>
             </ctl:VolumeSlider.Style>
         </ctl:VolumeSlider>
-        <TextBlock Grid.Column="2" Text="{Binding Volume, Mode=OneWay}">
+        <TextBlock x:Name="VolumeText" Grid.Column="2" Text="{Binding Volume, Mode=OneWay}">
             <TextBlock.Style>
                 <Style BasedOn="{StaticResource AppVolumeTextStyle}" TargetType="TextBlock">
                     <Style.Triggers>

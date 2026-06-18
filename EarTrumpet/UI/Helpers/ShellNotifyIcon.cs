@@ -136,13 +136,14 @@ namespace EarTrumpet.UI.Helpers
 
         private NOTIFYICONDATAW MakeData()
         {
+            var icon = IconSource?.Current;
             return new NOTIFYICONDATAW
             {
                 cbSize = Marshal.SizeOf(typeof(NOTIFYICONDATAW)),
                 hWnd = _window.Handle,
                 uFlags = NotifyIconFlags.NIF_MESSAGE | NotifyIconFlags.NIF_ICON | NotifyIconFlags.NIF_TIP | NotifyIconFlags.NIF_SHOWTIP,
                 uCallbackMessage = WM_CALLBACKMOUSEMSG,
-                hIcon = IconSource.Current.Handle,
+                hIcon = icon?.Handle ?? IntPtr.Zero,
                 szTip = _text
             };
         }

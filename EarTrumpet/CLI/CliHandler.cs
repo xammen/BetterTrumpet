@@ -26,7 +26,7 @@ namespace EarTrumpet.CLI
     ///   set-volume VALUE [--device ID] [--app NAME] → {"ok":true} (supports +N / -N relative)
     ///   mute [--device ID] [--app NAME]             → {"ok":true}
     ///   unmute [--device ID] [--app NAME]           → {"ok":true}
-    ///   toggle-mute [--device ID]                   → {"ok":true,"isMuted":true}
+    ///   toggle-mute [--device ID] [--app NAME]      → {"ok":true,"isMuted":true}
     ///   get-default                                 → {"id":"...","name":"..."}
     ///   set-default DEVICE_NAME                     → {"ok":true,"name":"..."}
     ///   set-device APP_EXE DEVICE_NAME              → {"ok":true,"app":"...","device":"..."}
@@ -41,6 +41,55 @@ namespace EarTrumpet.CLI
         private readonly Func<AppSettings> _getSettings;
         private readonly Func<IAudioDeviceManager> _getDeviceManager;
         private Func<DataModel.UpdateService> _getUpdateService;
+
+        private sealed class RuleAssignment
+        {
+            public string Query { get; set; }
+            public int? Volume { get; set; }
+            public bool? IsMuted { get; set; }
+            public bool IsOthers { get; set; }
+        }
+
+        private sealed class RuleSpec
+        {
+            public List<RuleAssignment> Keep { get; } = new List<RuleAssignment>();
+            public RuleAssignment Others { get; set; }
+            public bool CaptureAllDevices { get; set; } = true;
+            public bool ApplyAppsOnly { get; set; }
+        }
+
+        private sealed class RuleAppMatch
+        {
+            public string Query { get; set; }
+            public string MatchType { get; set; }
+            public int Score { get; set; }
+            public string AppId { get; set; }
+            public string ExeName { get; set; }
+            public string DisplayName { get; set; }
+            public string DeviceId { get; set; }
+            public string DeviceName { get; set; }
+            public int ProcessId { get; set; }
+            public int Volume { get; set; }
+            public bool IsMuted { get; set; }
+        }
+
+        private sealed class RulePlanChange
+        {
+            public string Scope { get; set; }
+            public string Rule { get; set; }
+            public string Query { get; set; }
+            public string MatchType { get; set; }
+            public string AppId { get; set; }
+            public string ExeName { get; set; }
+            public string DisplayName { get; set; }
+            public string DeviceId { get; set; }
+            public string DeviceName { get; set; }
+            public int ProcessId { get; set; }
+            public int VolumeBefore { get; set; }
+            public int VolumeAfter { get; set; }
+            public bool IsMutedBefore { get; set; }
+            public bool IsMutedAfter { get; set; }
+        }
 
         public CliHandler(
             Func<DeviceCollectionViewModel> getCollection,
@@ -94,6 +143,9 @@ namespace EarTrumpet.CLI
                     case "list-apps":
                         return DispatchToUI(() => ListApps());
 
+                    case "resolve-apps":
+                        return DispatchToUI(() => ResolveApps(args));
+
                     case "get-volume":
                         return DispatchToUI(() => GetVolume(args));
 
@@ -132,6 +184,15 @@ namespace EarTrumpet.CLI
                     case "delete":
                         return DeleteProfile(args);
 
+                    case "rule-preview":
+                        return DispatchToUI(() => PreviewRule(args));
+
+                    case "rule-apply":
+                        return DispatchToUI(() => ApplyRule(args));
+
+                    case "preset-create":
+                        return DispatchToUI(() => CreatePresetFromRule(args));
+
                     case "watch":
                         return DispatchToUI(() => WatchSnapshot());
 
@@ -167,11 +228,15 @@ namespace EarTrumpet.CLI
             var devices = new List<object>();
             var defaultId = collection.Default?.Id;
 
-            foreach (var device in collection.AllDevices)
+            foreach (var device in collection.AllDevices ?? Enumerable.Empty<DeviceViewModel>())
             {
+                if (device == null) continue;
+
                 var apps = new List<object>();
-                foreach (var app in device.Apps)
+                foreach (var app in device.Apps ?? Enumerable.Empty<IAppItemViewModel>())
                 {
+                    if (app == null) continue;
+
                     apps.Add(new
                     {
                         id = app.Id,
@@ -204,12 +269,16 @@ namespace EarTrumpet.CLI
             var apps = new List<object>();
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var device in collection.AllDevices)
+            foreach (var device in collection.AllDevices ?? Enumerable.Empty<DeviceViewModel>())
             {
-                foreach (var app in device.Apps)
+                if (device == null) continue;
+
+                foreach (var app in device.Apps ?? Enumerable.Empty<IAppItemViewModel>())
                 {
+                    if (app == null) continue;
+
                     // Deduplicate by exe name (apps can appear on multiple devices)
-                    var key = app.ExeName ?? app.DisplayName;
+                    var key = app.ExeName ?? app.DisplayName ?? app.Id;
                     if (seen.Contains(key)) continue;
                     seen.Add(key);
 
@@ -325,16 +394,11 @@ namespace EarTrumpet.CLI
             var appName = GetArg(args, "--app");
             if (appName != null)
             {
-                var collection = _getCollection();
-                if (collection == null) return Error("audio not ready");
+                var app = ResolveApp(appName);
+                if (app == null) return Error($"app not found: {appName}");
 
-                var app = FindApp(collection, appName);
-                if (app != null)
-                {
-                    app.IsMuted = mute;
-                    return JsonConvert.SerializeObject(new { ok = true, app = app.DisplayName, isMuted = mute });
-                }
-                return Error($"app not found: {appName}");
+                app.IsMuted = mute;
+                return JsonConvert.SerializeObject(new { ok = true, app = app.DisplayName, isMuted = app.IsMuted });
             }
 
             var device2 = ResolveDevice(args);
@@ -346,6 +410,16 @@ namespace EarTrumpet.CLI
 
         private string ToggleMute(List<string> args)
         {
+            var appName = GetArg(args, "--app");
+            if (appName != null)
+            {
+                var app = ResolveApp(appName);
+                if (app == null) return Error($"app not found: {appName}");
+
+                app.IsMuted = !app.IsMuted;
+                return JsonConvert.SerializeObject(new { ok = true, app = app.DisplayName, isMuted = app.IsMuted });
+            }
+
             var device = ResolveDevice(args);
             if (device == null) return Error("device not found");
 
@@ -420,10 +494,14 @@ namespace EarTrumpet.CLI
             int routed = 0;
             var routedApps = new List<string>();
 
-            foreach (var device in collection.AllDevices)
+            foreach (var device in collection.AllDevices ?? Enumerable.Empty<DeviceViewModel>())
             {
-                foreach (var app in device.Apps)
+                if (device == null) continue;
+
+                foreach (var app in device.Apps ?? Enumerable.Empty<IAppItemViewModel>())
                 {
+                    if (app == null) continue;
+
                     if (AppMatches(app, appExe))
                     {
                         try
@@ -492,11 +570,15 @@ namespace EarTrumpet.CLI
             var snapshot = new List<object>();
             var defaultId = collection.Default?.Id;
 
-            foreach (var device in collection.AllDevices)
+            foreach (var device in collection.AllDevices ?? Enumerable.Empty<DeviceViewModel>())
             {
+                if (device == null) continue;
+
                 var apps = new List<object>();
-                foreach (var app in device.Apps)
+                foreach (var app in device.Apps ?? Enumerable.Empty<IAppItemViewModel>())
                 {
+                    if (app == null) continue;
+
                     apps.Add(new
                     {
                         exeName = app.ExeName,
@@ -554,7 +636,7 @@ namespace EarTrumpet.CLI
                 settingsReady = settings != null,
                 defaultDevice = collection?.Default?.DisplayName,
                 devices = collection?.AllDevices?.Count() ?? 0,
-                apps = collection?.AllDevices?.Sum(d => d.Apps?.Count() ?? 0) ?? 0,
+                apps = collection?.AllDevices?.Where(d => d != null).Sum(d => d.Apps?.Count() ?? 0) ?? 0,
                 presets = profiles
             });
         }
@@ -746,6 +828,117 @@ namespace EarTrumpet.CLI
             return JsonConvert.SerializeObject(new { ok = true, preset = profile.Name });
         }
 
+        private string ResolveApps(List<string> args)
+        {
+            if (args.Count == 0) return Error("usage: resolve-apps QUERY [QUERY...]");
+
+            var collection = _getCollection();
+            if (collection == null) return Error("audio not ready");
+
+            var result = args.Select(query => new
+            {
+                query,
+                matches = FindAppMatches(collection, query)
+                    .Select(m => new
+                    {
+                        score = m.Score,
+                        matchType = m.MatchType,
+                        exeName = m.ExeName,
+                        displayName = m.DisplayName,
+                        appId = m.AppId,
+                        device = m.DeviceName,
+                        deviceId = m.DeviceId,
+                        processId = m.ProcessId,
+                        volume = m.Volume,
+                        isMuted = m.IsMuted
+                    })
+                    .ToList()
+            });
+
+            return JsonConvert.SerializeObject(result);
+        }
+
+        private string PreviewRule(List<string> args)
+        {
+            var collection = _getCollection();
+            if (collection == null) return Error("audio not ready");
+
+            var parseError = TryParseRule(args, out var spec);
+            if (parseError != null) return Error(parseError);
+
+            var plan = BuildRulePlan(collection, spec);
+            return JsonConvert.SerializeObject(new
+            {
+                ok = true,
+                applyAppsOnly = spec.ApplyAppsOnly,
+                captureScope = spec.CaptureAllDevices ? "AllDevices" : "CurrentDevice",
+                changes = plan,
+                appsMatched = plan.Select(p => p.AppId ?? $"{p.ExeName}:{p.ProcessId}").Distinct().Count(),
+                warnings = BuildRuleWarnings(spec, plan)
+            });
+        }
+
+        private string ApplyRule(List<string> args)
+        {
+            var collection = _getCollection();
+            if (collection == null) return Error("audio not ready");
+
+            var parseError = TryParseRule(args, out var spec);
+            if (parseError != null) return Error(parseError);
+
+            var plan = BuildRulePlan(collection, spec);
+            ApplyRulePlan(collection, plan);
+
+            return JsonConvert.SerializeObject(new
+            {
+                ok = true,
+                appsChanged = plan.Count,
+                changes = plan,
+                warnings = BuildRuleWarnings(spec, plan)
+            });
+        }
+
+        private string CreatePresetFromRule(List<string> args)
+        {
+            if (args.Count == 0) return Error("usage: preset-create NAME --keep APP=VOL [--others VOL] [--apps-only] [--all-devices]");
+
+            var name = args[0];
+            var ruleArgs = args.Skip(1).ToList();
+
+            var settings = _getSettings();
+            if (settings == null) return Error("settings not available");
+
+            var collection = _getCollection();
+            if (collection == null) return Error("audio not ready");
+
+            var parseError = TryParseRule(ruleArgs, out var spec);
+            if (parseError != null) return Error(parseError);
+
+            var plan = BuildRulePlan(collection, spec);
+            ApplyRulePlan(collection, plan);
+
+            var service = new VolumeProfileService(settings);
+            var profile = service.CaptureCurrentState(
+                name,
+                collection,
+                spec.CaptureAllDevices ? VolumeProfileService.CaptureScope.AllDevices : VolumeProfileService.CaptureScope.CurrentDevice);
+            profile.ApplyAppsOnly = spec.ApplyAppsOnly;
+            service.SaveProfile(profile);
+
+            return JsonConvert.SerializeObject(new
+            {
+                ok = true,
+                preset = profile.Name,
+                slug = profile.Slug,
+                captureScope = profile.CaptureScope.ToString(),
+                applyAppsOnly = profile.ApplyAppsOnly,
+                appsChanged = plan.Count,
+                appsCaptured = profile.Devices?.Sum(d => d.Apps?.Count ?? 0) ?? 0,
+                changes = plan,
+                warnings = BuildRuleWarnings(spec, plan)
+            });
+        }
+
         private string ExportSettings(List<string> args)
         {
             var settings = _getSettings();
@@ -805,11 +998,23 @@ namespace EarTrumpet.CLI
                     d.DisplayName.IndexOf(deviceArg, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
+        private IAppItemViewModel ResolveApp(string appName)
+        {
+            var collection = _getCollection();
+            if (collection == null) return null;
+
+            return FindApp(collection, appName);
+        }
+
         private static IAppItemViewModel FindApp(DeviceCollectionViewModel collection, string appName)
         {
             if (collection == null || string.IsNullOrWhiteSpace(appName)) return null;
 
-            var apps = collection.AllDevices.SelectMany(d => d.Apps).ToList();
+            var apps = collection.AllDevices
+                .Where(d => d != null)
+                .SelectMany(d => d.Apps ?? Enumerable.Empty<IAppItemViewModel>())
+                .Where(a => a != null)
+                .ToList();
             return apps.FirstOrDefault(a => AppMatchesExact(a, appName))
                 ?? apps.FirstOrDefault(a => AppMatchesPartial(a, appName));
         }
@@ -838,6 +1043,318 @@ namespace EarTrumpet.CLI
             var displayName = app.DisplayName ?? string.Empty;
             return exeName.IndexOf(appName, StringComparison.OrdinalIgnoreCase) >= 0 ||
                    displayName.IndexOf(appName, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static List<RuleAppMatch> FindAppMatches(DeviceCollectionViewModel collection, string query)
+        {
+            if (collection == null || string.IsNullOrWhiteSpace(query)) return new List<RuleAppMatch>();
+
+            return (collection.AllDevices ?? Enumerable.Empty<DeviceViewModel>())
+                .Where(device => device != null)
+                .SelectMany(device => (device.Apps ?? Enumerable.Empty<IAppItemViewModel>())
+                    .Where(app => app != null)
+                    .Select(app => new { device, app }))
+                .Select(x => CreateAppMatch(x.device, x.app, query))
+                .Where(x => x.Score > 0)
+                .OrderByDescending(x => x.Score)
+                .ThenBy(x => x.DisplayName, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        private static RuleAppMatch CreateAppMatch(DeviceViewModel device, IAppItemViewModel app, string query)
+        {
+            if (device == null || app == null) return new RuleAppMatch { Query = query };
+
+            var normalizedQuery = NormalizeToken(query);
+            var exeName = app.ExeName ?? string.Empty;
+            var exeNoExt = System.IO.Path.GetFileNameWithoutExtension(exeName);
+            var displayName = app.DisplayName ?? string.Empty;
+            var appId = app.AppId ?? string.Empty;
+
+            var candidates = new[]
+            {
+                new { Value = exeName, Type = "exe" },
+                new { Value = exeNoExt, Type = "exeName" },
+                new { Value = displayName, Type = "displayName" },
+                new { Value = appId, Type = "appId" },
+            };
+
+            var bestScore = 0;
+            var bestType = "none";
+
+            foreach (var candidate in candidates)
+            {
+                var value = NormalizeToken(candidate.Value);
+                if (string.IsNullOrWhiteSpace(value) || string.IsNullOrWhiteSpace(normalizedQuery)) continue;
+
+                int score;
+                if (string.Equals(value, normalizedQuery, StringComparison.OrdinalIgnoreCase))
+                {
+                    score = 100;
+                }
+                else if (value.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase))
+                {
+                    score = 80;
+                }
+                else if (value.IndexOf(normalizedQuery, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    score = 60;
+                }
+                else
+                {
+                    score = 0;
+                }
+
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestType = candidate.Type;
+                }
+            }
+
+            return new RuleAppMatch
+            {
+                Query = query,
+                MatchType = bestType,
+                Score = bestScore,
+                AppId = app.AppId,
+                ExeName = app.ExeName,
+                DisplayName = app.DisplayName,
+                DeviceId = device.Id,
+                DeviceName = device.DisplayName,
+                ProcessId = app.ProcessId,
+                Volume = app.Volume,
+                IsMuted = app.IsMuted
+            };
+        }
+
+        private static string NormalizeToken(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+            return System.IO.Path.GetFileNameWithoutExtension(value.Trim()).ToLowerInvariant();
+        }
+
+        private static string TryParseRule(List<string> args, out RuleSpec spec)
+        {
+            spec = new RuleSpec();
+            if (args == null || args.Count == 0)
+            {
+                return "usage: rule-preview --keep APP=VOL [--keep APP=VOL] [--others VOL] [--apps-only] [--current-device]";
+            }
+
+            for (var i = 0; i < args.Count; i++)
+            {
+                var arg = args[i];
+
+                if (IsFlag(arg, "--apps-only"))
+                {
+                    spec.ApplyAppsOnly = true;
+                    continue;
+                }
+
+                if (IsFlag(arg, "--all-devices"))
+                {
+                    spec.CaptureAllDevices = true;
+                    continue;
+                }
+
+                if (IsFlag(arg, "--current-device"))
+                {
+                    spec.CaptureAllDevices = false;
+                    continue;
+                }
+
+                if (IsFlag(arg, "--keep") || IsFlag(arg, "--app"))
+                {
+                    if (++i >= args.Count) return $"{arg} requires APP=VOL";
+                    var assignmentError = TryParseAssignment(args[i], false, out var assignment);
+                    if (assignmentError != null) return assignmentError;
+                    spec.Keep.Add(assignment);
+                    continue;
+                }
+
+                if (IsFlag(arg, "--others"))
+                {
+                    if (++i >= args.Count) return "--others requires VOL";
+                    var assignmentError = TryParseAssignment(args[i], true, out var assignment);
+                    if (assignmentError != null) return assignmentError;
+                    spec.Others = assignment;
+                    continue;
+                }
+
+                var bareAssignmentError = TryParseAssignment(arg, false, out var bareAssignment);
+                if (bareAssignmentError == null && !bareAssignment.IsOthers)
+                {
+                    spec.Keep.Add(bareAssignment);
+                    continue;
+                }
+
+                return $"unknown rule argument: {arg}";
+            }
+
+            if (spec.Keep.Count == 0 && spec.Others == null)
+            {
+                return "rule needs at least one --keep APP=VOL or --others VOL";
+            }
+
+            return null;
+        }
+
+        private static string TryParseAssignment(string value, bool isOthers, out RuleAssignment assignment)
+        {
+            assignment = new RuleAssignment { IsOthers = isOthers };
+            if (string.IsNullOrWhiteSpace(value)) return "empty assignment";
+
+            if (isOthers && value.IndexOf('=') < 0)
+            {
+                return TryParseTargetState(value, assignment);
+            }
+
+            var parts = value.Split(new[] { '=' }, 2);
+            if (parts.Length != 2 || string.IsNullOrWhiteSpace(parts[0]))
+            {
+                return "assignment must be APP=VOL, APP=mute, or APP=unmute";
+            }
+
+            assignment.Query = parts[0].Trim();
+            assignment.IsOthers = isOthers || string.Equals(assignment.Query, "others", StringComparison.OrdinalIgnoreCase) || assignment.Query == "*";
+            return TryParseTargetState(parts[1], assignment);
+        }
+
+        private static string TryParseTargetState(string value, RuleAssignment assignment)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return "missing assignment value";
+            var normalized = value.Trim().ToLowerInvariant();
+
+            switch (normalized)
+            {
+                case "mute":
+                case "muted":
+                    assignment.IsMuted = true;
+                    return null;
+                case "unmute":
+                case "unmuted":
+                    assignment.IsMuted = false;
+                    return null;
+            }
+
+            if (!int.TryParse(normalized.TrimEnd('%'), out var volume) || volume < 0 || volume > 100)
+            {
+                return "volume must be 0-100, mute, or unmute";
+            }
+
+            assignment.Volume = volume;
+            assignment.IsMuted = false;
+            return null;
+        }
+
+        private static List<RulePlanChange> BuildRulePlan(DeviceCollectionViewModel collection, RuleSpec spec)
+        {
+            var changes = new List<RulePlanChange>();
+            var keepIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var assignment in spec.Keep)
+            {
+                var matches = FindAppMatches(collection, assignment.Query);
+                foreach (var match in matches)
+                {
+                    var key = GetRuleMatchKey(match);
+                    keepIds.Add(key);
+                    changes.Add(CreateRulePlanChange(match, assignment, "keep"));
+                }
+            }
+
+            if (spec.Others != null)
+            {
+                foreach (var device in collection.AllDevices ?? Enumerable.Empty<DeviceViewModel>())
+                {
+                    if (device == null) continue;
+
+                    foreach (var app in device.Apps ?? Enumerable.Empty<IAppItemViewModel>())
+                    {
+                        if (app == null) continue;
+
+                        var match = CreateAppMatch(device, app, app.ExeName ?? app.DisplayName);
+                        if (keepIds.Contains(GetRuleMatchKey(match))) continue;
+                        changes.Add(CreateRulePlanChange(match, spec.Others, "others"));
+                    }
+                }
+            }
+
+            return changes
+                .GroupBy(c => c.AppId ?? $"{c.ExeName}:{c.ProcessId}:{c.DeviceId}", StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.First())
+                .ToList();
+        }
+
+        private static RulePlanChange CreateRulePlanChange(RuleAppMatch match, RuleAssignment assignment, string rule)
+        {
+            return new RulePlanChange
+            {
+                Scope = "app",
+                Rule = rule,
+                Query = assignment.Query,
+                MatchType = match.MatchType,
+                AppId = match.AppId,
+                ExeName = match.ExeName,
+                DisplayName = match.DisplayName,
+                DeviceId = match.DeviceId,
+                DeviceName = match.DeviceName,
+                ProcessId = match.ProcessId,
+                VolumeBefore = match.Volume,
+                VolumeAfter = assignment.Volume ?? match.Volume,
+                IsMutedBefore = match.IsMuted,
+                IsMutedAfter = assignment.IsMuted ?? match.IsMuted
+            };
+        }
+
+        private static string GetRuleMatchKey(RuleAppMatch match)
+        {
+            return match.AppId ?? $"{match.ExeName}:{match.ProcessId}:{match.DeviceId}";
+        }
+
+        private static List<string> BuildRuleWarnings(RuleSpec spec, List<RulePlanChange> plan)
+        {
+            var warnings = new List<string>();
+            foreach (var keep in spec.Keep)
+            {
+                if (!plan.Any(p => p.Rule == "keep" && string.Equals(p.Query, keep.Query, StringComparison.OrdinalIgnoreCase)))
+                {
+                    warnings.Add($"App not found: {keep.Query}");
+                }
+            }
+            return warnings;
+        }
+
+        private static void ApplyRulePlan(DeviceCollectionViewModel collection, List<RulePlanChange> plan)
+        {
+            if (collection == null || plan == null) return;
+
+            var apps = (collection.AllDevices ?? Enumerable.Empty<DeviceViewModel>())
+                .Where(d => d != null)
+                .SelectMany(d => d.Apps ?? Enumerable.Empty<IAppItemViewModel>())
+                .Where(app => app != null)
+                .ToList();
+            foreach (var change in plan)
+            {
+                var targets = apps.Where(app =>
+                    (!string.IsNullOrWhiteSpace(change.AppId) && string.Equals(app.AppId, change.AppId, StringComparison.OrdinalIgnoreCase)) ||
+                    (string.IsNullOrWhiteSpace(change.AppId) &&
+                     string.Equals(app.ExeName, change.ExeName, StringComparison.OrdinalIgnoreCase) &&
+                     app.ProcessId == change.ProcessId)).ToList();
+
+                foreach (var app in targets)
+                {
+                    app.Volume = change.VolumeAfter;
+                    app.IsMuted = change.IsMutedAfter;
+                }
+            }
+        }
+
+        private static bool IsFlag(string value, string flag)
+        {
+            return string.Equals(value, flag, StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(value, flag.TrimStart('-'), StringComparison.OrdinalIgnoreCase);
         }
 
         private static List<List<string>> SplitBatchCommands(List<string> args)
@@ -881,6 +1398,7 @@ namespace EarTrumpet.CLI
             {
                 case "list-devices":
                 case "list-apps":
+                case "resolve-apps":
                 case "get-volume":
                 case "set-volume":
                 case "mute":
@@ -894,6 +1412,9 @@ namespace EarTrumpet.CLI
                 case "apply-profile":
                 case "save":
                 case "delete":
+                case "rule-preview":
+                case "rule-apply":
+                case "preset-create":
                 case "watch":
                 case "check-update":
                 case "doctor":
@@ -933,6 +1454,7 @@ namespace EarTrumpet.CLI
 
                 case "mute":
                 case "unmute":
+                case "toggle-mute":
                     if (rest.Count == 1 && !rest[0].StartsWith("-") && !rest[0].StartsWith("/"))
                     {
                         return new[] { first, "--app", rest[0] }.ToList();
@@ -942,6 +1464,9 @@ namespace EarTrumpet.CLI
                 case "profile":
                 case "preset":
                     return NormalizeProfileAlias(rest);
+
+                case "rule":
+                    return NormalizeRuleAlias(rest);
 
                 case "device":
                     return NormalizeDeviceAlias(rest);
@@ -994,10 +1519,19 @@ namespace EarTrumpet.CLI
         private static List<string> NormalizeProfileAlias(List<string> args)
         {
             if (args.Count == 0 || string.Equals(args[0], "list", StringComparison.OrdinalIgnoreCase)) return new List<string> { "presets" };
+            if (string.Equals(args[0], "create", StringComparison.OrdinalIgnoreCase)) return new[] { "preset-create" }.Concat(args.Skip(1)).ToList();
             if (string.Equals(args[0], "load", StringComparison.OrdinalIgnoreCase) || string.Equals(args[0], "apply", StringComparison.OrdinalIgnoreCase)) return new[] { "apply" }.Concat(args.Skip(1)).ToList();
             if (string.Equals(args[0], "save", StringComparison.OrdinalIgnoreCase)) return new[] { "save" }.Concat(args.Skip(1)).ToList();
             if (string.Equals(args[0], "delete", StringComparison.OrdinalIgnoreCase)) return new[] { "delete" }.Concat(args.Skip(1)).ToList();
             return new[] { "apply" }.Concat(args).ToList();
+        }
+
+        private static List<string> NormalizeRuleAlias(List<string> args)
+        {
+            if (args.Count == 0) return new List<string> { "rule-preview" };
+            if (string.Equals(args[0], "preview", StringComparison.OrdinalIgnoreCase)) return new[] { "rule-preview" }.Concat(args.Skip(1)).ToList();
+            if (string.Equals(args[0], "apply", StringComparison.OrdinalIgnoreCase)) return new[] { "rule-apply" }.Concat(args.Skip(1)).ToList();
+            return new[] { "rule-preview" }.Concat(args).ToList();
         }
 
         private static List<string> NormalizeDeviceAlias(List<string> args)

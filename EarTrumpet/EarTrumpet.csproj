@@ -55,6 +55,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>..\Build\Release\</OutputPath>
+    <SelfContained>true</SelfContained>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <DefineConstants>$(DefineConstants);X86</DefineConstants>

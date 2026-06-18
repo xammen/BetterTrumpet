@@ -1,515 +1,505 @@
 <Window x:Class="EarTrumpet.UI.Views.OnboardingWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:Theme="clr-namespace:EarTrumpet.UI.Themes"
         xmlns:resx="clr-namespace:EarTrumpet.Properties"
-        Title="BetterTrumpet"
-        Width="580" Height="640"
+        xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
+        Title="{x:Static resx:Resources.OnboardingWindowTitle}"
+        Width="760" Height="620"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="None"
         AllowsTransparency="True"
-        Background="Transparent">
+        Background="Transparent"
+        KeyDown="Window_KeyDown">
 
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/BetterTrumpet;component/UI/Controls/OnboardingComponents.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/UI/Controls/OnboardingComponents.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
             <BooleanToVisibilityConverter x:Key="BoolVis"/>
         </ResourceDictionary>
     </Window.Resources>
 
-    <!-- ═══ SHELL ═══ -->
-    <Border CornerRadius="8" ClipToBounds="True"
-            Theme:Brush.Background="Theme={Theme}ChromeMediumLow"
-            Theme:Brush.BorderBrush="Theme={Theme}ChromeDisabledLow"
-            BorderThickness="1">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="32" ShadowDepth="0" Opacity="0.4" Color="Black"/>
-        </Border.Effect>
-
+    <Border Background="{StaticResource OnboardingBg}"
+            BorderBrush="{StaticResource OnboardingBorder}"
+            BorderThickness="1"
+            CornerRadius="12">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="80"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- ═══ TOP: Progress bar + Drag area ═══ -->
-            <Grid Grid.Row="0">
-                <!-- Progress bar -->
-                <Border Height="3" VerticalAlignment="Top" Theme:Brush.Background="Theme={Theme}ChromeDisabledLow/0.5">
-                    <Border x:Name="ProgressBar" Theme:Brush.Background="SystemAccent"
-                            HorizontalAlignment="Left">
+            <Border Grid.RowSpan="3"
+                    CornerRadius="12"
+                    IsHitTestVisible="False"
+                    Opacity="0.42">
+                <Border.Background>
+                    <RadialGradientBrush x:Name="AmbientGradient" GradientOrigin="0.18,0.06" Center="0.18,0.06" RadiusX="0.72" RadiusY="0.72">
+                        <GradientStop Color="#1C3B9EFF" Offset="0"/>
+                        <GradientStop Color="Transparent" Offset="1"/>
+                    </RadialGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <Grid Grid.Row="0" Margin="30,24,30,18">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0">
+                    <TextBlock Text="BetterTrumpet"
+                               Foreground="{StaticResource OnboardingText}"
+                               FontSize="22"
+                               FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding StepLabel}"
+                               Foreground="{StaticResource OnboardingTextSubtle}"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <TextBlock Grid.Row="0"
+                           Grid.Column="1"
+                           Text="{Binding CurrentTitle}"
+                           Foreground="{StaticResource OnboardingTextMuted}"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"/>
+
+                <Grid Grid.Row="1"
+                      Grid.ColumnSpan="2"
+                      Height="3"
+                      Margin="0,18,0,0"
+                      Background="{StaticResource OnboardingTrack}">
+                    <Border x:Name="ProgressBar"
+                            Background="{StaticResource OnboardingTrackFill}"
+                            HorizontalAlignment="Left"
+                            CornerRadius="0,2,2,0">
                         <Border.RenderTransform>
-                            <ScaleTransform x:Name="ProgressScale" ScaleX="0.25" ScaleY="1"/>
+                            <ScaleTransform x:Name="ProgressScale" ScaleX="0.1667" ScaleY="1"/>
                         </Border.RenderTransform>
                         <Border.RenderTransformOrigin>
                             <Point X="0" Y="0.5"/>
                         </Border.RenderTransformOrigin>
                     </Border>
-                </Border>
-
-                <!-- Drag area + Skip -->
-                <Grid Height="48" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-                    <TextBlock x:Name="SkipButton" HorizontalAlignment="Right" VerticalAlignment="Center"
-                               Margin="0,0,24,0" Cursor="Hand"
-                               MouseLeftButtonDown="Skip_Click"
-                               FontSize="13" FontWeight="Medium"
-                               FontFamily="Segoe UI Variable Text, Segoe UI"
-                               Text="{x:Static resx:Resources.OnboardingSkip}"
-                               Theme:Brush.Foreground="Theme={Theme}BaseMediumLow">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Theme:Brush.Foreground" Value="Theme={Theme}BaseMediumLow"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Theme:Brush.Foreground" Value="Theme={Theme}BaseMedium"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
                 </Grid>
             </Grid>
 
-            <!-- ═══ CONTENT ═══ -->
-            <Grid Grid.Row="1" Margin="56,24,56,0">
+            <Grid Grid.Row="1" Margin="30,0,30,18">
+                <Grid.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="TextWrapping" Value="Wrap"/>
+                    </Style>
+                </Grid.Resources>
 
-                <!-- ══ PAGE 0: WELCOME ══ -->
-                <Grid x:Name="Page0" Visibility="{Binding IsPage0, Converter={StaticResource BoolVis}}">
+                <Grid x:Name="Page1" Visibility="{Binding IsPage1, Converter={StaticResource BoolVis}}">
                     <Grid.RenderTransform>
-                        <TranslateTransform x:Name="Page0Translate"/>
+                        <TranslateTransform x:Name="Page1Transform"/>
                     </Grid.RenderTransform>
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="400">
-                        <!-- Logo -->
-                        <Border Width="72" Height="72" CornerRadius="16"
-                                Theme:Brush.Background="Theme={Theme}BaseLow"
-                                HorizontalAlignment="Center" Margin="0,0,0,32">
-                            <Image Width="52" Height="52"
-                                   Source="/BetterTrumpet;component/Assets/icon.png"
-                                   RenderOptions.BitmapScalingMode="Fant"/>
-                        </Border>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                        <TextBlock Text="Welcome to" FontSize="15"
-                                   FontFamily="Segoe UI Variable Text, Segoe UI"
-                                   Theme:Brush.Foreground="Theme={Theme}BaseMedium"
-                                   HorizontalAlignment="Center" Margin="0,0,0,4"/>
-                        <TextBlock Text="BetterTrumpet" FontSize="32" FontWeight="Bold"
-                                   FontFamily="Segoe UI Variable Display, Segoe UI"
-                                   Theme:Brush.Foreground="Theme=ApplicationText{Theme}Theme"
-                                   HorizontalAlignment="Center" Margin="0,0,0,16"/>
-
-                        <TextBlock Text="{Binding SubtitleText}" FontSize="14"
-                                   FontFamily="Segoe UI Variable Text, Segoe UI"
-                                   Theme:Brush.Foreground="Theme={Theme}BaseMedium"
-                                   TextWrapping="Wrap" TextAlignment="Center"
-                                   LineHeight="22" Margin="0,0,0,24"/>
-
-                        <!-- Version badge -->
-                        <Border Theme:Brush.Background="SystemAccent/0.1" CornerRadius="6" Padding="12,6"
-                                HorizontalAlignment="Center">
-                            <TextBlock x:Name="VersionText" FontSize="12" FontWeight="SemiBold"
-                                       FontFamily="Segoe UI Variable Text, Segoe UI"
-                                       Theme:Brush.Foreground="SystemAccent"/>
-                        </Border>
+                    <StackPanel Grid.Row="0" MaxWidth="520">
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingAudioOutput}"
+                                   Foreground="{StaticResource OnboardingText}"
+                                   FontSize="28"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingSubtitleAudio}"
+                                   Foreground="{StaticResource OnboardingTextMuted}"
+                                   FontSize="14"
+                                   LineHeight="22"
+                                   Margin="0,0,0,20"/>
                     </StackPanel>
-                </Grid>
 
-                <!-- ══ PAGE 1: SETUP (Audio + Appearance) ══ -->
-                <ScrollViewer x:Name="Page1" VerticalScrollBarVisibility="Auto"
-                              Visibility="{Binding IsPage1, Converter={StaticResource BoolVis}}">
-                    <ScrollViewer.RenderTransform>
-                        <TranslateTransform x:Name="Page1Translate"/>
-                    </ScrollViewer.RenderTransform>
-                    <StackPanel Margin="0,0,8,0">
-                        <!-- Audio Device Section -->
-                        <TextBlock Text="🔊 Audio Output" Style="{StaticResource Onboarding.SectionTitle}"/>
-                        <TextBlock Text="Choose your preferred playback device"
-                                   Style="{StaticResource Onboarding.SectionSubtitle}"/>
+                    <TextBlock Grid.Row="1"
+                               Text="{x:Static resx:Resources.OnboardingNoDevices}"
+                               Visibility="{Binding HasNoDevices, Converter={StaticResource BoolVis}}"
+                               Foreground="{StaticResource OnboardingTextMuted}"
+                               FontSize="13"
+                               Margin="0,0,0,12"/>
 
-                        <!-- No devices warning -->
-                        <Border Padding="16,12" CornerRadius="6" Margin="0,0,0,16"
-                                Theme:Brush.Background="Theme={Theme}BaseLow"
-                                Visibility="{Binding HasNoDevices, Converter={StaticResource BoolVis}}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="16"
-                                           Foreground="#FFD54F" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                <TextBlock Text="{x:Static resx:Resources.OnboardingNoDevices}" FontSize="13"
-                                           FontFamily="Segoe UI Variable Text, Segoe UI"
-                                           Theme:Brush.Foreground="Theme={Theme}BaseMedium" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Device list -->
+                    <ScrollViewer Grid.Row="1" MaxHeight="350" VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding AudioDevices}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <RadioButton Style="{StaticResource Onboarding.RadioButton}"
-                                                 GroupName="AudioDevice"
-                                                 IsChecked="{Binding IsDefault, Mode=TwoWay}"
-                                                 Content="{Binding DisplayName}"/>
+                                    <Border Style="{StaticResource OnboardingChoiceCard}"
+                                            Margin="0,0,0,10"
+                                            MouseLeftButtonDown="DeviceCard_Click"
+                                            Tag="{Binding}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Width="36"
+                                                    Height="36"
+                                                    CornerRadius="7"
+                                                    Background="{StaticResource OnboardingSurfaceElevated}"
+                                                    Margin="0,0,14,0">
+                                                <TextBlock Text="♪"
+                                                           Foreground="{StaticResource OnboardingAccent}"
+                                                           FontSize="18"
+                                                           FontWeight="SemiBold"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding DisplayName}"
+                                                           Foreground="{StaticResource OnboardingText}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold"/>
+                                                <TextBlock Text="{x:Static resx:Resources.OnboardingDeviceConfigured}"
+                                                           Foreground="{StaticResource OnboardingTextMuted}"
+                                                           FontSize="12"
+                                                           Margin="0,3,0,0"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="2"
+                                                       Text="✓"
+                                                       Foreground="{StaticResource OnboardingAccent}"
+                                                       FontSize="16"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center"
+                                                       Visibility="{Binding IsDefault, Converter={StaticResource BoolVis}}"/>
+                                        </Grid>
+                                    </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
 
-                        <!-- Appearance Section -->
-                        <TextBlock Text="🎨 Appearance" Style="{StaticResource Onboarding.SectionTitle}" Margin="0,32,0,8"/>
-                        <TextBlock Text="Choose your theme preference"
-                                   Style="{StaticResource Onboarding.SectionSubtitle}"/>
+                <Grid x:Name="Page2" Visibility="{Binding IsPage2, Converter={StaticResource BoolVis}}">
+                    <Grid.RenderTransform>
+                        <TranslateTransform x:Name="Page2Transform"/>
+                    </Grid.RenderTransform>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="{x:Static resx:Resources.OnboardingAppearance}"
+                               Foreground="{StaticResource OnboardingText}"
+                               FontSize="28"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Grid.Row="1"
+                               Text="{x:Static resx:Resources.OnboardingSubtitleAppearance}"
+                               Foreground="{StaticResource OnboardingTextMuted}"
+                               FontSize="14"
+                               LineHeight="22"
+                               Margin="0,0,0,22"/>
+
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Style="{StaticResource OnboardingCardButton}"
+                                Margin="0,0,12,0"
+                                Tag="0"
+                                Click="ThemeCard_Click">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{x:Static resx:Resources.OnboardingSystemTheme}"
+                                               Foreground="{StaticResource OnboardingText}"
+                                               FontSize="18"
+                                               FontWeight="SemiBold"/>
+                                    <TextBlock Text="{x:Static resx:Resources.OnboardingSystemThemeDesc}"
+                                               Foreground="{StaticResource OnboardingTextMuted}"
+                                               FontSize="13"
+                                               LineHeight="20"
+                                               Margin="0,8,0,18"/>
+                                </StackPanel>
+                                <TextBlock Grid.Row="1"
+                                           Text="{x:Static resx:Resources.OnboardingRecommendedBadge}"
+                                           Foreground="{StaticResource OnboardingAccent}"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Bottom"
+                                           Visibility="{Binding IsSystemThemeSelected, Converter={StaticResource BoolVis}}"/>
+                            </Grid>
+                        </Button>
+
+                        <Button Grid.Column="1"
+                                Style="{StaticResource OnboardingCardButton}"
+                                Margin="12,0,0,0"
+                                Tag="1"
+                                Click="ThemeCard_Click">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{x:Static resx:Resources.OnboardingCustomTheme}"
+                                               Foreground="{StaticResource OnboardingText}"
+                                               FontSize="18"
+                                               FontWeight="SemiBold"/>
+                                    <TextBlock Text="{x:Static resx:Resources.OnboardingCustomThemeDesc}"
+                                               Foreground="{StaticResource OnboardingTextMuted}"
+                                               FontSize="13"
+                                               LineHeight="20"
+                                               Margin="0,8,0,18"/>
+                                    <Border Height="42"
+                                            CornerRadius="8"
+                                            Background="{StaticResource OnboardingSurfaceElevated}"
+                                            BorderBrush="{StaticResource OnboardingBorderSoft}"
+                                            BorderThickness="1">
+                                        <Grid Margin="12,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Height="6" CornerRadius="3" Background="{StaticResource OnboardingAccent}" VerticalAlignment="Center"/>
+                                            <Border Grid.Column="1" Height="6" CornerRadius="3" Background="#4ED5A8" VerticalAlignment="Center" Margin="8,0"/>
+                                            <Border Grid.Column="2" Height="6" CornerRadius="3" Background="#303744" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Grid.Row="1"
+                                           Text="{x:Static resx:Resources.OnboardingCustomThemeNote}"
+                                           Foreground="{StaticResource OnboardingAccent}"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Bottom"
+                                           Visibility="{Binding IsCustomThemeSelected, Converter={StaticResource BoolVis}}"/>
+                            </Grid>
+                        </Button>
+                    </Grid>
+                </Grid>
+
+                <Grid x:Name="Page3" Visibility="{Binding IsPage3, Converter={StaticResource BoolVis}}">
+                    <Grid.RenderTransform>
+                        <TranslateTransform x:Name="Page3Transform"/>
+                    </Grid.RenderTransform>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="{x:Static resx:Resources.OnboardingPrivacy}"
+                               Foreground="{StaticResource OnboardingText}"
+                               FontSize="28"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Grid.Row="1"
+                               Text="{x:Static resx:Resources.OnboardingSubtitlePrivacy}"
+                               Foreground="{StaticResource OnboardingTextMuted}"
+                               FontSize="14"
+                               LineHeight="22"
+                               Margin="0,0,0,20"/>
+
+                    <Grid Grid.Row="2">
+                        <StackPanel MaxWidth="560">
+                            <Border Style="{StaticResource OnboardingCard}" Padding="18" Margin="0,0,0,10">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{x:Static resx:Resources.OnboardingTelemetryValueTitle}"
+                                                       Foreground="{StaticResource OnboardingText}"
+                                                       FontSize="16"
+                                                       FontWeight="SemiBold"/>
+                                            <TextBlock Text="{x:Static resx:Resources.OnboardingTelemetryValueDesc}"
+                                                       Foreground="{StaticResource OnboardingTextMuted}"
+                                                       FontSize="12"
+                                                       LineHeight="18"
+                                                       Margin="0,6,16,0"/>
+                                        </StackPanel>
+                                        <CheckBox Grid.Column="1"
+                                                  IsChecked="{Binding IsTelemetryEnabled}"
+                                                  Style="{StaticResource OnboardingCheckBox}"
+                                                  VerticalAlignment="Top"/>
+                                    </Grid>
+
+                                    <Border Margin="0,14,0,0"
+                                            Background="{StaticResource OnboardingSurfaceElevated}"
+                                            BorderBrush="{StaticResource OnboardingBorderSoft}"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Padding="14"
+                                            Visibility="{Binding IsTelemetryDisableConfirmationVisible, Converter={StaticResource BoolVis}}">
+                                        <StackPanel>
+                                            <TextBlock Text="{x:Static resx:Resources.OnboardingTelemetryConfirmTitle}"
+                                                       Foreground="{StaticResource OnboardingText}"
+                                                       FontSize="13"
+                                                       FontWeight="SemiBold"/>
+                                            <TextBlock Text="{x:Static resx:Resources.OnboardingTelemetryConfirmDesc}"
+                                                       Foreground="{StaticResource OnboardingTextMuted}"
+                                                       FontSize="12"
+                                                       LineHeight="18"
+                                                       Margin="0,6,0,12"/>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                <Button Content="{x:Static resx:Resources.OnboardingTelemetryDisableAnyway}"
+                                                        Command="{Binding ConfirmDisableTelemetryCommand}"
+                                                        Style="{StaticResource OnboardingDangerButton}"
+                                                        Margin="0,0,8,0"/>
+                                                <Button Content="{x:Static resx:Resources.OnboardingTelemetryKeepEnabled}"
+                                                        Command="{Binding KeepTelemetryEnabledCommand}"
+                                                        Style="{StaticResource OnboardingPrimaryButton}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <CheckBox Content="{x:Static resx:Resources.OnboardingLaunchAtStartup}"
+                                      IsChecked="{Binding RunAtStartup}"
+                                      Style="{StaticResource OnboardingCheckBox}"
+                                      Margin="4,6,0,0"/>
+                            <TextBlock Text="{x:Static resx:Resources.OnboardingLaunchAtStartupDesc}"
+                                       Foreground="{StaticResource OnboardingTextMuted}"
+                                       FontSize="12"
+                                       Margin="32,6,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+                <Grid x:Name="Page4" Visibility="{Binding IsPage4, Converter={StaticResource BoolVis}}">
+                    <Grid.RenderTransform>
+                        <TranslateTransform x:Name="Page4Transform"/>
+                    </Grid.RenderTransform>
+                    <StackPanel VerticalAlignment="Center" MaxWidth="560">
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingAllReady}"
+                                   Foreground="{StaticResource OnboardingText}"
+                                   FontSize="32"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,10"/>
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingSetupReadyDesc}"
+                                   Foreground="{StaticResource OnboardingTextMuted}"
+                                   FontSize="15"
+                                   LineHeight="23"
+                                   Margin="0,0,0,22"/>
 
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-
-                            <!-- System Theme -->
-                            <Border x:Name="Theme0Card" Grid.Column="0"
-                                    Style="{StaticResource Onboarding.SelectableCard}"
-                                    MouseLeftButtonDown="Theme0_Click">
+                            <Border Grid.Column="0" Style="{StaticResource OnboardingCard}" Padding="16" Margin="0,0,8,0">
                                 <StackPanel>
-                                    <Border Height="80" Theme:Brush.Background="Theme={Theme}BaseLow" CornerRadius="6,6,0,0"
-                                            Margin="-16,-14,-16,0" Padding="12">
-                                        <Grid>
-                                            <Ellipse Width="32" Height="32" Theme:Brush.Fill="Theme={Theme}BaseMediumLow"
-                                                     HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                            <Rectangle Width="60" Height="6" RadiusX="3" RadiusY="3"
-                                                       Theme:Brush.Fill="Theme={Theme}BaseMediumLow" HorizontalAlignment="Right"
-                                                       VerticalAlignment="Center" Margin="0,0,0,12"/>
-                                        </Grid>
-                                    </Border>
-                                    <StackPanel Margin="0,16,0,0">
-                                        <TextBlock Text="{x:Static resx:Resources.OnboardingSystemTheme}"
-                                                   FontSize="14" FontWeight="SemiBold"
-                                                   FontFamily="Segoe UI Variable Text, Segoe UI"
-                                                   Theme:Brush.Foreground="Theme=ApplicationText{Theme}Theme"/>
-                                        <TextBlock Text="{x:Static resx:Resources.OnboardingSystemThemeDesc}"
-                                                   FontSize="12" Margin="0,4,0,0"
-                                                   FontFamily="Segoe UI Variable Text, Segoe UI"
-                                                   Theme:Brush.Foreground="Theme={Theme}BaseMediumLow"
-                                                   TextWrapping="Wrap"/>
-                                    </StackPanel>
+                                    <TextBlock Text="✓" Foreground="{StaticResource OnboardingAccent}" FontSize="18" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{x:Static resx:Resources.OnboardingDeviceConfigured}" Foreground="{StaticResource OnboardingText}" FontSize="13" FontWeight="SemiBold" Margin="0,8,0,0"/>
                                 </StackPanel>
                             </Border>
-
-                            <!-- Custom Theme -->
-                            <Border x:Name="Theme1Card" Grid.Column="2"
-                                    Style="{StaticResource Onboarding.SelectableCard}"
-                                    MouseLeftButtonDown="Theme1_Click">
+                            <Border Grid.Column="1" Style="{StaticResource OnboardingCard}" Padding="16" Margin="8,0">
                                 <StackPanel>
-                                    <Border Height="80" CornerRadius="6,6,0,0"
-                                            Margin="-16,-14,-16,0" Padding="12">
-                                        <Border.Background>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                <GradientStop Color="#202196F3" Offset="0"/>
-                                                <GradientStop Color="#207C4DFF" Offset="1"/>
-                                            </LinearGradientBrush>
-                                        </Border.Background>
-                                        <Grid>
-                                            <Ellipse Width="32" Height="32" Fill="#403B9EFF"
-                                                     HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                            <Rectangle Width="60" Height="6" RadiusX="3" RadiusY="3"
-                                                       Fill="#507C4DFF" HorizontalAlignment="Right"
-                                                       VerticalAlignment="Center" Margin="0,0,0,12"/>
-                                        </Grid>
-                                    </Border>
-                                    <StackPanel Margin="0,16,0,0">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{x:Static resx:Resources.OnboardingCustomTheme}"
-                                                       FontSize="14" FontWeight="SemiBold"
-                                                       FontFamily="Segoe UI Variable Text, Segoe UI"
-                                                       Theme:Brush.Foreground="Theme=ApplicationText{Theme}Theme"/>
-                                            <Border Background="#10FFD54F" CornerRadius="4" Padding="5,2" Margin="6,0,0,0">
-                                                <TextBlock Text="NEW" FontSize="9" FontWeight="Bold" Foreground="#FFD54F"/>
-                                            </Border>
-                                        </StackPanel>
-                                        <TextBlock Text="{x:Static resx:Resources.OnboardingCustomThemeDesc}"
-                                                   FontSize="12" Margin="0,4,0,0"
-                                                   FontFamily="Segoe UI Variable Text, Segoe UI"
-                                                   Theme:Brush.Foreground="Theme={Theme}BaseMediumLow"
-                                                   TextWrapping="Wrap"/>
-                                    </StackPanel>
+                                    <TextBlock Text="✓" Foreground="{StaticResource OnboardingAccent}" FontSize="18" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{x:Static resx:Resources.OnboardingAppearanceChosen}" Foreground="{StaticResource OnboardingText}" FontSize="13" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Column="2" Style="{StaticResource OnboardingCard}" Padding="16" Margin="8,0,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="✓" Foreground="{StaticResource OnboardingAccent}" FontSize="18" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{x:Static resx:Resources.OnboardingPrivacyConfigured}" Foreground="{StaticResource OnboardingText}" FontSize="13" FontWeight="SemiBold" Margin="0,8,0,0"/>
                                 </StackPanel>
                             </Border>
                         </Grid>
+
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingTrayAccessDesc}"
+                                   Foreground="{StaticResource OnboardingTextSubtle}"
+                                   FontSize="12"
+                                   LineHeight="18"
+                                   Margin="0,20,0,0"/>
                     </StackPanel>
-                </ScrollViewer>
+                </Grid>
 
-                <!-- ══ PAGE 2: PRIVACY ══ -->
-                <ScrollViewer x:Name="Page2" VerticalScrollBarVisibility="Auto"
-                              Visibility="{Binding IsPage2, Converter={StaticResource BoolVis}}">
-                    <ScrollViewer.RenderTransform>
-                        <TranslateTransform x:Name="Page2Translate"/>
-                    </ScrollViewer.RenderTransform>
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock Text="🔒 Privacy" Style="{StaticResource Onboarding.SectionTitle}"/>
-                        <TextBlock Text="{Binding SubtitleText}"
-                                   Style="{StaticResource Onboarding.SectionSubtitle}"/>
-
-                        <!-- Trust badges -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
-                            <Border Theme:Brush.Background="SystemAccent/0.1" CornerRadius="6" Padding="10,6" Margin="0,0,8,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE8D8;" FontFamily="Segoe MDL2 Assets" FontSize="12"
-                                               Foreground="#4CAF50" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <TextBlock Text="No Ads" FontSize="12" FontWeight="SemiBold"
-                                               FontFamily="Segoe UI Variable Text, Segoe UI"
-                                               Theme:Brush.Foreground="Theme=ApplicationText{Theme}Theme"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Theme:Brush.Background="SystemAccent/0.1" CornerRadius="6" Padding="10,6" Margin="0,0,8,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE8D8;" FontFamily="Segoe MDL2 Assets" FontSize="12"
-                                               Foreground="#4CAF50" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <TextBlock Text="No Tracking" FontSize="12" FontWeight="SemiBold"
-                                               FontFamily="Segoe UI Variable Text, Segoe UI"
-                                               Theme:Brush.Foreground="Theme=ApplicationText{Theme}Theme"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Theme:Brush.Background="SystemAccent/0.1" CornerRadius="6" Padding="10,6">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE8D8;" FontFamily="Segoe MDL2 Assets" FontSize="12"
-                                               Foreground="#4CAF50" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <TextBlock Text="No Selling" FontSize="12" FontWeight="SemiBold"
-                                               FontFamily="Segoe UI Variable Text, Segoe UI"
-                                               Theme:Brush.Foreground="Theme=ApplicationText{Theme}Theme"/>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- Telemetry -->
-                        <Border Style="{StaticResource Onboarding.Card}" Margin="0,0,0,16">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                                    <TextBlock Text="{x:Static resx:Resources.OnboardingCrashReports}"
-                                               FontSize="14" FontWeight="SemiBold"
-                                               FontFamily="Segoe UI Variable Text, Segoe UI"
-                                               Theme:Brush.Foreground="Theme=ApplicationText{Theme}Theme" Margin="0,0,0,4"/>
-                                    <TextBlock Text="{x:Static resx:Resources.OnboardingCrashReportsDesc}"
-                                               FontSize="13"
-                                               FontFamily="Segoe UI Variable Text, Segoe UI"
-                                               Theme:Brush.Foreground="Theme={Theme}BaseMediumLow"
-                                               TextWrapping="Wrap"/>
-                                </StackPanel>
-                                <CheckBox Grid.Column="1" Style="{StaticResource Onboarding.Toggle}"
-                                          IsChecked="{Binding IsTelemetryEnabled, Mode=TwoWay}"
-                                          VerticalAlignment="Center"/>
-                            </Grid>
-                        </Border>
-
-                        <!-- Run at Startup -->
-                        <Border Style="{StaticResource Onboarding.Card}" Margin="0,0,0,16">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-                                    <TextBlock Text="{x:Static resx:Resources.OnboardingLaunchAtStartup}"
-                                               FontSize="14" FontWeight="SemiBold"
-                                               FontFamily="Segoe UI Variable Text, Segoe UI"
-                                               Theme:Brush.Foreground="Theme=ApplicationText{Theme}Theme" Margin="0,0,0,4"/>
-                                    <TextBlock Text="{x:Static resx:Resources.OnboardingLaunchAtStartupDesc}"
-                                               FontSize="13"
-                                               FontFamily="Segoe UI Variable Text, Segoe UI"
-                                               Theme:Brush.Foreground="Theme={Theme}BaseMediumLow"/>
-                                </StackPanel>
-                                <CheckBox Grid.Column="1" Style="{StaticResource Onboarding.Toggle}"
-                                          IsChecked="{Binding RunAtStartup, Mode=TwoWay}"
-                                          VerticalAlignment="Center"/>
-                            </Grid>
-                        </Border>
-
-                        <!-- Update Channel -->
-                        <Border Style="{StaticResource Onboarding.Card}">
-                            <StackPanel>
-                                <TextBlock Text="{x:Static resx:Resources.OnboardingAutoUpdates}"
-                                           FontSize="14" FontWeight="SemiBold"
-                                           FontFamily="Segoe UI Variable Text, Segoe UI"
-                                           Theme:Brush.Foreground="Theme=ApplicationText{Theme}Theme" Margin="0,0,0,12"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <!-- All -->
-                                    <Border Grid.Column="0" Padding="0,8" CornerRadius="6" Cursor="Hand"
-                                            Margin="0,0,4,0" MouseLeftButtonDown="UpdateChannel0_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Theme:Brush.Background" Value="Theme={Theme}BaseLow"/>
-                                                <Setter Property="BorderThickness" Value="1.5"/>
-                                                <Setter Property="Theme:Brush.BorderBrush" Value="Transparent"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding UpdateChannelIndex}" Value="0">
-                                                        <Setter Property="Theme:Brush.BorderBrush" Value="SystemAccent"/>
-                                                        <Setter Property="Theme:Brush.Background" Value="SystemAccent/0.1"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <StackPanel HorizontalAlignment="Center">
-                                            <TextBlock Text="{x:Static resx:Resources.OnboardingUpdateAll}"
-                                                       FontSize="13" FontWeight="SemiBold"
-                                                       FontFamily="Segoe UI Variable Text, Segoe UI"
-                                                       HorizontalAlignment="Center"
-                                                       Theme:Brush.Foreground="Theme=ApplicationText{Theme}Theme"/>
-                                            <TextBlock Text="{x:Static resx:Resources.OnboardingUpdateRecommended}"
-                                                       FontSize="10" Opacity="0.6"
-                                                       FontFamily="Segoe UI Variable Text, Segoe UI"
-                                                       HorizontalAlignment="Center"
-                                                       Theme:Brush.Foreground="SystemAccent"/>
-                                        </StackPanel>
-                                    </Border>
-
-                                    <!-- Minor+Major -->
-                                    <Border Grid.Column="1" Padding="0,8" CornerRadius="6" Cursor="Hand"
-                                            Margin="0,0,4,0" MouseLeftButtonDown="UpdateChannel1_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Theme:Brush.Background" Value="Theme={Theme}BaseLow"/>
-                                                <Setter Property="BorderThickness" Value="1.5"/>
-                                                <Setter Property="Theme:Brush.BorderBrush" Value="Transparent"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding UpdateChannelIndex}" Value="1">
-                                                        <Setter Property="Theme:Brush.BorderBrush" Value="SystemAccent"/>
-                                                        <Setter Property="Theme:Brush.Background" Value="SystemAccent/0.1"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.OnboardingUpdateMinor}"
-                                                   FontSize="13" FontWeight="SemiBold"
-                                                   FontFamily="Segoe UI Variable Text, Segoe UI"
-                                                   HorizontalAlignment="Center"
-                                                   Theme:Brush.Foreground="Theme=ApplicationText{Theme}Theme"/>
-                                    </Border>
-
-                                    <!-- None -->
-                                    <Border Grid.Column="2" Padding="0,8" CornerRadius="6" Cursor="Hand"
-                                            MouseLeftButtonDown="UpdateChannel3_Click">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Theme:Brush.Background" Value="Theme={Theme}BaseLow"/>
-                                                <Setter Property="BorderThickness" Value="1.5"/>
-                                                <Setter Property="Theme:Brush.BorderBrush" Value="Transparent"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding UpdateChannelIndex}" Value="3">
-                                                        <Setter Property="Theme:Brush.BorderBrush" Value="SystemAccent"/>
-                                                        <Setter Property="Theme:Brush.Background" Value="SystemAccent/0.1"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock Text="{x:Static resx:Resources.OnboardingUpdateNone}"
-                                                   FontSize="13" FontWeight="SemiBold"
-                                                   FontFamily="Segoe UI Variable Text, Segoe UI"
-                                                   HorizontalAlignment="Center"
-                                                   Theme:Brush.Foreground="Theme=ApplicationText{Theme}Theme"/>
-                                    </Border>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-
-                <!-- ══ PAGE 3: READY ══ -->
-                <Grid x:Name="Page3" Visibility="{Binding IsPage3, Converter={StaticResource BoolVis}}">
+                <Grid x:Name="Page5" Visibility="{Binding IsPage5, Converter={StaticResource BoolVis}}">
                     <Grid.RenderTransform>
-                        <TranslateTransform x:Name="Page3Translate"/>
+                        <TranslateTransform x:Name="Page5Transform"/>
                     </Grid.RenderTransform>
-                    <StackPanel VerticalAlignment="Center" MaxWidth="420">
-                        <!-- Check circle -->
-                        <Border Width="56" Height="56" CornerRadius="28"
-                                Theme:Brush.Background="SystemAccent/0.15"
-                                HorizontalAlignment="Left" Margin="0,0,0,32">
-                            <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="24"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       Theme:Brush.Foreground="SystemAccent"/>
-                        </Border>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="330"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="{x:Static resx:Resources.OnboardingAllReady}"
-                                   FontSize="28" FontWeight="Bold"
-                                   FontFamily="Segoe UI Variable Display, Segoe UI"
-                                   Theme:Brush.Foreground="Theme=ApplicationText{Theme}Theme" Margin="0,0,0,8"/>
-                        <TextBlock Text="{x:Static resx:Resources.OnboardingAllReadyDesc}"
-                                   FontSize="14" TextWrapping="Wrap" LineHeight="22"
-                                   FontFamily="Segoe UI Variable Text, Segoe UI"
-                                   Theme:Brush.Foreground="Theme={Theme}BaseMedium" Margin="0,0,0,32"/>
+                    <Border Grid.Column="0"
+                            Background="{StaticResource OnboardingSurface}"
+                            BorderBrush="{StaticResource OnboardingBorderSoft}"
+                            BorderThickness="1"
+                            CornerRadius="10"
+                            Padding="16"
+                            VerticalAlignment="Center">
+                        <Image Height="330"
+                               Stretch="Uniform"
+                               gif:AnimationBehavior.SourceUri="pack://application:,,,/Assets/TrayPin.gif"
+                               gif:AnimationBehavior.RepeatBehavior="Forever"/>
+                    </Border>
 
-                        <!-- Check items -->
-                        <StackPanel x:Name="CheckItem0" Orientation="Horizontal" Margin="0,0,0,12">
-                            <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                       Theme:Brush.Foreground="SystemAccent"
-                                       VerticalAlignment="Center" Margin="0,0,12,0"/>
-                            <TextBlock Text="{x:Static resx:Resources.OnboardingDeviceConfigured}" FontSize="14"
-                                       FontFamily="Segoe UI Variable Text, Segoe UI"
-                                       Theme:Brush.Foreground="Theme={Theme}BaseMedium"/>
-                        </StackPanel>
-                        <StackPanel x:Name="CheckItem1" Orientation="Horizontal" Margin="0,0,0,12">
-                            <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                       Theme:Brush.Foreground="SystemAccent"
-                                       VerticalAlignment="Center" Margin="0,0,12,0"/>
-                            <TextBlock Text="{x:Static resx:Resources.OnboardingAppearanceChosen}" FontSize="14"
-                                       FontFamily="Segoe UI Variable Text, Segoe UI"
-                                       Theme:Brush.Foreground="Theme={Theme}BaseMedium"/>
-                        </StackPanel>
-                        <StackPanel x:Name="CheckItem2" Orientation="Horizontal">
-                            <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                       Theme:Brush.Foreground="SystemAccent"
-                                       VerticalAlignment="Center" Margin="0,0,12,0"/>
-                            <TextBlock Text="{x:Static resx:Resources.OnboardingPrivacyConfigured}" FontSize="14"
-                                       FontFamily="Segoe UI Variable Text, Segoe UI"
-                                       Theme:Brush.Foreground="Theme={Theme}BaseMedium"/>
-                        </StackPanel>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="34,0,0,0">
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingPinTitle}"
+                                   Foreground="{StaticResource OnboardingText}"
+                                   FontSize="30"
+                                   FontWeight="SemiBold"
+                                   LineHeight="36"
+                                   Margin="0,0,0,10"/>
+                        <TextBlock Text="{x:Static resx:Resources.OnboardingPinDesc}"
+                                   Foreground="{StaticResource OnboardingTextMuted}"
+                                   FontSize="14"
+                                   LineHeight="22"
+                                   MaxWidth="300"/>
                     </StackPanel>
                 </Grid>
             </Grid>
 
-            <!-- ═══ BOTTOM BAR ═══ -->
-            <Grid Grid.Row="2" Margin="56,0,56,0" VerticalAlignment="Center">
+            <Grid Grid.Row="2" Margin="30,0,30,24">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Back -->
-                <Border Grid.Column="0" Style="{StaticResource Onboarding.SecondaryButton}"
-                        MouseLeftButtonDown="Back_Click"
-                        Visibility="{Binding CanGoBack, Converter={StaticResource BoolVis}}">
-                    <TextBlock Text="{x:Static resx:Resources.OnboardingBack}" FontSize="13" FontWeight="Medium"
-                               FontFamily="Segoe UI Variable Text, Segoe UI"
-                               Theme:Brush.Foreground="Theme={Theme}BaseMediumLow"/>
-                </Border>
+                <Button Grid.Column="0"
+                        Content="{x:Static resx:Resources.OnboardingSkip}"
+                        Style="{StaticResource OnboardingGhostButton}"
+                        Click="Skip_Click"/>
 
-                <!-- Step indicator dots -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal"
-                            HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Ellipse x:Name="Dot0" Width="7" Height="7" Margin="4,0" Theme:Brush.Fill="SystemAccent"/>
-                    <Ellipse x:Name="Dot1" Width="7" Height="7" Margin="4,0" Theme:Brush.Fill="Theme={Theme}BaseLow"/>
-                    <Ellipse x:Name="Dot2" Width="7" Height="7" Margin="4,0" Theme:Brush.Fill="Theme={Theme}BaseLow"/>
-                    <Ellipse x:Name="Dot3" Width="7" Height="7" Margin="4,0" Theme:Brush.Fill="Theme={Theme}BaseLow"/>
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <Border x:Name="Dot0" Width="7" Height="7" CornerRadius="4" Margin="5"/>
+                    <Border x:Name="Dot1" Width="7" Height="7" CornerRadius="4" Margin="5"/>
+                    <Border x:Name="Dot2" Width="7" Height="7" CornerRadius="4" Margin="5"/>
+                    <Border x:Name="Dot3" Width="7" Height="7" CornerRadius="4" Margin="5"/>
+                    <Border x:Name="Dot4" Width="7" Height="7" CornerRadius="4" Margin="5"/>
                 </StackPanel>
 
-                <!-- Continue/Done button -->
-                <Border x:Name="CtaButton" Grid.Column="2"
-                        Style="{StaticResource Onboarding.PrimaryButton}"
-                        MouseLeftButtonDown="Next_Click">
-                    <TextBlock Text="{Binding NextButtonText}" FontSize="13" FontWeight="SemiBold"
-                               FontFamily="Segoe UI Variable Text, Segoe UI"
-                               Foreground="#FF0E0E12"/>
-                </Border>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="{x:Static resx:Resources.OnboardingBack}"
+                            Style="{StaticResource OnboardingGhostButton}"
+                            Click="Back_Click"
+                            Visibility="{Binding CanGoBack, Converter={StaticResource BoolVis}}"
+                            Margin="0,0,10,0"/>
+                    <Button Content="{Binding NextButtonText}"
+                            Style="{StaticResource OnboardingPrimaryButton}"
+                            Click="Next_Click"/>
+                </StackPanel>
             </Grid>
         </Grid>
     </Border>

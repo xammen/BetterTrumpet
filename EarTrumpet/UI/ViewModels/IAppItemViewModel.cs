@@ -16,6 +16,8 @@ namespace EarTrumpet.UI.ViewModels
         string ExeName { get; }
         string AppId { get; }
         char IconText { get; }
+        bool AnimateOnLoad { get; }
+        bool IsHiding { get; set; }
         bool IsExpanded { get; }
         bool IsMovable { get; }
         float PeakValue1 { get; }

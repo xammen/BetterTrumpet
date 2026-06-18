@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <StoreAssociation xmlns="http://schemas.microsoft.com/appx/2010/storeassociation">
-  <Publisher>CN=6099D0EF-9374-47ED-BDFE-A82136831235</Publisher>
-  <PublisherDisplayName>File-New-Project</PublisherDisplayName>
+  <Publisher>CN=7EDFC72A-8780-4841-8F34-30B45D719EAF</Publisher>
+  <PublisherDisplayName>xammen</PublisherDisplayName>
   <DeveloperAccountType>MSA</DeveloperAccountType>
   <GeneratePackageHash>http://www.w3.org/2001/04/xmlenc#sha256</GeneratePackageHash>
   <SupportedLocales>
@@ -359,11 +359,11 @@
     <Language Code="zu-za" InMinimumRequirementSet="true" />
   </SupportedLocales>
   <ProductReservedInfo>
-    <MainPackageIdentityName>40459File-New-Project.EarTrumpet</MainPackageIdentityName>
+    <MainPackageIdentityName>xammen.Bettertrumpet</MainPackageIdentityName>
     <ReservedNames>
-      <ReservedName>EarTrumpet</ReservedName>
+      <ReservedName>BetterTrumpet</ReservedName>
     </ReservedNames>
   </ProductReservedInfo>
   <AccountPackageIdentityNames />
-  <PackageInfoList LandingUrl="https://developer.microsoft.com/dashboard/Application?appId=9NBLGGH516XP" />
+  <PackageInfoList LandingUrl="https://partner.microsoft.com/dashboard/products" />
 </StoreAssociation>

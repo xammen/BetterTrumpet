@@ -17,8 +17,8 @@ namespace EarTrumpet.DataModel.Storage
         static StorageFactory()
         {
             var exeDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            var markerPath = Path.Combine(exeDir, "portable.marker");
-            s_isPortable = File.Exists(markerPath);
+            s_isPortable = File.Exists(Path.Combine(exeDir, "portable.marker")) ||
+                           File.Exists(Path.Combine(exeDir, ".portable"));
 
             if (s_isPortable)
             {

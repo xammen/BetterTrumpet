@@ -14,7 +14,7 @@ namespace EarTrumpet.UI.ViewModels
         // Default colors (Windows accent blue as fallback)
         public static readonly Color DefaultAccentColor = Color.FromRgb(0, 120, 215);
         public static readonly Color DefaultTrackBackground = Color.FromRgb(80, 80, 80);
-        public static readonly Color DefaultPeakMeter = Color.FromRgb(255, 255, 255);
+        public static readonly Color DefaultPeakMeter = DefaultAccentColor;
 
         // Category constants
         public const string CatDefault = "Minimal";

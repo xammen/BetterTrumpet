@@ -565,6 +565,16 @@ namespace EarTrumpet
             window.Show();
         }
 
+        private void OpenGitHubRepo()
+        {
+            Trace.WriteLine($"App OpenGitHubRepo");
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "https://github.com/xammen/BetterTrumpet",
+                UseShellExecute = true
+            });
+        }
+
         private void DisplayChangelogIfUpdated()
         {
             var currentVersion = App.PackageVersion?.ToString() ?? "";
@@ -718,12 +728,42 @@ namespace EarTrumpet
                 });
             }
 
+            var addonItems = AddonManager.Host.TrayContextMenuItems?.OrderBy(x => x.NotificationAreaContextMenuItems.FirstOrDefault()?.DisplayName).SelectMany(ext => ext.NotificationAreaContextMenuItems);
+            if (addonItems != null && addonItems.Any())
+            {
+                ret.Add(new ContextMenuSeparator());
+                ret.AddRange(addonItems);
+            }
+
             ret.AddRange(new List<ContextMenuItem>
                 {
                     new ContextMenuSeparator(),
+                    new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.TrayOpenVolumeMixer, Glyph = "\xE9E9", Command = new RelayCommand(_mixerWindow.OpenOrBringToFront) },
+                    new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.TrayOpenSettings, Glyph = "\xE713", Command = new RelayCommand(_settingsWindow.OpenOrBringToFront) },
+                });
+
+            if (_updateService != null && _updateService.IsUpdateAvailable)
+            {
+                ret.Add(new ContextMenuSeparator());
+                ret.Add(new ContextMenuItem
+                {
+                    DisplayName = string.Format(EarTrumpet.Properties.Resources.UpdateContextMenu, _updateService.LatestVersion),
+                    Glyph = "\xE896",
+                    Command = new RelayCommand(() => _updateService.DownloadAndInstallAsync()),
+                });
+            }
+
+            ret.AddRange(new List<ContextMenuItem>
+                {
+                    new ContextMenuSeparator(),
+                    new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.CheckForUpdatesText, Glyph = "\xE895", Command = new RelayCommand(CheckForUpdatesFromTray) },
+                    new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.TrayWhatsNew, Glyph = "\xE8F1", Command = new RelayCommand(ShowChangelogManually) },
+                    new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.TrayShowOnboarding, Glyph = "\xE7BE", Command = new RelayCommand(ShowOnboardingManually) },
+                    new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.TrayStarProject, Glyph = "\xE734", Command = new RelayCommand(OpenGitHubRepo) },
+                    new ContextMenuSeparator(),
                     new ContextMenuItem
                     {
-                        DisplayName = EarTrumpet.Properties.Resources.WindowsLegacyMenuText,
+                        DisplayName = EarTrumpet.Properties.Resources.TrayWindowsAudioTools,
                         Children = new List<ContextMenuItem>
                         {
                             new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.LegacyVolumeMixerText, Command =  new RelayCommand(LegacyControlPanelHelper.StartLegacyAudioMixer) },
@@ -738,35 +778,6 @@ namespace EarTrumpet
                         },
                     },
                     new ContextMenuSeparator(),
-                });
-
-            var addonItems = AddonManager.Host.TrayContextMenuItems?.OrderBy(x => x.NotificationAreaContextMenuItems.FirstOrDefault()?.DisplayName).SelectMany(ext => ext.NotificationAreaContextMenuItems);
-            if (addonItems != null && addonItems.Any())
-            {
-                ret.AddRange(addonItems);
-                ret.Add(new ContextMenuSeparator());
-            }
-
-            if (_updateService != null && _updateService.IsUpdateAvailable)
-            {
-                ret.Add(new ContextMenuItem
-                {
-                    DisplayName = string.Format(EarTrumpet.Properties.Resources.UpdateContextMenu, _updateService.LatestVersion),
-                    Glyph = "\xE896",
-                    Command = new RelayCommand(() => _updateService.DownloadAndInstallAsync()),
-                });
-                ret.Add(new ContextMenuSeparator());
-            }
-
-            ret.AddRange(new List<ContextMenuItem>
-                {
-                    new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.FullWindowTitleText, Command = new RelayCommand(_mixerWindow.OpenOrBringToFront) },
-                    new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.SettingsWindowText, Command = new RelayCommand(_settingsWindow.OpenOrBringToFront) },
-                    new ContextMenuSeparator(),
-                    new ContextMenuItem { DisplayName = "Show onboarding", Glyph = "\xE7BE", Command = new RelayCommand(ShowOnboardingManually) },
-                    new ContextMenuItem { DisplayName = "What's new", Glyph = "\xE8F1", Command = new RelayCommand(ShowChangelogManually) },
-                    new ContextMenuSeparator(),
-                    new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.CheckForUpdatesText, Glyph = "\xE895", Command = new RelayCommand(CheckForUpdatesFromTray) },
                     new ContextMenuItem { DisplayName = EarTrumpet.Properties.Resources.ContextMenuExitTitle, Command = new RelayCommand(Shutdown) },
                 });
             return ret;

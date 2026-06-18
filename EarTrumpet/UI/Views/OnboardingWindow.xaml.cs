@@ -2,6 +2,7 @@ using EarTrumpet.UI.ViewModels;
 using System;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -10,237 +11,185 @@ namespace EarTrumpet.UI.Views
 {
     public partial class OnboardingWindow : Window
     {
-        private readonly Duration _transitionDuration = new Duration(TimeSpan.FromMilliseconds(250));
-        private readonly IEasingFunction _easeOut = new CubicEase { EasingMode = EasingMode.EaseOut };
-        private int _lastPage = -1;
+        private readonly Duration _pageDuration = new Duration(TimeSpan.FromMilliseconds(260));
+        private readonly Duration _dotDuration = new Duration(TimeSpan.FromMilliseconds(180));
+        private readonly IEasingFunction _ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+        private int _lastPage = 0;
 
         public OnboardingWindow()
         {
             InitializeComponent();
-            VersionText.Text = $"v{App.PackageVersion}";
             Loaded += OnLoaded;
-            PreviewKeyDown += OnboardingWindow_KeyDown;
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            // Initialize first page
-            AnimatePageEntrance(Page0, Page0Translate);
-            UpdateProgressBar();
-            UpdateStepDots(0);
-
             if (DataContext is INotifyPropertyChanged npc)
             {
                 npc.PropertyChanged += OnViewModelPropertyChanged;
             }
 
-            Closed += (s, ev) =>
-            {
-                if (DataContext is INotifyPropertyChanged n)
-                    n.PropertyChanged -= OnViewModelPropertyChanged;
-            };
+            UpdateProgressBar();
+            UpdateDots();
+            StartAmbientAnimation();
+            AnimatePageIn(Page1Transform, true);
         }
 
-        private void OnboardingWindow_KeyDown(object sender, KeyEventArgs e)
+        private void StartAmbientAnimation()
         {
-            if (DataContext is OnboardingViewModel vm)
+            var anim = new DoubleAnimation
             {
-                if (e.Key == Key.Escape)
-                {
-                    Skip_Click(null, null);
-                    e.Handled = true;
-                }
-                else if (e.Key == Key.Enter)
-                {
-                    Next_Click(null, null);
-                    e.Handled = true;
-                }
-            }
+                From = 0.58,
+                To = 0.88,
+                Duration = TimeSpan.FromSeconds(5),
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
+            };
+
+            AmbientGradient.BeginAnimation(RadialGradientBrush.RadiusXProperty, anim);
+            AmbientGradient.BeginAnimation(RadialGradientBrush.RadiusYProperty, anim);
         }
 
         private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(OnboardingViewModel.CurrentPage) && DataContext is OnboardingViewModel vm)
+            if (!(DataContext is OnboardingViewModel vm) || e.PropertyName != nameof(OnboardingViewModel.CurrentPage))
             {
-                int newPage = vm.CurrentPage;
-                bool forward = newPage > _lastPage;
-                AnimatePageTransition(newPage, forward);
-                UpdateProgressBar();
-                UpdateStepDots(newPage);
-                _lastPage = newPage;
-
-                // Update theme card selection when entering page 1
-                if (newPage == 1)
-                {
-                    UpdateThemeCardSelection();
-                }
+                return;
             }
+
+            var newPage = vm.CurrentPage;
+            var forward = newPage > _lastPage;
+            _lastPage = newPage;
+
+            UpdateProgressBar();
+            UpdateDots();
+
+            switch (newPage)
+            {
+                case 0:
+                    AnimatePageIn(Page1Transform, forward);
+                    break;
+                case 1:
+                    AnimatePageIn(Page2Transform, forward);
+                    break;
+                case 2:
+                    AnimatePageIn(Page3Transform, forward);
+                    break;
+                case 3:
+                    AnimatePageIn(Page4Transform, forward);
+                    break;
+                case 4:
+                    AnimatePageIn(Page5Transform, forward);
+                    break;
+            }
+        }
+
+        private void AnimatePageIn(TranslateTransform transform, bool forward)
+        {
+            if (transform == null) return;
+
+            var fromX = forward ? 28.0 : -28.0;
+            var anim = new DoubleAnimation(fromX, 0, _pageDuration)
+            {
+                EasingFunction = _ease
+            };
+
+            transform.BeginAnimation(TranslateTransform.XProperty, anim);
         }
 
         private void UpdateProgressBar()
         {
-            if (DataContext is OnboardingViewModel vm)
+            if (!(DataContext is OnboardingViewModel vm)) return;
+
+            var anim = new DoubleAnimation(vm.Progress, _pageDuration)
             {
-                var anim = new DoubleAnimation(vm.Progress, _transitionDuration)
-                {
-                    EasingFunction = _easeOut
-                };
-                ProgressScale.BeginAnimation(ScaleTransform.ScaleXProperty, anim);
-            }
-        }
-
-        private void UpdateStepDots(int currentPage)
-        {
-            var dots = new[] { Dot0, Dot1, Dot2, Dot3 };
-            var accentBrush = (SolidColorBrush)FindResource("Onboarding.AccentBrush");
-            var dimBrush = new SolidColorBrush(Color.FromArgb(0x25, 0xFF, 0xFF, 0xFF));
-
-            for (int i = 0; i < dots.Length; i++)
-            {
-                var targetBrush = i == currentPage ? accentBrush : dimBrush;
-                var anim = new ColorAnimation(((SolidColorBrush)targetBrush).Color, _transitionDuration)
-                {
-                    EasingFunction = _easeOut
-                };
-                ((SolidColorBrush)dots[i].Fill).BeginAnimation(SolidColorBrush.ColorProperty, anim);
-
-                // Active dot slightly bigger
-                var sizeAnim = new DoubleAnimation(i == currentPage ? 8 : 7, _transitionDuration)
-                {
-                    EasingFunction = _easeOut
-                };
-                dots[i].BeginAnimation(WidthProperty, sizeAnim);
-                dots[i].BeginAnimation(HeightProperty, sizeAnim);
-            }
-        }
-
-        private void AnimatePageTransition(int newPage, bool forward)
-        {
-            FrameworkElement page;
-            TranslateTransform translate;
-
-            switch (newPage)
-            {
-                case 0: page = Page0; translate = Page0Translate; break;
-                case 1: page = Page1; translate = Page1Translate; break;
-                case 2: page = Page2; translate = Page2Translate; break;
-                case 3: page = Page3; translate = Page3Translate; break;
-                default: return;
-            }
-
-            AnimatePageEntrance(page, translate, forward);
-        }
-
-        private void AnimatePageEntrance(FrameworkElement page, TranslateTransform translate, bool forward = true)
-        {
-            double startX = forward ? 40 : -40;
-
-            var slideAnim = new DoubleAnimation(startX, 0, _transitionDuration)
-            {
-                EasingFunction = _easeOut
+                EasingFunction = _ease
             };
-            translate.BeginAnimation(TranslateTransform.XProperty, slideAnim);
 
-            var fadeAnim = new DoubleAnimation(0, 1, _transitionDuration)
-            {
-                EasingFunction = _easeOut
-            };
-            page.BeginAnimation(OpacityProperty, fadeAnim);
+            ProgressScale.BeginAnimation(ScaleTransform.ScaleXProperty, anim);
         }
 
-        // ═══ EVENT HANDLERS ═══
-
-        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void UpdateDots()
         {
-            if (e.ClickCount == 1) DragMove();
-        }
+            if (!(DataContext is OnboardingViewModel vm)) return;
 
-        private void Next_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (DataContext is OnboardingViewModel vm)
+            var dots = new[] { Dot0, Dot1, Dot2, Dot3, Dot4 };
+            for (var i = 0; i < dots.Length; i++)
             {
-                if (vm.IsLastPage)
+                var active = i == vm.CurrentPage;
+                var color = active ? Color.FromRgb(59, 158, 255) : Color.FromRgb(52, 54, 64);
+
+                var brush = new SolidColorBrush(color);
+                dots[i].Background = brush;
+
+                var scale = new ScaleTransform(active ? 1.25 : 1.0, active ? 1.25 : 1.0);
+                dots[i].RenderTransform = scale;
+                dots[i].RenderTransformOrigin = new Point(0.5, 0.5);
+
+                var opacityAnim = new DoubleAnimation(active ? 1.0 : 0.65, _dotDuration)
                 {
-                    // Simple fade out and close
-                    var fadeOut = new DoubleAnimation(1, 0, new Duration(TimeSpan.FromMilliseconds(200)))
-                    {
-                        EasingFunction = _easeOut
-                    };
-                    fadeOut.Completed += (s, ev) => vm.SkipCommand.Execute(null);
-                    BeginAnimation(OpacityProperty, fadeOut);
-                }
-                else
-                {
-                    vm.NextCommand.Execute(null);
-                }
+                    EasingFunction = _ease
+                };
+                dots[i].BeginAnimation(OpacityProperty, opacityAnim);
             }
-            if (e != null) e.Handled = true;
         }
 
-        private void Back_Click(object sender, MouseButtonEventArgs e)
+        private void Next_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is OnboardingViewModel vm)
+            {
+                vm.NextCommand.Execute(null);
+            }
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is OnboardingViewModel vm)
+            {
                 vm.BackCommand.Execute(null);
-            e.Handled = true;
+            }
         }
 
-        private void Skip_Click(object sender, MouseButtonEventArgs e)
+        private void Skip_Click(object sender, RoutedEventArgs e)
         {
-            var fadeOut = new DoubleAnimation(1, 0, new Duration(TimeSpan.FromMilliseconds(200)));
-            fadeOut.Completed += (s, ev) =>
+            if (DataContext is OnboardingViewModel vm)
+            {
+                vm.SkipCommand.Execute(null);
+            }
+        }
+
+        private void DeviceCard_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is OnboardingViewModel vm && sender is FrameworkElement fe && fe.Tag is AudioDeviceChoice choice)
+            {
+                vm.SelectedDevice = choice;
+            }
+        }
+
+        private void ThemeCard_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is OnboardingViewModel vm && TryGetTagIndex(sender, out var index))
+            {
+                vm.SelectedThemeIndex = index;
+            }
+        }
+
+        private static bool TryGetTagIndex(object sender, out int index)
+        {
+            index = 0;
+            return sender is FrameworkElement fe && int.TryParse(fe.Tag?.ToString(), out index);
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
             {
                 if (DataContext is OnboardingViewModel vm)
+                {
                     vm.SkipCommand.Execute(null);
-            };
-            BeginAnimation(OpacityProperty, fadeOut);
-            if (e != null) e.Handled = true;
-        }
-
-        private void Theme0_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (DataContext is OnboardingViewModel vm)
-            {
-                vm.SelectedThemeIndex = 0;
-                UpdateThemeCardSelection();
+                }
             }
-            e.Handled = true;
-        }
-
-        private void Theme1_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (DataContext is OnboardingViewModel vm)
-            {
-                vm.SelectedThemeIndex = 1;
-                UpdateThemeCardSelection();
-            }
-            e.Handled = true;
-        }
-
-        private void UpdateThemeCardSelection()
-        {
-            if (DataContext is OnboardingViewModel vm)
-            {
-                Theme0Card.Tag = vm.SelectedThemeIndex == 0 ? "Selected" : null;
-                Theme1Card.Tag = vm.SelectedThemeIndex == 1 ? "Selected" : null;
-            }
-        }
-
-        private void UpdateChannel0_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (DataContext is OnboardingViewModel vm) vm.UpdateChannelIndex = 0;
-            e.Handled = true;
-        }
-
-        private void UpdateChannel1_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (DataContext is OnboardingViewModel vm) vm.UpdateChannelIndex = 1;
-            e.Handled = true;
-        }
-
-        private void UpdateChannel3_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (DataContext is OnboardingViewModel vm) vm.UpdateChannelIndex = 3;
-            e.Handled = true;
         }
     }
 }

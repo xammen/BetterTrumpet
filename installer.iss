@@ -1,7 +1,7 @@
 [Setup]
 AppName=BetterTrumpet
-AppVersion=3.0.13
-AppVerName=BetterTrumpet 3.0.13
+AppVersion=3.1.0
+AppVerName=BetterTrumpet 3.1.0
 AppPublisher=xammen
 AppPublisherURL=https://bettertrumpet.hiii.boo
 AppSupportURL=https://github.com/xammen/BetterTrumpet/issues
@@ -10,7 +10,7 @@ DefaultDirName={autopf}\BetterTrumpet
 DefaultGroupName=BetterTrumpet
 UninstallDisplayIcon={app}\BetterTrumpet.exe
 OutputDir=dist
-OutputBaseFilename=BetterTrumpet-3.0.13-setup
+OutputBaseFilename=BetterTrumpet-3.1.0-setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 ArchitecturesAllowed=x86compatible
@@ -21,11 +21,11 @@ DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 LicenseFile=LICENSE
-VersionInfoVersion=3.0.13.0
+VersionInfoVersion=3.1.0.0
 VersionInfoCompany=xammen
 VersionInfoDescription=BetterTrumpet - Windows Volume Control
 VersionInfoProductName=BetterTrumpet
-VersionInfoProductVersion=3.0.13
+VersionInfoProductVersion=3.1.0
 MinVersion=10.0.17134
 
 [Languages]
@@ -49,8 +49,8 @@ french.LaunchAfterInstall=Lancer BetterTrumpet
 
 [Files]
 Source: "Build\Release\BetterTrumpet.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Build\Release\BetterTrumpet.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Build\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Build\Release\*.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: "bt.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Build\Release\af-ZA\*"; DestDir: "{app}\af-ZA"; Flags: ignoreversion recursesubdirs
 Source: "Build\Release\ar-SA\*"; DestDir: "{app}\ar-SA"; Flags: ignoreversion recursesubdirs

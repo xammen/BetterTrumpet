@@ -104,20 +104,29 @@ namespace EarTrumpet.Diagnosis
         {
             try
             {
+                var diagnosticBundlePath = TryCreateCrashDiagnosticBundle(ex, isFatal);
                 var title = "BetterTrumpet";
+                var diagnosticText = string.IsNullOrWhiteSpace(diagnosticBundlePath)
+                    ? ""
+                    : "\n\nUn rapport de diagnostic a été créé et son chemin a été copié dans le presse-papiers :\n"
+                      + diagnosticBundlePath;
+
                 var body = isFatal
                     ? "BetterTrumpet a rencontr\u00e9 une erreur critique et doit fermer.\n\n"
                       + "Le rapport a \u00e9t\u00e9 enregistr\u00e9 dans les logs.\n\n"
                       + $"D\u00e9tails : {ex?.Message ?? "Erreur inconnue"}"
+                      + diagnosticText
                     : "BetterTrumpet a rencontr\u00e9 un probl\u00e8me.\n\n"
                       + "L'application va tenter de continuer.\n\n"
-                      + $"D\u00e9tails : {ex?.Message ?? "Erreur inconnue"}";
+                      + $"D\u00e9tails : {ex?.Message ?? "Erreur inconnue"}"
+                      + diagnosticText;
 
                 var buttons = isFatal ? MessageBoxButton.OK : MessageBoxButton.OKCancel;
 
                 // Run on a new thread to avoid deadlocking the dispatcher
                 var dialogThread = new Thread(() =>
                 {
+                    ErrorReporter.CopyPathToClipboard(diagnosticBundlePath);
                     var result = MessageBox.Show(body, title, buttons, MessageBoxImage.Error);
 
                     if (isFatal || result == MessageBoxResult.Cancel)
@@ -136,6 +145,22 @@ namespace EarTrumpet.Diagnosis
                 {
                     Environment.Exit(1);
                 }
+            }
+        }
+
+        private static string TryCreateCrashDiagnosticBundle(Exception ex, bool isFatal)
+        {
+            try
+            {
+                return ErrorReporter.ExportDiagnosticBundle(
+                    ex,
+                    isFatal ? "fatal-crash" : "ui-thread-exception",
+                    includeLiveSnapshot: false);
+            }
+            catch (Exception exportEx)
+            {
+                Trace.WriteLine($"CrashHandler: Failed to create diagnostic bundle: {exportEx}");
+                return null;
             }
         }
     }

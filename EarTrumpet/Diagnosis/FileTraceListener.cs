@@ -92,6 +92,21 @@ namespace EarTrumpet.Diagnosis
         /// </summary>
         public string GetLogDirectory() => _logDirectory;
 
+        public override void Flush()
+        {
+            lock (_lock)
+            {
+                try
+                {
+                    _writer?.Flush();
+                }
+                catch
+                {
+                    // Logging should never crash the app
+                }
+            }
+        }
+
         private string DetectLevel(string message)
         {
             if (message == null) return "INFO ";

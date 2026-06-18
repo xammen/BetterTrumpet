@@ -206,8 +206,9 @@ namespace EarTrumpet.UI.Helpers
 
         public void CheckForUpdate()
         {
-            // Don't update if animating
-            if (_isAnimating) return;
+            // When animation is already running we still need one initial icon,
+            // otherwise the tray icon can be asked for before the first frame lands.
+            if (_isAnimating && Current != null) return;
 
             var nextHash = GetHash();
             if (nextHash != _hash)

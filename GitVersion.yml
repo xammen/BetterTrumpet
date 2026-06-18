@@ -1,5 +1,7 @@
-next-version: 3.0.13
+next-version: 3.1.0
 assembly-versioning-scheme: MajorMinorPatchTag
+assembly-file-versioning-format: '{Major}.{Minor}.{Patch}'
+assembly-informational-format: '{MajorMinorPatch}'
 branches:
   feature:
     mode: ContinuousDeployment

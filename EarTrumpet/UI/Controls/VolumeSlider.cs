@@ -7,6 +7,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using EarTrumpet.UI.ViewModels;
 
 namespace EarTrumpet.UI.Controls
 {
@@ -364,18 +365,19 @@ namespace EarTrumpet.UI.Controls
             
             if (settings.UseCustomSliderColors)
             {
-                // Update DependencyProperties (for DataTrigger bindings)
+                // Update DependencyProperties (for DataTrigger bindings). Stored Transparent
+                // means "use the current default", not "fall back to the white WPF theme".
                 var thumbColor = settings.SliderThumbColor;
-                CustomThumbBrush = thumbColor != Colors.Transparent ? new SolidColorBrush(thumbColor) : null;
+                CustomThumbBrush = new SolidColorBrush(thumbColor != Colors.Transparent ? thumbColor : ThemeRegistry.DefaultAccentColor);
                 
                 var trackFillColor = settings.SliderTrackFillColor;
-                CustomTrackFillBrush = trackFillColor != Colors.Transparent ? new SolidColorBrush(trackFillColor) : null;
+                CustomTrackFillBrush = new SolidColorBrush(trackFillColor != Colors.Transparent ? trackFillColor : ThemeRegistry.DefaultAccentColor);
                 
                 var trackBgColor = settings.SliderTrackBackgroundColor;
-                CustomTrackBackgroundBrush = trackBgColor != Colors.Transparent ? new SolidColorBrush(trackBgColor) : null;
+                CustomTrackBackgroundBrush = new SolidColorBrush(trackBgColor != Colors.Transparent ? trackBgColor : ThemeRegistry.DefaultTrackBackground);
                 
                 var peakColor = settings.PeakMeterColor;
-                CustomPeakMeterBrush = peakColor != Colors.Transparent ? new SolidColorBrush(peakColor) : null;
+                CustomPeakMeterBrush = new SolidColorBrush(peakColor != Colors.Transparent ? peakColor : ThemeRegistry.DefaultPeakMeter);
                 
                 // Also apply directly to visual elements — the Theme:Brush system sets local
                 // values (priority 11) which override DataTrigger setters (priority 5), so we

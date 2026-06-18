@@ -42,7 +42,7 @@ jobs:
         Publisher: 'CN=File-New-Project, O=File-New-Project, L=Purcellville, S=Virginia, C=US'
       Store:
         Channel: Store
-        Publisher: 'CN=6099D0EF-9374-47ED-BDFE-A82136831235'
+        Publisher: 'CN=7EDFC72A-8780-4841-8F34-30B45D719EAF'
     maxParallel: 2
 
   steps:

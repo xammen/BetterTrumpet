@@ -608,6 +608,42 @@ namespace EarTrumpet.Properties {
                 return ResourceManager.GetString("ContextMenuHiddenAppsTitleFormat", resourceCulture);
             }
         }
+
+        public static string TrayOpenVolumeMixer {
+            get {
+                return ResourceManager.GetString("TrayOpenVolumeMixer", resourceCulture);
+            }
+        }
+
+        public static string TrayOpenSettings {
+            get {
+                return ResourceManager.GetString("TrayOpenSettings", resourceCulture);
+            }
+        }
+
+        public static string TrayShowOnboarding {
+            get {
+                return ResourceManager.GetString("TrayShowOnboarding", resourceCulture);
+            }
+        }
+
+        public static string TrayWhatsNew {
+            get {
+                return ResourceManager.GetString("TrayWhatsNew", resourceCulture);
+            }
+        }
+
+        public static string TrayStarProject {
+            get {
+                return ResourceManager.GetString("TrayStarProject", resourceCulture);
+            }
+        }
+
+        public static string TrayWindowsAudioTools {
+            get {
+                return ResourceManager.GetString("TrayWindowsAudioTools", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to No playback devices found.
@@ -1974,7 +2010,7 @@ namespace EarTrumpet.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Collect troubleshooting data.
+        ///   Looks up a localized string similar to Export diagnostic report.
         /// </summary>
         public static string TroubleshootEarTrumpetText {
             get {
@@ -2360,6 +2396,18 @@ namespace EarTrumpet.Properties {
         public static string SettingsAboutSubtitle {
             get { return ResourceManager.GetString("SettingsAboutSubtitle", resourceCulture); }
         }
+        public static string DiagnosticsExportSuccessTitle {
+            get { return ResourceManager.GetString("DiagnosticsExportSuccessTitle", resourceCulture); }
+        }
+        public static string DiagnosticsExportSuccessMessage {
+            get { return ResourceManager.GetString("DiagnosticsExportSuccessMessage", resourceCulture); }
+        }
+        public static string DiagnosticsExportFailedTitle {
+            get { return ResourceManager.GetString("DiagnosticsExportFailedTitle", resourceCulture); }
+        }
+        public static string DiagnosticsExportFailedMessage {
+            get { return ResourceManager.GetString("DiagnosticsExportFailedMessage", resourceCulture); }
+        }
         public static string SettingsUpdates {
             get { return ResourceManager.GetString("SettingsUpdates", resourceCulture); }
         }
@@ -2493,8 +2541,38 @@ namespace EarTrumpet.Properties {
         public static string OnboardingWelcomeTo {
             get { return ResourceManager.GetString("OnboardingWelcomeTo", resourceCulture); }
         }
+        public static string OnboardingWindowTitle {
+            get { return ResourceManager.GetString("OnboardingWindowTitle", resourceCulture); }
+        }
+        public static string OnboardingStepFormat {
+            get { return ResourceManager.GetString("OnboardingStepFormat", resourceCulture); }
+        }
+        public static string OnboardingIntroTitle {
+            get { return ResourceManager.GetString("OnboardingIntroTitle", resourceCulture); }
+        }
+        public static string OnboardingIntroDesc {
+            get { return ResourceManager.GetString("OnboardingIntroDesc", resourceCulture); }
+        }
+        public static string OnboardingIntroMixerTitle {
+            get { return ResourceManager.GetString("OnboardingIntroMixerTitle", resourceCulture); }
+        }
+        public static string OnboardingIntroMixerDesc {
+            get { return ResourceManager.GetString("OnboardingIntroMixerDesc", resourceCulture); }
+        }
+        public static string OnboardingIntroTrayTitle {
+            get { return ResourceManager.GetString("OnboardingIntroTrayTitle", resourceCulture); }
+        }
+        public static string OnboardingIntroTrayDesc {
+            get { return ResourceManager.GetString("OnboardingIntroTrayDesc", resourceCulture); }
+        }
         public static string OnboardingSubtitleWelcome {
             get { return ResourceManager.GetString("OnboardingSubtitleWelcome", resourceCulture); }
+        }
+        public static string OnboardingSetupSummaryTitle {
+            get { return ResourceManager.GetString("OnboardingSetupSummaryTitle", resourceCulture); }
+        }
+        public static string OnboardingSetupSummaryDesc {
+            get { return ResourceManager.GetString("OnboardingSetupSummaryDesc", resourceCulture); }
         }
         public static string OnboardingAudioOutput {
             get { return ResourceManager.GetString("OnboardingAudioOutput", resourceCulture); }
@@ -2522,6 +2600,24 @@ namespace EarTrumpet.Properties {
         }
         public static string OnboardingCrashReportsInfo {
             get { return ResourceManager.GetString("OnboardingCrashReportsInfo", resourceCulture); }
+        }
+        public static string OnboardingTelemetryValueTitle {
+            get { return ResourceManager.GetString("OnboardingTelemetryValueTitle", resourceCulture); }
+        }
+        public static string OnboardingTelemetryValueDesc {
+            get { return ResourceManager.GetString("OnboardingTelemetryValueDesc", resourceCulture); }
+        }
+        public static string OnboardingTelemetryConfirmTitle {
+            get { return ResourceManager.GetString("OnboardingTelemetryConfirmTitle", resourceCulture); }
+        }
+        public static string OnboardingTelemetryConfirmDesc {
+            get { return ResourceManager.GetString("OnboardingTelemetryConfirmDesc", resourceCulture); }
+        }
+        public static string OnboardingTelemetryKeepEnabled {
+            get { return ResourceManager.GetString("OnboardingTelemetryKeepEnabled", resourceCulture); }
+        }
+        public static string OnboardingTelemetryDisableAnyway {
+            get { return ResourceManager.GetString("OnboardingTelemetryDisableAnyway", resourceCulture); }
         }
         public static string OnboardingAutoUpdates {
             get { return ResourceManager.GetString("OnboardingAutoUpdates", resourceCulture); }
@@ -2579,6 +2675,18 @@ namespace EarTrumpet.Properties {
         }
         public static string OnboardingCustomThemeDesc {
             get { return ResourceManager.GetString("OnboardingCustomThemeDesc", resourceCulture); }
+        }
+        public static string OnboardingCustomThemeNote {
+            get { return ResourceManager.GetString("OnboardingCustomThemeNote", resourceCulture); }
+        }
+        public static string OnboardingRecommendedBadge {
+            get { return ResourceManager.GetString("OnboardingRecommendedBadge", resourceCulture); }
+        }
+        public static string OnboardingSetupReadyDesc {
+            get { return ResourceManager.GetString("OnboardingSetupReadyDesc", resourceCulture); }
+        }
+        public static string OnboardingTrayAccessDesc {
+            get { return ResourceManager.GetString("OnboardingTrayAccessDesc", resourceCulture); }
         }
         public static string OnboardingSkip {
             get { return ResourceManager.GetString("OnboardingSkip", resourceCulture); }

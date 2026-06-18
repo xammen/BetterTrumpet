@@ -55,6 +55,7 @@ namespace EarTrumpet.CLI
 
                 case "list-devices":
                 case "list-apps":
+                case "resolve-apps":
                 case "get-volume":
                 case "set-volume":
                 case "mute":
@@ -69,6 +70,9 @@ namespace EarTrumpet.CLI
                 case "save":
                 case "apply":
                 case "delete":
+                case "rule-preview":
+                case "rule-apply":
+                case "preset-create":
                 case "watch":
                 case "check-update":
                 case "export-settings":
@@ -153,7 +157,7 @@ namespace EarTrumpet.CLI
             Console.WriteLine("  --set-volume VALUE --app NAME           Set app volume (absolute or relative)");
             Console.WriteLine("  --mute [--device ID|--app NAME]         Mute device or app");
             Console.WriteLine("  --unmute [--device ID|--app NAME]       Unmute device or app");
-            Console.WriteLine("  --toggle-mute [--device ID]             Toggle mute on device");
+            Console.WriteLine("  --toggle-mute [--device ID|--app NAME]  Toggle mute on device or app");
             Console.WriteLine("  --get-default                           Show current default playback device");
             Console.WriteLine("  --set-default DEVICE_NAME               Change default playback device");
             Console.WriteLine("  --set-device APP_EXE DEVICE_NAME        Route app audio to specific device");
@@ -170,8 +174,13 @@ namespace EarTrumpet.CLI
             Console.WriteLine("  --ping                                  Check if BetterTrumpet is running");
             Console.WriteLine("  doctor                                  Diagnose CLI/audio readiness (JSON)");
             Console.WriteLine("  batch <commands...>                     Run multiple CLI commands sequentially");
+            Console.WriteLine("  resolve-apps QUERY [QUERY...]           Resolve app names for automation");
+            Console.WriteLine("  rule preview --keep APP=VOL --others VOL Preview an app volume rule");
+            Console.WriteLine("  rule apply --keep APP=VOL --others VOL  Apply an app volume rule");
+            Console.WriteLine("  preset create NAME --keep APP=VOL       Create QuickTrumpet preset from rule");
             Console.WriteLine("  volume [APP] VALUE                      Friendly alias for set-volume");
             Console.WriteLine("  mute APP | unmute APP                   Friendly app mute aliases");
+            Console.WriteLine("  toggle-mute APP                         Friendly app toggle mute alias");
             Console.WriteLine("  mode NAME                               Apply a QuickTrumpet preset");
             Console.WriteLine("  --version                               Show version");
             Console.WriteLine("  --help                                  Show this help");
@@ -182,6 +191,7 @@ namespace EarTrumpet.CLI
             Console.WriteLine("  BetterTrumpet.exe --set-volume +10");
             Console.WriteLine("  BetterTrumpet.exe --set-volume -5 --app spotify");
             Console.WriteLine("  BetterTrumpet.exe --mute --device \"Speakers\"");
+            Console.WriteLine("  BetterTrumpet.exe --toggle-mute --app discord");
             Console.WriteLine("  BetterTrumpet.exe --set-default \"Headphones (BEACN Mic)\"");
             Console.WriteLine("  BetterTrumpet.exe --set-device spotify.exe \"Headphones\"");
             Console.WriteLine("  BetterTrumpet.exe --apply-profile \"Night Mode\"");
@@ -190,6 +200,9 @@ namespace EarTrumpet.CLI
             Console.WriteLine("  bt save streaming --all-devices");
             Console.WriteLine("  bt focus");
             Console.WriteLine("  bt volume discord 67");
+            Console.WriteLine("  bt toggle-mute discord");
+            Console.WriteLine("  bt rule preview --keep valorant=100 --others 15");
+            Console.WriteLine("  bt preset create \"Valorant Focus\" --keep valorant=100 --others 15 --apps-only");
             Console.WriteLine("  bt batch --set-volume 67 --app discord --set-volume 30 --app vivaldi");
             Console.WriteLine("  bt mode Discord");
             Console.WriteLine();

@@ -59,6 +59,19 @@ namespace EarTrumpet.UI.ViewModels
         public string IconPath { get; }
         public bool IsExpanded { get; }
         public bool IsDesktopApp { get; }
+        public bool AnimateOnLoad => true;
+        public bool IsHiding
+        {
+            get => _isHiding;
+            set
+            {
+                if (_isHiding != value)
+                {
+                    _isHiding = value;
+                    RaisePropertyChanged(nameof(IsHiding));
+                }
+            }
+        }
         public bool IsMovable { get; }
         public float PeakValue1 { get; }
         public float PeakValue2 { get; }
@@ -72,6 +85,7 @@ namespace EarTrumpet.UI.ViewModels
         private int[] _processIds;
         private int _volume;
         private bool _isMuted;
+        private bool _isHiding;
 
         internal TemporaryAppItemViewModel(DeviceCollectionViewModel parent, IAudioDeviceManager deviceManager, IAppItemViewModel app, bool isChild = false)
         {

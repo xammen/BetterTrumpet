@@ -32,6 +32,19 @@ namespace EarTrumpet.UI.ViewModels
         public string AppId => _session.AppId;
         public string IconPath => _session.IconPath;
         public bool IsDesktopApp => _session.IsDesktopApp;
+        public bool AnimateOnLoad { get; private set; }
+        public bool IsHiding
+        {
+            get => _isHiding;
+            set
+            {
+                if (_isHiding != value)
+                {
+                    _isHiding = value;
+                    RaisePropertyChanged(nameof(IsHiding));
+                }
+            }
+        }
         public bool IsExpanded { get; private set; }
         public int ProcessId => _session.ProcessId;
         public ObservableCollection<IAppItemViewModel> ChildApps { get; private set; }
@@ -55,10 +68,12 @@ namespace EarTrumpet.UI.ViewModels
 
         private readonly IAudioDeviceSession _session;
         private readonly WeakReference<DeviceViewModel> _parent;
+        private bool _isHiding;
 
-        internal AppItemViewModel(DeviceViewModel parent, IAudioDeviceSession session, bool isChild = false) : base(session)
+        internal AppItemViewModel(DeviceViewModel parent, IAudioDeviceSession session, bool isChild = false, bool animateOnLoad = false) : base(session)
         {
             IsExpanded = isChild;
+            AnimateOnLoad = animateOnLoad;
             _session = session;
             _session.PropertyChanged += Session_PropertyChanged;
             _parent = new WeakReference<DeviceViewModel>(parent);

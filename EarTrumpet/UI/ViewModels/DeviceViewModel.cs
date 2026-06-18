@@ -182,7 +182,7 @@ namespace EarTrumpet.UI.ViewModels
             {
                 case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
                     Debug.Assert(e.NewItems.Count == 1);
-                    AddSession((IAudioDeviceSession)e.NewItems[0]);
+                    AddSession((IAudioDeviceSession)e.NewItems[0], true);
                     break;
 
                 case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
@@ -199,14 +199,14 @@ namespace EarTrumpet.UI.ViewModels
             }
         }
 
-        private void AddSession(IAudioDeviceSession session)
+        private void AddSession(IAudioDeviceSession session, bool animateOnLoad)
         {
             if (_settings != null && _settings.IsAppHiddenForDevice(_device.Id, session.AppId, session.ExeName))
             {
                 return;
             }
 
-            var newSession = new AppItemViewModel(this, session);
+            var newSession = new AppItemViewModel(this, session, animateOnLoad: animateOnLoad);
 
             foreach (var app in Apps)
             {
@@ -227,8 +227,43 @@ namespace EarTrumpet.UI.ViewModels
             Apps.Clear();
             foreach (var session in _device.Groups)
             {
-                AddSession(session);
+                AddSession(session, false);
             }
+        }
+
+        private void ReconcileAppsWithHiddenState()
+        {
+            foreach (var app in Apps.ToArray())
+            {
+                if (_settings != null && _settings.IsAppHiddenForDevice(_device.Id, app.AppId, app.ExeName))
+                {
+                    if (app is TemporaryAppItemViewModel temporaryApp)
+                    {
+                        temporaryApp.Expired -= OnAppExpired;
+                    }
+
+                    Apps.Remove(app);
+                }
+            }
+
+            foreach (var session in _device.Groups)
+            {
+                if (_settings != null && _settings.IsAppHiddenForDevice(_device.Id, session.AppId, session.ExeName))
+                {
+                    continue;
+                }
+
+                if (!Apps.Any(app => AppMatchesSession(app, session)))
+                {
+                    AddSession(session, true);
+                }
+            }
+        }
+
+        private static bool AppMatchesSession(IAppItemViewModel app, IAudioDeviceSession session)
+        {
+            return string.Equals(app.Id, session.Id, StringComparison.OrdinalIgnoreCase) ||
+                   (!string.IsNullOrWhiteSpace(app.AppId) && string.Equals(app.AppId, session.AppId, StringComparison.OrdinalIgnoreCase));
         }
 
         private void RefreshHiddenCount()
@@ -238,7 +273,7 @@ namespace EarTrumpet.UI.ViewModels
 
         internal void RefreshHiddenApps()
         {
-            RebuildAppsCollection();
+            ReconcileAppsWithHiddenState();
             RefreshHiddenCount();
         }
 

@@ -420,7 +420,7 @@
                                         HorizontalAlignment="Left"
                                         CornerRadius="2"
                                         Opacity="0.6"
-                                        Theme:Brush.Background="Theme=ApplicationText{Theme}Theme, HighContrast=HotTrack" />
+                                        Theme:Brush.Background="Theme=SystemAccent, HighContrast=HotTrack" />
 
                                 <Border Name="PeakMeter2"
                                         Height="4"
@@ -428,7 +428,7 @@
                                         HorizontalAlignment="Left"
                                         CornerRadius="2"
                                         Opacity="0.6"
-                                        Theme:Brush.Background="Theme=ApplicationText{Theme}Theme, HighContrast=HotTrack" />
+                                        Theme:Brush.Background="Theme=SystemAccent, HighContrast=HotTrack" />
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsEnabled" Value="False">
@@ -476,7 +476,7 @@
                                         HorizontalAlignment="Left"
                                         CornerRadius="2"
                                         Opacity="0.6"
-                                        Theme:Brush.Background="Theme=ApplicationText{Theme}Theme, HighContrast=HotTrack" />
+                                        Theme:Brush.Background="Theme=SystemAccent, HighContrast=HotTrack" />
 
                                 <Border Name="PeakMeter2"
                                         Height="4"
@@ -484,26 +484,26 @@
                                         HorizontalAlignment="Left"
                                         CornerRadius="2"
                                         Opacity="0.6"
-                                        Theme:Brush.Background="Theme=ApplicationText{Theme}Theme, HighContrast=HotTrack" />
+                                        Theme:Brush.Background="Theme=SystemAccent, HighContrast=HotTrack" />
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsEnabled" Value="False">
                                     <Setter Property="Opacity" Value="0.5" />
                                 </Trigger>
                                 <!-- Custom thumb color -->
-                                <DataTrigger Binding="{Binding CustomThumbBrush, RelativeSource={RelativeSource Self}, Converter={x:Static local:NullToBoolConverter.Instance}}" Value="False">
+                                <DataTrigger Binding="{Binding CustomThumbBrush, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static local:NullToBoolConverter.Instance}}" Value="False">
                                     <Setter TargetName="SliderThumb" Property="Foreground" Value="{Binding CustomThumbBrush, RelativeSource={RelativeSource TemplatedParent}}" />
                                 </DataTrigger>
                                 <!-- Custom track fill color -->
-                                <DataTrigger Binding="{Binding CustomTrackFillBrush, RelativeSource={RelativeSource Self}, Converter={x:Static local:NullToBoolConverter.Instance}}" Value="False">
+                                <DataTrigger Binding="{Binding CustomTrackFillBrush, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static local:NullToBoolConverter.Instance}}" Value="False">
                                     <Setter TargetName="SliderLeft" Property="Foreground" Value="{Binding CustomTrackFillBrush, RelativeSource={RelativeSource TemplatedParent}}" />
                                 </DataTrigger>
                                 <!-- Custom track background color -->
-                                <DataTrigger Binding="{Binding CustomTrackBackgroundBrush, RelativeSource={RelativeSource Self}, Converter={x:Static local:NullToBoolConverter.Instance}}" Value="False">
+                                <DataTrigger Binding="{Binding CustomTrackBackgroundBrush, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static local:NullToBoolConverter.Instance}}" Value="False">
                                     <Setter TargetName="SliderRight" Property="Foreground" Value="{Binding CustomTrackBackgroundBrush, RelativeSource={RelativeSource TemplatedParent}}" />
                                 </DataTrigger>
                                 <!-- Custom peak meter color -->
-                                <DataTrigger Binding="{Binding CustomPeakMeterBrush, RelativeSource={RelativeSource Self}, Converter={x:Static local:NullToBoolConverter.Instance}}" Value="False">
+                                <DataTrigger Binding="{Binding CustomPeakMeterBrush, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static local:NullToBoolConverter.Instance}}" Value="False">
                                     <Setter TargetName="PeakMeter1" Property="Background" Value="{Binding CustomPeakMeterBrush, RelativeSource={RelativeSource TemplatedParent}}" />
                                     <Setter TargetName="PeakMeter2" Property="Background" Value="{Binding CustomPeakMeterBrush, RelativeSource={RelativeSource TemplatedParent}}" />
                                 </DataTrigger>

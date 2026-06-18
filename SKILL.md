@@ -220,11 +220,13 @@ bt --unmute --app discord
 bt unmute discord
 ```
 
-Toggle mute on a device:
+Toggle mute on a device or app:
 
 ```powershell
 bt --toggle-mute
 bt --toggle-mute --device "Headphones"
+bt --toggle-mute --app discord
+bt toggle-mute discord
 ```
 
 ### Default Playback Device

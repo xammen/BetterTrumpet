@@ -76,7 +76,7 @@ BetterTrumpet.exe --set-default "Headphones"
 | `mute <app>` | Friendly app mute alias | Yes |
 | `--unmute` | Unmute a device or app | Yes |
 | `unmute <app>` | Friendly app unmute alias | Yes |
-| `--toggle-mute` | Toggle mute on a device | Yes |
+| `--toggle-mute` | Toggle mute on a device or app | Yes |
 | `--get-default` | Show the current default playback device | Yes |
 | `--set-default <name>` | Change the system default playback device | Yes |
 | `--set-device <app> <device>` | Route an app's audio to a specific device | Yes |
@@ -345,12 +345,14 @@ BetterTrumpet.exe --unmute --device "Realtek"
 
 ### `--toggle-mute`
 
-Toggle the mute state of a device.
+Toggle the mute state of a device or app.
 
 | Syntax | Description |
 |---|---|
 | `--toggle-mute` | Toggle mute on default device |
 | `--toggle-mute --device "BEACN"` | Toggle mute on specific device |
+| `--toggle-mute --app discord` | Toggle mute on specific app |
+| `toggle-mute discord` | Friendly app toggle mute alias |
 
 ```
 BetterTrumpet.exe --toggle-mute
@@ -360,6 +362,18 @@ BetterTrumpet.exe --toggle-mute
 {
   "ok": true,
   "device": "Headphones (BEACN Mic)",
+  "isMuted": true
+}
+```
+
+```
+BetterTrumpet.exe --toggle-mute --app discord
+```
+
+```json
+{
+  "ok": true,
+  "app": "Discord",
   "isMuted": true
 }
 ```

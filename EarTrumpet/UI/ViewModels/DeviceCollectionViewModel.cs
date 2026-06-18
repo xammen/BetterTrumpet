@@ -16,6 +16,7 @@ namespace EarTrumpet.UI.ViewModels
     public class DeviceCollectionViewModel : BindableBase
     {
         private static readonly string DefaultDeviceChangedProperty = "DefaultDeviceChangedProperty";
+        private const int AppHideAnimationDurationMs = 140;
 
         public event EventHandler<DeviceViewModel> DefaultChanged;
         public event Action TrayPropertyChanged;
@@ -172,7 +173,7 @@ namespace EarTrumpet.UI.ViewModels
 
         public bool CanHideApp(IAppItemViewModel app)
         {
-            return app != null && app.Parent != null && !(app is TemporaryAppItemViewModel);
+            return app != null && app.Parent != null && !app.IsHiding && !(app is TemporaryAppItemViewModel);
         }
 
         public void HideAppOnDevice(IAppItemViewModel app)
@@ -182,7 +183,36 @@ namespace EarTrumpet.UI.ViewModels
                 return;
             }
 
-            _settings.HideAppForDevice(app.Parent.Id, app.AppId, app.ExeName, app.DisplayName);
+            var deviceId = app.Parent.Id;
+            var appId = app.AppId;
+            var exeName = app.ExeName;
+            var displayName = app.DisplayName;
+
+            if (!ShouldDelayAppHide())
+            {
+                _settings.HideAppForDevice(deviceId, appId, exeName, displayName);
+                return;
+            }
+
+            app.IsHiding = true;
+
+            var timer = new DispatcherTimer(DispatcherPriority.Normal, _currentDispatcher)
+            {
+                Interval = TimeSpan.FromMilliseconds(AppHideAnimationDurationMs),
+            };
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+                _settings.HideAppForDevice(deviceId, appId, exeName, displayName);
+            };
+            timer.Start();
+        }
+
+        private bool ShouldDelayAppHide()
+        {
+            return EarTrumpet.UI.Themes.Manager.Current?.AnimationsEnabled == true &&
+                   (_settings?.UseSmoothVolumeAnimation ?? true) &&
+                   !(_settings?.IsEffectiveEcoMode ?? false);
         }
 
         public List<AppSettings.HiddenAppEntry> GetHiddenAppsForDevice(string deviceId)

@@ -127,7 +127,25 @@
     <value>Envoyer des commentaires</value>
   </data>
   <data name="ContextMenuHiddenAppsTitleFormat" xml:space="preserve">
-    <value>Entrées d'app cachées ({0})</value>
+    <value>Apps masquées ({0})</value>
+  </data>
+  <data name="TrayOpenVolumeMixer" xml:space="preserve">
+    <value>Ouvrir le mélangeur</value>
+  </data>
+  <data name="TrayOpenSettings" xml:space="preserve">
+    <value>Ouvrir les paramètres</value>
+  </data>
+  <data name="TrayShowOnboarding" xml:space="preserve">
+    <value>Relancer l'accueil</value>
+  </data>
+  <data name="TrayWhatsNew" xml:space="preserve">
+    <value>Voir les nouveautés</value>
+  </data>
+  <data name="TrayStarProject" xml:space="preserve">
+    <value>Soutenir sur GitHub</value>
+  </data>
+  <data name="TrayWindowsAudioTools" xml:space="preserve">
+    <value>Outils audio Windows</value>
   </data>
   <data name="ContextMenuRestoreAllHiddenApps" xml:space="preserve">
     <value>Restaurer toutes les entrées d'app cachées</value>
@@ -160,7 +178,7 @@
     <value>Sons</value>
   </data>
   <data name="TroubleshootEarTrumpetText" xml:space="preserve">
-    <value>Collecter les données de diagnostic</value>
+    <value>Exporter un rapport de diagnostic</value>
   </data>
   <data name="HotkeyDescriptionText" xml:space="preserve">
     <value>Votre raccourci</value>
@@ -1120,6 +1138,24 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
   <data name="SettingsSendDiagnosticsDesc" xml:space="preserve">
     <value>Rapports de crash anonymes et statistiques d'utilisation. Aucune donnée personnelle collectée.</value>
   </data>
+  <data name="DiagnosticsExportSuccessTitle" xml:space="preserve">
+    <value>Rapport de diagnostic prêt</value>
+  </data>
+  <data name="DiagnosticsExportSuccessMessage" xml:space="preserve">
+    <value>Un bundle de support a été créé et son chemin a été copié dans le presse-papiers :
+
+{0}
+
+Joignez ce fichier .zip lorsque vous signalez un problème BetterTrumpet.</value>
+  </data>
+  <data name="DiagnosticsExportFailedTitle" xml:space="preserve">
+    <value>Échec de l'export diagnostic</value>
+  </data>
+  <data name="DiagnosticsExportFailedMessage" xml:space="preserve">
+    <value>BetterTrumpet n'a pas pu créer le rapport de diagnostic.
+
+Détails : {0}</value>
+  </data>
   <data name="SettingsUpdates" xml:space="preserve">
     <value>Mises à jour</value>
   </data>
@@ -1242,8 +1278,38 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
   <data name="OnboardingWelcomeTo" xml:space="preserve">
     <value>Bienvenue sur</value>
   </data>
+  <data name="OnboardingWindowTitle" xml:space="preserve">
+    <value>Configuration de BetterTrumpet</value>
+  </data>
+  <data name="OnboardingStepFormat" xml:space="preserve">
+    <value>Étape {0} sur {1}</value>
+  </data>
+  <data name="OnboardingIntroTitle" xml:space="preserve">
+    <value>Réglez le mixeur une bonne fois.</value>
+  </data>
+  <data name="OnboardingIntroDesc" xml:space="preserve">
+    <value>BetterTrumpet reste dans la barre des tâches et vous donne un accès rapide aux apps, périphériques, thèmes et réglages de récupération.</value>
+  </data>
+  <data name="OnboardingIntroMixerTitle" xml:space="preserve">
+    <value>Mixez les apps sans ouvrir les Paramètres</value>
+  </data>
+  <data name="OnboardingIntroMixerDesc" xml:space="preserve">
+    <value>Gardez les volumes par app et les sorties audio à portée de clic.</value>
+  </data>
+  <data name="OnboardingIntroTrayTitle" xml:space="preserve">
+    <value>Gardez l'icône vraiment accessible</value>
+  </data>
+  <data name="OnboardingIntroTrayDesc" xml:space="preserve">
+    <value>La dernière étape montre comment épingler BetterTrumpet près des icônes système.</value>
+  </data>
   <data name="OnboardingSubtitleWelcome" xml:space="preserve">
     <value>Prenez enfin le contrôle total de votre son.</value>
+  </data>
+  <data name="OnboardingSetupSummaryTitle" xml:space="preserve">
+    <value>Ce que cette configuration règle</value>
+  </data>
+  <data name="OnboardingSetupSummaryDesc" xml:space="preserve">
+    <value>Choisissez un périphérique, l'apparence de l'app, puis les réglages de confidentialité et de démarrage qui vous conviennent.</value>
   </data>
   <data name="OnboardingAudioOutput" xml:space="preserve">
     <value>Sortie audio</value>
@@ -1261,16 +1327,34 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Confidentialité</value>
   </data>
   <data name="OnboardingSubtitlePrivacy" xml:space="preserve">
-    <value>Vos données restent les vôtres.</value>
+    <value>Les rapports de crash sont techniques, et ils nous permettent de corriger les vrais bugs plus vite.</value>
   </data>
   <data name="OnboardingCrashReports" xml:space="preserve">
     <value>Rapports de crash</value>
   </data>
   <data name="OnboardingCrashReportsDesc" xml:space="preserve">
-    <value>Anonymes, aucune donnée personnelle</value>
+    <value>Recommandé pour diagnostiquer crashs, bugs et fuites mémoire</value>
   </data>
   <data name="OnboardingCrashReportsInfo" xml:space="preserve">
     <value>Cela nous aide à corriger les bugs sans jamais collecter de données privées.</value>
+  </data>
+  <data name="OnboardingTelemetryValueTitle" xml:space="preserve">
+    <value>Aidez-nous à repérer crashs et fuites mémoire</value>
+  </data>
+  <data name="OnboardingTelemetryValueDesc" xml:space="preserve">
+    <value>Ces rapports contiennent des diagnostics techniques comme les stack traces, la version Windows et l'état de l'app. Nous ne revendons aucune donnée.</value>
+  </data>
+  <data name="OnboardingTelemetryConfirmTitle" xml:space="preserve">
+    <value>Désactiver les rapports de crash ?</value>
+  </data>
+  <data name="OnboardingTelemetryConfirmDesc" xml:space="preserve">
+    <value>Les garder actifs nous aide à corriger les crashs, bugs et fuites mémoire dans les versions publiques. Les rapports servent uniquement à améliorer BetterTrumpet.</value>
+  </data>
+  <data name="OnboardingTelemetryKeepEnabled" xml:space="preserve">
+    <value>Garder activé</value>
+  </data>
+  <data name="OnboardingTelemetryDisableAnyway" xml:space="preserve">
+    <value>Désactiver quand même</value>
   </data>
   <data name="OnboardingAutoUpdates" xml:space="preserve">
     <value>Mises à jour automatiques</value>
@@ -1321,13 +1405,25 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Système</value>
   </data>
   <data name="OnboardingSystemThemeDesc" xml:space="preserve">
-    <value>Suit Windows</value>
+    <value>Suit Windows et garde l'app visuellement discrète.</value>
   </data>
   <data name="OnboardingCustomTheme" xml:space="preserve">
     <value>Personnalisé</value>
   </data>
   <data name="OnboardingCustomThemeDesc" xml:space="preserve">
-    <value>Couleurs personnalisées</value>
+    <value>Utilise la palette BetterTrumpet pour des sliders et vumètres plus lisibles.</value>
+  </data>
+  <data name="OnboardingCustomThemeNote" xml:space="preserve">
+    <value>Utiliser les couleurs BetterTrumpet</value>
+  </data>
+  <data name="OnboardingRecommendedBadge" xml:space="preserve">
+    <value>Recommandé</value>
+  </data>
+  <data name="OnboardingSetupReadyDesc" xml:space="preserve">
+    <value>Vos choix de configuration sont appliqués.</value>
+  </data>
+  <data name="OnboardingTrayAccessDesc" xml:space="preserve">
+    <value>L'icône de la barre des tâches garde les contrôles des apps et périphériques à portée de clic.</value>
   </data>
   <data name="OnboardingSkip" xml:space="preserve">
     <value>Passer</value>

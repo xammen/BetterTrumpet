@@ -48,6 +48,8 @@ namespace EarTrumpet.UI.ViewModels
         public string AppId { get; set; }
         public char IconText { get; set; }
         public string IconPath { get; set; }
+        public bool AnimateOnLoad => false;
+        public bool IsHiding { get; set; }
         public bool IsExpanded => false;
         public bool IsMovable => false;
         public float PeakValue1 => 0;

@@ -92,7 +92,7 @@ nuget.exe restore EarTrumpet.vs15.sln
 
 | Area | What you get |
 | --- | --- |
-| Onboarding | 6-page setup flow for audio, appearance, privacy, ready, and tray pinning |
+| Onboarding | 5-step setup flow for audio, appearance, privacy, ready, and tray pinning |
 | Themes | 7 color channels, presets, custom themes, and dynamic album-art mode |
 | Media popup | Hover player with cover art, seek, shuffle, repeat, and blur |
 | Profiles | Save, restore, export, import, rename, and apply full audio setups |
@@ -152,13 +152,14 @@ bt save focus
 bt save discord --apps-only
 bt focus
 bt volume discord 67
+bt toggle-mute discord
 bt batch --set-volume 67 --app discord --set-volume 30 --app vivaldi
 bt doctor
 ```
 
 | Area | Commands |
 | --- | --- |
-| Devices | `--list-devices`, `--list-apps`, `--get-volume`, `--set-volume`, `volume`, `--mute`, `mute`, `--unmute`, `unmute`, `--toggle-mute` |
+| Devices & apps | `--list-devices`, `--list-apps`, `--get-volume`, `--set-volume`, `volume`, `--mute`, `mute`, `--unmute`, `unmute`, `--toggle-mute`, `toggle-mute` |
 | Routing | `--get-default`, `--set-default`, `--set-device` |
 | QuickTrumpet | `presets`, `save`, `apply`, `mode`, direct preset aliases like `bt focus`, plus compatible `--list-profiles`, `--apply-profile` |
 | Automation | `batch`, `doctor`, `--watch`, `--ping`, `--check-update`, `--export-settings`, `--import-settings` |
@@ -189,9 +190,8 @@ bt doctor
 
 ## Onboarding
 
-The onboarding wizard has 6 pages:
+The onboarding wizard has 5 pages:
 
-- Welcome
 - Audio
 - Appearance
 - Privacy
@@ -221,7 +221,7 @@ powershell -ExecutionPolicy Bypass -File build-portable.ps1
 | Area | Stack |
 | --- | --- |
 | Language | C# / WPF |
-| Framework | .NET Framework 4.6.2 |
+| Framework | .NET 8 for Windows |
 | Audio | Windows Core Audio |
 | Media | Windows Media Session |
 | Packaging | MSBuild + GitVersion + Inno Setup + portable zip |
