@@ -15,6 +15,10 @@ namespace EarTrumpet.UI.Controls
     {
         // Smoothing factor for peak meter: higher = faster response, lower = smoother (0.0 - 1.0)
         private const double PeakSmoothingFactor = 0.35;
+        private const string ThumbBrushRef = "Theme=SystemAccent, HighContrast=ControlText";
+        private const string TrackFillBrushRef = "SystemAccent";
+        private const string TrackBackgroundBrushRef = ":Theme=Control{Theme}SliderTrackFillDisabled, :HighContrast=ControlText, Flyout:Theme=FlyoutThemeTrackRightBackground, Flyout:HighContrast=ControlText";
+        private const string PeakMeterBrushRef = "Theme=SystemAccent, HighContrast=HotTrack";
         
         // Default smoothing factor for volume slider animation when clicking on track
         // Lower = slower/smoother animation, Higher = faster (0.0 - 1.0)
@@ -414,11 +418,52 @@ namespace EarTrumpet.UI.Controls
         
         private void ResetVisualElementColors()
         {
-            if (_thumb != null) _thumb.ClearValue(Control.ForegroundProperty);
-            if (_sliderLeft != null) _sliderLeft.ClearValue(Control.ForegroundProperty);
-            if (_sliderRight != null) _sliderRight.ClearValue(Control.ForegroundProperty);
-            if (_peakMeter1 != null) _peakMeter1.ClearValue(Border.BackgroundProperty);
-            if (_peakMeter2 != null) _peakMeter2.ClearValue(Border.BackgroundProperty);
+            if (_thumb != null)
+            {
+                _thumb.ClearValue(Control.ForegroundProperty);
+                _thumb.Foreground = ResolveThemeBrush(_thumb, ThumbBrushRef, ThemeRegistry.DefaultAccentColor);
+            }
+
+            if (_sliderLeft != null)
+            {
+                _sliderLeft.ClearValue(Control.ForegroundProperty);
+                _sliderLeft.Foreground = ResolveThemeBrush(_sliderLeft, TrackFillBrushRef, ThemeRegistry.DefaultAccentColor);
+            }
+
+            if (_sliderRight != null)
+            {
+                _sliderRight.ClearValue(Control.ForegroundProperty);
+                _sliderRight.Foreground = ResolveThemeBrush(_sliderRight, TrackBackgroundBrushRef, ThemeRegistry.DefaultTrackBackground);
+            }
+
+            if (_peakMeter1 != null)
+            {
+                _peakMeter1.ClearValue(Border.BackgroundProperty);
+                _peakMeter1.Background = ResolveThemeBrush(_peakMeter1, PeakMeterBrushRef, ThemeRegistry.DefaultPeakMeter);
+            }
+
+            if (_peakMeter2 != null)
+            {
+                _peakMeter2.ClearValue(Border.BackgroundProperty);
+                _peakMeter2.Background = ResolveThemeBrush(_peakMeter2, PeakMeterBrushRef, ThemeRegistry.DefaultPeakMeter);
+            }
+        }
+
+        private static Brush ResolveThemeBrush(DependencyObject target, string themeBrushRef, Color fallback)
+        {
+            try
+            {
+                if (UI.Themes.Manager.Current != null)
+                {
+                    return new SolidColorBrush(UI.Themes.Manager.Current.ResolveRef(target, themeBrushRef));
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"VolumeSlider: Failed to resolve theme brush '{themeBrushRef}' — {ex.Message}");
+            }
+
+            return new SolidColorBrush(fallback);
         }
         
         private void StartAnimation()
