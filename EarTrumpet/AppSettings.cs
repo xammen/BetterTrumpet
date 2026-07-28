@@ -1210,6 +1210,20 @@ namespace EarTrumpet
             }
         }
 
+        // Whether the theme's TextColor should override menu/window text globally (tray
+        // menu, settings, flyout labels) in addition to the sliders. Off by default -
+        // most themes pick a TextColor tuned for the flyout's tinted background, and it
+        // reads as too strong against the plain menu/window chrome elsewhere.
+        public bool ApplyThemeTextColor
+        {
+            get => _settings.Get("ApplyThemeTextColor", false);
+            set
+            {
+                _settings.Set("ApplyThemeTextColor", value);
+                if (!_batchMode) CustomSliderColorsChanged?.Invoke();
+            }
+        }
+
         // Volume profiles JSON storage
         public string VolumeProfilesJson
         {

@@ -155,6 +155,19 @@ namespace EarTrumpet.UI.ViewModels
             }
         }
 
+        // Whether the theme's text color applies globally (tray menu, settings, flyout
+        // labels) in addition to the sliders. Off by default - see AppSettings.
+        public bool ApplyThemeTextColor
+        {
+            get => _settings.ApplyThemeTextColor;
+            set
+            {
+                _settings.ApplyThemeTextColor = value;
+                RaisePropertyChanged(nameof(ApplyThemeTextColor));
+                ApplyExtendedThemeColors();
+            }
+        }
+
         // Dynamic album art theme
         public bool UseDynamicAlbumArtTheme
         {
@@ -854,7 +867,7 @@ namespace EarTrumpet.UI.ViewModels
                 var accentGlow = _settings.AccentGlowColor;
 
                 bool hasWindowBg = windowBg != Colors.Transparent;
-                bool hasTextColor = textColor != Colors.Transparent;
+                bool hasTextColor = textColor != Colors.Transparent && _settings.ApplyThemeTextColor;
 
                 if (!hasWindowBg && !hasTextColor)
                 {
@@ -883,6 +896,14 @@ namespace EarTrumpet.UI.ViewModels
                         grayTextRef.Value = $"#{grayVersion.A:X2}{grayVersion.R:X2}{grayVersion.G:X2}{grayVersion.B:X2}";
                         grayTextRef.Rules.Clear();
                     }
+                }
+                else if (_refsBackedUp)
+                {
+                    // Text color is set but ApplyThemeTextColor is off (or the theme has no
+                    // text color) - make sure Text/GrayText aren't left holding a stale
+                    // override from a previous ApplyExtendedThemeColors call.
+                    RestoreThemeRef("Text");
+                    RestoreThemeRef("GrayText");
                 }
 
                 if (hasWindowBg)
@@ -986,6 +1007,25 @@ namespace EarTrumpet.UI.ViewModels
             catch (Exception ex)
             {
                 Trace.WriteLine($"EarTrumpetColorsSettingsPageViewModel: RestoreOriginalThemeRefs failed - {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Restore a single Ref's original value/rules, leaving the rest of the backed-up
+        /// Refs (e.g. window background) untouched.
+        /// </summary>
+        private void RestoreThemeRef(string key)
+        {
+            if (!_originalRefs.TryGetValue(key, out var backupObj) || !(backupObj is RefBackup backup)) return;
+
+            var r = Manager.Current.References.FirstOrDefault(x => x.Key == key);
+            if (r == null) return;
+
+            r.Value = backup.Value;
+            r.Rules.Clear();
+            foreach (var rule in backup.Rules)
+            {
+                r.Rules.Add(rule);
             }
         }
 

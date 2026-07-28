@@ -697,6 +697,34 @@
                     </Border>
 
                     <!-- ═══════════════════════════════════════════════════ -->
+                    <!-- Apply text color globally (menus/windows, not just sliders) -->
+                    <!-- Always visible regardless of Dynamic/Presets/Custom tab,   -->
+                    <!-- since TextColor is set by all three paths.                 -->
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <Border Margin="0,0,0,16" Padding="16,12" CornerRadius="10"
+                            Theme:Brush.Background="Theme={Theme}ListLow, HighContrast=Window">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Style="{StaticResource SectionIconBorder}">
+                                <TextBlock Text="&#xE8D2;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="White" />
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Custom Text Colour" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="Also apply theme to menu text"
+                                           Style="{StaticResource BodySubText}" FontSize="12" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <CheckBox Grid.Column="2" VerticalAlignment="Center"
+                                      IsChecked="{Binding ApplyThemeTextColor, Mode=TwoWay}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- ═══════════════════════════════════════════════════ -->
                     <!-- SEGMENTED TAB BAR: [Dynamic] [Presets] [Custom]     -->
                     <!-- ═══════════════════════════════════════════════════ -->
                     <Border Margin="0,0,0,16" CornerRadius="8" Padding="3"
