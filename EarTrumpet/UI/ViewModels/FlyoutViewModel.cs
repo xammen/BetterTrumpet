@@ -101,6 +101,10 @@ private readonly Action _returnFocusToTray;
         // flyout first deactivates it (closing it), then delivers the click — without this
         // guard that trailing click re-opens the flyout. Used to absorb that click.
         private DateTime _lastDeactivatedAt = DateTime.MinValue;
+        // Timestamp of the last transition to Open. Guards against a spurious deactivation
+        // arriving within the window right after opening, which would immediately close the
+        // flyout that just opened.
+        private DateTime _lastOpenedAt = DateTime.MinValue;
         private MouseHook _mh;
         private Rect _winRect;
 
@@ -405,6 +409,7 @@ private readonly Action _returnFocusToTray;
             switch (State)
             {
                 case FlyoutViewState.Open:
+                    _lastOpenedAt = DateTime.UtcNow;
                     _mainViewModel.OnTrayFlyoutShown();
 
                     if (_closedDuringOpen)
@@ -538,7 +543,6 @@ private readonly Action _returnFocusToTray;
             // click would re-open the just-closed flyout. If the click lands right after a
             // deactivation, treat it as the dismiss and absorb it. Keyboard reopen is unaffected.
             if (inputType == InputType.Mouse
-                && (State == FlyoutViewState.Closing_Stage1 || State == FlyoutViewState.Closing_Stage2)
                 && (DateTime.UtcNow - _lastDeactivatedAt) < TimeSpan.FromMilliseconds(300))
             {
                 return;
@@ -572,6 +576,10 @@ private readonly Action _returnFocusToTray;
                 return;
             }
             if (IsPinned)
+            {
+                return;
+            }
+            if ((DateTime.UtcNow - _lastOpenedAt) < TimeSpan.FromMilliseconds(200))
             {
                 return;
             }
