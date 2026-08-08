@@ -968,6 +968,31 @@ namespace EarTrumpet.UI.ViewModels
                         acrylicFallbackRef.Value = bgHex;
                         acrylicFallbackRef.Rules.Clear();
                     }
+
+                    // Override AcrylicBackground - the settings window's left nav pane
+                    // (Grid.Column 0) uses this ref directly for its normal resting-state
+                    // background. Without this override it stays on the theme's own
+                    // un-tinted default, which is what shows through as a plain grey flash
+                    // during a live resize (the real acrylic backdrop briefly suppresses
+                    // and this Border becomes momentarily visible) and disappears again
+                    // once the window settles.
+                    var acrylicBackgroundRef = refs.FirstOrDefault(r => r.Key == "AcrylicBackground");
+                    if (acrylicBackgroundRef != null)
+                    {
+                        acrylicBackgroundRef.Value = bgHex;
+                        acrylicBackgroundRef.Rules.Clear();
+                    }
+
+                    // Override AcrylicColor_Settings - the settings window's actual DWM
+                    // backdrop brush (Theme:AcrylicBrush.Background on the window root),
+                    // a separate system from the WPF Border layers above. Same "/opacity"
+                    // tint format as AcrylicColor_Flyout.
+                    var acrylicSettingsRef = refs.FirstOrDefault(r => r.Key == "AcrylicColor_Settings");
+                    if (acrylicSettingsRef != null)
+                    {
+                        acrylicSettingsRef.Value = $"{bgHex}/{FlyoutAcrylicTintOpacity}";
+                        acrylicSettingsRef.Rules.Clear();
+                    }
                 }
 
                 // Fire theme change to repaint all UI elements
@@ -986,7 +1011,7 @@ namespace EarTrumpet.UI.ViewModels
         {
             if (_refsBackedUp) return;
 
-            var keysToBackup = new[] { "Text", "GrayText", "Background", "FlyoutBackground", "PopupBackground", "AcrylicColor_Flyout", "AcrylicBackgroundFallback" };
+            var keysToBackup = new[] { "Text", "GrayText", "Background", "FlyoutBackground", "PopupBackground", "AcrylicColor_Flyout", "AcrylicBackgroundFallback", "AcrylicColor_Settings", "AcrylicBackground" };
             foreach (var key in keysToBackup)
             {
                 var r = Manager.Current.References.FirstOrDefault(x => x.Key == key);
