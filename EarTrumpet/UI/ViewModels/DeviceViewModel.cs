@@ -2,6 +2,7 @@ using EarTrumpet.DataModel.Audio;
 using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.Extensions;
 using EarTrumpet.Interop.MMDeviceAPI;
+using EarTrumpet.Logic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -197,8 +198,15 @@ namespace EarTrumpet.UI.ViewModels
                     }
                     break;
 
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
+                    RebuildAppsCollection();
+                    break;
+
                 default:
-                    throw new NotImplementedException();
+                    Trace.WriteLine($"DeviceViewModel OnCollectionChanged ignored action {e.Action}");
+                    break;
             }
         }
 
@@ -370,6 +378,15 @@ namespace EarTrumpet.UI.ViewModels
             {
                 SetVolumeSilently(app, folderVolumePercent);
             }
+            else if ((rule == null || !rule.HasVolumeRule) &&
+                     isNewSession &&
+                     RemoteDesktopIdentity.IsRemoteDesktopExe(app.ExeName) &&
+                     _settings != null &&
+                     _settings.TryGetRemoteDesktopVolume(out var remoteDesktopVolume) &&
+                     LaunchVolumeTracker.TryClaim(app.ProcessId))
+            {
+                SetVolumeSilently(app, remoteDesktopVolume);
+            }
 
             // Must come after the volume write: setting a non-zero volume clears the
             // session's mute (AudioDeviceSession.Volume setter), which would undo a hard mute.
@@ -422,6 +439,14 @@ namespace EarTrumpet.UI.ViewModels
 
             if (sender is IAppItemViewModel app)
             {
+                if (e.PropertyName == nameof(IAppItemViewModel.Volume) &&
+                    _settings != null &&
+                    RemoteDesktopIdentity.IsRemoteDesktopExe(app.ExeName) &&
+                    !VolumeWriteScope.IsActive)
+                {
+                    _settings.RemoteDesktopLastVolume = app.Volume;
+                }
+
                 ApplyRuleToApp(app, isNewSession: false);
             }
         }

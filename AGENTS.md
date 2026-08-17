@@ -72,12 +72,15 @@ Use `python tools/bettertrumpet_workbench.py` for repo-aware routing and validat
 - `build`, `web`, and `package` run explicit heavy actions.
 - `learn --area ... --symptom ... --rule ...` records recurring traps.
 
+On the Linux cloud-agent VM, run `bash tools/run-linux-self-test.sh` (needs the .NET 8 SDK). It executes PathSanitizer, the disconnect race gate, the portable engines in `EarTrumpet/Logic/`, and source contracts for HSTRING marshalling plus the settings/UI wiring. It does not run WASAPI, WPF, or the tray.
+
 ## Repo Map
 
 ```
 EarTrumpet/
 ├── App.xaml.cs              # Startup, onboarding, changelog, tray menu
 ├── AppSettings.cs           # Registry / portable settings
+├── Logic/                    # Portable engines compiled into the Linux self-test
 ├── CLI/
 │   ├── CliHandler.cs        # CLI command parsing and pipe IPC
 │   └── CliEntryPoint.cs     # bt entry point / help text
@@ -133,7 +136,7 @@ EarTrumpet/
 
 - `Left Ctrl` at startup forces onboarding
 - `Left Shift` at startup forces changelog
-- `HasShownFirstRun` is presence-based. Deleting `HKCU\Software\EarTrumpet\hasShownFirstRun` forces onboarding; writing `false` is not the same thing.
+- `HasShownFirstRun` is presence-based. Deleting `HKCU\Software\EarTrumpet\hasShownFirstRun` forces onboarding; writing `false` is not the same thing. The key is written when onboarding completes (or is skipped), not when the window is first shown, so a crash during first-run still reopens onboarding.
 - The tray icon can become active before all startup work is finished. Keep tray icon code null-safe.
 
 ## Onboarding
@@ -159,6 +162,14 @@ Notes:
 
 Recent work in `master` includes:
 
+- Linux cloud-agent self-test: `bash tools/run-linux-self-test.sh` covers PathSanitizer, the session disconnect race gate, portable engines in `EarTrumpet/Logic/` (app identity, folder defaults, mixer size, device-change notify, focus-lost, RDP identity), and source contracts for the .NET 8 HSTRING marshalling fix plus the settings/UI wiring for those engines. It cannot exercise WASAPI, the flyout, or combase.dll. Focus-lost ignores BetterTrumpet's own process, does not record undo, and reapplies from the original snapshot when the mute/attenuate setting changes. Mixer size is saved only in many-devices mode and restored once per open. Device-change toasts seed the current default so the first real switch can notify.
+- Mixer Open window (#40): user-resized width/height persist as `MixerWindowWidth`/`MixerWindowHeight` and are restored only in many-devices mode (`> 3` devices), after `SizeToContent` would otherwise wipe `WINDOWPLACEMENT`. Tiny/off-screen values clamp via `WindowSizePolicy`.
+- Appearance (#39): the legacy tray-icon checkbox moved from General to Appearance. Tooltips stay on General.
+- App rules empty state (#30): the big “No rules yet” hint hides when folder defaults exist. Folder matching lives in `FolderVolumeRuleMatcher` (deepest path wins).
+- Device-change toast (#36): opt-in `NotifyOnDefaultDeviceChange` in Mouse/Volume settings. Startup’s first default device is silent.
+- Focus-lost volume (#33): opt-in mute/attenuate of background apps via `FocusLostSupervisor` + a 250 ms foreground poll. Lock and keep-muted rules are skipped; original volume restores on focus.
+- RDP reconnect volume (#7): `mstsc`/`msrdc` last volume persists across new process ids and reapplies on the next session unless an explicit app/folder rule exists.
+- GitHub #37 / #41 / #43 hardening: per-app device switching now uses manual HSTRING / IInspectable interop for .NET 8 (`Combase.GetActivationFactory`), so `SetPersistedDefaultAudioEndpoint` actually reaches Windows instead of throwing `MarshalDirectiveException` and cloning the app row. Session teardown is idempotent, icon-path callbacks marshal to the dispatcher, and collection `Reset`/`Move`/`Replace` rebuild instead of throwing. Manual diagnostic export warns first, stages files for review, sanitizes user-folder paths, and Sentry/GitHub update checks wait for first-run consent. Telemetry opt-out still does not disable update checks; they are independent.
 - Folder launch-volume defaults: App rules now include custom folder defaults that apply a chosen starting volume to desktop sessions whose executable path is under the configured folder, recursively. The deepest matching folder wins. Explicit app `Set at launch` and `Lock` volume rules remain higher priority; hard mute still composes with a folder default. Folder-default settings export and import with the rest of the profile.
 - CLI `set-default` now switches and verifies both Windows `Console` and `Multimedia` playback roles. COM failures or unchanged endpoints return an error instead of a false `ok: true`; `GetDefaultDevice(role)` must query the requested role rather than always reading `Multimedia`.
 - The flyout uses tray icon bounds only to select the target monitor; its position remains anchored to that monitor's taskbar edge. It enters the topmost band before opening animations begin so another always-on-top window cannot cover it mid-animation.
@@ -362,8 +373,11 @@ Tray menu primary icons can use local Phosphor Bold geometries from `UI/Helpers/
 - Portable logs: `config\logs` next to the executable
 - Log rotation: `bettertrumpet-*.log`, max 5 files of 5 MB
 - Manual export: Settings -> About -> `TroubleshootEarTrumpetText`
-- Manual export creates `BetterTrumpet-diagnostics-*.zip`, opens Explorer on it, and copies the path to the clipboard
-- Crash handling creates a diagnostic bundle with the exception and recent logs, without taking a live audio snapshot to avoid cascading failures
+- Manual export warns that the bundle can contain app/device names and logs, writes a staging folder for review/edit, then zips on confirmation
+- Exported text replaces `C:\Users\<name>\...` with `%USERPROFILE%` / `%APPDATA%` / `%LOCALAPPDATA%` / `%TEMP%`
+- Crash handling creates a diagnostic bundle immediately (no review UI) with the exception and recent logs, without taking a live audio snapshot to avoid cascading failures
+- Crash dialogs are localized (EN/FR) and show a sanitized path
+- Sentry initializes only after stored telemetry consent or a completed first-run; GitHub update checks wait until `hasShownFirstRun` exists. Telemetry opt-out does not disable updates.
 
 The diagnostic zip can contain app names, device names, process IDs, endpoint IDs, settings state, and recent logs. Keep this clear in user-facing copy when asking users to attach it.
 
@@ -381,6 +395,8 @@ The diagnostic zip can contain app names, device names, process IDs, endpoint ID
 10. For startup/run entries on .NET 8, do not use `Assembly.GetExecutingAssembly().Location`; it points to `BetterTrumpet.dll`. Use `Environment.ProcessPath` for `BetterTrumpet.exe`.
 11. SMTC's manager-level `GetCurrentSession()` can switch between Spotify and browser tabs between calls. This remains a known baseline limitation after the experimental fix was reverted; isolate any future behavioral fix from visual redesign work.
 12. A custom window background must update both `Background` and `FlyoutBackground` refs. Keep `FlyoutBackground` translucent (`color/opacity/1`) so changing only `AcrylicColor_Flyout` does not leave the content painted with the system accent or remove the acrylic blur.
+13. Never marshal WinRT `HSTRING` / `IInspectable` with `UnmanagedType.HString` or `UnmanagedType.IInspectable` on .NET 8. Use `WindowsCreateString` / `WindowsDeleteString` / `WindowsGetStringRawBuffer` and `Marshal.GetObjectForIUnknown`. That marshaller gap is what broke per-app device switching after the 3.1.0 migration (GitHub #37).
+14. Telemetry (`IsTelemetryEnabled`) only gates Sentry. GitHub release checks are a separate `AutoCheckForUpdates` / `UpdateNotifyChannel` path.
 
 ## Validation Status
 

@@ -12,7 +12,6 @@ namespace EarTrumpet.Diagnosis
     /// Global unhandled exception handler for BetterTrumpet.
     /// Captures crashes from all sources: UI thread, background threads, async tasks.
     /// Logs to Trace (picked up by CircularBufferTraceListener) and shows a user-friendly dialog.
-    /// In v3 Phase 3, these will also be forwarded to Sentry.
     /// </summary>
     static class CrashHandler
     {
@@ -105,21 +104,17 @@ namespace EarTrumpet.Diagnosis
             try
             {
                 var diagnosticBundlePath = TryCreateCrashDiagnosticBundle(ex, isFatal);
-                var title = "BetterTrumpet";
+                var title = EarTrumpet.Properties.Resources.CrashDialogTitle;
                 var diagnosticText = string.IsNullOrWhiteSpace(diagnosticBundlePath)
                     ? ""
-                    : "\n\nUn rapport de diagnostic a été créé et son chemin a été copié dans le presse-papiers :\n"
-                      + diagnosticBundlePath;
+                    : string.Format(
+                        EarTrumpet.Properties.Resources.CrashDialogDiagnosticPath,
+                        PathSanitizer.Sanitize(diagnosticBundlePath));
 
-                var body = isFatal
-                    ? "BetterTrumpet a rencontr\u00e9 une erreur critique et doit fermer.\n\n"
-                      + "Le rapport a \u00e9t\u00e9 enregistr\u00e9 dans les logs.\n\n"
-                      + $"D\u00e9tails : {ex?.Message ?? "Erreur inconnue"}"
-                      + diagnosticText
-                    : "BetterTrumpet a rencontr\u00e9 un probl\u00e8me.\n\n"
-                      + "L'application va tenter de continuer.\n\n"
-                      + $"D\u00e9tails : {ex?.Message ?? "Erreur inconnue"}"
-                      + diagnosticText;
+                var template = isFatal
+                    ? EarTrumpet.Properties.Resources.CrashDialogFatalBody
+                    : EarTrumpet.Properties.Resources.CrashDialogNonFatalBody;
+                var body = string.Format(template, ex?.Message ?? EarTrumpet.Properties.Resources.CrashDialogUnknownError, diagnosticText);
 
                 var buttons = isFatal ? MessageBoxButton.OK : MessageBoxButton.OKCancel;
 

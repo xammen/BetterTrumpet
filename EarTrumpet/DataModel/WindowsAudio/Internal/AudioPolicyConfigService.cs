@@ -13,6 +13,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
         private const string MMDEVAPI_TOKEN = @"\\?\SWD#MMDEVAPI#";
 
         private IAudioPolicyConfigFactory _sharedPolicyConfig;
+        private bool _factoryFailed;
         private EDataFlow _flow;
 
         public AudioPolicyConfig(EDataFlow flow)
@@ -20,11 +21,28 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
             _flow = flow;
         }
 
-        private void EnsurePolicyConfig()
+        private bool EnsurePolicyConfig()
         {
-            if (_sharedPolicyConfig == null)
+            if (_sharedPolicyConfig != null)
+            {
+                return true;
+            }
+
+            if (_factoryFailed)
+            {
+                return false;
+            }
+
+            try
             {
                 _sharedPolicyConfig = AudioPolicyConfigFactory.Create();
+                return _sharedPolicyConfig != null;
+            }
+            catch (Exception ex)
+            {
+                _factoryFailed = true;
+                Trace.WriteLine($"AudioPolicyConfig EnsurePolicyConfig failed: {ex}");
+                return false;
             }
         }
 
@@ -35,33 +53,54 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
 
         private string UnpackDeviceId(string deviceId)
         {
+            if (string.IsNullOrWhiteSpace(deviceId)) return deviceId;
             if (deviceId.StartsWith(MMDEVAPI_TOKEN)) deviceId = deviceId.Remove(0, MMDEVAPI_TOKEN.Length);
             if (deviceId.EndsWith(DEVINTERFACE_AUDIO_RENDER)) deviceId = deviceId.Remove(deviceId.Length - DEVINTERFACE_AUDIO_RENDER.Length);
             if (deviceId.EndsWith(DEVINTERFACE_AUDIO_CAPTURE)) deviceId = deviceId.Remove(deviceId.Length - DEVINTERFACE_AUDIO_CAPTURE.Length);
             return deviceId;
         }
 
-        public void SetDefaultEndPoint(string deviceId, int processId)
+        private static bool Succeeded(HRESULT hr)
+        {
+            return unchecked((int)hr) >= 0;
+        }
+
+        public bool SetDefaultEndPoint(string deviceId, int processId)
         {
             Trace.WriteLine($"AudioPolicyConfigService SetDefaultEndPoint {deviceId} {processId}");
             try
             {
-                EnsurePolicyConfig();
+                if (!EnsurePolicyConfig())
+                {
+                    return false;
+                }
 
                 IntPtr hstring = IntPtr.Zero;
 
-                if (!string.IsNullOrWhiteSpace(deviceId))
+                try
                 {
-                    var str = GenerateDeviceId(deviceId);
-                    Combase.WindowsCreateString(str, (uint)str.Length, out hstring);
-                }
+                    if (!string.IsNullOrWhiteSpace(deviceId))
+                    {
+                        var str = GenerateDeviceId(deviceId);
+                        Combase.WindowsCreateString(str, (uint)str.Length, out hstring);
+                    }
 
-                _sharedPolicyConfig.SetPersistedDefaultAudioEndpoint((uint)processId, _flow, ERole.eMultimedia, hstring);
-                _sharedPolicyConfig.SetPersistedDefaultAudioEndpoint((uint)processId, _flow, ERole.eConsole, hstring);
+                    var multimedia = _sharedPolicyConfig.SetPersistedDefaultAudioEndpoint((uint)processId, _flow, ERole.eMultimedia, hstring);
+                    var console = _sharedPolicyConfig.SetPersistedDefaultAudioEndpoint((uint)processId, _flow, ERole.eConsole, hstring);
+                    return Succeeded(multimedia) && Succeeded(console);
+                }
+                finally
+                {
+                    if (hstring != IntPtr.Zero)
+                    {
+                        Combase.WindowsDeleteString(hstring);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 Trace.WriteLine($"{ex}");
+                return false;
             }
         }
 
@@ -69,9 +108,17 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
         {
             try
             {
-                EnsurePolicyConfig();
+                if (!EnsurePolicyConfig())
+                {
+                    return null;
+                }
 
-                _sharedPolicyConfig.GetPersistedDefaultAudioEndpoint((uint)processId, _flow, ERole.eMultimedia | ERole.eConsole, out string deviceId);
+                var hr = _sharedPolicyConfig.GetPersistedDefaultAudioEndpoint((uint)processId, _flow, ERole.eMultimedia | ERole.eConsole, out string deviceId);
+                if (!Succeeded(hr) || string.IsNullOrWhiteSpace(deviceId))
+                {
+                    return null;
+                }
+
                 return UnpackDeviceId(deviceId);
             }
             catch (Exception ex)

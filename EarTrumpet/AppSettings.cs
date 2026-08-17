@@ -1,6 +1,7 @@
 using EarTrumpet.DataModel;
 using EarTrumpet.DataModel.Storage;
 using EarTrumpet.Interop.Helpers;
+using EarTrumpet.Logic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -1182,6 +1183,8 @@ namespace EarTrumpet
 
         public event Action TelemetryConsentChanged;
 
+        public bool HasStoredTelemetryConsent => _settings.HasKey("IsTelemetryEnabled");
+
         public bool IsTelemetryEnabled
         {
             get
@@ -1639,28 +1642,22 @@ namespace EarTrumpet
         public bool TryGetFolderVolume(string executablePath, out int volumePercent)
         {
             volumePercent = 0;
-            if (string.IsNullOrWhiteSpace(executablePath) || !Path.IsPathFullyQualified(executablePath))
-            {
-                return false;
-            }
-
             lock (_folderVolumeRulesSync)
             {
                 EnsureFolderVolumeRulesLoaded();
-                var matchingRule = _folderVolumeRules
-                    .Where(entry => IsExecutableUnderFolder(executablePath, entry.FolderPath))
-                    .OrderByDescending(entry => entry.FolderPath.Length)
-                    .ThenBy(entry => entry.CreatedAtUtc)
-                    .FirstOrDefault();
-
-                if (matchingRule == null)
+                var rules = new List<FolderVolumeRule>(_folderVolumeRules.Count);
+                foreach (var entry in _folderVolumeRules)
                 {
-                    return false;
+                    rules.Add(new FolderVolumeRule(entry.FolderPath, entry.VolumePercent, entry.CreatedAtUtc));
                 }
 
-                volumePercent = matchingRule.VolumePercent;
-                return true;
+                return FolderVolumeRuleMatcher.TryMatch(executablePath, rules, out volumePercent);
             }
+        }
+
+        public bool TryGetRemoteDesktopVolume(out int volumePercent)
+        {
+            return RemoteDesktopIdentity.TryGetRememberedVolume(RemoteDesktopLastVolume, out volumePercent);
         }
 
         private void EnsureFolderVolumeRulesLoaded()
@@ -1697,7 +1694,7 @@ namespace EarTrumpet
 
             foreach (var entry in entries.Where(entry => entry != null))
             {
-                var normalizedFolder = NormalizeFolderPath(entry.FolderPath);
+                var normalizedFolder = FolderVolumeRuleMatcher.NormalizeFolderPath(entry.FolderPath);
                 if (string.IsNullOrEmpty(normalizedFolder) || !knownFolders.Add(normalizedFolder))
                 {
                     continue;
@@ -1724,47 +1721,6 @@ namespace EarTrumpet
                 VolumePercent = entry.VolumePercent,
                 CreatedAtUtc = entry.CreatedAtUtc,
             };
-        }
-
-        private static bool IsExecutableUnderFolder(string executablePath, string folderPath)
-        {
-            try
-            {
-                var folder = NormalizeFolderPath(folderPath);
-                var executable = Path.GetFullPath(executablePath);
-                if (string.IsNullOrEmpty(folder) || string.IsNullOrEmpty(executable))
-                {
-                    return false;
-                }
-
-                var folderPrefix = Path.EndsInDirectorySeparator(folder)
-                    ? folder
-                    : folder + Path.DirectorySeparatorChar;
-                return executable.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase);
-            }
-            catch (Exception ex) when (ex is ArgumentException || ex is NotSupportedException)
-            {
-                Trace.WriteLine($"AppSettings folder match failed: {ex.Message}");
-                return false;
-            }
-        }
-
-        private static string NormalizeFolderPath(string folder)
-        {
-            if (string.IsNullOrWhiteSpace(folder))
-            {
-                return "";
-            }
-
-            try
-            {
-                return Path.TrimEndingDirectorySeparator(Path.GetFullPath(folder.Trim().Trim('"')));
-            }
-            catch (Exception ex) when (ex is ArgumentException || ex is NotSupportedException)
-            {
-                Trace.WriteLine($"AppSettings folder normalization failed: {ex.Message}");
-                return "";
-            }
         }
 
         /// <summary>
@@ -1821,6 +1777,42 @@ namespace EarTrumpet
         {
             get => _settings.Get("FullMixerWindowPlacement", default(WINDOWPLACEMENT?));
             set => _settings.Set("FullMixerWindowPlacement", value);
+        }
+
+        public double MixerWindowWidth
+        {
+            get => _settings.Get("MixerWindowWidth", 0.0);
+            set => _settings.Set("MixerWindowWidth", value);
+        }
+
+        public double MixerWindowHeight
+        {
+            get => _settings.Get("MixerWindowHeight", 0.0);
+            set => _settings.Set("MixerWindowHeight", value);
+        }
+
+        public bool NotifyOnDefaultDeviceChange
+        {
+            get => _settings.Get("NotifyOnDefaultDeviceChange", false);
+            set => _settings.Set("NotifyOnDefaultDeviceChange", value);
+        }
+
+        public bool UseFocusLostVolume
+        {
+            get => _settings.Get("UseFocusLostVolume", false);
+            set => _settings.Set("UseFocusLostVolume", value);
+        }
+
+        public int FocusLostAttenuatePercent
+        {
+            get => FocusLostVolumePolicy.ClampAttenuatePercent(_settings.Get("FocusLostAttenuatePercent", 0));
+            set => _settings.Set("FocusLostAttenuatePercent", FocusLostVolumePolicy.ClampAttenuatePercent(value));
+        }
+
+        public int RemoteDesktopLastVolume
+        {
+            get => _settings.Get("RemoteDesktopLastVolume", -1);
+            set => _settings.Set("RemoteDesktopLastVolume", RemoteDesktopIdentity.ClampStoredVolume(value));
         }
 
         public WINDOWPLACEMENT? SettingsWindowPlacement

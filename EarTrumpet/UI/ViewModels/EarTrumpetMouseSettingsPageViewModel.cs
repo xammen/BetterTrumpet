@@ -32,6 +32,32 @@ namespace EarTrumpet.UI.ViewModels
             set => _settings.UseVolumeTickSound = value;
         }
 
+        public bool NotifyOnDefaultDeviceChange
+        {
+            get => _settings.NotifyOnDefaultDeviceChange;
+            set => _settings.NotifyOnDefaultDeviceChange = value;
+        }
+
+        public bool UseFocusLostVolume
+        {
+            get => _settings.UseFocusLostVolume;
+            set
+            {
+                _settings.UseFocusLostVolume = value;
+                RaisePropertyChanged(nameof(UseFocusLostVolume));
+            }
+        }
+
+        public int FocusLostAttenuatePercent
+        {
+            get => _settings.FocusLostAttenuatePercent;
+            set
+            {
+                _settings.FocusLostAttenuatePercent = value;
+                RaisePropertyChanged(nameof(FocusLostAttenuatePercent));
+            }
+        }
+
         private readonly AppSettings _settings;
 
         public EarTrumpetMouseSettingsPageViewModel(AppSettings settings) : base(null)

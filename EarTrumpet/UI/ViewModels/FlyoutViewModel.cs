@@ -211,7 +211,8 @@ private readonly Action _returnFocusToTray;
                     break;
 
                 default:
-                    throw new NotImplementedException();
+                    Trace.WriteLine($"FlyoutViewModel OnCollectionChanged ignored action {e.Action}");
+                    break;
             }
 
             UpdateTextVisibility();

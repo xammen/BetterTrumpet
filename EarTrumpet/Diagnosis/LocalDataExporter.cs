@@ -20,7 +20,7 @@ namespace EarTrumpet.Diagnosis
         public static void DumpAndShowData(string logText)
         {
             var fileName = $"{Path.GetTempFileName()}.txt";
-            File.WriteAllText(fileName, BuildDiagnosticText(logText, null, "manual-text-export", includeLiveSnapshot: true));
+            File.WriteAllText(fileName, PathSanitizer.Sanitize(BuildDiagnosticText(logText, null, "manual-text-export", includeLiveSnapshot: true)));
             ProcessHelper.StartNoThrow(fileName);
         }
 
@@ -32,29 +32,62 @@ namespace EarTrumpet.Diagnosis
 
             var fileName = $"BetterTrumpet-diagnostics-{DateTime.Now:yyyyMMdd-HHmmss-fff}.zip";
             var zipPath = Path.Combine(diagnosticsDir, fileName);
-            var addErrors = new StringBuilder();
 
             using (var archive = ZipFile.Open(zipPath, ZipArchiveMode.Create))
             {
-                WriteTextEntry(archive, "README.txt",
-                    "BetterTrumpet diagnostic bundle\r\n\r\n" +
-                    "Attach this zip file when reporting an issue.\r\n" +
-                    "It can contain app names, device names, process IDs, Windows audio endpoint IDs, settings state, and recent BetterTrumpet logs.\r\n" +
-                    "Review it before sharing if your audio setup contains sensitive names.\r\n");
+                WriteBundleEntries((name, text) => WriteTextEntry(archive, name, text), logText, logDirectory, exception, reason, includeLiveSnapshot);
+            }
 
-                WriteTextEntry(archive, "diagnostic-summary.txt", BuildDiagnosticText(logText, exception, reason, includeLiveSnapshot));
+            return zipPath;
+        }
 
-                if (exception != null)
+        public static string CreateStagingFolder(string logText, string logDirectory, Exception exception = null, string reason = null, bool includeLiveSnapshot = true)
+        {
+            var diagnosticsDir = GetDiagnosticsDirectory(logDirectory);
+            Directory.CreateDirectory(diagnosticsDir);
+            CleanupOldBundles(diagnosticsDir);
+
+            var stagingDir = Path.Combine(diagnosticsDir, $"BetterTrumpet-diagnostics-staging-{DateTime.Now:yyyyMMdd-HHmmss-fff}");
+            Directory.CreateDirectory(stagingDir);
+
+            WriteBundleEntries((name, text) =>
+            {
+                var path = Path.Combine(stagingDir, name.Replace('/', Path.DirectorySeparatorChar));
+                var directory = Path.GetDirectoryName(path);
+                if (!string.IsNullOrEmpty(directory))
                 {
-                    WriteTextEntry(archive, "exception.txt", exception.ToString());
+                    Directory.CreateDirectory(directory);
                 }
+                File.WriteAllText(path, text ?? "", Encoding.UTF8);
+            }, logText, logDirectory, exception, reason, includeLiveSnapshot);
 
-                AddLogFiles(archive, logDirectory, addErrors);
+            return stagingDir;
+        }
 
-                if (addErrors.Length > 0)
-                {
-                    WriteTextEntry(archive, "log-copy-errors.txt", addErrors.ToString());
-                }
+        public static string ZipDirectory(string stagingDir)
+        {
+            if (string.IsNullOrWhiteSpace(stagingDir) || !Directory.Exists(stagingDir))
+            {
+                throw new DirectoryNotFoundException(stagingDir);
+            }
+
+            var zipName = Path.GetFileName(stagingDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            zipName = zipName.Replace("-staging-", "-") + ".zip";
+            var zipPath = Path.Combine(Path.GetDirectoryName(stagingDir), zipName);
+            if (File.Exists(zipPath))
+            {
+                File.Delete(zipPath);
+            }
+
+            ZipFile.CreateFromDirectory(stagingDir, zipPath, CompressionLevel.Fastest, includeBaseDirectory: false);
+
+            try
+            {
+                Directory.Delete(stagingDir, true);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"LocalDataExporter ZipDirectory cleanup failed: {ex.Message}");
             }
 
             return zipPath;
@@ -64,6 +97,15 @@ namespace EarTrumpet.Diagnosis
         {
             try
             {
+                if (Directory.Exists(filePath))
+                {
+                    Process.Start(new ProcessStartInfo("explorer.exe", $"\"{filePath}\"")
+                    {
+                        UseShellExecute = true
+                    });
+                    return;
+                }
+
                 Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{filePath}\"")
                 {
                     UseShellExecute = true
@@ -72,7 +114,35 @@ namespace EarTrumpet.Diagnosis
             catch (Exception ex)
             {
                 Trace.WriteLine($"LocalDataExporter ShowInExplorer failed: {ex.Message}");
-                ProcessHelper.StartNoThrow(Path.GetDirectoryName(filePath));
+                ProcessHelper.StartNoThrow(Directory.Exists(filePath) ? filePath : Path.GetDirectoryName(filePath));
+            }
+        }
+
+        private static void WriteBundleEntries(Action<string, string> writeText, string logText, string logDirectory, Exception exception, string reason, bool includeLiveSnapshot)
+        {
+            void Write(string name, string text) => writeText(name, PathSanitizer.Sanitize(text ?? ""));
+
+            var addErrors = new StringBuilder();
+
+            Write("README.txt",
+                "BetterTrumpet diagnostic bundle\r\n\r\n" +
+                "Attach this zip file when reporting an issue.\r\n" +
+                "It can contain app names, device names, process IDs, Windows audio endpoint IDs, settings state, and recent BetterTrumpet logs.\r\n" +
+                "User folder paths are replaced with %USERPROFILE% / %APPDATA% / %LOCALAPPDATA% / %TEMP%.\r\n" +
+                "Review it before sharing if your audio setup contains sensitive names.\r\n");
+
+            Write("diagnostic-summary.txt", BuildDiagnosticText(logText, exception, reason, includeLiveSnapshot));
+
+            if (exception != null)
+            {
+                Write("exception.txt", exception.ToString());
+            }
+
+            AddLogFiles(Write, logDirectory, addErrors);
+
+            if (addErrors.Length > 0)
+            {
+                Write("log-copy-errors.txt", addErrors.ToString());
             }
         }
 
@@ -136,15 +206,15 @@ namespace EarTrumpet.Diagnosis
             var entry = archive.CreateEntry(entryName, CompressionLevel.Fastest);
             using (var writer = new StreamWriter(entry.Open(), Encoding.UTF8))
             {
-                writer.Write(text ?? "");
+                writer.Write(PathSanitizer.Sanitize(text ?? ""));
             }
         }
 
-        private static void AddLogFiles(ZipArchive archive, string logDirectory, StringBuilder addErrors)
+        private static void AddLogFiles(Action<string, string> writeText, string logDirectory, StringBuilder addErrors)
         {
             if (string.IsNullOrWhiteSpace(logDirectory) || !Directory.Exists(logDirectory))
             {
-                addErrors.AppendLine($"Log directory not found: {logDirectory ?? "(null)"}");
+                addErrors.AppendLine($"Log directory not found: {PathSanitizer.Sanitize(logDirectory ?? "(null)")}");
                 return;
             }
 
@@ -154,11 +224,15 @@ namespace EarTrumpet.Diagnosis
             {
                 try
                 {
-                    archive.CreateEntryFromFile(file, $"logs/{Path.GetFileName(file)}", CompressionLevel.Fastest);
+                    using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    using (var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
+                    {
+                        writeText($"logs/{Path.GetFileName(file)}", reader.ReadToEnd());
+                    }
                 }
                 catch (Exception ex)
                 {
-                    addErrors.AppendLine($"{file}: {ex.Message}");
+                    addErrors.AppendLine($"{PathSanitizer.Sanitize(file)}: {ex.Message}");
                 }
             }
         }

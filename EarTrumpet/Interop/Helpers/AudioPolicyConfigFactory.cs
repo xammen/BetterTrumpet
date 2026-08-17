@@ -1,6 +1,7 @@
 ﻿using EarTrumpet.Extensions;
 using EarTrumpet.Interop.MMDeviceAPI;
 using System;
+using System.Diagnostics;
 
 namespace EarTrumpet.Interop.Helpers
 {
@@ -10,12 +11,17 @@ namespace EarTrumpet.Interop.Helpers
         {
             if (Environment.OSVersion.IsAtLeast(OSVersions.Version21H2))
             {
-                return new AudioPolicyConfigFactoryImplFor21H2();
+                try
+                {
+                    return new AudioPolicyConfigFactoryImplFor21H2();
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"AudioPolicyConfigFactory 21H2 activation failed, trying downlevel: {ex.Message}");
+                }
             }
-            else
-            {
-                return new AudioPolicyConfigFactoryImplForDownlevel();
-            }
+
+            return new AudioPolicyConfigFactoryImplForDownlevel();
         }
     }
 }

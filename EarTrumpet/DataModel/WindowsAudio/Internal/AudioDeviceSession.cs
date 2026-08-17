@@ -137,6 +137,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
         private AudioSessionState _state;
         private bool _isMuted;
         private bool _isDisconnected;
+        private int _disconnectIssued;
         private bool _isMoved;
         private bool _moveOnInactive;
         private bool _isRegistered;
@@ -223,12 +224,14 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
             RaisePropertyChanged(nameof(State));
         }
 
-        public void MoveToDevice(string id, bool hide)
+        public bool MoveToDevice(string id, bool hide)
         {
             if (_parent.TryGetTarget(out var parent))
             {
-                ((IAudioDeviceManagerWindowsAudio)parent.Parent).SetDefaultEndPoint(id, ProcessId);
+                return ((IAudioDeviceManagerWindowsAudio)parent.Parent).SetDefaultEndPoint(id, ProcessId);
             }
+
+            return false;
         }
 
         public void UpdatePeakValueBackground()
@@ -368,6 +371,11 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
 
         private void DisconnectSession()
         {
+            if (!SessionDisconnectGate.TryBeginDisconnect(ref _disconnectIssued))
+            {
+                return;
+            }
+
             Trace.WriteLine($"AudioDeviceSession DisconnectSession {ExeName} {Id}");
 
             _isDisconnected = true;
@@ -446,8 +454,11 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
 
         void IAudioSessionEvents.OnIconPathChanged(string NewIconPath, ref Guid EventContext)
         {
-            IconPath = NewIconPath;
-            RaisePropertyChanged(nameof(IconPath));
+            ChooseIconPath(NewIconPath);
+            _dispatcher.BeginInvoke((Action)(() =>
+            {
+                RaisePropertyChanged(nameof(IconPath));
+            }));
         }
     }
 }

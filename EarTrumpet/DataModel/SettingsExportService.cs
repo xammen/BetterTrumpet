@@ -85,6 +85,13 @@ namespace EarTrumpet.DataModel
                 ["VolumeProfilesJson"] = settings.VolumeProfilesJson,
                 ["ShowQuickTrumpetConfirmation"] = settings.ShowQuickTrumpetConfirmation,
 
+                ["MixerWindowWidth"] = settings.MixerWindowWidth,
+                ["MixerWindowHeight"] = settings.MixerWindowHeight,
+                ["NotifyOnDefaultDeviceChange"] = settings.NotifyOnDefaultDeviceChange,
+                ["UseFocusLostVolume"] = settings.UseFocusLostVolume,
+                ["FocusLostAttenuatePercent"] = settings.FocusLostAttenuatePercent,
+                ["RemoteDesktopLastVolume"] = settings.RemoteDesktopLastVolume,
+
                 // Per-app rules (hard mute + volume rules)
                 ["AppRulesJson"] = settings.AppRulesJson,
                 ["FolderVolumeRulesJson"] = settings.FolderVolumeRulesJson,
@@ -246,6 +253,12 @@ namespace EarTrumpet.DataModel
             TrySet(data, "AutoCheckForUpdates", (bool v) => settings.AutoCheckForUpdates = v);
             TrySet(data, "UpdateNotifyChannel", (int v) => settings.UpdateNotifyChannel = (UpdateChannel)v);
             TrySet(data, "ShowQuickTrumpetConfirmation", (bool v) => settings.ShowQuickTrumpetConfirmation = v);
+            TrySet(data, "MixerWindowWidth", (double v) => settings.MixerWindowWidth = v);
+            TrySet(data, "MixerWindowHeight", (double v) => settings.MixerWindowHeight = v);
+            TrySet(data, "NotifyOnDefaultDeviceChange", (bool v) => settings.NotifyOnDefaultDeviceChange = v);
+            TrySet(data, "UseFocusLostVolume", (bool v) => settings.UseFocusLostVolume = v);
+            TrySet(data, "FocusLostAttenuatePercent", (int v) => settings.FocusLostAttenuatePercent = v);
+            TrySet(data, "RemoteDesktopLastVolume", (int v) => settings.RemoteDesktopLastVolume = v);
 
             // Hotkeys
             TrySetHotkey(data, "FlyoutHotkey", h => settings.FlyoutHotkey = h);

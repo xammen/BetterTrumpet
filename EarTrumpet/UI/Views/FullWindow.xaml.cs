@@ -1,5 +1,6 @@
 using EarTrumpet.Extensions;
 using EarTrumpet.Interop;
+using EarTrumpet.Logic;
 using EarTrumpet.UI.ViewModels;
 using System.Diagnostics;
 using System.Windows;
@@ -10,6 +11,7 @@ namespace EarTrumpet.UI.Views
     public partial class FullWindow : Window
     {
         private readonly double _windowAndItemSize;
+        private bool _restoredUserSize;
         private FullWindowViewModel ViewModel => (FullWindowViewModel)DataContext;
 
         public FullWindow()
@@ -36,6 +38,12 @@ namespace EarTrumpet.UI.Views
                 if (User32.GetWindowPlacement(new WindowInteropHelper((Window)sender).Handle, out var placement))
                 {
                     App.Settings.FullMixerWindowPlacement = placement;
+                }
+
+                if (WindowSizePolicy.ShouldRestoreUserSize(ViewModel.AllDevices.Count))
+                {
+                    App.Settings.MixerWindowWidth = Width;
+                    App.Settings.MixerWindowHeight = Height;
                 }
             };
 
@@ -77,6 +85,21 @@ namespace EarTrumpet.UI.Views
             SizeToContent = ViewModel.IsManyDevicesMode ? SizeToContent.Manual : SizeToContent.WidthAndHeight;
             ResizeMode = ViewModel.IsManyDevicesMode ? ResizeMode.CanResize : ResizeMode.NoResize;
             this.RemoveWindowStyle(User32.WS_MAXIMIZEBOX);
+
+            if (WindowSizePolicy.ShouldRestoreUserSize(ViewModel.AllDevices.Count))
+            {
+                if (!_restoredUserSize &&
+                    WindowSizePolicy.TryNormalize(App.Settings.MixerWindowWidth, App.Settings.MixerWindowHeight, out var width, out var height))
+                {
+                    Width = width;
+                    Height = height;
+                    _restoredUserSize = true;
+                }
+            }
+            else
+            {
+                _restoredUserSize = false;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 using EarTrumpet.DataModel;
+using EarTrumpet.Logic;
 using EarTrumpet.UI.Helpers;
 using System;
 using System.Collections.ObjectModel;
@@ -9,7 +10,7 @@ namespace EarTrumpet.UI.ViewModels
 {
     public class FullWindowViewModel : BindableBase, IPopupHostViewModel
     {
-        public static readonly int SmallDeviceCountLimit = 3;
+        public static readonly int SmallDeviceCountLimit = WindowSizePolicy.SmallDeviceCountLimit;
 
         public ObservableCollection<DeviceViewModel> AllDevices => _mainViewModel.VisibleDevices;
         public ModalDialogViewModel Dialog { get; }

@@ -133,15 +133,40 @@ namespace EarTrumpet.UI.ViewModels
                         Debug.Assert(e.OldItems.Count == 1);
                         ChildApps.Remove(ChildApps.First(x => x.Id == ((IAudioDeviceSession)e.OldItems[0]).Id));
                         break;
+                    case NotifyCollectionChangedAction.Reset:
+                    case NotifyCollectionChangedAction.Move:
+                    case NotifyCollectionChangedAction.Replace:
+                        RebuildChildApps(parent);
+                        break;
                     default:
-                        throw new NotImplementedException();
+                        Trace.WriteLine($"AppItemViewModel Children_CollectionChanged ignored action {e.Action}");
+                        break;
                 }
             }
         }
 
-        public void MoveToDevice(string id, bool hide)
+        private void RebuildChildApps(DeviceViewModel parent)
         {
-            ((IAudioDeviceSessionInternal)_session).MoveToDevice(id, hide);
+            if (ChildApps == null)
+            {
+                ChildApps = new ObservableCollection<IAppItemViewModel>();
+            }
+
+            ChildApps.Clear();
+            if (_session.Children == null)
+            {
+                return;
+            }
+
+            foreach (var child in _session.Children)
+            {
+                ChildApps.Add(new AppItemViewModel(parent, child, true));
+            }
+        }
+
+        public bool MoveToDevice(string id, bool hide)
+        {
+            return ((IAudioDeviceSessionInternal)_session).MoveToDevice(id, hide);
         }
 
         public override void UpdatePeakValueForeground()

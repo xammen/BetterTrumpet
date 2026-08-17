@@ -76,6 +76,12 @@ namespace EarTrumpet.Diagnosis
                 return;
             }
 
+            if (!_settings.HasStoredTelemetryConsent && !_settings.HasShownFirstRun)
+            {
+                Trace.WriteLine("Sentry: Waiting for first-run telemetry consent — crash reporting not started yet");
+                return;
+            }
+
             if (!_settings.IsTelemetryEnabled)
             {
                 Trace.WriteLine("Sentry: User has not opted in — crash reporting disabled (GDPR)");
@@ -160,12 +166,48 @@ namespace EarTrumpet.Diagnosis
         {
             try
             {
-                var bundlePath = ExportDiagnosticBundle(null, "manual-export", includeLiveSnapshot: true);
+                var confirm = MessageBox.Show(
+                    EarTrumpet.Properties.Resources.DiagnosticsExportConfirmMessage,
+                    EarTrumpet.Properties.Resources.DiagnosticsExportConfirmTitle,
+                    MessageBoxButton.OKCancel,
+                    MessageBoxImage.Information);
+                if (confirm != MessageBoxResult.OK)
+                {
+                    return;
+                }
+
+                Trace.Flush();
+                var stagingPath = LocalDataExporter.CreateStagingFolder(
+                    _listener.GetLogText(),
+                    GetLogDirectoryPath(),
+                    null,
+                    "manual-export",
+                    includeLiveSnapshot: true);
+
+                LocalDataExporter.ShowInExplorer(stagingPath);
+
+                var review = MessageBox.Show(
+                    EarTrumpet.Properties.Resources.DiagnosticsExportReviewMessage,
+                    EarTrumpet.Properties.Resources.DiagnosticsExportReviewTitle,
+                    MessageBoxButton.OKCancel,
+                    MessageBoxImage.Information);
+                if (review != MessageBoxResult.OK)
+                {
+                    CopyPathToClipboard(stagingPath);
+                    MessageBox.Show(
+                        string.Format(EarTrumpet.Properties.Resources.DiagnosticsExportStagingKeptMessage, PathSanitizer.Sanitize(stagingPath)),
+                        EarTrumpet.Properties.Resources.DiagnosticsExportSuccessTitle,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                    return;
+                }
+
+                var bundlePath = LocalDataExporter.ZipDirectory(stagingPath);
                 CopyPathToClipboard(bundlePath);
                 LocalDataExporter.ShowInExplorer(bundlePath);
 
                 MessageBox.Show(
-                    string.Format(EarTrumpet.Properties.Resources.DiagnosticsExportSuccessMessage, bundlePath),
+                    string.Format(EarTrumpet.Properties.Resources.DiagnosticsExportSuccessMessage, PathSanitizer.Sanitize(bundlePath)),
                     EarTrumpet.Properties.Resources.DiagnosticsExportSuccessTitle,
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);

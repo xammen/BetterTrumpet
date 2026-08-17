@@ -274,6 +274,7 @@ namespace EarTrumpet.UI.ViewModels
 
         private void Skip()
         {
+            ApplyPrivacyAndUpdates();
             Completed?.Invoke(this, EventArgs.Empty);
         }
 

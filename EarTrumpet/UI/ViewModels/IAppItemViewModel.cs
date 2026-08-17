@@ -30,7 +30,7 @@ namespace EarTrumpet.UI.ViewModels
         string PersistedOutputDevice { get; }
         int ProcessId { get; }
         bool DoesGroupWith(IAppItemViewModel app);
-        void MoveToDevice(string id, bool hide);
+        bool MoveToDevice(string id, bool hide);
         void UpdatePeakValueForeground();
         void UpdatePeakValueBackground();
         IDeviceViewModel Parent { get; }

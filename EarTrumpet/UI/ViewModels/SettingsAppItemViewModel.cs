@@ -79,7 +79,7 @@ namespace EarTrumpet.UI.ViewModels
             throw new NotImplementedException();
         }
 
-        public void MoveToDevice(string id, bool hide)
+        public bool MoveToDevice(string id, bool hide)
         {
             throw new NotImplementedException();
         }

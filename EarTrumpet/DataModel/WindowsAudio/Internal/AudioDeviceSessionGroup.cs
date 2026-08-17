@@ -125,21 +125,29 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
             }
         }
 
-        public void MoveToDevice(string id, bool hideExistingSessions)
+        public bool MoveToDevice(string id, bool hideExistingSessions)
         {
-            if (_parent.TryGetTarget(out var parent))
+            if (!_parent.TryGetTarget(out var parent))
             {
-                // Update the output for all processes represented by this app.
-                foreach (var pid in _sessions.Select(c => c.ProcessId).ToSet())
-                {
-                    ((IAudioDeviceManagerWindowsAudio)parent.Parent).SetDefaultEndPoint(id, pid);
-                }
+                return false;
+            }
 
-                if (hideExistingSessions)
+            var manager = (IAudioDeviceManagerWindowsAudio)parent.Parent;
+            var ok = true;
+            foreach (var pid in _sessions.Select(c => c.ProcessId).ToSet())
+            {
+                if (!manager.SetDefaultEndPoint(id, pid))
                 {
-                    Hide();
+                    ok = false;
                 }
             }
+
+            if (ok && hideExistingSessions)
+            {
+                Hide();
+            }
+
+            return ok;
         }
 
         public void UpdatePeakValueBackground()

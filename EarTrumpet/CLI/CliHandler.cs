@@ -2,6 +2,7 @@ using EarTrumpet.DataModel;
 using EarTrumpet.DataModel.Audio;
 using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.Interop.MMDeviceAPI;
+using EarTrumpet.Logic;
 using EarTrumpet.UI.ViewModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -456,10 +457,7 @@ namespace EarTrumpet.CLI
             if (mgr == null) return Error("device manager not available");
 
             // Find device by name
-            var device = collection.AllDevices.FirstOrDefault(d =>
-                string.Equals(d.DisplayName, deviceName, StringComparison.OrdinalIgnoreCase))
-                ?? collection.AllDevices.FirstOrDefault(d =>
-                    d.DisplayName.IndexOf(deviceName, StringComparison.OrdinalIgnoreCase) >= 0);
+            var device = collection.AllDevices.FirstOrDefault(d => AppIdentity.MatchesDevice(d.DisplayName, deviceName));
 
             if (device == null) return Error($"device not found: {deviceName}");
 
@@ -493,10 +491,7 @@ namespace EarTrumpet.CLI
             if (mgr == null) return Error("device manager not available");
 
             // Find target device
-            var targetDevice = collection.AllDevices.FirstOrDefault(d =>
-                string.Equals(d.DisplayName, deviceName, StringComparison.OrdinalIgnoreCase))
-                ?? collection.AllDevices.FirstOrDefault(d =>
-                    d.DisplayName.IndexOf(deviceName, StringComparison.OrdinalIgnoreCase) >= 0);
+            var targetDevice = collection.AllDevices.FirstOrDefault(d => AppIdentity.MatchesDevice(d.DisplayName, deviceName));
 
             if (targetDevice == null) return Error($"device not found: {deviceName}");
 
@@ -1004,8 +999,7 @@ namespace EarTrumpet.CLI
 
             // Match by ID or display name (case-insensitive)
             return collection.AllDevices.FirstOrDefault(d => d.Id == deviceArg)
-                ?? collection.AllDevices.FirstOrDefault(d =>
-                    d.DisplayName.IndexOf(deviceArg, StringComparison.OrdinalIgnoreCase) >= 0);
+                ?? collection.AllDevices.FirstOrDefault(d => AppIdentity.MatchesDevice(d.DisplayName, deviceArg));
         }
 
         private IAppItemViewModel ResolveApp(string appName)
@@ -1036,23 +1030,12 @@ namespace EarTrumpet.CLI
 
         private static bool AppMatchesExact(IAppItemViewModel app, string appName)
         {
-            if (app == null || string.IsNullOrWhiteSpace(appName)) return false;
-
-            var exeName = app.ExeName ?? string.Empty;
-            var exeNoExt = System.IO.Path.GetFileNameWithoutExtension(exeName);
-            return string.Equals(exeName, appName, StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(exeNoExt, appName, StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(app.DisplayName, appName, StringComparison.OrdinalIgnoreCase);
+            return app != null && AppIdentity.MatchesExact(app.ExeName, app.DisplayName, appName);
         }
 
         private static bool AppMatchesPartial(IAppItemViewModel app, string appName)
         {
-            if (app == null || string.IsNullOrWhiteSpace(appName)) return false;
-
-            var exeName = app.ExeName ?? string.Empty;
-            var displayName = app.DisplayName ?? string.Empty;
-            return exeName.IndexOf(appName, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   displayName.IndexOf(appName, StringComparison.OrdinalIgnoreCase) >= 0;
+            return app != null && AppIdentity.MatchesPartial(app.ExeName, app.DisplayName, appName);
         }
 
         private static List<RuleAppMatch> FindAppMatches(DeviceCollectionViewModel collection, string query)
@@ -1075,52 +1058,11 @@ namespace EarTrumpet.CLI
         {
             if (device == null || app == null) return new RuleAppMatch { Query = query };
 
-            var normalizedQuery = NormalizeToken(query);
             var exeName = app.ExeName ?? string.Empty;
-            var exeNoExt = System.IO.Path.GetFileNameWithoutExtension(exeName);
             var displayName = app.DisplayName ?? string.Empty;
             var appId = app.AppId ?? string.Empty;
-
-            var candidates = new[]
-            {
-                new { Value = exeName, Type = "exe" },
-                new { Value = exeNoExt, Type = "exeName" },
-                new { Value = displayName, Type = "displayName" },
-                new { Value = appId, Type = "appId" },
-            };
-
-            var bestScore = 0;
-            var bestType = "none";
-
-            foreach (var candidate in candidates)
-            {
-                var value = NormalizeToken(candidate.Value);
-                if (string.IsNullOrWhiteSpace(value) || string.IsNullOrWhiteSpace(normalizedQuery)) continue;
-
-                int score;
-                if (string.Equals(value, normalizedQuery, StringComparison.OrdinalIgnoreCase))
-                {
-                    score = 100;
-                }
-                else if (value.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase))
-                {
-                    score = 80;
-                }
-                else if (value.IndexOf(normalizedQuery, StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    score = 60;
-                }
-                else
-                {
-                    score = 0;
-                }
-
-                if (score > bestScore)
-                {
-                    bestScore = score;
-                    bestType = candidate.Type;
-                }
-            }
+            var bestScore = AppIdentity.Score(exeName, displayName, appId, query);
+            var bestType = bestScore >= 100 ? "exe" : bestScore > 0 ? "partial" : "none";
 
             return new RuleAppMatch
             {
@@ -1136,12 +1078,6 @@ namespace EarTrumpet.CLI
                 Volume = app.Volume,
                 IsMuted = app.IsMuted
             };
-        }
-
-        private static string NormalizeToken(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value)) return string.Empty;
-            return System.IO.Path.GetFileNameWithoutExtension(value.Trim()).ToLowerInvariant();
         }
 
         private static string TryParseRule(List<string> args, out RuleSpec spec)

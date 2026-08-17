@@ -19,22 +19,16 @@ namespace EarTrumpet.UI.ViewModels
             public string ExeName { get; set; }
         }
 
-        public bool UseLegacyIcon
+        public bool ShowAppTooltips
         {
-            get => _settings.UseLegacyIcon;
-            set => _settings.UseLegacyIcon = value;
+            get => _settings.ShowAppTooltips;
+            set => _settings.ShowAppTooltips = value;
         }
 
         public bool RunAtStartup
         {
             get => _settings.RunAtStartup;
             set => _settings.RunAtStartup = value;
-        }
-
-        public bool ShowAppTooltips
-        {
-            get => _settings.ShowAppTooltips;
-            set => _settings.ShowAppTooltips = value;
         }
 
         public bool HasHiddenApps => _settings.HiddenAppsCount > 0;

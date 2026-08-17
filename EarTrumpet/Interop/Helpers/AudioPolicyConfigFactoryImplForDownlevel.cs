@@ -10,8 +10,8 @@ namespace EarTrumpet.Interop.Helpers
         internal AudioPolicyConfigFactoryImplForDownlevel()
         {
             var iid = typeof(IAudioPolicyConfigFactoryVariantForDownlevel).GUID;
-            Combase.RoGetActivationFactory("Windows.Media.Internal.AudioPolicyConfig", ref iid, out object factory);
-            _factory = (IAudioPolicyConfigFactoryVariantForDownlevel)factory;
+            _factory = (IAudioPolicyConfigFactoryVariantForDownlevel)Combase.GetActivationFactory(
+                "Windows.Media.Internal.AudioPolicyConfig", iid);
         }
 
         public HRESULT ClearAllPersistedApplicationDefaultEndpoints()
@@ -21,7 +21,19 @@ namespace EarTrumpet.Interop.Helpers
 
         public HRESULT GetPersistedDefaultAudioEndpoint(uint processId, EDataFlow flow, ERole role, out string deviceId)
         {
-            return _factory.GetPersistedDefaultAudioEndpoint(processId, flow, role, out deviceId);
+            var hr = _factory.GetPersistedDefaultAudioEndpoint(processId, flow, role, out var hstring);
+            try
+            {
+                deviceId = Combase.HStringToString(hstring);
+                return hr;
+            }
+            finally
+            {
+                if (hstring != IntPtr.Zero)
+                {
+                    Combase.WindowsDeleteString(hstring);
+                }
+            }
         }
 
         public HRESULT SetPersistedDefaultAudioEndpoint(uint processId, EDataFlow flow, ERole role, IntPtr deviceId)

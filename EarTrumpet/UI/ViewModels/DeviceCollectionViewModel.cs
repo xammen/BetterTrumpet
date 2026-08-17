@@ -384,7 +384,8 @@ namespace EarTrumpet.UI.ViewModels
                     break;
 
                 default:
-                    throw new NotImplementedException();
+                    Trace.WriteLine($"DeviceCollectionViewModel OnCollectionChanged ignored action {e.Action}");
+                    break;
             }
         }
 
@@ -448,7 +449,11 @@ namespace EarTrumpet.UI.ViewModels
 
                 var tempApp = new TemporaryAppItemViewModel(this, _deviceManager, app);
 
-                app.MoveToDevice(device?.Id, hide: isLogicallyMovingDevices);
+                if (!app.MoveToDevice(device?.Id, hide: isLogicallyMovingDevices))
+                {
+                    Trace.WriteLine($"DeviceCollectionViewModel MoveAppToDeviceInternal Windows API failed for {app.ExeName}");
+                    return;
+                }
 
                 // Update the UI if the device logically changed places.
                 if (isLogicallyMovingDevices)

@@ -8,7 +8,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
         Guid GroupingParam { get; }
         void Hide();
         void UnHide();
-        void MoveToDevice(string id, bool hide);
+        bool MoveToDevice(string id, bool hide);
         void UpdatePeakValueBackground();
     }
 }

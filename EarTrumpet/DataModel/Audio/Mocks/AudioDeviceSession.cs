@@ -97,9 +97,9 @@ namespace EarTrumpet.DataModel.Audio.Mocks
     
         }
 
-        public void MoveToDevice(string id, bool hide)
+        public bool MoveToDevice(string id, bool hide)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public void UpdatePeakValueBackground()

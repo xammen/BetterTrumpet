@@ -1368,7 +1368,58 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
 
 {0}
 
-Attach this .zip file when reporting a BetterTrumpet issue.</value>
+Review the zip before sharing. It can still contain app names, device names, process IDs, and other details from your audio setup.</value>
+  </data>
+  <data name="DiagnosticsExportConfirmTitle" xml:space="preserve">
+    <value>Export diagnostic report</value>
+  </data>
+  <data name="DiagnosticsExportConfirmMessage" xml:space="preserve">
+    <value>The diagnostic report can include app names, device names, process IDs, Windows audio endpoint IDs, settings state, and recent BetterTrumpet logs.
+
+User folder paths are replaced with environment variables, but you should still review the files before sharing.
+
+Create the report now?</value>
+  </data>
+  <data name="DiagnosticsExportReviewTitle" xml:space="preserve">
+    <value>Review diagnostic files</value>
+  </data>
+  <data name="DiagnosticsExportReviewMessage" xml:space="preserve">
+    <value>The diagnostic files are open in Explorer. Review or edit them, then click OK to pack them into a zip.
+
+Click Cancel to leave the files unzipped so you can keep editing them.</value>
+  </data>
+  <data name="DiagnosticsExportStagingKeptMessage" xml:space="preserve">
+    <value>The diagnostic files were left unzipped so you can review them:
+
+{0}
+
+The folder path was copied to the clipboard.</value>
+  </data>
+  <data name="CrashDialogTitle" xml:space="preserve">
+    <value>BetterTrumpet</value>
+  </data>
+  <data name="CrashDialogFatalBody" xml:space="preserve">
+    <value>BetterTrumpet ran into a critical error and must close.
+
+The report was saved to the logs.
+
+Details: {0}{1}</value>
+  </data>
+  <data name="CrashDialogNonFatalBody" xml:space="preserve">
+    <value>BetterTrumpet ran into a problem.
+
+The app will try to continue.
+
+Details: {0}{1}</value>
+  </data>
+  <data name="CrashDialogDiagnosticPath" xml:space="preserve">
+    <value>
+
+A diagnostic report was created and its path was copied to the clipboard:
+{0}</value>
+  </data>
+  <data name="CrashDialogUnknownError" xml:space="preserve">
+    <value>Unknown error</value>
   </data>
   <data name="DiagnosticsExportFailedTitle" xml:space="preserve">
     <value>Diagnostic export failed</value>
@@ -1775,5 +1826,35 @@ Details: {0}</value>
   </data>
   <data name="SettingsMoreOptions" xml:space="preserve">
     <value>More options</value>
+  </data>
+  <data name="SettingsDeviceChangeNotify" xml:space="preserve">
+    <value>Device change</value>
+  </data>
+  <data name="SettingsDeviceChangeNotifyDesc" xml:space="preserve">
+    <value>Toast when the default playback device switches</value>
+  </data>
+  <data name="SettingsNotifyOnDeviceChange" xml:space="preserve">
+    <value>Show a notification when the default device changes</value>
+  </data>
+  <data name="DefaultDeviceChangedNotificationTitle" xml:space="preserve">
+    <value>Playback device</value>
+  </data>
+  <data name="DefaultDeviceChangedNotificationFormat" xml:space="preserve">
+    <value>Now using {0}</value>
+  </data>
+  <data name="SettingsFocusLostVolume" xml:space="preserve">
+    <value>Focus lost</value>
+  </data>
+  <data name="SettingsFocusLostVolumeDesc" xml:space="preserve">
+    <value>Mute or reduce apps when another window is in front</value>
+  </data>
+  <data name="SettingsUseFocusLostVolume" xml:space="preserve">
+    <value>Lower volume of apps that lose focus</value>
+  </data>
+  <data name="SettingsFocusLostAttenuate" xml:space="preserve">
+    <value>Background volume (0% mutes)</value>
+  </data>
+  <data name="SettingsFocusLostAttenuateHint" xml:space="preserve">
+    <value>Locked and keep-muted rules are left alone. The original volume comes back when the app is focused again.</value>
   </data>
 </root>

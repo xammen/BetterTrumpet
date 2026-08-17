@@ -43,6 +43,7 @@ namespace EarTrumpet.DataModel
         private readonly HttpClient _httpClient;
         private readonly DispatcherTimer _timer;
         private readonly Dispatcher _dispatcher;
+        private bool _started;
 
         private bool _isUpdateAvailable;
         public bool IsUpdateAvailable
@@ -185,6 +186,12 @@ namespace EarTrumpet.DataModel
                 Trace.WriteLine("UpdateService: Auto-updates disabled (Channel=None), skipping timer");
                 return;
             }
+
+            if (_started)
+            {
+                return;
+            }
+            _started = true;
 
             // Delayed first check
             var startupTimer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher)

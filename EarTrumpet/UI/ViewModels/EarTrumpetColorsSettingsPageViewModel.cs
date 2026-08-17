@@ -156,6 +156,12 @@ namespace EarTrumpet.UI.ViewModels
             }
         }
 
+        public bool UseLegacyIcon
+        {
+            get => _settings.UseLegacyIcon;
+            set => _settings.UseLegacyIcon = value;
+        }
+
         private double? _pendingWindowBackgroundOpacity;
 
         public double PendingWindowBackgroundOpacity

@@ -29,7 +29,7 @@ namespace EarTrumpet.Interop.MMDeviceAPI
         [PreserveSig]
         HRESULT SetPersistedDefaultAudioEndpoint(uint processId, EDataFlow flow, ERole role, IntPtr deviceId);
         [PreserveSig]
-        HRESULT GetPersistedDefaultAudioEndpoint(uint processId, EDataFlow flow, ERole role, [Out, MarshalAs(UnmanagedType.HString)] out string deviceId);
+        HRESULT GetPersistedDefaultAudioEndpoint(uint processId, EDataFlow flow, ERole role, out IntPtr deviceId);
         [PreserveSig]
         HRESULT ClearAllPersistedApplicationDefaultEndpoints();
     }

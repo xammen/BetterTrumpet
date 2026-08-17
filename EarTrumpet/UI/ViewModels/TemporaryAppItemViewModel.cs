@@ -167,18 +167,23 @@ namespace EarTrumpet.UI.ViewModels
             return ExeName == app.ExeName;
         }
 
-        public void MoveToDevice(string id, bool hide)
+        public bool MoveToDevice(string id, bool hide)
         {
-            // Update the output for all processes represented by this app.
+            var ok = true;
             foreach (var pid in _processIds)
             {
-                ((IAudioDeviceManagerWindowsAudio)_deviceManager).SetDefaultEndPoint(id, pid);
+                if (!((IAudioDeviceManagerWindowsAudio)_deviceManager).SetDefaultEndPoint(id, pid))
+                {
+                    ok = false;
+                }
             }
 
-            if (hide)
+            if (ok && hide)
             {
                 Expire();
             }
+
+            return ok;
         }
 
         private void Expire()

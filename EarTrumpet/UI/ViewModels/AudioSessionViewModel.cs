@@ -79,6 +79,14 @@ namespace EarTrumpet.UI.ViewModels
                 _stream.Volume = volumePercent / 100f;
             }
         }
+
+        internal void SetMuteWithoutUndo(bool isMuted)
+        {
+            if (_stream.IsMuted != isMuted)
+            {
+                _stream.IsMuted = isMuted;
+            }
+        }
         public virtual float PeakValue1 => _stream.PeakValue1;
         public virtual float PeakValue2 => _stream.PeakValue2;
 

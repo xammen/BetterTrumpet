@@ -1302,7 +1302,58 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
 
 {0}
 
-Joignez ce fichier .zip lorsque vous signalez un problème BetterTrumpet.</value>
+Relisez le zip avant de le partager. Il peut encore contenir des noms d'applications, de périphériques, des identifiants de processus et d'autres détails de votre configuration audio.</value>
+  </data>
+  <data name="DiagnosticsExportConfirmTitle" xml:space="preserve">
+    <value>Exporter le rapport de diagnostic</value>
+  </data>
+  <data name="DiagnosticsExportConfirmMessage" xml:space="preserve">
+    <value>Le rapport de diagnostic peut contenir des noms d'applications, de périphériques, des identifiants de processus, des identifiants de points de terminaison audio Windows, l'état des paramètres et les journaux récents de BetterTrumpet.
+
+Les chemins vers les dossiers utilisateur sont remplacés par des variables d'environnement, mais vous devriez quand même relire les fichiers avant de les partager.
+
+Créer le rapport maintenant ?</value>
+  </data>
+  <data name="DiagnosticsExportReviewTitle" xml:space="preserve">
+    <value>Relire les fichiers de diagnostic</value>
+  </data>
+  <data name="DiagnosticsExportReviewMessage" xml:space="preserve">
+    <value>Les fichiers de diagnostic sont ouverts dans l'Explorateur. Relisez-les ou modifiez-les, puis cliquez sur OK pour les regrouper dans un zip.
+
+Cliquez sur Annuler pour laisser les fichiers non compressés afin de continuer à les modifier.</value>
+  </data>
+  <data name="DiagnosticsExportStagingKeptMessage" xml:space="preserve">
+    <value>Les fichiers de diagnostic ont été laissés non compressés pour que vous puissiez les relire :
+
+{0}
+
+Le chemin du dossier a été copié dans le presse-papiers.</value>
+  </data>
+  <data name="CrashDialogTitle" xml:space="preserve">
+    <value>BetterTrumpet</value>
+  </data>
+  <data name="CrashDialogFatalBody" xml:space="preserve">
+    <value>BetterTrumpet a rencontré une erreur critique et doit fermer.
+
+Le rapport a été enregistré dans les logs.
+
+Détails : {0}{1}</value>
+  </data>
+  <data name="CrashDialogNonFatalBody" xml:space="preserve">
+    <value>BetterTrumpet a rencontré un problème.
+
+L'application va tenter de continuer.
+
+Détails : {0}{1}</value>
+  </data>
+  <data name="CrashDialogDiagnosticPath" xml:space="preserve">
+    <value>
+
+Un rapport de diagnostic a été créé et son chemin a été copié dans le presse-papiers :
+{0}</value>
+  </data>
+  <data name="CrashDialogUnknownError" xml:space="preserve">
+    <value>Erreur inconnue</value>
   </data>
   <data name="DiagnosticsExportFailedTitle" xml:space="preserve">
     <value>Échec de l'export diagnostic</value>
@@ -1751,5 +1802,35 @@ Détails : {0}</value>
   </data>
   <data name="SettingsUseMonkeyTickSoundTip" xml:space="preserve">
     <value>Conserver ce son secret pour les réglages du volume</value>
+  </data>
+  <data name="SettingsDeviceChangeNotify" xml:space="preserve">
+    <value>Changement de périphérique</value>
+  </data>
+  <data name="SettingsDeviceChangeNotifyDesc" xml:space="preserve">
+    <value>Notification quand la sortie audio par défaut change</value>
+  </data>
+  <data name="SettingsNotifyOnDeviceChange" xml:space="preserve">
+    <value>Afficher une notification quand le périphérique par défaut change</value>
+  </data>
+  <data name="DefaultDeviceChangedNotificationTitle" xml:space="preserve">
+    <value>Périphérique de lecture</value>
+  </data>
+  <data name="DefaultDeviceChangedNotificationFormat" xml:space="preserve">
+    <value>Utilisation de {0}</value>
+  </data>
+  <data name="SettingsFocusLostVolume" xml:space="preserve">
+    <value>Perte de focus</value>
+  </data>
+  <data name="SettingsFocusLostVolumeDesc" xml:space="preserve">
+    <value>Couper ou baisser les applications quand une autre fenêtre est au premier plan</value>
+  </data>
+  <data name="SettingsUseFocusLostVolume" xml:space="preserve">
+    <value>Baisser le volume des applications qui perdent le focus</value>
+  </data>
+  <data name="SettingsFocusLostAttenuate" xml:space="preserve">
+    <value>Volume en arrière-plan (0 % coupe le son)</value>
+  </data>
+  <data name="SettingsFocusLostAttenuateHint" xml:space="preserve">
+    <value>Les règles verrouillées et « garder en sourdine » restent intactes. Le volume d'origine revient quand l'application reprend le focus.</value>
   </data>
 </root>
