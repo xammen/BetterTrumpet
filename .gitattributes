@@ -1,4 +1,3 @@
-[core]
 * text eol=crlf
 
 *.png binary
@@ -25,3 +24,11 @@
 *.bz2 binary
 *.swp binary
 *.pfx binary
+*.exe binary
+*.dll binary
+*.nupkg binary
+*.msix binary
+*.msixbundle binary
+*.appx binary
+*.appxbundle binary
+*.snk binary

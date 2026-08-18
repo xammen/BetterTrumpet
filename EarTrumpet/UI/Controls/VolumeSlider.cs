@@ -661,7 +661,7 @@ namespace EarTrumpet.UI.Controls
                 StartAnimation();
 
                 // Only start dragging if we KNOW we clicked on the thumb
-                // Otherwise (clicked on track, or thumb not found), animate smoothly
+                // Otherwise (clicked on track, or thumb not found), jump directly.
                 if (_thumb != null && _thumb.IsMouseOver)
                 {
                     // Click on thumb - start dragging immediately
@@ -670,10 +670,14 @@ namespace EarTrumpet.UI.Controls
                 }
                 else
                 {
-                    // Click on track (or thumb not found) - animate smoothly to target
+                    // Click on track (or thumb not found) - set value directly.
+                    // We avoid animation here because the flyout may close on
+                    // mouse-up and unload the slider, which cancels the render
+                    // subscription mid-animation and leaves Value stuck partway.
                     _clickedOnTrack = true;
                     _isDragging = false;
-                    SetPositionByControlPoint(_lastMousePosition, animate: true);
+                    _isAnimatingValue = false;
+                    SetPositionByControlPoint(_lastMousePosition, animate: false);
                 }
 
                 CaptureMouse();
@@ -730,13 +734,15 @@ namespace EarTrumpet.UI.Controls
                 
                 if (_clickedOnTrack)
                 {
-                    // User clicked on track - they're now dragging after the initial click
-                    // Stop animation and switch to instant updates
+                    // User clicked on track and is now dragging.
+                    // Switch from animation to instant updates so the thumb
+                    // follows the cursor without lag, but keep the target
+                    // in sync so a subsequent release lands on the cursor.
                     _clickedOnTrack = false;
                     _isDragging = true;
                     _isAnimatingValue = false;
                 }
-                
+
                 if (_isDragging)
                 {
                     // When dragging, we want instant updates (no animation)
@@ -766,7 +772,17 @@ namespace EarTrumpet.UI.Controls
 
         public void SetPositionByControlPoint(Point point, bool animate = false)
         {
-            var percent = point.X / ActualWidth;
+            var thumbWidth = _thumb?.ActualWidth ?? 0;
+            var trackWidth = ActualWidth - thumbWidth;
+            double percent;
+            if (trackWidth > 0)
+            {
+                percent = (point.X - thumbWidth / 2.0) / trackWidth;
+            }
+            else
+            {
+                percent = point.X / ActualWidth;
+            }
             var newValue = Bound((Maximum - Minimum) * percent);
             
             // Only animate if requested AND smooth animation is enabled in settings
