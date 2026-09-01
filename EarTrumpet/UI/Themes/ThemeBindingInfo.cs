@@ -52,7 +52,6 @@ namespace EarTrumpet.UI.Themes
             _isAttached = false;
             _element = null;
             _initialValue = default(T);
-            Manager.Current.ThemeChanged -= ThemeChanged;
         }
 
         private void Element_Loaded(object sender, RoutedEventArgs e)
@@ -85,23 +84,28 @@ namespace EarTrumpet.UI.Themes
                 {
                     _isAttached = true;
                     _initialValue = (T)ReadPropertyValue(element);
-                    Manager.Current.ThemeChanged += ThemeChanged;
                 }
                 WritePropertyValue(element, _applyCallback.Invoke(element, _value));
             }
         }
 
-        private void ThemeChanged()
+        /// <summary>
+        /// Repaints this binding. Driven by Brush, which owns the single subscription to
+        /// Manager.ThemeChanged on behalf of every binding in its registry; subscribing from here
+        /// would root this instance in that singleton for the life of the process.
+        /// </summary>
+        internal void ThemeChanged()
         {
+            // Not attached means Options.Source has never resolved, so there is no captured initial
+            // value to restore later and nothing to repaint. Options.Source changing will apply it.
+            if (!_isAttached)
+            {
+                return;
+            }
+
             if ((_element != null) && _element.TryGetTarget(out var element))
             {
                 WritePropertyValue(element, _applyCallback.Invoke(element, _value));
-            }
-            else
-            {
-                // The element has been collected. Manager is a singleton, so without this the
-                // subscription would keep this instance alive for the rest of the process.
-                Manager.Current.ThemeChanged -= ThemeChanged;
             }
         }
 

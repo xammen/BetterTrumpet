@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 
@@ -9,12 +10,21 @@ namespace EarTrumpet.UI.Themes
         // Weak keys. Elements that are rebuilt repeatedly would otherwise be pinned here for the
         // life of the process: the tray context menu creates a fresh ContextMenu and a fresh set of
         // MenuItem containers on every right-click, each carrying several theme bindings.
+        //
+        // Only ever touched on the UI thread: every writer arrives through a DependencyProperty
+        // changed callback, and the reader below runs on Manager's ThemeChanged. Neither the outer
+        // Dictionary nor ConditionalWeakTable.Add is safe against a concurrent writer, and Add
+        // throws if the key is already present, hence the Remove-then-Add below.
         private static readonly Dictionary<string, ConditionalWeakTable<DependencyObject, ThemeBindingInfo<System.Windows.Media.Brush>>> _bindingInfo =
             new Dictionary<string, ConditionalWeakTable<DependencyObject, ThemeBindingInfo<System.Windows.Media.Brush>>>();
+
+        private static bool _isSubscribedToThemeChanged;
 
         private static void ImplementPropertyChanged(string propertyName, DependencyObject dependencyObject, object newValue)
         {
             var value = (string)newValue;
+
+            EnsureSubscribedToThemeChanged();
 
             if (!_bindingInfo.TryGetValue(propertyName, out var bindings))
             {
@@ -41,12 +51,47 @@ namespace EarTrumpet.UI.Themes
         /// </summary>
         internal static void ReapplyBindings(DependencyObject dependencyObject)
         {
+            // Also here, not just in ImplementPropertyChanged: a binding created while Manager did
+            // not yet exist skips the subscription, and this is the path that then attaches it.
+            EnsureSubscribedToThemeChanged();
+
             foreach (var bindings in _bindingInfo.Values)
             {
                 if (bindings.TryGetValue(dependencyObject, out var info))
                 {
                     info.ApplyValue(dependencyObject);
                 }
+            }
+        }
+
+        // One subscription for the whole registry, rather than one per ThemeBindingInfo. Manager is
+        // a singleton, so a per-instance subscription roots the instance in its delegate list, and
+        // a binding cannot unsubscribe itself when its element is simply discarded -- nothing calls
+        // Leaving() in that case. That defeats the weak keys above: the element would be collected
+        // but its binding would not, so the delegate list would grow by one entry per theme binding
+        // per rebuild for the life of the process (roughly a hundred per tray right-click), and
+        // every theme change would walk all of them.
+        private static void EnsureSubscribedToThemeChanged()
+        {
+            if (_isSubscribedToThemeChanged || Manager.Current == null)
+            {
+                return;
+            }
+
+            _isSubscribedToThemeChanged = true;
+            Manager.Current.ThemeChanged += OnThemeChanged;
+        }
+
+        private static void OnThemeChanged()
+        {
+            // Materialized before dispatching: a handler that sets a theme binding would otherwise
+            // mutate what is being enumerated -- the ConditionalWeakTable it lands in, and the outer
+            // Dictionary too if it is the first binding for that property name. Collected keys are
+            // already absent from the enumeration.
+            var bindings = _bindingInfo.Values.SelectMany(table => table).Select(entry => entry.Value).ToList();
+            foreach (var binding in bindings)
+            {
+                binding.ThemeChanged();
             }
         }
 
