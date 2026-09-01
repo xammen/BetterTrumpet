@@ -58,6 +58,20 @@ namespace EarTrumpet.Interop.Helpers
                 });
         }
 
+        /// <summary>
+        /// Turns the acrylic material off. Deliberately does NOT undo the corner rounding that
+        /// <see cref="EnableAcrylic"/> applies, despite the asymmetry looking like an oversight.
+        /// </summary>
+        /// <remarks>
+        /// This is a transient suppression, not a teardown: AcrylicBrush calls it on every
+        /// LocationChanged and SizeChanged and restores the material 200ms later, so unrounding here
+        /// would square a window's corners for the duration of every drag and resize.
+        ///
+        /// It is also not this function's rounding to undo. Windows that want to be round say so
+        /// themselves in SourceInitialized (FlyoutWindow, SettingsWindow, MediaPopupWindow and
+        /// others all call EnableRoundedCornersIfApplicable), and nothing here records whether a
+        /// given HWND was rounded on its own behalf or on acrylic's.
+        /// </remarks>
         public static void DisableAcrylic(Visual target)
         {
             SetAccentPolicy(HandleFromVisual(target),

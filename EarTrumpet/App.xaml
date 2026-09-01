@@ -732,10 +732,14 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ContextMenu}">
                             <Border x:Name="Border">
-                                <!--  Radius 7, not 8: acrylic-backed menus are clipped by DWM's own
-                                      rounded geometry (DWMWCP_ROUND). Matching 8 exactly leaves a
-                                      hairline of bare acrylic in the corners, so undercut it by 1px
-                                      and let DWM's antialiased arc define the visible corner.  -->
+                                <!--  Radius 7, not 8: when this template backs an acrylic menu (the
+                                      tray menu), DWM clips the popup to its own rounded geometry
+                                      (DWMWCP_ROUND), and matching 8 exactly leaves a hairline of
+                                      bare acrylic in the corners. Undercutting by 1px lets DWM's
+                                      antialiased arc define the visible corner. In-window context
+                                      menus share this template but get neither acrylic nor DWM
+                                      rounding, so for them the undercut buys nothing; it is just
+                                      1px tighter, which is why one radius can serve both.  -->
                                 <Border x:Name="ContentBorder"
                                         Padding="4,4"
                                         Background="{TemplateBinding Background}"
