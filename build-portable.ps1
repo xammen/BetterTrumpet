@@ -1,5 +1,24 @@
-$src = 'Build\Release'
-$dst = 'dist\BetterTrumpet-3.3.1-portable'
+param(
+    [ValidateSet('x86', 'x64', 'arm64')]
+    [string]$Arch = 'x86'
+)
+
+$ErrorActionPreference = 'Stop'
+$Version = '3.4.0'
+
+switch ($Arch) {
+    'x86'   { $src = 'Build\Release';        $suffix = '' }
+    'x64'   { $src = 'Build\Release-x64';    $suffix = '-x64' }
+    'arm64' { $src = 'Build\Release-arm64';  $suffix = '-arm64' }
+}
+
+# Without this, a missing build dir is only a non-terminating error: the script would sail on and
+# emit a ~200-byte ZIP containing nothing but portable.marker, with exit code 0.
+if (-not (Test-Path (Join-Path $src 'BetterTrumpet.exe'))) {
+    throw "Build output not found: $src\BetterTrumpet.exe - build Release|$Arch first."
+}
+
+$dst = "dist\BetterTrumpet-$Version-portable$suffix"
 Remove-Item $dst -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $dst | Out-Null
 
@@ -24,7 +43,7 @@ foreach ($folder in @('SettingsWeb', 'AnnouncementsWeb', 'runtimes')) {
 Set-Content (Join-Path $dst 'portable.marker') 'BetterTrumpet Portable Mode'
 
 # Zip it
-$zipPath = 'dist\BetterTrumpet-3.3.1-portable.zip'
+$zipPath = "dist\BetterTrumpet-$Version-portable$suffix.zip"
 Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
 Compress-Archive -Path "$dst\*" -DestinationPath $zipPath -CompressionLevel Optimal
 

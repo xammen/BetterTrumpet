@@ -1,4 +1,4 @@
-next-version: 3.3.1
+next-version: 3.4.0
 assembly-versioning-scheme: MajorMinorPatch
 assembly-file-versioning-format: '{Major}.{Minor}.{Patch}'
 assembly-informational-format: '{MajorMinorPatch}'

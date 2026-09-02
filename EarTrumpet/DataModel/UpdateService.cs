@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 
@@ -246,25 +247,14 @@ namespace EarTrumpet.DataModel
                 ReleaseNotes = body;
                 LastCheckTime = DateTime.Now;
 
-                // Find the setup .exe and portable .zip asset URLs
+                // Find the setup .exe and portable .zip asset URLs for our architecture.
                 _setupDownloadUrl = null;
                 _portableDownloadUrl = null;
                 var assets = json["assets"] as JArray;
                 if (assets != null)
                 {
-                    var setupAsset = assets.FirstOrDefault(a =>
-                        (a["name"]?.ToString() ?? "").EndsWith("-setup.exe", StringComparison.OrdinalIgnoreCase));
-                    if (setupAsset != null)
-                    {
-                        _setupDownloadUrl = setupAsset["browser_download_url"]?.ToString();
-                    }
-
-                    var portableAsset = assets.FirstOrDefault(a =>
-                        (a["name"]?.ToString() ?? "").EndsWith("-portable.zip", StringComparison.OrdinalIgnoreCase));
-                    if (portableAsset != null)
-                    {
-                        _portableDownloadUrl = portableAsset["browser_download_url"]?.ToString();
-                    }
+                    _setupDownloadUrl = FindAssetUrl(assets, "-setup", ".exe");
+                    _portableDownloadUrl = FindAssetUrl(assets, "-portable", ".zip");
                 }
 
                 if (Version.TryParse(versionStr, out var remoteVersion))
@@ -296,6 +286,58 @@ namespace EarTrumpet.DataModel
             {
                 IsChecking = false;
             }
+        }
+
+        /// <summary>
+        /// Release-asset suffix for the architecture this process is running as. x86 keeps the
+        /// historical unsuffixed name ("BetterTrumpet-3.4.0-setup.exe"); x64 and arm64 releases
+        /// carry "-x64"/"-arm64" so each install updates to a binary of its own architecture.
+        /// This is deliberately the *process* architecture, not the machine's: an x86 install
+        /// running under ARM64 emulation keeps updating to x86 rather than swapping the user's
+        /// install out from under them for a different binary. Migrating to a native build is a
+        /// manual reinstall.
+        /// </summary>
+        private static string ArchAssetSuffix
+        {
+            get
+            {
+                switch (RuntimeInformation.ProcessArchitecture)
+                {
+                    case Architecture.X64: return "-x64";
+                    case Architecture.Arm64: return "-arm64";
+                    default: return "";
+                }
+            }
+        }
+
+        /// <summary>
+        /// Picks the release asset matching this process's architecture, e.g.
+        /// "BetterTrumpet-3.4.0-setup-arm64.exe". Falls back to the unsuffixed x86 asset so
+        /// releases that ship x86 only (every release before 3.4.0, or one where an arch build
+        /// was dropped) still update — x86 runs everywhere, just not natively.
+        /// </summary>
+        private static string FindAssetUrl(JArray assets, string kind, string extension)
+        {
+            string UrlForSuffix(string suffix)
+            {
+                var wanted = kind + suffix + extension;
+                var asset = assets.FirstOrDefault(a =>
+                    (a["name"]?.ToString() ?? "").EndsWith(wanted, StringComparison.OrdinalIgnoreCase));
+                return asset?["browser_download_url"]?.ToString();
+            }
+
+            var suffixed = UrlForSuffix(ArchAssetSuffix);
+            if (suffixed != null || ArchAssetSuffix.Length == 0)
+            {
+                return suffixed;
+            }
+
+            var fallback = UrlForSuffix("");
+            if (fallback != null)
+            {
+                Trace.WriteLine($"UpdateService: No {ArchAssetSuffix} '{kind}' asset in this release — falling back to x86");
+            }
+            return fallback;
         }
 
         /// <summary>
@@ -351,7 +393,7 @@ namespace EarTrumpet.DataModel
 
             try
             {
-                var fileName = $"BetterTrumpet-{LatestVersion}-setup.exe";
+                var fileName = $"BetterTrumpet-{LatestVersion}-setup{ArchAssetSuffix}.exe";
                 tempPath = Path.Combine(Path.GetTempPath(), fileName);
 
                 Trace.WriteLine($"UpdateService: Downloading {_setupDownloadUrl} → {tempPath}");
@@ -421,7 +463,7 @@ namespace EarTrumpet.DataModel
 
             try
             {
-                zipPath = Path.Combine(Path.GetTempPath(), $"BetterTrumpet-{LatestVersion}-portable.zip");
+                zipPath = Path.Combine(Path.GetTempPath(), $"BetterTrumpet-{LatestVersion}-portable{ArchAssetSuffix}.zip");
                 extractDir = Path.Combine(Path.GetTempPath(), $"BetterTrumpet-{LatestVersion}-update");
 
                 Trace.WriteLine($"UpdateService: Portable mode — downloading {_portableDownloadUrl} → {zipPath}");

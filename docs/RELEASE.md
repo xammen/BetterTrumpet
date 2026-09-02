@@ -45,12 +45,14 @@ peut contenir du travail utilisateur non lie : ne pas utiliser `git add -A`.
 Mettre a jour les sources de version suivantes :
 
 - `GitVersion.yml` : `next-version: X.Y.Z`
-- `installer.iss` : `AppVersion`, `AppVerName`, `OutputBaseFilename`,
-  `VersionInfoVersion` (`X.Y.Z.0`) et `VersionInfoProductVersion`
-- `build-portable.ps1` : dossier et nom du ZIP
+- `installer.iss` : `#define AppVersionStr "X.Y.Z"` uniquement; `AppVersion`,
+  `AppVerName`, les trois `OutputName`, `VersionInfoVersion` (`X.Y.Z.0`) et
+  `VersionInfoProductVersion` en decoulent
+- `release.ps1` : `$Version`
+- `build-portable.ps1` : `$Version` (dossier et nom du ZIP)
 - `chocolatey/bettertrumpet.nuspec` : version et URL des notes
-- `chocolatey/tools/chocolateyInstall.ps1` : URL du setup; le checksum vient
-  apres le build
+- `chocolatey/tools/chocolateyInstall.ps1` : `$version` (les URL en decoulent);
+  les trois checksums viennent apres le build
 - `winget-manifest/xmn.BetterTrumpet*.yaml` et
   `winget-manifest/manifests/x/xmn/BetterTrumpet/X.Y.Z/` : les trois manifestes
   de staging et les trois manifestes canoniques (version, installer, locale);
@@ -63,7 +65,7 @@ Une recherche avant le commit permet de trouver les anciennes valeurs qui
 resteraient dans les fichiers de release :
 
 ```powershell
-rg -n "3\.2\.1|X\.Y\.Z" GitVersion.yml installer.iss build-portable.ps1 `
+rg -n "3\.3\.1|X\.Y\.Z" GitVersion.yml installer.iss release.ps1 build-portable.ps1 `
   chocolatey winget-manifest EarTrumpet.Package release-notes-*.md
 ```
 
@@ -100,7 +102,7 @@ Ajouter explicitement les fichiers prepares, puis creer un tag annote. Le build
 realise ensuite sur ce tag obtient la bonne version GitVersion.
 
 ```powershell
-git add GitVersion.yml installer.iss build-portable.ps1 `
+git add GitVersion.yml installer.iss release.ps1 build-portable.ps1 `
   chocolatey/bettertrumpet.nuspec chocolatey/tools/chocolateyInstall.ps1 `
   winget-manifest/xmn.BetterTrumpet.yaml `
   winget-manifest/xmn.BetterTrumpet.installer.yaml `
@@ -120,24 +122,24 @@ git push origin vX.Y.Z
 Si la release ne comprend pas le Store, omettre son manifeste du `git add`.
 Avant de continuer, confirmer que `git show vX.Y.Z` pointe vers le commit attendu.
 
+`release.ps1` inverse cet ordre : il construit d'abord et ne tagge qu'apres avoir
+ecrit les checksums, de sorte que le commit tagge les contienne deja. Les deux
+ordres produisent les memes binaires : `GitVersion.yml` fixe `next-version` et
+formate chaque champ de version en `{MajorMinorPatch}`.
+
 ## 4. Construire et verifier les artefacts GitHub
 
-Utiliser le MSBuild de Visual Studio installe. Le chemin ci-dessous est le
-chemin habituel; l'adapter si la version de Visual Studio est differente.
+`EarTrumpet.csproj` est au format SDK : `dotnet build` suffit et restaure tout
+seul. Ne pas construire la solution pour x64/arm64 : `EarTrumpet.ColorTool` et
+`EarTrumpet.Package` sont x86 uniquement et en sont exclus. Remplacer `x86` par
+`x64` ou `arm64` dans les trois commandes; le dossier de sortie est choisi par
+le fichier projet (`Build\Release`, `Build\Release-x64`, `Build\Release-arm64`).
 
 ```powershell
-nuget.exe restore EarTrumpet.vs15.sln
+dotnet build EarTrumpet\EarTrumpet.csproj --no-incremental -c Release -p:Platform=x86
 
-& 'C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe' `
-  EarTrumpet\EarTrumpet.csproj `
-  /p:Configuration=Release `
-  /p:Platform=x86 `
-  /p:OutputPath=..\Build\Release `
-  /t:Rebuild `
-  /v:minimal
-
-powershell -ExecutionPolicy Bypass -File build-portable.ps1
-& 'C:\Users\xammen\AppData\Local\Programs\Inno Setup 6\ISCC.exe' installer.iss
+powershell -ExecutionPolicy Bypass -File build-portable.ps1 -Arch x86
+& "$env:LOCALAPPDATA\Programs\Inno Setup 7\ISCC.exe" /DArch=x86 installer.iss
 
 [System.Diagnostics.FileVersionInfo]::GetVersionInfo('Build\Release\BetterTrumpet.exe') |
   Select-Object FileVersion, ProductVersion

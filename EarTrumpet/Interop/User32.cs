@@ -179,7 +179,15 @@ namespace EarTrumpet.Interop
             [FieldOffset(0)]
             public RAWINPUTHEADER header;
 
+            // RAWINPUTHEADER ends with hDevice (HANDLE) and wParam (WPARAM), so it is 16 bytes on
+            // x86 but 24 on x64/ARM64, and the union that follows is pointer-aligned. Getting this
+            // wrong does not throw: PtrToStructure just reads the union from the wrong offset and
+            // every RAWMOUSE field - usButtonData carries the wheel delta - comes back as garbage.
+#if X86
             [FieldOffset(16)]
+#elif X64 || ARM64
+            [FieldOffset(24)]
+#endif
             public RAWMOUSE mouse;
 
             // ...
@@ -295,8 +303,19 @@ namespace EarTrumpet.Interop
             IntPtr hWnd,
             GWL nIndex,
             int dwNewLong);
+#elif X64 || ARM64
+        [DllImport("user32.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
+        public static extern IntPtr GetWindowLongPtr(
+            IntPtr hWnd,
+            GWL nIndex);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
+        public static extern IntPtr SetWindowLongPtr(
+            IntPtr hWnd,
+            GWL nIndex,
+            IntPtr dwNewLong);
 #else
-#error [Get/Set]WindowLong not supported on 64-bit platforms
+#error Platform not supported. Define X86, X64 or ARM64.
 #endif
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode, PreserveSig = true)]

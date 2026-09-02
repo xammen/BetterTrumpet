@@ -26,6 +26,20 @@ namespace EarTrumpet.Interop
             public int UniqueProcessId;
             /* ... */
         }
+        #elif X64 || ARM64
+        [StructLayout(LayoutKind.Explicit)]
+        public struct SYSTEM_PROCESS_INFORMATION
+        {
+            [FieldOffset(0)]
+            public int NextEntryOffset;
+            /* ... */
+            [FieldOffset(56)]
+            public UNICODE_STRING ImageName;
+            /* ... */
+            [FieldOffset(80)]
+            public IntPtr UniqueProcessId;
+            /* ... */
+        }
         #else
         #error Platform not supported.
         #endif

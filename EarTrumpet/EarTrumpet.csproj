@@ -8,14 +8,12 @@
          floor satisfies the CA1416 platform-compatibility analyzer for the WinRT
          and Win32 (GDI+, Forms.Screen, Registry) call sites. -->
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
-    <RuntimeIdentifier>win-x86</RuntimeIdentifier>
     <SelfContained>false</SelfContained>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>EarTrumpet</RootNamespace>
     <AssemblyName>BetterTrumpet</AssemblyName>
-    <Platforms>x86</Platforms>
-    <PlatformTarget>x86</PlatformTarget>
+    <Platforms>x86;x64;arm64</Platforms>
     <ApplicationIcon>Assets\BetterTrumpet.ico</ApplicationIcon>
     <ApplicationManifest>App.manifest</ApplicationManifest>
     <LangVersion>latest</LangVersion>
@@ -42,14 +40,51 @@
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Platform)' == 'x86'">
+    <RuntimeIdentifier>win-x86</RuntimeIdentifier>
+    <PlatformTarget>x86</PlatformTarget>
+    <DefineConstants>$(DefineConstants);X86</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'x64'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <DefineConstants>$(DefineConstants);X64</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'arm64'">
+    <RuntimeIdentifier>win-arm64</RuntimeIdentifier>
+    <PlatformTarget>arm64</PlatformTarget>
+    <DefineConstants>$(DefineConstants);ARM64</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86' OR '$(Configuration)|$(Platform)' == 'VSDebug|x86'">
     <OutputPath>..\Build\Debug\</OutputPath>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <DefineConstants>$(DefineConstants);X86</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64' OR '$(Configuration)|$(Platform)' == 'VSDebug|x64'">
+    <OutputPath>..\Build\Debug-x64\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|arm64' OR '$(Configuration)|$(Platform)' == 'VSDebug|arm64'">
+    <OutputPath>..\Build\Debug-arm64\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'VSDebug|x86'">
+    <DefineConstants>$(DefineConstants);VSDEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'VSDebug|x64'">
+    <DefineConstants>$(DefineConstants);VSDEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'VSDebug|arm64'">
     <DefineConstants>$(DefineConstants);VSDEBUG</DefineConstants>
   </PropertyGroup>
 
@@ -58,7 +93,20 @@
     <SelfContained>true</SelfContained>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
-    <DefineConstants>$(DefineConstants);X86</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\Build\Release-x64\</OutputPath>
+    <SelfContained>true</SelfContained>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|arm64'">
+    <OutputPath>..\Build\Release-arm64\</OutputPath>
+    <SelfContained>true</SelfContained>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
   </PropertyGroup>
 
   <!-- NuGet packages. In-box-on-net8 assemblies (System.Memory, System.Buffers,

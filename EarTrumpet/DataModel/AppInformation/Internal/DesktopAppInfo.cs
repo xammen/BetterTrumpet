@@ -135,7 +135,11 @@ namespace EarTrumpet.DataModel.AppInformation.Internal
                     do
                     {
                         processInfo = Marshal.PtrToStructure<Ntdll.SYSTEM_PROCESS_INFORMATION>(entryPtr);
+#if X86
                         if (processInfo.UniqueProcessId == processId && processInfo.ImageName.Buffer != IntPtr.Zero)
+#elif X64 || ARM64
+                        if (processInfo.UniqueProcessId.ToInt32() == processId && processInfo.ImageName.Buffer != IntPtr.Zero)
+#endif
                         {
                             executableName = Marshal.PtrToStringUni(processInfo.ImageName.Buffer, processInfo.ImageName.Length / 2);
                             executableNameRetrieved = true;

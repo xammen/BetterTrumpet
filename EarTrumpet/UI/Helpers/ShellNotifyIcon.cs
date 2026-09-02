@@ -244,8 +244,19 @@ namespace EarTrumpet.UI.Helpers
         private SecondaryInvokeArgs CreateSecondaryInvokeArgs(InputType type, IntPtr wParam) => new SecondaryInvokeArgs
         {
             InputType = type,
-            Point = new Point((short)wParam.ToInt32(), wParam.ToInt32() >> 16)
+            Point = PointFromPackedCoords(wParam)
         };
+
+        // The notify-icon callback packs the anchor point into wParam as MAKEWPARAM(x, y). On
+        // 64-bit that DWORD arrives zero-extended in a UINT_PTR, so any negative y — keyboard
+        // invocation sends (-1,-1), and monitors above the primary are negative too — sets bit 31
+        // and IntPtr.ToInt32() would throw OverflowException (it throws regardless of the
+        // checked/unchecked context). Truncate explicitly, then sign-extend each 16-bit half.
+        private static Point PointFromPackedCoords(IntPtr wParam)
+        {
+            var packed = unchecked((int)wParam.ToInt64());
+            return new Point((short)packed, (short)(packed >> 16));
+        }
 
         private void OnNotifyIconMouseMove()
         {

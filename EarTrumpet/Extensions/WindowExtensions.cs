@@ -90,32 +90,46 @@ namespace EarTrumpet.Extensions
 
         public static void RemoveWindowStyle(this Window window, int styleToRemove)
         {
-            var currentStyle = User32.GetWindowLong(window.GetHandle(), User32.GWL.GWL_STYLE);
+            var currentStyle = GetWindowStyle(window.GetHandle(), User32.GWL.GWL_STYLE);
             if (currentStyle == 0)
             {
                 Trace.WriteLine($"WindowExtensions RemoveWindowStyle Failed: ({Marshal.GetLastWin32Error()})");
                 return;
             }
 
-            User32.SetWindowLong(window.GetHandle(), User32.GWL.GWL_STYLE, (currentStyle & ~styleToRemove));
+            SetWindowStyle(window.GetHandle(), User32.GWL.GWL_STYLE, currentStyle & ~styleToRemove);
         }
 
         public static void ApplyExtendedWindowStyle(this Window window, int newExStyle)
         {
-            var currentExStyle = User32.GetWindowLong(window.GetHandle(), User32.GWL.GWL_EXSTYLE);
+            var currentExStyle = GetWindowStyle(window.GetHandle(), User32.GWL.GWL_EXSTYLE);
             if (currentExStyle == 0)
             {
                 Trace.WriteLine($"WindowExtensions ApplyExtendedWindowStyle Failed: ({Marshal.GetLastWin32Error()})");
                 return;
             }
 
-            var oldExStyle = User32.SetWindowLong(window.GetHandle(), User32.GWL.GWL_EXSTYLE, currentExStyle | newExStyle);
+            var oldExStyle = SetWindowStyle(window.GetHandle(), User32.GWL.GWL_EXSTYLE, currentExStyle | newExStyle);
             if (oldExStyle != currentExStyle)
             {
                 Trace.WriteLine($"WindowExtensions ApplyExtendedWindowStyle Unexpected: ({oldExStyle} vs. {currentExStyle})");
                 return;
             }
         }
+
+#if X86
+        private static int GetWindowStyle(IntPtr hWnd, User32.GWL index) => User32.GetWindowLong(hWnd, index);
+        private static int SetWindowStyle(IntPtr hWnd, User32.GWL index, int style) => User32.SetWindowLong(hWnd, index, style);
+#elif X64 || ARM64
+        // GWL_STYLE/GWL_EXSTYLE are DWORD-sized, but [Get|Set]WindowLongPtr zero-extend them into
+        // a LONG_PTR. WS_POPUP alone sets bit 31, which would make IntPtr.ToInt32() throw
+        // OverflowException, so truncate explicitly on the way out and zero-extend on the way in.
+        private static int GetWindowStyle(IntPtr hWnd, User32.GWL index) =>
+            unchecked((int)User32.GetWindowLongPtr(hWnd, index).ToInt64());
+
+        private static int SetWindowStyle(IntPtr hWnd, User32.GWL index, int style) =>
+            unchecked((int)User32.SetWindowLongPtr(hWnd, index, new IntPtr(unchecked((long)(uint)style))).ToInt64());
+#endif
 
         public static IntPtr GetHandle(this Window window)
         {
