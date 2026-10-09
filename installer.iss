@@ -40,10 +40,10 @@ Name: "addtopath"; Description: "{cm:AddToPathTask}"; GroupDescription: "{cm:Opt
 [CustomMessages]
 english.StartupTask=Launch BetterTrumpet at Windows startup
 french.StartupTask=Lancer BetterTrumpet au demarrage de Windows
-english.AddToPathTask=Add to PATH (lets you run the "bt" volume command in any terminal - see docs/CLI.md on GitHub)
-french.AddToPathTask=Ajouter au PATH (permet d'utiliser la commande de volume "bt" dans n'importe quel terminal - voir docs/CLI.md sur GitHub)
-english.AddToPathAlready=BetterTrumpet folder is already in PATH
-french.AddToPathAlready=Le dossier BetterTrumpet est deja dans le PATH
+english.AddToPathTask=Add the "bt" command-line tool to PATH (control volume, devices and presets from any terminal, e.g. "bt help" - see docs/CLI.md on GitHub)
+french.AddToPathTask=Ajouter l'outil en ligne de commande "bt" au PATH (controler volume, peripheriques et presets depuis n'importe quel terminal, ex. "bt help" - voir docs/CLI.md sur GitHub)
+english.AddToPathAlreadyTask=Already added to PATH by a previous install ("bt" command-line tool) - uncheck to remove it
+french.AddToPathAlreadyTask=Deja ajoute au PATH par une installation precedente (outil "bt" en ligne de commande) - decochez pour le retirer
 english.OptionsGroup=Options:
 french.OptionsGroup=Options :
 english.LaunchAfterInstall=Launch BetterTrumpet
@@ -133,16 +133,43 @@ begin
   Result := Pos(';' + Uppercase(Param) + ';', ';' + Uppercase(OrigPath) + ';') = 0;
 end;
 
-// Reflect the current PATH state on the "Add to PATH" task checkbox:
-// already in PATH -> unchecked and disabled so the user is not left wondering.
+// Remove a directory from the user PATH (keeps the REG_EXPAND_SZ type). Returns True if it was there.
+function RemoveDirFromPath(Dir: string): Boolean;
+var
+  OrigPath: string;
+  P: Integer;
+begin
+  Result := False;
+  if not RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', OrigPath) then
+    exit;
+  // Wrap in semicolons so the first/last entries match like any other.
+  OrigPath := ';' + OrigPath + ';';
+  P := Pos(';' + Uppercase(Dir) + ';', Uppercase(OrigPath));
+  if P = 0 then
+    exit;
+  Delete(OrigPath, P, Length(Dir) + 1);
+  Delete(OrigPath, 1, 1);
+  if (Length(OrigPath) > 0) and (OrigPath[Length(OrigPath)] = ';') then
+    Delete(OrigPath, Length(OrigPath), 1);
+  RegWriteExpandStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', OrigPath);
+  Result := True;
+end;
+
+var
+  PathTaskInitialised: Boolean;
+  PathWasAlreadyPresent: Boolean;
+
+// "Add to PATH" task: when the folder is already in PATH, show it checked with an explanation
+// instead of greying it out. Unchecking it removes the entry (see CurStepChanged).
 procedure CurPageChanged(CurPageID: Integer);
 var
   I: Integer;
   TaskCaption: string;
   ItemCaption: string;
 begin
-  if CurPageID = wpSelectTasks then
+  if (CurPageID = wpSelectTasks) and not PathTaskInitialised then
   begin
+    PathTaskInitialised := True;
     if not NeedsAddPath(ExpandConstant('{app}')) then
     begin
       TaskCaption := CustomMessage('AddToPathTask');
@@ -156,8 +183,9 @@ begin
         end;
         if Pos(TaskCaption, ItemCaption) > 0 then
         begin
-          WizardForm.TasksList.CheckItem(I, coUncheck);
-          WizardForm.TasksList.ItemEnabled[I] := False;
+          PathWasAlreadyPresent := True;
+          WizardForm.TasksList.ItemCaption[I] := CustomMessage('AddToPathAlreadyTask');
+          WizardForm.TasksList.CheckItem(I, coCheck);
           break;
         end;
         I := I + 1;
@@ -166,26 +194,20 @@ begin
   end;
 end;
 
+// Only act when the user saw the checkbox pre-checked and cleared it: silent installs
+// (winget, Chocolatey, auto-update) never show the page and must leave PATH alone.
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if (CurStep = ssPostInstall) and PathWasAlreadyPresent and not WizardIsTaskSelected('addtopath') then
+    RemoveDirFromPath(ExpandConstant('{app}'));
+end;
+
 // Remove from PATH + clean BetterTrumpet registry on uninstall
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
-var
-  OrigPath: string;
-  AppDir: string;
-  P: Integer;
 begin
   if CurUninstallStep = usPostUninstall then
   begin
-    // Remove from PATH
-    AppDir := ExpandConstant('{app}');
-    if RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', OrigPath) then
-    begin
-      P := Pos(';' + Uppercase(AppDir), Uppercase(OrigPath));
-      if P > 0 then
-      begin
-        Delete(OrigPath, P, Length(';' + AppDir));
-        RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', OrigPath);
-      end;
-    end;
+    RemoveDirFromPath(ExpandConstant('{app}'));
 
     // Clean all BetterTrumpet settings (so reinstall triggers onboarding)
     RegDeleteKeyIncludingSubkeys(HKEY_CURRENT_USER, 'Software\EarTrumpet');
