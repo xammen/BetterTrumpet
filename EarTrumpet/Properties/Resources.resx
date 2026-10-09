@@ -1046,7 +1046,7 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
     <value>Eco Mode</value>
   </data>
   <data name="SettingsEcoModeDesc" xml:space="preserve">
-    <value>Reduce CPU/GPU usage on battery</value>
+    <value>Lower refresh rates to save CPU/GPU, always or only on battery</value>
   </data>
   <data name="SettingsEcoModeOverridden" xml:space="preserve">
     <value>Overridden by Eco Mode when active</value>
@@ -1194,7 +1194,7 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
     <value>Max</value>
   </data>
   <data name="SettingsEcoModeEnable" xml:space="preserve">
-    <value>Enable Eco Mode (20 FPS)</value>
+    <value>Always use Eco Mode (20 FPS)</value>
   </data>
   <data name="SettingsEcoModeEnableTip" xml:space="preserve">
     <value>Reduces peak meter refresh rate to 20 FPS, significantly lowering CPU usage. Ideal for laptops or when running on battery power.</value>
@@ -2158,7 +2158,13 @@ Details: {0}</value>
     <value>peak</value>
   </data>
   <data name="WebSettingsHealthUser" xml:space="preserve">
-    <value>User</value>
+    <value>Window objects (USER)</value>
+  </data>
+  <data name="WebSettingsHealthGdi" xml:space="preserve">
+    <value>Graphics objects (GDI)</value>
+  </data>
+  <data name="WebSettingsHealthHint" xml:space="preserve">
+    <value>Windows resource counters used to spot leaks. Graphics (GDI) and window (USER) objects should stay roughly stable over time; peaks are the highest values since launch.</value>
   </data>
   <data name="WebSettingsHealthThreads" xml:space="preserve">
     <value>Threads</value>

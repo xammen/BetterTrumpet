@@ -19,9 +19,14 @@ namespace EarTrumpet.Diagnosis
     static class HealthMonitor
     {
         private static DispatcherTimer _timer;
-        private static long _peakMemoryMB;
-        private static int _peakGdiHandles;
-        private static int _peakUserHandles;
+
+        // GetGuiResources flags. The *_PEAK flags return the kernel's own high-water mark, so peaks
+        // stay correct between checks (tracking them on the 5-minute timer showed peaks below the
+        // live value in the diagnostics view, #76).
+        private const int GR_GDIOBJECTS = 0;
+        private const int GR_USEROBJECTS = 1;
+        private const int GR_GDIOBJECTS_PEAK = 2;
+        private const int GR_USEROBJECTS_PEAK = 4;
 
         private const long MemoryWarnMB = 200;
         private const long MemoryCriticalMB = 400;
@@ -60,41 +65,41 @@ namespace EarTrumpet.Diagnosis
 
                 // Memory check
                 var memoryMB = process.WorkingSet64 / (1024 * 1024);
-                if (memoryMB > _peakMemoryMB) _peakMemoryMB = memoryMB;
+                var peakMemoryMB = process.PeakWorkingSet64 / (1024 * 1024);
 
                 if (memoryMB > MemoryCriticalMB)
                 {
-                    Trace.WriteLine($"HealthMonitor: CRITICAL — Memory {memoryMB}MB exceeds {MemoryCriticalMB}MB limit (peak: {_peakMemoryMB}MB)");
+                    Trace.WriteLine($"HealthMonitor: CRITICAL — Memory {memoryMB}MB exceeds {MemoryCriticalMB}MB limit (peak: {peakMemoryMB}MB)");
                 }
                 else if (memoryMB > MemoryWarnMB)
                 {
-                    Trace.WriteLine($"HealthMonitor: WARN — Memory {memoryMB}MB exceeds {MemoryWarnMB}MB warning (peak: {_peakMemoryMB}MB)");
+                    Trace.WriteLine($"HealthMonitor: WARN — Memory {memoryMB}MB exceeds {MemoryWarnMB}MB warning (peak: {peakMemoryMB}MB)");
                 }
 
                 // GDI handle check (Windows has a per-process limit of ~10000)
-                var gdiHandles = GetGuiResources(process.Handle, 0); // GR_GDIOBJECTS
-                if (gdiHandles > _peakGdiHandles) _peakGdiHandles = gdiHandles;
+                var gdiHandles = GetGuiResources(process.Handle, GR_GDIOBJECTS);
+                var peakGdiHandles = GetGuiResources(process.Handle, GR_GDIOBJECTS_PEAK);
 
                 if (gdiHandles > HandleCritical)
                 {
-                    Trace.WriteLine($"HealthMonitor: CRITICAL — GDI handles {gdiHandles} exceeds {HandleCritical} (peak: {_peakGdiHandles})");
+                    Trace.WriteLine($"HealthMonitor: CRITICAL — GDI handles {gdiHandles} exceeds {HandleCritical} (peak: {peakGdiHandles})");
                 }
                 else if (gdiHandles > HandleWarn)
                 {
-                    Trace.WriteLine($"HealthMonitor: WARN — GDI handles {gdiHandles} exceeds {HandleWarn} (peak: {_peakGdiHandles})");
+                    Trace.WriteLine($"HealthMonitor: WARN — GDI handles {gdiHandles} exceeds {HandleWarn} (peak: {peakGdiHandles})");
                 }
 
                 // User handle check
-                var userHandles = GetGuiResources(process.Handle, 1); // GR_USEROBJECTS
-                if (userHandles > _peakUserHandles) _peakUserHandles = userHandles;
+                var userHandles = GetGuiResources(process.Handle, GR_USEROBJECTS);
+                var peakUserHandles = GetGuiResources(process.Handle, GR_USEROBJECTS_PEAK);
 
                 if (userHandles > HandleCritical)
                 {
-                    Trace.WriteLine($"HealthMonitor: CRITICAL — User handles {userHandles} exceeds {HandleCritical} (peak: {_peakUserHandles})");
+                    Trace.WriteLine($"HealthMonitor: CRITICAL — User handles {userHandles} exceeds {HandleCritical} (peak: {peakUserHandles})");
                 }
                 else if (userHandles > HandleWarn)
                 {
-                    Trace.WriteLine($"HealthMonitor: WARN — User handles {userHandles} exceeds {HandleWarn} (peak: {_peakUserHandles})");
+                    Trace.WriteLine($"HealthMonitor: WARN — User handles {userHandles} exceeds {HandleWarn} (peak: {peakUserHandles})");
                 }
             }
             catch (Exception ex)
@@ -112,16 +117,16 @@ namespace EarTrumpet.Diagnosis
             {
                 var process = Process.GetCurrentProcess();
                 var memMB = process.WorkingSet64 / (1024 * 1024);
-                var gdi = GetGuiResources(process.Handle, 0);
-                var user = GetGuiResources(process.Handle, 1);
+                var gdi = GetGuiResources(process.Handle, GR_GDIOBJECTS);
+                var user = GetGuiResources(process.Handle, GR_USEROBJECTS);
                 var threads = process.Threads.Count;
                 var uptime = DateTime.Now - process.StartTime;
 
-                return $"Memory: {memMB}MB (peak: {_peakMemoryMB}MB) | " +
-                       $"GDI: {gdi} (peak: {_peakGdiHandles}) | " +
-                       $"User: {user} (peak: {_peakUserHandles}) | " +
+                return $"Memory: {memMB}MB (peak: {process.PeakWorkingSet64 / (1024 * 1024)}MB) | " +
+                       $"GDI: {gdi} (peak: {GetGuiResources(process.Handle, GR_GDIOBJECTS_PEAK)}) | " +
+                       $"User: {user} (peak: {GetGuiResources(process.Handle, GR_USEROBJECTS_PEAK)}) | " +
                        $"Threads: {threads} | " +
-                       $"Uptime: {uptime:hh\\:mm\\:ss}";
+                       $"Uptime: {uptime:d\\.hh\\:mm\\:ss}";
             }
             catch
             {

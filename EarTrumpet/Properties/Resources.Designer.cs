@@ -3535,6 +3535,12 @@ namespace EarTrumpet.Properties {
         public static string WebSettingsHealthUser {
             get { return ResourceManager.GetString("WebSettingsHealthUser", resourceCulture); }
         }
+        public static string WebSettingsHealthGdi {
+            get { return ResourceManager.GetString("WebSettingsHealthGdi", resourceCulture); }
+        }
+        public static string WebSettingsHealthHint {
+            get { return ResourceManager.GetString("WebSettingsHealthHint", resourceCulture); }
+        }
         public static string WebSettingsHealthThreads {
             get { return ResourceManager.GetString("WebSettingsHealthThreads", resourceCulture); }
         }

@@ -1032,7 +1032,7 @@
     <value>节能模式</value>
   </data>
   <data name="SettingsEcoModeDesc" xml:space="preserve">
-    <value>在电池供电时降低 CPU/GPU 使用</value>
+    <value>降低刷新率以减少 CPU/GPU 使用（始终或仅在电池供电时）</value>
   </data>
   <data name="SettingsEcoModeOverridden" xml:space="preserve">
     <value>节能模式激活时覆盖此项</value>
@@ -1179,7 +1179,7 @@
     <value>最大</value>
   </data>
   <data name="SettingsEcoModeEnable" xml:space="preserve">
-    <value>启用节能模式（20 FPS）</value>
+    <value>始终使用节能模式（20 FPS）</value>
   </data>
   <data name="SettingsEcoModeEnableTip" xml:space="preserve">
     <value>将峰值表刷新率降至 20 FPS，显著降低 CPU 使用。适合笔记本电脑或电池供电时使用。</value>

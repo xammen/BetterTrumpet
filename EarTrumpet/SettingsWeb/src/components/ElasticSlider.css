@@ -87,12 +87,25 @@
   width: 20px;
   height: 20px;
   place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
   color: var(--colorNeutralForeground3);
   font-size: 16px;
   font-weight: 600;
   line-height: 1;
   will-change: transform;
   transition: color 180ms cubic-bezier(.2,0,0,1), transform 180ms cubic-bezier(.2,0,0,1);
+}
+
+.elastic-slider__icon:hover {
+  color: var(--colorNeutralForeground1);
+}
+
+.elastic-slider--disabled .elastic-slider__icon {
+  cursor: not-allowed;
 }
 
 .elastic-slider__root:hover .elastic-slider__icon {

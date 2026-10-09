@@ -1200,6 +1200,7 @@ function HealthBlock({ payload }: { payload: SettingsPayload }) {
           : <span className="bt-health-item" key={index}><span className="bt-health-value">{part}</span></span>;
       })}
     </div>
+    <span className="bt-health-hint">{t(payload, "healthHint", "")}</span>
   </div>;
 }
 

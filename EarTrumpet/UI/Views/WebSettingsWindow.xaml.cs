@@ -853,7 +853,7 @@ namespace EarTrumpet.UI.Views
                     ["confirmClearAll"] = R("WebSettingsConfirmClearAll"), ["cancel"] = R("WebSettingsCancel"),
                     ["saved"] = R("WebSettingsSaved"), ["applied"] = R("WebSettingsApplied"),
                     ["hexColor"] = R("WebSettingsHexColor"), ["preview"] = R("WebSettingsPreview"),
-                    ["appHealth"] = R("WebSettingsAppHealth"), ["searchShortcut"] = R("WebSettingsSearchShortcut"),
+                    ["appHealth"] = R("WebSettingsAppHealth"), ["healthHint"] = R("WebSettingsHealthHint"),["searchShortcut"] = R("WebSettingsSearchShortcut"),
                     ["disabledByEco"] = R("WebSettingsDisabledByEco"),
                     ["requiresSmoothAnimation"] = R("WebSettingsRequiresSmoothAnimation"),
                     ["requiresAutoCheck"] = R("WebSettingsRequiresAutoCheck"),
@@ -986,6 +986,7 @@ namespace EarTrumpet.UI.Views
             return summary
                 .Replace("Memory:", R("WebSettingsHealthMemory") + ":")
                 .Replace("(peak:", "(" + R("WebSettingsHealthPeak") + ":")
+                .Replace("GDI:", R("WebSettingsHealthGdi") + ":")
                 .Replace("User:", R("WebSettingsHealthUser") + ":")
                 .Replace("Threads:", R("WebSettingsHealthThreads") + ":")
                 .Replace("Uptime:", R("WebSettingsHealthUptime") + ":");

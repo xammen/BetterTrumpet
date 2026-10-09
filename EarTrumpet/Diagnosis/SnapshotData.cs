@@ -34,7 +34,7 @@ namespace EarTrumpet.Diagnosis
                     { "runtimeMinutes", () => (int)EarTrumpet.App.Duration.TotalMinutes },
                     { "gdiObjects", () => User32.GetGuiResources(Kernel32.GetCurrentProcess(), User32.GR_FLAGS.GR_GDIOBJECTS) },
                     { "userObjects", () => User32.GetGuiResources(Kernel32.GetCurrentProcess(), User32.GR_FLAGS.GR_USEROBJECTS) },
-                    { "globalGdiObjects", () => User32.GetGuiResources(User32.GR_GLOBAL, User32.GR_FLAGS.GR_USEROBJECTS) },
+                    { "globalGdiObjects", () => User32.GetGuiResources(User32.GR_GLOBAL, User32.GR_FLAGS.GR_GDIOBJECTS) },
                     { "globalUserObjects", () => User32.GetGuiResources(User32.GR_GLOBAL, User32.GR_FLAGS.GR_USEROBJECTS) },
                     { "handleCount", () => GetProcessHandleCount() },
 #if DEBUG

@@ -4,6 +4,8 @@ import type { KeyboardEvent, PointerEvent, ReactNode } from "react";
 import "./ElasticSlider.css";
 
 const MAX_OVERFLOW = 34;
+// Wheel bursts update the readout live but write to the host once the wheel settles.
+const WHEEL_COMMIT_DELAY_MS = 250;
 
 interface ElasticSliderProps {
   value?: number;
@@ -46,6 +48,8 @@ export default function ElasticSlider({
   const valueRef = useRef(initialValue);
   const lastCommittedRef = useRef(initialValue);
   const sliderRef = useRef<HTMLDivElement>(null);
+  const controlRef = useRef<HTMLDivElement>(null);
+  const wheelCommitTimer = useRef<number | undefined>(undefined);
   const [region, setRegion] = useState<"left" | "middle" | "right">("middle");
   const clientX = useMotionValue(0);
   const overflow = useMotionValue(0);
@@ -141,12 +145,50 @@ export default function ElasticSlider({
     else animate(overflow, 0, { type: "spring", bounce: 0.28, visualDuration: 0.32 });
   };
 
+  const stepDelta = isStepped ? stepSize : (maxValue - startingValue) / 100;
+
+  // The -/+ icons nudge by one step, like the arrow keys.
+  const nudge = (direction: 1 | -1) => {
+    if (disabled) return;
+    update(valueRef.current + direction * stepDelta);
+    commit();
+  };
+
+  // Scrolling over the slider adjusts it by one step per notch instead of scrolling the page,
+  // matching the flyout. React's onWheel is passive, so preventDefault needs a native listener.
+  const wheelRef = useRef<(event: WheelEvent) => void>(() => {});
+  const commitRef = useRef(commit);
+  commitRef.current = commit;
+  wheelRef.current = event => {
+    if (disabled || event.deltaY === 0) return;
+    event.preventDefault();
+    update(valueRef.current + (event.deltaY < 0 ? stepDelta : -stepDelta));
+    window.clearTimeout(wheelCommitTimer.current);
+    wheelCommitTimer.current = window.setTimeout(() => {
+      wheelCommitTimer.current = undefined;
+      commitRef.current();
+    }, WHEEL_COMMIT_DELAY_MS);
+  };
+  useEffect(() => {
+    const element = controlRef.current;
+    if (!element) return;
+    const listener = (event: WheelEvent) => wheelRef.current(event);
+    element.addEventListener("wheel", listener, { passive: false });
+    return () => {
+      element.removeEventListener("wheel", listener);
+      // Flush a pending wheel commit so a value scrolled just before unmount is not lost.
+      if (wheelCommitTimer.current !== undefined) {
+        window.clearTimeout(wheelCommitTimer.current);
+        commitRef.current();
+      }
+    };
+  }, []);
+
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (disabled) return;
-    const delta = isStepped ? stepSize : (maxValue - startingValue) / 100;
     let next: number | undefined;
-    if (event.key === "ArrowLeft" || event.key === "ArrowDown") next = valueRef.current - delta;
-    if (event.key === "ArrowRight" || event.key === "ArrowUp") next = valueRef.current + delta;
+    if (event.key === "ArrowLeft" || event.key === "ArrowDown") next = valueRef.current - stepDelta;
+    if (event.key === "ArrowRight" || event.key === "ArrowUp") next = valueRef.current + stepDelta;
     if (event.key === "Home") next = startingValue;
     if (event.key === "End") next = maxValue;
     if (next === undefined) return;
@@ -160,14 +202,15 @@ export default function ElasticSlider({
   return (
     <div className={`elastic-slider ${disabled ? "elastic-slider--disabled" : ""} ${className}`.trim()} aria-disabled={disabled || undefined}>
       <motion.div
+        ref={controlRef}
         className="elastic-slider__control"
         onHoverStart={() => reducedMotion || disabled ? scale.jump(1) : animate(scale, 1.12, { duration: 0.16, ease: "easeOut" })}
         onHoverEnd={() => reducedMotion ? scale.jump(1) : animate(scale, 1, { duration: 0.18, ease: "easeOut" })}
         style={{ opacity: iconOpacity }}
       >
-        <motion.span className="elastic-slider__icon" animate={{ scale: region === "left" && !reducedMotion ? [1, 1.22, 1] : 1 }} style={{ x: leftX }} aria-hidden="true">
+        <motion.button type="button" className="elastic-slider__icon" tabIndex={-1} disabled={disabled} onClick={() => nudge(-1)} animate={{ scale: region === "left" && !reducedMotion ? [1, 1.22, 1] : 1 }} style={{ x: leftX }} aria-hidden="true">
           {leftIcon}
-        </motion.span>
+        </motion.button>
         <div
           ref={sliderRef}
           className="elastic-slider__root"
@@ -202,9 +245,9 @@ export default function ElasticSlider({
             </div>
           </motion.div>
         </div>
-        <motion.span className="elastic-slider__icon" animate={{ scale: region === "right" && !reducedMotion ? [1, 1.22, 1] : 1 }} style={{ x: rightX }} aria-hidden="true">
+        <motion.button type="button" className="elastic-slider__icon" tabIndex={-1} disabled={disabled} onClick={() => nudge(1)} animate={{ scale: region === "right" && !reducedMotion ? [1, 1.22, 1] : 1 }} style={{ x: rightX }} aria-hidden="true">
           {rightIcon}
-        </motion.span>
+        </motion.button>
       </motion.div>
       <output className="elastic-slider__value" aria-hidden="true" style={{ minWidth: `${outputWidth}ch` }}>{format(draft)}</output>
     </div>

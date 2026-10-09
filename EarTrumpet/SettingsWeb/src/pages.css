@@ -697,6 +697,16 @@
   color: #e6e9ec;
 }
 
+.bt-health-hint {
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(244, 247, 245, 0.5);
+}
+
+.bt-health-hint:empty {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bt-confirm.bt-confirm,
   .bt-choose-chevron,

@@ -1028,7 +1028,7 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Mode éco</value>
   </data>
   <data name="SettingsEcoModeDesc" xml:space="preserve">
-    <value>Réduire la consommation CPU/GPU sur batterie</value>
+    <value>Réduire la fréquence de rafraîchissement pour économiser CPU/GPU, en permanence ou seulement sur batterie</value>
   </data>
   <data name="SettingsEcoModeOverridden" xml:space="preserve">
     <value>Écrasé par le mode éco quand actif</value>
@@ -1131,7 +1131,7 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Max</value>
   </data>
   <data name="SettingsEcoModeEnable" xml:space="preserve">
-    <value>Activer le mode Éco (20 FPS)</value>
+    <value>Toujours utiliser le mode Éco (20 FPS)</value>
   </data>
   <data name="SettingsEcoModeEnableTip" xml:space="preserve">
     <value>Réduit le taux de rafraîchissement à 20 FPS, diminuant significativement l'utilisation CPU. Idéal pour les portables ou sur batterie.</value>
@@ -2134,7 +2134,13 @@ Détails : {0}</value>
     <value>pic</value>
   </data>
   <data name="WebSettingsHealthUser" xml:space="preserve">
-    <value>USER</value>
+    <value>Objets fenêtre (USER)</value>
+  </data>
+  <data name="WebSettingsHealthGdi" xml:space="preserve">
+    <value>Objets graphiques (GDI)</value>
+  </data>
+  <data name="WebSettingsHealthHint" xml:space="preserve">
+    <value>Compteurs de ressources Windows servant à repérer les fuites. Les objets graphiques (GDI) et fenêtre (USER) doivent rester à peu près stables dans le temps ; les pics sont les valeurs les plus hautes depuis le lancement.</value>
   </data>
   <data name="WebSettingsHealthThreads" xml:space="preserve">
     <value>Threads</value>
