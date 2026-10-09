@@ -27,6 +27,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
             {
                 if (value != _default)
                 {
+                    SetDefaultDevice(value, ERole.eConsole);
                     SetDefaultDevice(value, ERole.eMultimedia);
                     // The system confirmation callback may never fire (virtual/RDP devices),
                     // so commit the requested default immediately. QueryDefaultDevice stays
@@ -113,7 +114,11 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
         {
             TraceLine("QueryDefaultDevice");
             var currentDeviceId = _default?.Id;
-            _default = GetDefaultDevice();
+            // The Windows Sound panel and tray volume flag the Console role as "the" default.
+            // Third-party tools/drivers can move Console without Multimedia (or vice versa), so
+            // reading Multimedia alone left BetterTrumpet pinned on a stale device (#71/#72).
+            _default = GetDefaultDevice(ERole.eConsole) ?? GetDefaultDevice(ERole.eMultimedia);
+            TraceLine($"QueryDefaultDevice roles console={GetDefaultDevice(ERole.eConsole)?.Id} multimedia={GetDefaultDevice(ERole.eMultimedia)?.Id} communications={GetDefaultDevice(ERole.eCommunications)?.Id}");
             string newDeviceId = _default?.Id;
             if (currentDeviceId != newDeviceId)
             {
