@@ -128,35 +128,80 @@ select:focus-visible {
   scrollbar-color: rgb(155 123 234 / 0.38) transparent;
 }
 
-/* Main pane: slim premium scrollbar. The thumb is a thin rounded accent line
-   that brightens on hover; the track stays transparent so there is no hard
-   reserved gutter column. */
+/* Main pane scrollbar. Chromium ignores every ::-webkit-scrollbar rule as soon as
+   scrollbar-width/scrollbar-color are set (Edge 121+), so the global thin rule is
+   reset here. The thumb is a neutral 4px pill (the accent is reserved for actions)
+   that thickens on hover; the track starts below the caption buttons and stops
+   short of the panel's rounded bottom corner. */
 .settings-main {
-  scrollbar-width: thin;
-  scrollbar-color: rgb(155 123 234 / 0.32) transparent;
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}
+
+/* Scroll edges: the content itself fades out (a mask, not a tinted overlay), so
+   cards dissolve into the atmosphere under the caption buttons instead of sliding
+   beneath them. The fade lengths are registered so they can animate in and out. */
+@property --fade-top {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-bottom {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.settings-main {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
+  transition: --fade-top 220ms cubic-bezier(.2, 0, 0, 1), --fade-bottom 220ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.settings-main.fade-top {
+  --fade-top: 64px;
+}
+
+.settings-main.fade-bottom {
+  --fade-bottom: 40px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-main {
+    transition: none;
+  }
 }
 
 .settings-main::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 12px;
 }
 
 .settings-main::-webkit-scrollbar-track {
+  margin: 52px 0 16px;
   background: transparent;
 }
 
 .settings-main::-webkit-scrollbar-thumb {
-  min-height: 44px;
-  background: rgb(155 123 234 / 0.32);
-  border: 2px solid transparent;
+  min-height: 48px;
+  background: rgba(255, 255, 255, .16);
+  border: 4px solid transparent;
   border-radius: 999px;
   background-clip: padding-box;
-  transition: background 200ms cubic-bezier(.33,1,.68,1), border-width 200ms cubic-bezier(.33,1,.68,1);
 }
 
 .settings-main::-webkit-scrollbar-thumb:hover {
-  background: rgb(177 150 241 / 0.55);
-  border-width: 1px;
+  background-color: rgba(255, 255, 255, .3);
+  border-width: 3px;
+}
+
+.settings-main::-webkit-scrollbar-thumb:active {
+  background-color: rgba(255, 255, 255, .38);
+  border-width: 3px;
+}
+
+.settings-main::-webkit-scrollbar-button {
+  display: none;
 }
 
 *::-webkit-scrollbar {

@@ -131,58 +131,68 @@
   transform: scale(0.98);
 }
 
-/* Caption chrome: quiet ghost buttons on a faint dark backdrop so they stay
-   legible on the bright atmosphere gradient. Whisper on hover; the close
-   button keeps only a muted red veil instead of a full-bleed system-red block. */
-.window-controls-polished {
-  padding: 2px;
-  border-radius: 10px;
-  background: rgba(8, 7, 18, .26);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06);
-}
-
-.window-controls-polished .window-button-polished {
-  margin-right: 0;
-}
-
+/* Caption chrome: two bare round buttons floating over the main surface, no
+   backdrop plate. Neutral veil on hover, a solid red disc on close hover so the
+   destructive action reads instantly; a quick press-in on both. */
 .window-button-polished {
-  min-width: 36px !important;
-  width: 36px !important;
-  min-height: 28px !important;
-  height: 28px !important;
-  padding: 0 !important;
-  margin-right: 2px;
-  border-radius: 8px !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none;
-  color: rgba(244, 247, 245, .62) !important;
-  transition: color 140ms cubic-bezier(.33,1,.68,1), background-color 140ms cubic-bezier(.33,1,.68,1) !important;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(244, 247, 245, .7);
+  cursor: default;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 140ms cubic-bezier(.2, 0, 0, 1),
+    color 140ms cubic-bezier(.2, 0, 0, 1),
+    transform 140ms cubic-bezier(.2, 0, 0, 1);
 }
 
 .window-button-polished svg {
-  transform: scale(.82);
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.15;
+  stroke-linecap: round;
 }
 
 .window-button-polished:hover {
-  color: rgba(244, 247, 245, .92) !important;
-  background-color: rgba(255, 255, 255, .08) !important;
-  box-shadow: none !important;
+  background-color: rgba(255, 255, 255, .1);
+  color: #fff;
 }
 
 .window-button-polished:active {
-  background-color: rgba(255, 255, 255, .1) !important;
+  background-color: rgba(255, 255, 255, .07);
+  transform: scale(.92);
+  transition-duration: 60ms;
+}
+
+.window-button-polished:focus-visible {
+  box-shadow: 0 0 0 2px #9b7bea;
 }
 
 .close-button-polished:hover {
-  color: rgba(255, 226, 220, .92) !important;
-  background-color: rgba(150, 34, 26, .55) !important;
-  box-shadow: none !important;
+  background-color: #e5484d;
+  color: #fff;
 }
 
 .close-button-polished:active {
-  background-color: rgba(130, 28, 22, .65) !important;
+  background-color: #c93a3f;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .window-button-polished {
+    transition: none;
+  }
+
+  .window-button-polished:active {
+    transform: none;
+  }
 }
 
 /* Mobile header with backdrop blur */

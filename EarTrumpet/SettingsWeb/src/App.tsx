@@ -34,8 +34,6 @@ import {
   SettingsIcon,
   ShieldCheckIcon,
 } from "@animateicons/react/lucide";
-import { Dismiss16Regular } from "@fluentui/react-icons/svg/dismiss";
-import { Subtract16Regular } from "@fluentui/react-icons/svg/subtract";
 import appIcon from "../../Assets/icon.png";
 import { DitherField } from "./components/DitherField";
 import { SettingsPage } from "./SettingsPages";
@@ -178,23 +176,6 @@ const useStyles = makeStyles({
   // ── Main: atmospheric sage surface ──
   main: { position: "relative", display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0, overflow: "hidden", contain: "layout paint", borderRadius: "18px", backgroundColor: "#11123f" },
   mainScroll: { position: "relative", zIndex: 1, flex: "1 1 auto", minHeight: 0, overflowY: "auto", overscrollBehavior: "contain", scrollBehavior: "smooth", scrollbarGutter: "stable both-edges" },
-  // Soft scrims at the top and bottom edges of the scrollable main pane.
-  // A plain gradient only (no backdrop-filter): re-blurring every scroll frame
-  // in Chromium is expensive and makes the wheel feel heavy.
-  mainFade: {
-    position: "absolute", left: 0, right: 0, zIndex: 2, height: "56px",
-    pointerEvents: "none",
-    opacity: 0, transitionProperty: "opacity", transitionDuration: "240ms",
-  },
-  mainFadeTop: {
-    top: 0,
-    backgroundImage: "linear-gradient(180deg, rgba(17,18,63,0.42) 0%, rgba(17,18,63,0) 100%)",
-  },
-  mainFadeBottom: {
-    bottom: 0,
-    backgroundImage: "linear-gradient(0deg, rgba(17,18,63,0.42) 0%, rgba(17,18,63,0) 100%)",
-  },
-  mainFadeVisible: { opacity: 1 },
   // Ink dither stage (lab variant 07). Gradient base + canvas field.
   atmosphere: {
     position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden",
@@ -287,17 +268,9 @@ const useStyles = makeStyles({
   colorInput: { width: "42px", height: "34px", padding: "3px", border: "1px solid rgba(255,255,255,.14)", borderRadius: "14px", backgroundColor: "rgba(255,255,255,.06)", transitionProperty: "transform, border-color", transitionDuration: "180ms" },
 
   // ── Window chrome ──
-  windowControls: { position: "fixed", top: "8px", right: "10px", zIndex: 30, display: "flex", alignItems: "center", gap: "2px" },
+  windowControls: { position: "fixed", top: "12px", right: "16px", zIndex: 30, display: "flex", alignItems: "center", gap: "4px", "@media (max-width: 680px)": { top: "14px" } },
   dragRegion: { position: "fixed", top: 0, right: "104px", left: "264px", zIndex: 19, height: "44px", touchAction: "none", userSelect: "none", "@media (max-width: 680px)": { left: 0 } },
   dragRegionCollapsed: { left: "80px" },
-  windowButton: {
-    width: "44px", height: "32px", minWidth: "44px", minHeight: "32px", padding: 0,
-    borderRadius: "6px",
-    color: "rgba(244,247,245,.55)", backgroundColor: "transparent", border: "none",
-    transitionProperty: "color, background-color", transitionDuration: "160ms",
-  },
-  closeButton: {},
-  windowIcon: { display: "grid", placeItems: "center", width: "20px", height: "20px" },
 
   // ── Mobile ──
   mobileHeader: { display: "none", "@media (max-width: 680px)": { display: "flex", position: "fixed", inset: "0 0 auto 0", zIndex: 10, alignItems: "center", gap: "12px", height: "58px", padding: "0 96px 0 18px", backgroundColor: "rgba(5, 7, 6, 0.92)", borderBottom: "1px solid rgba(255,255,255,.08)" } },
@@ -826,7 +799,7 @@ export function App() {
             transition={{ duration: 0.36, ease: morphEase, delay: 0.08 }}
           >
             <div className={styles.atmosphere}><DitherField live={!payload.status.ecoModeActive} /></div>
-            <div ref={mainScrollRef} className={mergeClasses(styles.mainScroll, "settings-main")} onScroll={updateMainEdgeFade}>
+            <div ref={mainScrollRef} className={mergeClasses(styles.mainScroll, "settings-main", mainEdgeFade.top && "fade-top", mainEdgeFade.bottom && "fade-bottom")} onScroll={updateMainEdgeFade}>
               <div className={mergeClasses(styles.mobileHeader, "mobile-header-polished")}><img className={styles.logo} src={appIcon} alt="" /><Text weight="semibold">{payload.appName}</Text><Button className={styles.mobileMenuButton} appearance="subtle" icon={<MenuIcon size={20} />} aria-label={mobileDrawerOpen ? (payload.labels.closeNavigation || "Close navigation") : (payload.labels.openNavigation || "Open navigation")} aria-expanded={mobileDrawerOpen} title={mobileDrawerOpen ? (payload.labels.closeNavigation || "Close navigation") : (payload.labels.openNavigation || "Open navigation")} onClick={() => setMobileDrawerOpen(value => !value)} /></div>
               <div ref={contentRef} className={styles.content}>
                 {bridgeError && <MessageBar className={styles.message} intent="error"><MessageBarBody>{bridgeError}</MessageBarBody></MessageBar>}
@@ -837,8 +810,6 @@ export function App() {
                 {!selectedPage && <Text className={styles.searchEmpty}>{payload.labels.noResults || "No settings match your search."}</Text>}
               </div>
             </div>
-            <div className={mergeClasses(styles.mainFade, styles.mainFadeTop, mainEdgeFade.top && styles.mainFadeVisible)} aria-hidden="true" />
-            <div className={mergeClasses(styles.mainFade, styles.mainFadeBottom, mainEdgeFade.bottom && styles.mainFadeVisible)} aria-hidden="true" />
           </motion.main>
         </div>
         <div className={mergeClasses(styles.drawerBackdrop, mobileDrawerOpen && styles.drawerBackdropOpen)} onClick={() => setMobileDrawerOpen(false)} aria-hidden="true" />
@@ -1097,8 +1068,14 @@ function SidebarBody({ styles, payload, groups, selectedPage, collapsed, query, 
 
 function WindowControls({ labels, styles }: { labels: { minimize: string; close: string }; styles: ReturnType<typeof useStyles> }) {
   const post = (action: "minimize" | "close") => window.chrome?.webview?.postMessage({ type: "windowAction", action });
-  return <div className={mergeClasses(styles.windowControls, "window-controls-polished")} aria-label={`${labels.minimize}, ${labels.close}`}>
-    <Button appearance="subtle" className={mergeClasses(styles.windowButton, "window-button-polished")} icon={<Subtract16Regular />} aria-label={labels.minimize} title={labels.minimize} onClick={() => post("minimize")} />
-    <Button appearance="subtle" className={mergeClasses(styles.windowButton, styles.closeButton, "window-button-polished", "close-button-polished")} icon={<Dismiss16Regular />} aria-label={labels.close} title={labels.close} onClick={() => post("close")} />
+  // Plain buttons with hairline 10px glyphs (Windows 11 caption weight) instead of Fluent
+  // icon buttons, so hover/press states are fully owned by polish.css.
+  return <div className={mergeClasses(styles.windowControls, "window-controls-polished")} role="group" aria-label={`${labels.minimize}, ${labels.close}`}>
+    <button type="button" className="window-button-polished" aria-label={labels.minimize} title={labels.minimize} onClick={() => post("minimize")}>
+      <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M0.5 5h9" /></svg>
+    </button>
+    <button type="button" className="window-button-polished close-button-polished" aria-label={labels.close} title={labels.close} onClick={() => post("close")}>
+      <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M1 1l8 8M9 1l-8 8" /></svg>
+    </button>
   </div>;
 }
