@@ -218,14 +218,7 @@ namespace EarTrumpet.UI.Views
                             urlElement.ValueKind == JsonValueKind.String
                             ? urlElement.GetString()
                             : null;
-                        if (!string.IsNullOrWhiteSpace(url))
-                        {
-                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                            {
-                                FileName = url,
-                                UseShellExecute = true
-                            });
-                        }
+                        EarTrumpet.Interop.Helpers.ProcessHelper.OpenWebLinkNoThrow(url);
                         break;
                     case "vote":
                         var voteId = root.TryGetProperty("id", out var idElement) &&

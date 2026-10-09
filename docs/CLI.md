@@ -13,7 +13,7 @@ BetterTrumpet exposes a full CLI that lets you control system audio — devices,
  ───────                          ────────
  BetterTrumpet.exe --list-apps
         │
-        ├──► Named Pipe (BetterTrumpet_IPC_v1) ──► Running Instance
+        ├──► Named Pipe (BetterTrumpet_IPC_v1_<session>) ──► Running Instance
         │                                              │
         │                                          Processes on
         │                                          UI thread (STA)
@@ -24,7 +24,7 @@ BetterTrumpet exposes a full CLI that lets you control system audio — devices,
    Exits
 ```
 
-- The CLI launches a **second BetterTrumpet.exe process** that sends a command to the already-running tray instance via a Windows named pipe (`BetterTrumpet_IPC_v1`).
+- The CLI launches a **second BetterTrumpet.exe process** that sends a command to the already-running tray instance via a Windows named pipe (`BetterTrumpet_IPC_v1_<session id>`, restricted to the current user).
 - The tray instance processes the command on the UI thread (required for COM audio / STA) and returns a **JSON response**.
 - The CLI process prints the response and exits.
 - **BetterTrumpet must be running** for all remote commands. Only `--help` and `--version` work locally.
@@ -832,9 +832,9 @@ If BetterTrumpet is running as a different user (e.g., elevated vs. non-elevated
 | Property | Value |
 |---|---|
 | Executable | `BetterTrumpet.exe` |
-| Runtime | .NET Framework 4.6.2 |
+| Runtime | .NET 8 (self-contained) |
 | Architecture | x86 |
 | IPC Mechanism | Windows Named Pipe |
-| Pipe Name | `BetterTrumpet_IPC_v1` |
+| Pipe Name | `BetterTrumpet_IPC_v1_<session id>` (current user only) |
 | Response Format | JSON (UTF-8) |
 | Audio Threading | STA (COM requirement) |

@@ -17,7 +17,13 @@ namespace EarTrumpet.Interop.Helpers
     /// </summary>
     public sealed class PipeServer : IDisposable
     {
-        public const string PipeName = "BetterTrumpet_IPC_v1";
+        // The pipe namespace is machine-wide: suffix with the Windows session so each logged-on user
+        // (fast user switching, RDS) gets their own pipe instead of colliding on one name.
+        public static readonly string PipeName = $"BetterTrumpet_IPC_v1_{Process.GetCurrentProcess().SessionId}";
+
+        // CurrentUserOnly: the server ACL only admits the creating user, and clients refuse
+        // to talk to a pipe owned by someone else (no name squatting by another account).
+        internal const PipeOptions Options = PipeOptions.CurrentUserOnly;
 
         public event Func<string, string> CommandReceived;
 
@@ -43,7 +49,7 @@ namespace EarTrumpet.Interop.Helpers
             // Connect to self to unblock WaitForConnection
             try
             {
-                using (var client = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut))
+                using (var client = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, Options))
                 {
                     client.Connect(500);
                     // Send a newline so ReadLineRaw unblocks
@@ -67,7 +73,7 @@ namespace EarTrumpet.Interop.Helpers
                         PipeDirection.InOut,
                         1, // max 1 concurrent connection
                         PipeTransmissionMode.Byte,
-                        PipeOptions.None);
+                        Options);
 
                     server.WaitForConnection();
 

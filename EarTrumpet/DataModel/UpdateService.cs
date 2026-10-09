@@ -145,6 +145,10 @@ namespace EarTrumpet.DataModel
         /// <summary>Direct download URL for the portable .zip from GitHub release assets.</summary>
         private string _portableDownloadUrl;
 
+        /// <summary>Expected SHA-256 (lowercase hex) of each asset, from the GitHub API "digest" field.</summary>
+        private string _setupSha256;
+        private string _portableSha256;
+
         public string UpdateText
         {
             get
@@ -249,6 +253,8 @@ namespace EarTrumpet.DataModel
                 // Find the setup .exe and portable .zip asset URLs
                 _setupDownloadUrl = null;
                 _portableDownloadUrl = null;
+                _setupSha256 = null;
+                _portableSha256 = null;
                 var assets = json["assets"] as JArray;
                 if (assets != null)
                 {
@@ -257,6 +263,7 @@ namespace EarTrumpet.DataModel
                     if (setupAsset != null)
                     {
                         _setupDownloadUrl = setupAsset["browser_download_url"]?.ToString();
+                        _setupSha256 = ParseSha256Digest(setupAsset["digest"]?.ToString());
                     }
 
                     var portableAsset = assets.FirstOrDefault(a =>
@@ -264,6 +271,7 @@ namespace EarTrumpet.DataModel
                     if (portableAsset != null)
                     {
                         _portableDownloadUrl = portableAsset["browser_download_url"]?.ToString();
+                        _portableSha256 = ParseSha256Digest(portableAsset["digest"]?.ToString());
                     }
                 }
 
@@ -369,8 +377,10 @@ namespace EarTrumpet.DataModel
                     }
                 }
 
+                VerifyDownload(tempPath, _setupSha256);
+
                 var fileInfo = new FileInfo(tempPath);
-                Trace.WriteLine($"UpdateService: Downloaded {fileInfo.Length / 1024}KB — launching installer");
+                Trace.WriteLine($"UpdateService: Downloaded {fileInfo.Length / 1024}KB, SHA-256 verified — launching installer");
 
                 // Launch the installer silently — it will kill us, install, and relaunch
                 Process.Start(new ProcessStartInfo
@@ -438,7 +448,9 @@ namespace EarTrumpet.DataModel
                     }
                 }
 
-                Trace.WriteLine($"UpdateService: Downloaded {new FileInfo(zipPath).Length / 1024}KB — extracting");
+                VerifyDownload(zipPath, _portableSha256);
+
+                Trace.WriteLine($"UpdateService: Downloaded {new FileInfo(zipPath).Length / 1024}KB, SHA-256 verified — extracting");
 
                 if (Directory.Exists(extractDir))
                 {
@@ -516,6 +528,45 @@ namespace EarTrumpet.DataModel
             finally
             {
                 IsDownloading = false;
+            }
+        }
+
+        /// <summary>
+        /// GitHub publishes "sha256:&lt;hex&gt;" for every release asset. Returns the hex part,
+        /// or null when the field is missing or uses another algorithm.
+        /// </summary>
+        private static string ParseSha256Digest(string digest)
+        {
+            const string prefix = "sha256:";
+            if (string.IsNullOrEmpty(digest) || !digest.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            var hex = digest.Substring(prefix.Length).Trim().ToLowerInvariant();
+            return hex.Length == 64 && hex.All(Uri.IsHexDigit) ? hex : null;
+        }
+
+        /// <summary>
+        /// Refuses to run or extract anything whose hash does not match the published digest.
+        /// Fails closed: no digest means no silent install (the caller falls back to the release page).
+        /// </summary>
+        private static void VerifyDownload(string path, string expectedSha256)
+        {
+            if (expectedSha256 == null)
+            {
+                throw new InvalidDataException("Release asset has no SHA-256 digest; refusing to run it unverified");
+            }
+
+            string actual;
+            using (var stream = File.OpenRead(path))
+            {
+                actual = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(stream)).ToLowerInvariant();
+            }
+
+            if (actual != expectedSha256)
+            {
+                throw new InvalidDataException($"SHA-256 mismatch (expected {expectedSha256}, got {actual})");
             }
         }
 

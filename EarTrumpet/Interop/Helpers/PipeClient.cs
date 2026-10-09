@@ -20,7 +20,7 @@ namespace EarTrumpet.Interop.Helpers
         {
             try
             {
-                using (var client = new NamedPipeClientStream(".", PipeServer.PipeName, PipeDirection.InOut))
+                using (var client = new NamedPipeClientStream(".", PipeServer.PipeName, PipeDirection.InOut, PipeServer.Options))
                 {
                     client.Connect(timeoutMs);
 

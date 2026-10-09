@@ -676,15 +676,7 @@ namespace EarTrumpet.UI.Views
                     privacy.ImportSettingsCommand.Execute(null);
                     break;
                 case "openUrl":
-                    var url = GetString(message, "url");
-                    if (!string.IsNullOrWhiteSpace(url))
-                    {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                        {
-                            FileName = url,
-                            UseShellExecute = true
-                        });
-                    }
+                    EarTrumpet.Interop.Helpers.ProcessHelper.OpenWebLinkNoThrow(GetString(message, "url"));
                     break;
                 default:
                     return;
