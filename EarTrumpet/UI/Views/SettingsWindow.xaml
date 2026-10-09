@@ -890,6 +890,11 @@
                             <CheckBox HorizontalAlignment="Left"
                                       Content="{x:Static resx:Resources.SettingsUseLegacyEarTrumpetIcon}"
                                       IsChecked="{Binding UseLegacyIcon, Mode=TwoWay}" />
+                            <CheckBox HorizontalAlignment="Left" Margin="0,10,0,0"
+                                      Content="{x:Static resx:Resources.SettingsTrayIconDeviceType}"
+                                      IsChecked="{Binding TrayIconShowsDeviceType, Mode=TwoWay}" />
+                            <TextBlock Margin="28,2,0,0" Style="{StaticResource BodySubText}" FontSize="12" TextWrapping="Wrap"
+                                       Text="{x:Static resx:Resources.SettingsTrayIconDeviceTypeDesc}" />
                         </StackPanel>
                     </Border>
 

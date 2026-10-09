@@ -165,6 +165,12 @@ namespace EarTrumpet.UI.ViewModels
             set => _settings.UseLegacyIcon = value;
         }
 
+        public bool TrayIconShowsDeviceType
+        {
+            get => _settings.TrayIconShowsDeviceType;
+            set => _settings.TrayIconShowsDeviceType = value;
+        }
+
         private double? _pendingWindowBackgroundOpacity;
 
         public double PendingWindowBackgroundOpacity

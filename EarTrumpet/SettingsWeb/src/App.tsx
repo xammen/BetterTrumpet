@@ -377,7 +377,7 @@ function groupPages(payload: SettingsPayload) {
 }
 
 const pageLabelKeys: Record<string, string[]> = {
-  general: ["startupTitle", "startupDescription", "runAtStartup", "trayTitle", "trayDescription", "useLegacyIcon", "showAppTooltips", "showAppTooltipsDescription", "hiddenApps", "hiddenAppsDescription", "hiddenDevices", "restore", "restoreAll"],
+  general: ["startupTitle", "startupDescription", "runAtStartup", "trayTitle", "trayDescription", "useLegacyIcon", "trayDeviceType", "trayDeviceTypeDescription", "showAppTooltips", "showAppTooltipsDescription", "hiddenApps", "hiddenAppsDescription", "hiddenDevices", "restore", "restoreAll"],
   mouse: ["scrollWheelTitle", "scrollWheelDescription", "useScrollWheelInTray", "useScrollWheelInTrayDescription", "useGlobalMouseWheelHook", "useGlobalMouseWheelHookDescription", "volumeScaleTitle", "volumeScaleDescription", "useLogarithmicVolume", "useVolumeTickSound", "useVolumeTickSoundDescription", "deviceChangeTitle", "deviceChangeDescription", "notifyOnDeviceChange", "focusLostTitle", "focusLostDescription", "useFocusLostVolume", "focusLostAttenuate", "focusLostAttenuateHint", "focusLostFade", "focusLostFadeHint", "focusLostScope", "focusLostAllApps", "focusLostSelectedApps", "focusLostSelectedHint"],
   shortcuts: ["shortcuts", "recordShortcut", "clearShortcut"],
   profiles: ["savedProfiles", "presetsDescription", "whatToSave", "includeDefaults", "includeDefaultsDesc", "includeDevices", "includeDevicesDesc", "includeApps", "includeAppsDesc", "routeApps", "rolePlayback", "roleRecording", "updateFromCurrent", "cycleTitle", "nextPreset", "previousPreset", "confirmation", "notificationDuration", "profileShortcut", "apply", "rename", "export", "import", "delete"],
@@ -422,7 +422,7 @@ interface SearchSpec {
 // bilingual synonym hints users are likely to type.
 const SEARCH_SPECS: SearchSpec[] = [
   { page: "general", anchor: "startup", keys: ["startupTitle", "startupDescription", "runAtStartup"], words: "demarrage lance boot windows start launch demarrer" },
-  { page: "general", anchor: "tray", keys: ["trayTitle", "trayDescription", "useLegacyIcon", "showAppTooltips", "showAppTooltipsDescription"], words: "icone notification tray systraze tooltip infobulle legacy ancien icone" },
+  { page: "general", anchor: "tray", keys: ["trayTitle", "trayDescription", "useLegacyIcon", "trayDeviceType", "trayDeviceTypeDescription", "showAppTooltips", "showAppTooltipsDescription"], words: "icone notification tray systraze tooltip infobulle legacy ancien icone casque headphones headset micro ecran monitor hdmi peripherique device type sortie output" },
   { page: "general", anchor: "hiddenApps", keys: ["hiddenApps", "hiddenAppsDescription", "restore", "restoreAll"], words: "cache masquer restaurer apps applications hidden restore" },
   { page: "general", anchor: "hiddenDevices", keys: ["hiddenDevices", "restore"], words: "peripherique cache restaure hidden device" },
   { page: "mouse", anchor: "wheel", keys: ["scrollWheelTitle", "scrollWheelDescription", "useScrollWheelInTray", "useGlobalMouseWheelHook", "useScrollWheelInTrayDescription", "useGlobalMouseWheelHookDescription"], words: "molette souris scroll wheel tray global survol" },

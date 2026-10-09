@@ -1324,6 +1324,20 @@ namespace EarTrumpet
             set => _settings.Set("UseGlobalMouseWheelHook", value);
         }
 
+        public event Action TrayIconShowsDeviceTypeChanged;
+
+        // #75: draw the tray icon as the default output's kind (headphones, headset, monitor)
+        // instead of the generic speaker. Off by default.
+        public bool TrayIconShowsDeviceType
+        {
+            get => _settings.Get("TrayIconShowsDeviceType", false);
+            set
+            {
+                _settings.Set("TrayIconShowsDeviceType", value);
+                TrayIconShowsDeviceTypeChanged?.Invoke();
+            }
+        }
+
         public event Action AppTooltipsChanged;
 
         public bool ShowAppTooltips

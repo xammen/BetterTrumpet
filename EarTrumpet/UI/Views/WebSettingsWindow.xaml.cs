@@ -376,6 +376,9 @@ namespace EarTrumpet.UI.Views
                 case "useLegacyIcon":
                     App.Settings.UseLegacyIcon = valueElement.GetBoolean();
                     break;
+                case "trayIconShowsDeviceType":
+                    App.Settings.TrayIconShowsDeviceType = valueElement.GetBoolean();
+                    break;
                 case "showAppTooltips":
                     App.Settings.ShowAppTooltips = valueElement.GetBoolean();
                     break;
@@ -733,6 +736,8 @@ namespace EarTrumpet.UI.Views
                     ["startupTitle"] = R("SettingsStartup"), ["startupDescription"] = R("SettingsStartupDesc"),
                     ["runAtStartup"] = R("SettingsRunAtStartup"), ["trayTitle"] = R("SettingsTrayIcon"),
                     ["trayDescription"] = R("SettingsTrayIconDesc"), ["useLegacyIcon"] = R("SettingsUseLegacyEarTrumpetIcon"),
+                    ["trayDeviceType"] = R("SettingsTrayIconDeviceType"), ["trayDeviceTypeDescription"] = R("SettingsTrayIconDeviceTypeDesc"),
+                    ["requiresModernIcon"] = R("WebSettingsRequiresModernIcon"),
                     ["showAppTooltips"] = R("SettingsShowAppTooltips"), ["showAppTooltipsDescription"] = R("SettingsAppTooltipsDesc"),
                     ["hiddenApps"] = R("SettingsHiddenAppsTitle"), ["hiddenAppsDescription"] = R("SettingsHiddenAppsDesc"),
                     ["restoreAll"] = R("SettingsRestoreHiddenApps"), ["restoreAllDevices"] = R("WebSettingsRestoreAllDevices"),
@@ -862,6 +867,7 @@ namespace EarTrumpet.UI.Views
                 {
                     runAtStartup = App.Settings.RunAtStartup,
                     useLegacyIcon = App.Settings.UseLegacyIcon,
+                    trayIconShowsDeviceType = App.Settings.TrayIconShowsDeviceType,
                     showAppTooltips = App.Settings.ShowAppTooltips,
                     useScrollWheelInTray = App.Settings.UseScrollWheelInTray,
                     useGlobalMouseWheelHook = App.Settings.UseGlobalMouseWheelHook,

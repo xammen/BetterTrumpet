@@ -40,6 +40,7 @@ namespace EarTrumpet.UI.ViewModels
         public string DeviceDescription => ((IAudioDeviceWindowsAudio)_device).DeviceDescription;
         public string EnumeratorName => ((IAudioDeviceWindowsAudio)_device).EnumeratorName;
         public string InterfaceName => ((IAudioDeviceWindowsAudio)_device).InterfaceName;
+        public AudioEndpointFormFactor FormFactor => (_device as IAudioDeviceWindowsAudio)?.FormFactor ?? AudioEndpointFormFactor.UnknownFormFactor;
         public ObservableCollection<IAppItemViewModel> Apps { get; }
         public int HiddenAppsCount
         {

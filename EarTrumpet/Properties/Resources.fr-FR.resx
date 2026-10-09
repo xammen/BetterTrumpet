@@ -2397,4 +2397,13 @@ Détails : {0}</value>
   <data name="WebSettingsQtNotificationDurationDesc" xml:space="preserve">
     <value>Temps d’affichage de la confirmation.</value>
   </data>
+  <data name="SettingsTrayIconDeviceType" xml:space="preserve">
+    <value>Afficher le type de sortie audio</value>
+  </data>
+  <data name="SettingsTrayIconDeviceTypeDesc" xml:space="preserve">
+    <value>Icône casque ou écran selon la sortie par défaut (les micro-casques s'affichent en casque). Les haut-parleurs gardent l'icône habituelle ; indisponible avec l'icône d'origine.</value>
+  </data>
+  <data name="WebSettingsRequiresModernIcon" xml:space="preserve">
+    <value>Désactivez l'icône d'origine pour afficher le type de sortie.</value>
+  </data>
 </root>

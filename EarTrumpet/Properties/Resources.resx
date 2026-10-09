@@ -2412,4 +2412,13 @@ Details: {0}</value>
   <data name="WebSettingsQtNotificationDurationDesc" xml:space="preserve">
     <value>How long the confirmation stays on screen.</value>
   </data>
+  <data name="SettingsTrayIconDeviceType" xml:space="preserve">
+    <value>Show the output device type</value>
+  </data>
+  <data name="SettingsTrayIconDeviceTypeDesc" xml:space="preserve">
+    <value>Headphones or monitor icon based on the default output (headsets show as headphones). Speakers keep the regular icon; not available with the original icon.</value>
+  </data>
+  <data name="WebSettingsRequiresModernIcon" xml:space="preserve">
+    <value>Turn off the original icon to show the device type.</value>
+  </data>
 </root>

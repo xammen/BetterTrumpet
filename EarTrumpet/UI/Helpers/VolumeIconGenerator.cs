@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -6,6 +7,14 @@ using System.Runtime.InteropServices;
 
 namespace EarTrumpet.UI.Helpers
 {
+    /// <summary>Device shapes the tray icon can show when it reflects the default output (#75).</summary>
+    public enum TrayDeviceGlyph
+    {
+        Speaker,
+        Headphones,
+        Monitor,
+    }
+
     /// <summary>
     /// Generates animated volume icons dynamically with high-quality anti-aliased rendering.
     /// Uses supersampling (4x) for crisp edges at small sizes.
@@ -22,6 +31,13 @@ namespace EarTrumpet.UI.Helpers
         private readonly Icon[] _framesLight;
         private readonly int[] _canonicalFrames;
         private bool _disposed;
+
+        // Playback animations of the device glyphs (#75): rendered on first use, cached per glyph
+        // and theme. Poses are held for two 50 ms ticks, so the shell gets ~10 updates per second.
+        private const int HeadphonesAnimationFrames = 48; // 2.4 s loop
+        private const int MonitorAnimationFrames = 16;    // 0.8 s loop, like the speaker
+        private const int DeviceAnimationStep = 2;
+        private readonly Dictionary<(TrayDeviceGlyph, bool), Icon[]> _deviceFrames = new Dictionary<(TrayDeviceGlyph, bool), Icon[]>();
 
         // Animation timing
         private const int WAVE1_START = 0;
@@ -95,6 +111,27 @@ namespace EarTrumpet.UI.Helpers
 
         private Icon GenerateFrame(float wave1Opacity, float wave2Opacity, bool lightTheme)
         {
+            return RenderIcon(lightTheme, (g, scale, mainColor) =>
+            {
+                DrawSpeaker(g, scale, mainColor);
+
+                if (wave1Opacity > 0)
+                {
+                    DrawWave1(g, scale, Color.FromArgb((int)(255 * wave1Opacity), mainColor));
+                }
+
+                if (wave2Opacity > 0)
+                {
+                    DrawWave2(g, scale, Color.FromArgb((int)(255 * wave2Opacity), mainColor));
+                }
+            });
+        }
+
+        /// <summary>
+        /// Draws in a 24-unit (SVG-like) space at 4x, then downsamples to the tray size.
+        /// </summary>
+        private Icon RenderIcon(bool lightTheme, Action<Graphics, float, Color> draw)
+        {
             // Render at high resolution
             using (var highRes = new Bitmap(_renderSize, _renderSize, PixelFormat.Format32bppArgb))
             {
@@ -110,21 +147,7 @@ namespace EarTrumpet.UI.Helpers
 
                     float scale = _renderSize / 24f;
                     Color mainColor = lightTheme ? Color.FromArgb(20, 20, 20) : Color.White;
-
-                    // Draw all elements
-                    DrawSpeaker(g, scale, mainColor);
-
-                    if (wave1Opacity > 0)
-                    {
-                        Color wave1Color = Color.FromArgb((int)(255 * wave1Opacity), mainColor);
-                        DrawWave1(g, scale, wave1Color);
-                    }
-
-                    if (wave2Opacity > 0)
-                    {
-                        Color wave2Color = Color.FromArgb((int)(255 * wave2Opacity), mainColor);
-                        DrawWave2(g, scale, wave2Color);
-                    }
+                    draw(g, scale, mainColor);
                 }
 
                 // Downsample to target size with high quality
@@ -258,47 +281,219 @@ namespace EarTrumpet.UI.Helpers
 
         public Icon GetMutedIcon(bool lightTheme)
         {
-            using (var highRes = new Bitmap(_renderSize, _renderSize, PixelFormat.Format32bppArgb))
+            return RenderIcon(lightTheme, (g, scale, mainColor) =>
             {
-                highRes.SetResolution(96, 96);
+                DrawSpeaker(g, scale, mainColor);
+                DrawMuteX(g, scale, mainColor);
+            });
+        }
 
-                using (var g = Graphics.FromImage(highRes))
+        /// <summary>
+        /// Static icon for the default output's kind. Non-speaker shapes are muted with a
+        /// cut-out slash, since there is no room for the speaker's side X next to them.
+        /// </summary>
+        public Icon GetDeviceIcon(TrayDeviceGlyph glyph, bool muted, bool lightTheme)
+        {
+            if (glyph == TrayDeviceGlyph.Speaker)
+            {
+                return muted ? GetMutedIcon(lightTheme) : GetStaticIcon(lightTheme);
+            }
+
+            return RenderIcon(lightTheme, (g, scale, mainColor) =>
+            {
+                ScaleDeviceGlyph(g, scale);
+
+                switch (glyph)
                 {
-                    g.SmoothingMode = SmoothingMode.HighQuality;
-                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                    g.CompositingQuality = CompositingQuality.HighQuality;
-                    g.Clear(Color.Transparent);
-
-                    float scale = _renderSize / 24f;
-                    Color mainColor = lightTheme ? Color.FromArgb(20, 20, 20) : Color.White;
-
-                    DrawSpeaker(g, scale, mainColor);
-                    DrawMuteX(g, scale, mainColor);
+                    case TrayDeviceGlyph.Headphones:
+                        DrawHeadphones(g, scale, mainColor);
+                        break;
+                    case TrayDeviceGlyph.Monitor:
+                        DrawMonitor(g, scale, mainColor);
+                        break;
                 }
 
-                using (var final = new Bitmap(_iconSize, _iconSize, PixelFormat.Format32bppArgb))
+                if (muted)
                 {
-                    final.SetResolution(96, 96);
+                    DrawSlash(g, scale, mainColor);
+                }
+            });
+        }
 
-                    using (var g = Graphics.FromImage(final))
+        /// <summary>Frames in one playback loop of the given glyph.</summary>
+        public int GetFrameCount(TrayDeviceGlyph glyph)
+        {
+            switch (glyph)
+            {
+                case TrayDeviceGlyph.Headphones: return HeadphonesAnimationFrames;
+                case TrayDeviceGlyph.Monitor: return MonitorAnimationFrames;
+                default: return _totalFrames;
+            }
+        }
+
+        /// <summary>Lowest frame index that renders exactly like <paramref name="frameIndex"/>.</summary>
+        public int GetCanonicalFrame(TrayDeviceGlyph glyph, int frameIndex)
+        {
+            if (glyph == TrayDeviceGlyph.Speaker)
+            {
+                return GetCanonicalFrame(frameIndex);
+            }
+
+            if (frameIndex < 0 || frameIndex >= GetFrameCount(glyph))
+                frameIndex = 0;
+
+            return frameIndex / DeviceAnimationStep * DeviceAnimationStep;
+        }
+
+        /// <summary>
+        /// Playback animation frame: speaker waves, a waveform scrolling inside the headphones, or an
+        /// equalizer on the monitor.
+        /// </summary>
+        public Icon GetFrame(TrayDeviceGlyph glyph, int frameIndex, bool lightTheme)
+        {
+            if (glyph == TrayDeviceGlyph.Speaker)
+            {
+                return GetFrame(frameIndex, lightTheme);
+            }
+
+            int pose = GetCanonicalFrame(glyph, frameIndex);
+            if (!_deviceFrames.TryGetValue((glyph, lightTheme), out var frames))
+            {
+                frames = new Icon[GetFrameCount(glyph)];
+                _deviceFrames[(glyph, lightTheme)] = frames;
+            }
+
+            if (frames[pose] == null)
+            {
+                frames[pose] = RenderIcon(lightTheme, (g, scale, mainColor) =>
+                {
+                    ScaleDeviceGlyph(g, scale);
+                    if (glyph == TrayDeviceGlyph.Headphones)
                     {
-                        g.SmoothingMode = SmoothingMode.HighQuality;
-                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                        g.CompositingQuality = CompositingQuality.HighQuality;
-                        g.Clear(Color.Transparent);
-
-                        g.DrawImage(highRes, 0, 0, _iconSize, _iconSize);
+                        DrawHeadphones(g, scale, mainColor);
+                        DrawScope(g, scale, mainColor, pose);
                     }
+                    else
+                    {
+                        DrawMonitor(g, scale, mainColor);
+                        DrawEqualizer(g, scale, mainColor, pose);
+                    }
+                });
+            }
 
-                    IntPtr hIcon = final.GetHicon();
-                    Icon icon = Icon.FromHandle(hIcon);
-                    Icon ownedIcon = (Icon)icon.Clone();
-                    DestroyIcon(hIcon);
-                    return ownedIcon;
+            return (Icon)frames[pose].Clone();
+        }
+
+        // These shapes span the full 24-unit box; at 90% they weigh about the same as the
+        // speaker next to other tray icons.
+        private static void ScaleDeviceGlyph(Graphics g, float scale)
+        {
+            g.TranslateTransform(12f * scale, 12f * scale);
+            g.ScaleTransform(0.9f, 0.9f);
+            g.TranslateTransform(-12f * scale, -12f * scale);
+        }
+
+        private static void DrawHeadphones(Graphics g, float scale, Color color)
+        {
+            using (var pen = new Pen(color, 2f * scale) { StartCap = LineCap.Round, EndCap = LineCap.Round })
+            using (var brush = new SolidBrush(color))
+            {
+                // Headband: top half of a 9-unit circle, ending inside the filled cups.
+                g.DrawArc(pen, 3f * scale, 2f * scale, 18f * scale, 18f * scale, 180, 180);
+
+                FillRoundedRect(g, brush, 2f * scale, 10.5f * scale, 6f * scale, 9.5f * scale, 2f * scale);
+                FillRoundedRect(g, brush, 16f * scale, 10.5f * scale, 6f * scale, 9.5f * scale, 2f * scale);
+            }
+        }
+
+        // A short waveform scrolling inside the arch, between the cups: the headphones keep their
+        // full size and silhouette (notes or waves around them forced a shrink that made the
+        // headphones unreadable at 16 px). Three wave cycles scroll per loop; the amplitude
+        // breathes with a music-like level, and the ends taper so it never touches the cups.
+        private static void DrawScope(Graphics g, float scale, Color color, int frame)
+        {
+            double loop = frame / (double)HeadphonesAnimationFrames * Math.PI * 2;
+            double level = 0.55 + 0.25 * Math.Sin(loop * 3 + 1.1) + 0.15 * Math.Sin(loop * 7 + 1.87) + 0.08 * Math.Sin(loop * 13 + 0.66);
+            double amplitude = 2.4 * (0.6 + 0.4 * Math.Max(0, Math.Min(1, level)));
+            double phase = loop * 3;
+
+            var points = new List<PointF>();
+            for (float x = 9.2f; x <= 14.8f + 0.001f; x += 0.35f)
+            {
+                double u = (x - 9.2) / 5.6;
+                double y = 14.6 - amplitude * Math.Sin(u * Math.PI) * Math.Sin(u * Math.PI * 3 - phase);
+                points.Add(new PointF(x * scale, (float)y * scale));
+            }
+
+            using (var pen = new Pen(color, 1.6f * scale) { StartCap = LineCap.Round, EndCap = LineCap.Round, LineJoin = LineJoin.Round })
+            {
+                g.DrawLines(pen, points.ToArray());
+            }
+        }
+
+        // Four phase-shifted bars bouncing inside the screen; one sine cycle per loop.
+        private static void DrawEqualizer(Graphics g, float scale, Color color, int frame)
+        {
+            double[] phases = { 0, 2.1, 4.2, 1.0 };
+            float[] xs = { 7.5f, 10.5f, 13.5f, 16.5f };
+            double t = frame / (double)MonitorAnimationFrames * Math.PI * 2;
+
+            using (var pen = new Pen(color, 1.8f * scale) { StartCap = LineCap.Round, EndCap = LineCap.Round })
+            {
+                for (int i = 0; i < xs.Length; i++)
+                {
+                    float height = 1f + 5f * (float)(0.5 + 0.5 * Math.Sin(t + phases[i]));
+                    g.DrawLine(pen, xs[i] * scale, 13.4f * scale, xs[i] * scale, (13.4f - height) * scale);
                 }
             }
+        }
+
+        private static void DrawMonitor(Graphics g, float scale, Color color)
+        {
+            using (var pen = new Pen(color, 2f * scale) { StartCap = LineCap.Round, EndCap = LineCap.Round, LineJoin = LineJoin.Round })
+            using (var screen = RoundedRect(2.5f * scale, 4f * scale, 19f * scale, 12.5f * scale, 2f * scale))
+            {
+                g.DrawPath(pen, screen);
+                g.DrawLine(pen, 12f * scale, 16.5f * scale, 12f * scale, 20.5f * scale);
+                g.DrawLine(pen, 8f * scale, 20.5f * scale, 16f * scale, 20.5f * scale);
+            }
+        }
+
+        private static void DrawSlash(Graphics g, float scale, Color color)
+        {
+            // Erase a gap around the slash first so it reads over filled shapes too.
+            var previous = g.CompositingMode;
+            g.CompositingMode = CompositingMode.SourceCopy;
+            using (var eraser = new Pen(Color.Transparent, 4f * scale) { StartCap = LineCap.Round, EndCap = LineCap.Round })
+            {
+                g.DrawLine(eraser, 3f * scale, 3f * scale, 21f * scale, 21f * scale);
+            }
+            g.CompositingMode = previous;
+
+            using (var pen = new Pen(color, 2f * scale) { StartCap = LineCap.Round, EndCap = LineCap.Round })
+            {
+                g.DrawLine(pen, 3f * scale, 3f * scale, 21f * scale, 21f * scale);
+            }
+        }
+
+        private static void FillRoundedRect(Graphics g, Brush brush, float x, float y, float width, float height, float radius)
+        {
+            using (var path = RoundedRect(x, y, width, height, radius))
+            {
+                g.FillPath(brush, path);
+            }
+        }
+
+        private static GraphicsPath RoundedRect(float x, float y, float width, float height, float radius)
+        {
+            float d = Math.Min(radius * 2, Math.Min(width, height));
+            var path = new GraphicsPath();
+            path.AddArc(x, y, d, d, 180, 90);
+            path.AddArc(x + width - d, y, d, d, 270, 90);
+            path.AddArc(x + width - d, y + height - d, d, d, 0, 90);
+            path.AddArc(x, y + height - d, d, d, 90, 90);
+            path.CloseFigure();
+            return path;
         }
 
         private void DrawMuteX(Graphics g, float scale, Color color)
@@ -330,6 +525,15 @@ namespace EarTrumpet.UI.Helpers
             {
                 icon?.Dispose();
             }
+
+            foreach (var frames in _deviceFrames.Values)
+            {
+                foreach (var icon in frames)
+                {
+                    icon?.Dispose();
+                }
+            }
+            _deviceFrames.Clear();
         }
     }
 }

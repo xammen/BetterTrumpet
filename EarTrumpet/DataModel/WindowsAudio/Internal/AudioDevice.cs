@@ -28,6 +28,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
         private string _enumeratorName;
         private string _interfaceName;
         private string _deviceDescription;
+        private AudioEndpointFormFactor _formFactor = AudioEndpointFormFactor.UnknownFormFactor;
         private float _volume;
         private bool _isMuted;
         private bool _isRegistered;
@@ -158,6 +159,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
         public string EnumeratorName => _enumeratorName;
         public string InterfaceName => _interfaceName;
         public string DeviceDescription => _deviceDescription;
+        public AudioEndpointFormFactor FormFactor => _formFactor;
 
         public IAudioDeviceManager Parent
         {
@@ -210,6 +212,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
                 _enumeratorName = propStore.GetValue<string>(PropertyKeys.DEVPKEY_Device_EnumeratorName);
                 _interfaceName = propStore.GetValue<string>(PropertyKeys.DEVPKEY_DeviceInterface_FriendlyName);
                 _deviceDescription = propStore.GetValue<string>(PropertyKeys.DEVPKEY_Device_DeviceDesc);
+                _formFactor = ReadFormFactor(propStore);
             }
             catch (Exception ex) when (ex.Is(HRESULT.AUDCLNT_E_DEVICE_INVALIDATED))
             {
@@ -218,6 +221,21 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
             catch (Exception ex)
             {
                 Trace.WriteLine(ex);
+            }
+        }
+
+        private static AudioEndpointFormFactor ReadFormFactor(IPropertyStore propStore)
+        {
+            var pv = propStore.GetValue(ref PropertyKeys.PKEY_AudioEndpoint_FormFactor);
+            try
+            {
+                return pv.varType == VarEnum.VT_UI4 && Enum.IsDefined(typeof(AudioEndpointFormFactor), (int)pv.uintVal)
+                    ? (AudioEndpointFormFactor)pv.uintVal
+                    : AudioEndpointFormFactor.UnknownFormFactor;
+            }
+            finally
+            {
+                Ole32.PropVariantClear(ref pv);
             }
         }
 

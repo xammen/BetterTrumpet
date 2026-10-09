@@ -3,6 +3,7 @@ export type SettingValue = boolean | number | string;
 export type SettingKey =
   | "runAtStartup"
   | "useLegacyIcon"
+  | "trayIconShowsDeviceType"
   | "showAppTooltips"
   | "useScrollWheelInTray"
   | "useGlobalMouseWheelHook"

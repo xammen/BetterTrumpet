@@ -29,6 +29,7 @@ namespace EarTrumpet.DataModel
 
                 // General
                 ["UseLegacyIcon"] = settings.UseLegacyIcon,
+                ["TrayIconShowsDeviceType"] = settings.TrayIconShowsDeviceType,
                 ["IsExpanded"] = settings.IsExpanded,
                 ["UseScrollWheelInTray"] = settings.UseScrollWheelInTray,
                 ["UseGlobalMouseWheelHook"] = settings.UseGlobalMouseWheelHook,
@@ -212,6 +213,7 @@ namespace EarTrumpet.DataModel
         {
             // General
             TrySet(data, "UseLegacyIcon", (bool v) => settings.UseLegacyIcon = v);
+            TrySet(data, "TrayIconShowsDeviceType", (bool v) => settings.TrayIconShowsDeviceType = v);
             TrySet(data, "IsExpanded", (bool v) => settings.IsExpanded = v);
             TrySet(data, "UseScrollWheelInTray", (bool v) => settings.UseScrollWheelInTray = v);
             TrySet(data, "UseGlobalMouseWheelHook", (bool v) => settings.UseGlobalMouseWheelHook = v);
