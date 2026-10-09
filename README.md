@@ -5,14 +5,11 @@
 <h1 align="center">BetterTrumpet</h1>
 
 <p align="center">
-  <a href="https://bettertrumpet.hiii.boo">
-    <img src="https://img.shields.io/badge/official%20site-bettertrumpet.hiii.boo-trumpet?labelColor=0a0a0a&color=4a9&style=for-the-badge" alt="Official Site"/>
+  <a href="https://bettertrumpet.com">
+    <img src="https://img.shields.io/badge/website-bettertrumpet.com-trumpet?labelColor=0a0a0a&color=4a9&style=for-the-badge" alt="Website"/>
   </a>
-  <a href="https://github.com/xammen/BetterTrumpet/releases">
-    <img src="https://img.shields.io/badge/download-releases-trumpet?labelColor=0a0a0a&color=888&style=for-the-badge" alt="Releases"/>
-  </a>
-  <a href="https://github.com/xammen/BetterTrumpet">
-    <img src="https://img.shields.io/badge/github-xammen/BetterTrumpet-trumpet?labelColor=0a0a0a&color=666&style=for-the-badge&logo=github&logoColor=888" alt="GitHub"/>
+  <a href="https://github.com/xammen/BetterTrumpet/releases/latest">
+    <img src="https://img.shields.io/github/v/release/xammen/BetterTrumpet?labelColor=0a0a0a&color=888&style=for-the-badge&label=download" alt="Latest release"/>
   </a>
   <a href="https://www.reddit.com/r/BetterTrumpet/">
     <img src="https://img.shields.io/badge/reddit-r%2FBetterTrumpet-ff4500?labelColor=0a0a0a&style=for-the-badge&logo=reddit&logoColor=ff4500" alt="Reddit"/>
@@ -20,232 +17,183 @@
 </p>
 
 <p align="center">
-  <i>Windows volume control that actually feels good to use.</i><br/>
-  <i>A polished fork of EarTrumpet with themes, media controls, profiles, a CLI, and a settings window that does not look like it is from 2012.</i>
+  <i>Per-app volume control for Windows that actually feels good to use.</i><br/>
+  <i>A polished fork of EarTrumpet, with app rules, presets, a media popup, themes and a CLI.</i>
+</p>
+
+<p align="center">
+  <img src="assets/readme/hero.jpg" alt="The BetterTrumpet volume flyout" width="900"/>
 </p>
 
 <p align="center">
   <a href="#install">Install</a> ·
-  <a href="#highlights">Highlights</a> ·
+  <a href="#features">Features</a> ·
   <a href="#cli">CLI</a> ·
+  <a href="#privacy">Privacy</a> ·
   <a href="#build-from-source">Build</a> ·
-  <a href="#community">Community</a> ·
-  <a href="#license">License</a>
+  <a href="#community">Community</a>
 </p>
 
 ---
 
-## What it is
+## Why BetterTrumpet
 
-BetterTrumpet keeps the part that mattered from EarTrumpet: fast per-app audio control.
-Then it adds the polish and automation that Windows should have had in the first place.
+The Windows volume mixer is two clicks too deep and forgets everything. BetterTrumpet lives in the tray and keeps it simple:
 
-```text
-system tray -> BetterTrumpet -> per-app volume
-                           ├── themes
-                           ├── media popup
-                           ├── profiles
-                           ├── settings (React/Fluent UI)
-                           ├── undo / redo
-                           └── CLI / updates
-```
+- **Every app, one click away.** Click the tray icon, drag a slider, done.
+- **It remembers.** Start Discord at 50%, keep that one game muted, lock an app's volume so it stops creeping up.
+- **One click setups.** Save "work", "gaming" or "night" as presets: output device, mic, device and app volumes, all at once.
+- **Your media, on hover.** Hover the tray icon to control what's playing.
+- **Looks the part.** Fits Windows 10 and 11, with themes if you want something else.
+
+It started as a fork of [EarTrumpet](https://github.com/File-New-Project/EarTrumpet) and keeps what made it great.
 
 ## Install
 
-| Method | Best for |
+| Method | Command / link |
 | --- | --- |
-| GitHub Releases | The quickest install or the portable zip |
-| Winget | People who prefer the Windows package manager |
-| Chocolatey | Existing Chocolatey users |
-| Build from source | Contributors and local testing |
+| **Installer or portable zip** | [GitHub Releases](https://github.com/xammen/BetterTrumpet/releases/latest) |
+| **Winget** | `winget install --id xmn.BetterTrumpet` |
+| **Chocolatey** | `choco install bettertrumpet` |
 
-### Release
-Download the latest installer or portable build from GitHub Releases.
+Requires Windows 10 (1809 or later) or Windows 11. The settings window uses the Microsoft Edge WebView2 runtime, which ships with Windows 11 and up-to-date Windows 10.
 
-### Winget
-```powershell
-winget install --id xmn.BetterTrumpet
-```
+> **Windows Defender or SmartScreen complaining?** The builds aren't code-signed yet, so new releases sometimes trip a machine-learning heuristic (a false positive). Each release ships a `release-checksums-X.Y.Z.txt` so you can check the SHA-256 of what you downloaded. Signing is on the roadmap.
 
-### Chocolatey
-```powershell
-choco install bettertrumpet
-```
+## Features
 
-### Source
-Build the app as x86 Release.
+### Per-app volume, done right
 
-```powershell
-git clone https://github.com/xammen/BetterTrumpet
-nuget.exe restore EarTrumpet.vs15.sln
-& "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" EarTrumpet\EarTrumpet.csproj /p:Configuration=Release /p:Platform=x86 /p:OutputPath=..\Build\Release /t:Rebuild /v:minimal
-```
+<p align="center">
+  <img src="https://github.com/xammen/BetterTrumpet/releases/download/v3.0.11/3.0.11.gif" alt="BetterTrumpet flyout in action" width="420"/>
+</p>
 
-## First Run
+- Every playing app gets its own slider, grouped by output device.
+- Send an app to a specific output (game on the headset, music on the speakers).
+- Hide the apps and devices you never touch.
+- `Ctrl+click` an app to solo it, `Ctrl+Z` / `Ctrl+Y` to undo and redo volume changes, `Ctrl+P` to pin the flyout open.
+- Global shortcuts for the flyout, the mixer, volume up/down and switching devices, plus one shortcut per device.
 
-1. Launch BetterTrumpet.
-2. Click the tray icon to open the volume flyout.
-3. Hover the tray icon for the media popup.
-4. Right-click for settings and device switching.
-5. Use `Ctrl+P` to pin the flyout.
-6. Use `Ctrl+Z` / `Ctrl+Y` to undo and redo volume changes.
+### App rules
 
-## Highlights
+Rules follow an app across restarts and reboots:
 
-| Area | What you get |
-| --- | --- |
-| Settings | Full React/Fluent UI settings window with Sage Glass design, deep search, and every settings page |
-| Focus-lost | Attenuate or mute apps when they lose focus, with configurable fade and per-app scope |
-| Themes | 12 curated presets across 5 categories, 7 color channels, per-theme opacity, and dynamic album-art mode |
-| Media popup | Hover player with cover art, seek, shuffle, repeat, and per-app volume |
-| Profiles | Save, restore, export, import, rename, and apply full audio setups with per-device hotkeys |
-| CLI | Pipe-based CLI with JSON output, 20+ commands, and a friendly `bt` shortcut |
-| What's-new | In-app feed with polls, surveys, and live votes (beta, disableable) |
-| Telemetry | Anonymous ping on startup, no data sold, fully disableable. Manual log export stays on your machine |
-| Performance | Eco mode trims animations and peak meter FPS when you want it lighter |
-| Reliability | Auto-update prompts, crash reporting, and background health monitoring |
+- **Set at launch:** the app always starts at the volume you chose.
+- **Lock:** the volume stays put, whatever the app tries.
+- **Keep muted:** muted every time it makes a sound.
+- **Folder defaults:** a starting volume for everything installed in a folder (handy for game libraries).
+- **Focus-lost:** quietly lower apps when you switch away from them, with a fade.
 
-## Themes
+### QuickTrumpet presets
 
-Three looks, same controls, same workflow.
+Save the current setup and bring it back in one click, from a hotkey or from the CLI. A preset can switch your default output and microphone, set device volumes and set app volumes, in any combination. Cycle through your presets with the next/previous shortcuts.
+
+### Media popup
+
+<p align="center">
+  <img src="assets/readme/media-popup.png" alt="Media popup" width="300"/>
+</p>
+
+Hover the tray icon to see what's playing: play/pause, skip, seek, shuffle, repeat and the app's own volume. Expand it to show the cover art.
+
+### Make it yours
 
 <div align="center">
   <table>
     <tr>
       <td align="center">
-        <img src="assets/Windows.png" alt="Windows theme preview" width="240" />
+        <img src="assets/Windows.png" alt="Windows theme" width="240" />
         <br />
-        <sub>Windows</sub>
-        <br />
-        <sub>Clean, calm, and close to the system look.</sub>
+        <sub>Default: follows your Windows accent</sub>
       </td>
       <td align="center">
-        <img src="assets/Spotify.png" alt="Spotify theme preview" width="240" />
+        <img src="assets/Spotify.png" alt="Spotify theme" width="240" />
         <br />
         <sub>Spotify</sub>
-        <br />
-        <sub>Brighter accents with a music-first feel.</sub>
       </td>
       <td align="center">
-        <img src="assets/pixel.png" alt="Pixel theme preview" width="240" />
+        <img src="assets/readme/theme-custom.png" alt="Custom colors" width="180" />
         <br />
-        <sub>Pixel</sub>
-        <br />
-        <sub>Low-key, chunky, and a bit retro.</sub>
+        <sub>Your own colors</sub>
       </td>
     </tr>
   </table>
 </div>
 
-Pick the look that fits your setup, or switch when the mood changes.
+- 12 built-in themes (Discord, Nord, Dracula, Catppuccin, high contrast and more), or pick your own seven colors.
+- Window opacity, peak meter styles, and an album-art mode that tints the sliders with the cover of what's playing.
+- An eco mode that lowers refresh rates, always or only on battery.
+
+### A tray icon that tells you where the sound goes
+
+<p align="center">
+  <img src="assets/readme/tray-icons.gif" alt="Tray icon per output type" width="660"/>
+</p>
+
+Optional: the tray icon can show the kind of output you're on (speakers, headphones or a monitor) and animates while something plays. *Coming in the next release.*
+
+### Settings
+
+A modern settings window with search: type "mute" or "startup" and jump straight to the right option. The classic window is still there if you prefer it.
 
 ## CLI
 
-BetterTrumpet exposes a pipe-based CLI. Commands return JSON, and the app must be running for remote commands to work.
+BetterTrumpet comes with a `bt` command (the installer can add it to your PATH). It talks to the running app and answers in JSON, so it's easy to script.
 
 ```powershell
-BetterTrumpet.exe --list-devices
-BetterTrumpet.exe --set-volume 75
-BetterTrumpet.exe --set-volume +10 --app spotify
-BetterTrumpet.exe --mute --device "Speakers"
-BetterTrumpet.exe --set-default "Headphones"
-BetterTrumpet.exe --set-device spotify.exe "Headphones"
-BetterTrumpet.exe --apply-profile "Night Mode"
-bt save focus
-bt save discord --apps-only
-bt focus
-bt volume discord 67
-bt toggle-mute discord
-bt batch --set-volume 67 --app discord --set-volume 30 --app vivaldi
-bt doctor
+bt help                          # everything it can do
+bt volume discord 40             # set an app's volume
+bt toggle-mute spotify
+bt set-default "Headphones"      # switch the default output
+bt save gaming                   # save the current setup as a preset
+bt gaming                        # ...and apply it later
+bt preset next                   # cycle through presets
+bt doctor                        # quick health check
 ```
 
-| Area | Commands |
-| --- | --- |
-| Devices & apps | `--list-devices`, `--list-apps`, `--get-volume`, `--set-volume`, `volume`, `--mute`, `mute`, `--unmute`, `unmute`, `--toggle-mute`, `toggle-mute` |
-| Routing | `--get-default`, `--set-default`, `--set-device` |
-| QuickTrumpet | `presets`, `save`, `apply`, `mode`, direct preset aliases like `bt focus`, plus compatible `--list-profiles`, `--apply-profile` |
-| Automation | `batch`, `doctor`, `--watch`, `--ping`, `--check-update`, `--export-settings`, `--import-settings` |
-| Help | `--version`, `--help` |
+The full reference lives in [docs/CLI.md](docs/CLI.md).
 
-## Settings
+## Privacy
 
-The settings window is now a modern React/Fluent UI app with a collapsible sidebar, deep search, and the Sage Glass design language.
+- **Diagnostic data** (one switch, off by default in the EU, on elsewhere): an anonymous ping at startup and crash reports through Sentry. No personal data is attached and nothing is sold. Change it anytime in Settings → Privacy.
+- **Update checks** ask the GitHub API for the latest release. They're a separate switch.
+- **The "What's new" feed** (news and polls) can be turned off in Settings → Privacy. Votes are anonymous.
+- **Diagnostic exports** are zip files you create yourself and review before sharing. Nothing is uploaded automatically.
 
-| Page | What it controls |
-| --- | --- |
-| Shortcuts | Flyout, mixer, settings, volume up/down, device switch, per-device hotkeys |
-| QuickTrumpet | Presets-first profiles with recordable hotkeys, rename, export, import |
-| Rules | App volume rules (set at launch, lock), folder defaults |
-| Appearance | Theme presets, custom colors, tray icon, dynamic album art |
-| Media popup | Hover delay, show while paused |
-| Performance | Peak meter FPS, eco mode |
-| Updates | Auto-check for updates |
-| Privacy | Telemetry toggle, what's-new feed toggle |
-| Diagnostics | Log export, version info |
+Details in [PRIVACY.md](PRIVACY.md).
 
-### Hotkeys
+## Build from source
 
-| Shortcut | Action |
-| --- | --- |
-| `Ctrl+Z` | Undo last volume change |
-| `Ctrl+Y` | Redo last volume change |
-| `Ctrl+P` | Pin / unpin the flyout |
-| configurable | Open flyout, mixer, settings, or switch device |
-
-## Onboarding
-
-The onboarding wizard has 5 pages:
-
-- Audio
-- Appearance
-- Privacy
-- Ready
-- Tray pin
-
-It also covers telemetry, update channels, and startup preferences during setup. Onboarding no longer auto-shows on first launch — you can open it anytime from the tray menu or by holding `Left Ctrl` at startup.
-
-## Build From Source
+You need the .NET 8 SDK and Node.js (npm builds the settings UI during the build). The app is x86.
 
 ```powershell
-nuget.exe restore EarTrumpet.vs15.sln
-& "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" EarTrumpet\EarTrumpet.csproj /p:Configuration=Release /p:Platform=x86 /p:OutputPath=..\Build\Release /t:Rebuild /v:minimal
-powershell -ExecutionPolicy Bypass -File build-portable.ps1
-& 'C:\Users\xammen\AppData\Local\Programs\Inno Setup 6\ISCC.exe' installer.iss
+git clone https://github.com/xammen/BetterTrumpet
+cd BetterTrumpet
+dotnet build EarTrumpet\EarTrumpet.csproj -c Release -r win-x86 --self-contained -p:Platform=x86 -p:OutputPath="..\Build\Release"
 ```
 
-## Supported Systems
-
-| OS | Status |
-| --- | --- |
-| Windows 10 (1803+) | Supported |
-| Windows 11 | Supported |
-
-## Tech Stack
+The app lands in `Build\Release\BetterTrumpet.exe`. `build-portable.ps1` makes the portable zip, and `installer.iss` builds the installer with [Inno Setup 6](https://jrsoftware.org/isinfo.php).
 
 | Area | Stack |
 | --- | --- |
-| Language | C# / WPF |
-| Framework | .NET 8 for Windows |
-| Audio | Windows Core Audio |
-| Media | Windows Media Session |
-| Settings | React / Fluent UI / WebView2 |
-| Packaging | MSBuild + GitVersion + Inno Setup + portable zip |
-| CLI | Named pipe IPC |
-| Telemetry | Anonymous ping (homemade, no third-party SDK) |
+| App | C# / WPF on .NET 8 |
+| Audio | Windows Core Audio, Windows media sessions |
+| Settings | React + Fluent UI in WebView2 |
+| CLI | Named pipe to the running app |
+| Packaging | GitVersion, Inno Setup, portable zip, Winget, Chocolatey |
 
 ## Community
 
-- [GitHub Issues](https://github.com/xammen/BetterTrumpet/issues) — bug reports and feature requests
-- [Reddit](https://www.reddit.com/r/BetterTrumpet/) — discussions, feedback, and general hangout
+- [GitHub Issues](https://github.com/xammen/BetterTrumpet/issues) for bugs and feature requests
+- [r/BetterTrumpet](https://www.reddit.com/r/BetterTrumpet/) to chat, share setups and give feedback
 
 ## Credits
 
-Based on [EarTrumpet](https://github.com/File-New-Project/EarTrumpet) by David Golden, Rafael Rivera, and Dave Amenta.
+Built on [EarTrumpet](https://github.com/File-New-Project/EarTrumpet) by David Golden, Rafael Rivera and Dave Amenta.
 
 ## License
 
-[MIT License](./LICENSE)
+[MIT](./LICENSE)
 
 <p align="center">
   <br/>
