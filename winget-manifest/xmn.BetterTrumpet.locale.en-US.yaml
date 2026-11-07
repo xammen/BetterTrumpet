@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
 
 PackageIdentifier: xmn.BetterTrumpet
-PackageVersion: 3.4.0
+PackageVersion: 3.5.0
 PackageLocale: en-US
 Publisher: xmn
 PublisherUrl: https://github.com/xammen
@@ -21,7 +21,7 @@ Tags:
   - bettertrumpet
   - eartrumpet
   - windows
-ReleaseNotes: "QuickTrumpet presets can now switch default devices (playback, communications, microphone), be edited and cycled with one shortcut. Idle CPU usage cut by about 6x. Settings window polish, tray menu and flyout fixes."
-ReleaseNotesUrl: https://github.com/xammen/BetterTrumpet/releases/tag/v3.4.0
+ReleaseNotes: "Smoother flyout animation, a reworked media popup that sticks to one player, five tick sounds to pick from, and a fix for sliders lagging after audio devices reconnect."
+ReleaseNotesUrl: https://github.com/xammen/BetterTrumpet/releases/tag/v3.5.0
 ManifestType: defaultLocale
 ManifestVersion: 1.10.0
