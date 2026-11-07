@@ -187,6 +187,11 @@ namespace EarTrumpet.DataModel
         /// </summary>
         public void Start()
         {
+            if (Storage.StorageFactory.IsPortableMode)
+            {
+                PortableUpdateApplier.CleanupLeftovers();
+            }
+
             // Don't start timer if updates are disabled
             if (Channel == UpdateChannel.None)
             {
@@ -410,9 +415,9 @@ namespace EarTrumpet.DataModel
         }
 
         /// <summary>
-        /// Portable mode: downloads the portable .zip and hands off to a small PowerShell
-        /// script that waits for this process to exit, replaces the app's files in place
-        /// (keeping ./config, portable.marker and any other user data), and relaunches.
+        /// Portable mode: downloads and extracts the portable .zip, then starts the extracted
+        /// exe, which waits for this process to exit, replaces the app's files in place
+        /// (keeping ./config) and relaunches (<see cref="PortableUpdateApplier"/>).
         /// Falls back to opening the GitHub release page if anything fails.
         /// </summary>
         private async void DownloadAndUpdatePortableAsync()
@@ -427,7 +432,6 @@ namespace EarTrumpet.DataModel
             IsDownloading = true;
             string zipPath = null;
             string extractDir = null;
-            string scriptPath = null;
 
             try
             {
@@ -473,43 +477,15 @@ namespace EarTrumpet.DataModel
                     }
                 }
 
-                var exePath = Process.GetCurrentProcess().MainModule.FileName;
-                var targetDir = Path.GetDirectoryName(exePath);
+                var targetDir = Path.GetDirectoryName(Environment.ProcessPath);
 
-                // robocopy mirrors the new release over the app folder:
-                //   /MIR  — also prunes files removed from the new release (no stale DLLs);
-                //   /XD   — keeps ./config, the only user data in portable mode;
-                //   /R /W — bound retries so a transient lock (AV, lingering child process)
-                //           can't hang the script forever (robocopy defaults to ~1M retries).
-                var script = string.Join(Environment.NewLine, new[]
-                {
-                    "$ErrorActionPreference = 'Stop'",
-                    // Wait for this process to exit, capped at 60s; force-kill as a safety net
-                    // if shutdown hangs (e.g. a modal dialog is still up).
-                    $"$proc = Get-Process -Id {Environment.ProcessId} -ErrorAction SilentlyContinue",
-                    $"if ($proc -and -not $proc.WaitForExit(60000)) {{ Stop-Process -Id {Environment.ProcessId} -Force }}",
-                    "Start-Sleep -Milliseconds 500",
-                    $"robocopy '{sourceDir}' '{targetDir}' /MIR /XD '{targetDir}\\config' /XJ /R:3 /W:5 /NFL /NDL /NJH /NJS /NP | Out-Null",
-                    "if ($LASTEXITCODE -ge 8) { throw \"robocopy failed with exit code $LASTEXITCODE\" }",
-                    $"Remove-Item '{extractDir}' -Recurse -Force -ErrorAction SilentlyContinue",
-                    $"Remove-Item '{zipPath}' -Force -ErrorAction SilentlyContinue",
-                    $"Start-Process '{exePath}' -WorkingDirectory '{targetDir}'",
-                    "Remove-Item $MyInvocation.MyCommand.Path -Force -ErrorAction SilentlyContinue",
-                });
+                Trace.WriteLine("UpdateService: Starting the new release to apply itself, then exiting");
 
-                scriptPath = Path.Combine(Path.GetTempPath(), $"BetterTrumpet-update-{LatestVersion}.ps1");
-                File.WriteAllText(scriptPath, script);
+                // The new exe waits for this process, mirrors itself over targetDir (keeping
+                // ./config) and relaunches; see PortableUpdateApplier.
+                Process.Start(PortableUpdateApplier.CreateStartInfo(Path.Combine(sourceDir, "BetterTrumpet.exe"), targetDir));
 
-                Trace.WriteLine("UpdateService: Launching portable update script, then exiting");
-
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "powershell.exe",
-                    Arguments = $"-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"{scriptPath}\"",
-                    UseShellExecute = true
-                });
-
-                // Exit via the dispatcher so the app shuts down cleanly; the script
+                // Exit via the dispatcher so the app shuts down cleanly; the new exe
                 // waits for this process before touching the files.
                 _ = _dispatcher.BeginInvoke(new Action(() => System.Windows.Application.Current.Shutdown()));
             }
@@ -520,7 +496,6 @@ namespace EarTrumpet.DataModel
                 // Clean up intermediates so a later attempt starts fresh
                 try { if (zipPath != null && File.Exists(zipPath)) File.Delete(zipPath); } catch { }
                 try { if (extractDir != null && Directory.Exists(extractDir)) Directory.Delete(extractDir, true); } catch { }
-                try { if (scriptPath != null && File.Exists(scriptPath)) File.Delete(scriptPath); } catch { }
 
                 // Fallback: open release page
                 OpenReleasePage();
