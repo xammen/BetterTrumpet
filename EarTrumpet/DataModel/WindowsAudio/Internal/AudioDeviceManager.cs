@@ -322,7 +322,9 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
         {
             if (_deviceMap.TryRemove(device.Id, out var foundDevice))
             {
+                // Listeners detach from the device on this notification, then its callbacks go.
                 _devices.Remove(device);
+                (foundDevice as AudioDevice)?.Release();
             }
         }
 

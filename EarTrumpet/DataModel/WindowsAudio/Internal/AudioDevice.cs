@@ -79,15 +79,44 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
             }
         }
 
+        // Called when the endpoint leaves the device list. The COM callbacks hold references to
+        // this object, so the finalizers never run while they are registered: without this, every
+        // disconnect/reconnect left a live copy of the device and its sessions behind (#81).
+        internal void Release()
+        {
+            if (_isRegistered)
+            {
+                _isRegistered = false;
+                try
+                {
+                    _deviceVolume.UnregisterControlChangeNotify(this);
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"AudioDevice Release Failed {_id} {ex}");
+                }
+            }
+
+            _sessions?.Release();
+            GC.SuppressFinalize(this);
+        }
+
         void IAudioEndpointVolumeCallback.OnNotify(IntPtr pNotify)
         {
+            if (!_isRegistered)
+            {
+                return;
+            }
+
             var data = Marshal.PtrToStructure<AUDIO_VOLUME_NOTIFICATION_DATA>(pNotify);
             _volume = data.fMasterVolume;
             _isMuted = data.bMuted != 0;
 
             _channels.OnNotify(pNotify, data);
 
-            _dispatcher.Invoke((Action)(() =>
+            // Asynchronous: a synchronous Invoke blocks the audio callback thread on the UI thread,
+            // and Release() unregisters from the UI thread.
+            _dispatcher.BeginInvoke((Action)(() =>
             {
                 RaisePropertyChanged(nameof(Volume));
                 RaisePropertyChanged(nameof(IsMuted));

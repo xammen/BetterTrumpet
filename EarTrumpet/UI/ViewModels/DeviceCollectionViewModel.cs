@@ -389,10 +389,15 @@ namespace EarTrumpet.UI.ViewModels
                     {
                         AllDevices.Remove(allExisting);
                         VisibleDevices.Remove(allExisting);
+                        allExisting.Detach();
                     }
                     break;
 
                 case NotifyCollectionChangedAction.Reset:
+                    foreach (var device in AllDevices)
+                    {
+                        device.Detach();
+                    }
                     AllDevices.Clear();
                     VisibleDevices.Clear();
                     foreach (var device in _deviceManager.Devices)

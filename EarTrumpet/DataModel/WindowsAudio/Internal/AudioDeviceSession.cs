@@ -154,6 +154,24 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
             }
         }
 
+        internal void Release()
+        {
+            if (_isRegistered)
+            {
+                _isRegistered = false;
+                try
+                {
+                    _session.UnregisterAudioSessionNotification(this);
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"AudioDeviceSession Release Failed: {ex}");
+                }
+            }
+
+            GC.SuppressFinalize(this);
+        }
+
         ~AudioDeviceSession()
         {
             try

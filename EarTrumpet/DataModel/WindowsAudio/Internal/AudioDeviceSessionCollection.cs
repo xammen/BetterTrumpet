@@ -18,6 +18,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
         private readonly List<IAudioDeviceSession> _movedSessions = new List<IAudioDeviceSession>();
         private IAudioSessionManager2 _sessionManager;
         private WeakReference<IAudioDevice> _parent;
+        private volatile bool _isReleased;
 
         public AudioDeviceSessionCollection(IAudioDevice parent, IMMDevice device, Dispatcher foregroundDispatcher)
         {
@@ -41,19 +42,54 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
             }
         }
 
-        ~AudioDeviceSessionCollection()
+        // Called by AudioDevice.Release on the UI thread. The former finalizer could never run while
+        // the session notification was registered, and threw on a null manager when it did.
+        public void Release()
         {
-            foreach (var session in _sessions)
+            if (_isReleased)
             {
-                session.PropertyChanged -= Session_PropertyChanged;
+                return;
             }
 
-            foreach (var session in _movedSessions)
+            _isReleased = true;
+
+            try
+            {
+                _sessionManager?.UnregisterSessionNotification(this);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"AudioDeviceSessionCollection Release Failed {ex}");
+            }
+
+            foreach (var session in _sessions.ToArray())
+            {
+                ReleaseSession(session);
+            }
+
+            foreach (var session in _movedSessions.ToArray())
             {
                 session.PropertyChanged -= MovedSession_PropertyChanged;
+                ReleaseSession(session);
             }
 
-            _sessionManager.UnregisterSessionNotification(this);
+            _movedSessions.Clear();
+        }
+
+        private void ReleaseSession(IAudioDeviceSession session)
+        {
+            if (session is AudioDeviceSessionGroup group)
+            {
+                foreach (var child in group.Sessions.ToArray())
+                {
+                    ReleaseSession(child);
+                }
+            }
+            else if (session is AudioDeviceSession leaf)
+            {
+                leaf.PropertyChanged -= Session_PropertyChanged;
+                leaf.Release();
+            }
         }
 
         private void CreateAndAddSession(IAudioSessionControl session)
@@ -68,7 +104,11 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
                 var newSession = new AudioDeviceSession(parent, session, _dispatcher);
                 _dispatcher.BeginInvoke((Action)(() =>
                 {
-                    if (newSession.State == SessionState.Moved)
+                    if (_isReleased)
+                    {
+                        newSession.Release();
+                    }
+                    else if (newSession.State == SessionState.Moved)
                     {
                         _movedSessions.Add(newSession);
                         newSession.PropertyChanged += MovedSession_PropertyChanged;
@@ -88,6 +128,11 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
         void IAudioSessionNotification.OnSessionCreated(IAudioSessionControl NewSession)
         {
             Trace.WriteLine($"AudioDeviceSessionCollection OnSessionCreated");
+            if (_isReleased)
+            {
+                return;
+            }
+
             CreateAndAddSession(NewSession);
         }
 

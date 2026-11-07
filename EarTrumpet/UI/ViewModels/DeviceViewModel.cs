@@ -108,13 +108,17 @@ namespace EarTrumpet.UI.ViewModels
             UpdateMasterVolumeIcon();
         }
 
-        // OPTIMIZATION: Removed finalizer to avoid GC Gen 2 promotion
-        // Event unsubscription is now handled by proper Dispose pattern when needed
-        // ~DeviceViewModel()
-        // {
-        //     _device.PropertyChanged -= OnPropertyChanged;
-        //     _device.Groups.CollectionChanged -= OnCollectionChanged;
-        // }
+        // Called when the device leaves the device list, so the removed device stops reaching this view model.
+        internal void Detach()
+        {
+            _device.PropertyChanged -= OnPropertyChanged;
+            _device.Groups.CollectionChanged -= OnCollectionChanged;
+
+            foreach (var app in Apps)
+            {
+                StopWatchingApp(app);
+            }
+        }
 
         private void OnPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
