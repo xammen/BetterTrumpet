@@ -72,6 +72,7 @@ Source: "Build\Release\it-IT\*"; DestDir: "{app}\it-IT"; Flags: ignoreversion re
 Source: "Build\Release\ja-JP\*"; DestDir: "{app}\ja-JP"; Flags: ignoreversion recursesubdirs
 Source: "Build\Release\ko-KR\*"; DestDir: "{app}\ko-KR"; Flags: ignoreversion recursesubdirs
 Source: "Build\Release\nl-NL\*"; DestDir: "{app}\nl-NL"; Flags: ignoreversion recursesubdirs
+Source: "Build\Release\no-NO\*"; DestDir: "{app}\no-NO"; Flags: ignoreversion recursesubdirs
 Source: "Build\Release\pl-PL\*"; DestDir: "{app}\pl-PL"; Flags: ignoreversion recursesubdirs
 Source: "Build\Release\pt-BR\*"; DestDir: "{app}\pt-BR"; Flags: ignoreversion recursesubdirs
 Source: "Build\Release\pt-PT\*"; DestDir: "{app}\pt-PT"; Flags: ignoreversion recursesubdirs
