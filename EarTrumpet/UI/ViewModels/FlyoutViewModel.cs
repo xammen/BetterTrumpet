@@ -22,7 +22,7 @@ namespace EarTrumpet.UI.ViewModels
         public bool IsExpanded { get; private set; }
         public bool IsExpandingOrCollapsing { get; private set; }
         // True for exactly one open cycle when that open was triggered by expand/collapse,
-        // so the view can play a lighter reveal (cascade only, no full-window pop).
+        // so the view swaps the content inside the visible surface instead of a full entrance.
         public bool IsReopeningFromExpand { get; set; }
         public bool CanExpand => _mainViewModel.VisibleDevices.Count > 1;
         public string DeviceNameText => Devices.Count > 0 ? Devices[0].DisplayName : null;
@@ -95,7 +95,6 @@ namespace EarTrumpet.UI.ViewModels
         private readonly Dispatcher _currentDispatcher = Dispatcher.CurrentDispatcher;
 private readonly Action _returnFocusToTray;
         private readonly AppSettings _settings;
-        private bool _closedDuringOpen;
         private bool _openAfterClose;
         private InputType _openAfterCloseInput;
         // Timestamp of the last light-dismiss deactivation. A tray click on an already-open
@@ -447,16 +446,13 @@ private readonly Action _returnFocusToTray;
             State = state;
             StateChanged?.Invoke(this, null);
 
-            switch (State)
+            // Switch on the requested state, not State. The view defers its follow-up
+            // transitions instead of re-entering ChangeState from StateChanged, but should
+            // anything ever re-enter, each state's side effects still run once, for that state.
+            switch (state)
             {
                 case FlyoutViewState.Open:
                     _mainViewModel.OnTrayFlyoutShown();
-
-                    if (_closedDuringOpen)
-                    {
-                        _closedDuringOpen = false;
-                        BeginClose(InputType.Command);
-                    }
                     break;
                 case FlyoutViewState.Closing_Stage1:
                     _mainViewModel.OnTrayFlyoutHidden();
@@ -474,8 +470,11 @@ private readonly Action _returnFocusToTray;
                     if (IsExpandingOrCollapsing)
                     {
                         IsExpandingOrCollapsing = false;
-                        // Mark the upcoming open as expand-triggered so the view can use a
-                        // lighter reveal (no full-window pop) — only this re-open, then reset.
+                        // The expand re-open below already satisfies a tray click that landed
+                        // during the swap; a leftover flag would re-open after the next close.
+                        _openAfterClose = false;
+                        // Mark the upcoming open as expand-triggered so the view swaps the
+                        // content inside the visible surface — only this re-open, then reset.
                         IsReopeningFromExpand = true;
                         DoExpandCollapse();
                         BeginOpen(LastInput);
@@ -497,6 +496,9 @@ private readonly Action _returnFocusToTray;
                 (oldState == FlyoutViewState.NotLoaded && newState == FlyoutViewState.Hidden) ||
                 (oldState == FlyoutViewState.Hidden && newState == FlyoutViewState.Opening) ||
                 (oldState == FlyoutViewState.Opening && newState == FlyoutViewState.Open) ||
+                // A close requested during the entrance retargets it (the view ignores the
+                // superseded entrance's completion).
+                (oldState == FlyoutViewState.Opening && newState == FlyoutViewState.Closing_Stage1) ||
                 (oldState == FlyoutViewState.Open && newState == FlyoutViewState.Closing_Stage1) ||
                 (oldState == FlyoutViewState.Closing_Stage1 && newState == FlyoutViewState.Closing_Stage2) ||
                 (oldState == FlyoutViewState.Closing_Stage1 && newState == FlyoutViewState.Hidden) ||
@@ -563,14 +565,14 @@ private readonly Action _returnFocusToTray;
 
         public void BeginClose(InputType inputType)
         {
-            if (State == FlyoutViewState.Open)
+            // Closing during the entrance (Escape, Alt+F4, expand/collapse, display change) no
+            // longer waits for the entrance to finish: the view reverses from wherever the
+            // surface is. Light dismiss is still ignored while Opening (OnDeactivated), and a
+            // tray click while Opening still does nothing (OpenFlyout), as before.
+            if (State == FlyoutViewState.Open || State == FlyoutViewState.Opening)
             {
                 LastInput = inputType;
                 ChangeState(FlyoutViewState.Closing_Stage1);
-            }
-            else if (State == FlyoutViewState.Opening)
-            {
-                _closedDuringOpen = true;
             }
 
             _mh.UnHook();

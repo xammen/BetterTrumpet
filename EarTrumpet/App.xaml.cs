@@ -74,6 +74,14 @@ namespace EarTrumpet
         {
             if (!Settings.ShowQuickTrumpetConfirmation) return;
 
+            // This toast already names the new default output. Windows reports the switch after
+            // ApplyProfile returns, so recording it here keeps the "default device changed" toast quiet.
+            var playback = result?.DefaultsApplied.FirstOrDefault(d => d.Role == VolumeProfileService.DefaultDeviceRole.Playback);
+            if (playback != null)
+            {
+                _lastNotifiedDeviceId = playback.DeviceId;
+            }
+
             // Title names the preset; the body says what actually changed (default
             // devices, device/app counts, anything that was not connected).
             _trayIcon?.ShowNotification(
@@ -143,7 +151,7 @@ namespace EarTrumpet
             var width = Math.Ceiling(desired.Width);
             var height = Math.Ceiling(desired.Height);
 
-            var popupTop = iconBounds.Top - (_mediaPopup?.Height ?? 185) - height - 12;
+            var popupTop = iconBounds.Top - (_mediaPopup?.Height ?? 169) - height - 12;
             var popupLeft = iconBounds.Left + (iconBounds.Width / 2) - (width / 2);
             var workArea = SystemParameters.WorkArea;
 
@@ -202,6 +210,13 @@ namespace EarTrumpet
 
         private void OnAppStartup(object sender, StartupEventArgs e)
         {
+            // Started from %TEMP% by the portable updater: replace the install, relaunch it, exit.
+            if (PortableUpdateApplier.TryRun(Environment.GetCommandLineArgs().Skip(1).ToArray()))
+            {
+                Shutdown();
+                return;
+            }
+
             // ══════════════════════════════════════════════════════════════
             // CLI INTERCEPT: If launched with CLI args, send to running instance and exit
             // ══════════════════════════════════════════════════════════════
@@ -313,7 +328,16 @@ namespace EarTrumpet
                 }
                 _flyoutViewModel.OpenFlyout(type);
             };
-            _trayIcon.SecondaryInvoke += (_, args) => _trayIcon.ShowContextMenu(GetTrayContextMenuItems(), args.Point);
+            _trayIcon.SecondaryInvoke += (_, args) =>
+            {
+                // A pending hover delay would otherwise open the media popup over the menu.
+                _mediaPopupDelayTimer?.Stop();
+                if (_mediaPopup != null && _mediaPopup.IsShowing)
+                {
+                    _mediaPopup.HidePopup();
+                }
+                _trayIcon.ShowContextMenu(GetTrayContextMenuItems(), args.Point);
+            };
             _trayIcon.TertiaryInvoke += (_, __) => CollectionViewModel.Default?.ToggleMute.Execute(null);
             _trayIcon.Scrolled += trayIconScrolled;
             // Tray icon is already visible from ContinueStartup
@@ -323,6 +347,18 @@ namespace EarTrumpet
             _focusLostService = new FocusLostService(CollectionViewModel, Settings);
             _focusLostService.Start();
             Exit += (_, __) => _focusLostService.Stop();
+
+            // The volume tick plays on its own thread; start it (and create its player there)
+            // once startup is idle so the first tick of a launch neither stalls nor lags.
+            // The file is not opened yet: that would create BetterTrumpet's audio session.
+            Exit += (_, __) => UI.Controls.TickSoundPlayer.Shutdown();
+            _ = Dispatcher.InvokeAsync(() =>
+            {
+                if (Settings.UseVolumeTickSound)
+                {
+                    UI.Controls.TickSoundPlayer.Prewarm();
+                }
+            }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
 
             Trace.WriteLine($"Startup: UI components ready at {Duration.TotalMilliseconds:F0}ms");
 
@@ -378,27 +414,17 @@ namespace EarTrumpet
                     catch (Exception ex) { Trace.WriteLine($"Startup: Hotkeys registration failed: {ex.Message}"); }
                 }));
 
-                // Task 3: Media popup (only if enabled)
-                if (Settings.MediaPopupEnabled)
+                // Task 3: Media popup hover wiring. The window itself is created on the first
+                // hover with the feature on, so enabling it later works without a restart.
+                tasks.Add(Task.Run(() =>
                 {
-                    tasks.Add(Task.Run(() =>
+                    try
                     {
-                        try
-                        {
-                            Dispatcher.Invoke((Action)(() =>
-                            {
-                                _mediaPopup = new MediaPopupWindow(Settings);
-                                InitializeMediaPopup();
-                            }));
-                            Trace.WriteLine($"Startup: MediaPopup initialized at {Duration.TotalMilliseconds:F0}ms");
-                        }
-                        catch (Exception ex) { Trace.WriteLine($"Startup: MediaPopup failed: {ex.Message}"); }
-                    }));
-                }
-                else
-                {
-                    Trace.WriteLine("Startup: MediaPopup skipped (feature disabled)");
-                }
+                        Dispatcher.Invoke((Action)InitializeMediaPopup);
+                        Trace.WriteLine($"Startup: MediaPopup hover wired at {Duration.TotalMilliseconds:F0}ms");
+                    }
+                    catch (Exception ex) { Trace.WriteLine($"Startup: MediaPopup failed: {ex.Message}"); }
+                }));
 
                 // Task 4: Health monitoring
                 tasks.Add(Task.Run(() =>
@@ -550,20 +576,36 @@ namespace EarTrumpet
         }
 
         /// <summary>
-        /// Sets up media popup hover behavior. Isolated from CompleteStartup for clarity.
-        /// Timer creation deferred to first Show() call for lazy initialization.
+        /// Sets up media popup hover behavior. The window and its delay timer are created on
+        /// the first hover with the feature enabled.
         /// </summary>
         private void InitializeMediaPopup()
         {
-            if (_mediaPopup == null) return;
+            Settings.MediaPopupSettingsChanged += () =>
+            {
+                if (!Settings.MediaPopupEnabled)
+                {
+                    _mediaPopupDelayTimer?.Stop();
+                    if (_mediaPopup != null && _mediaPopup.IsShowing)
+                    {
+                        _mediaPopup.HidePopup();
+                    }
+                }
+            };
 
-            // Timer will be created on first Show() call - deferred initialization
             _trayIcon.MouseHoverChanged += (_, isOver) =>
             {
                 if (!Settings.MediaPopupEnabled) return;
 
                 if (isOver)
                 {
+                    if (_mediaPopup == null)
+                    {
+                        _mediaPopup = new MediaPopupWindow(Settings);
+                        _mediaPopup.PopupHidden += (__, ___) => RefreshTrayTooltipPresentation();
+                        Trace.WriteLine("MediaPopup: Window created on first hover");
+                    }
+
                     // Lazy-create timer on first hover
                     if (_mediaPopupDelayTimer == null)
                     {
@@ -627,14 +669,9 @@ namespace EarTrumpet
                 else
                 {
                     _mediaPopupDelayTimer?.Stop();
-                    _mediaPopup.StartHideTimer();
+                    _mediaPopup?.StartHideTimer();
                     RefreshTrayTooltipPresentation();
                 }
-            };
-
-            _mediaPopup.PopupHidden += (_, __) =>
-            {
-                RefreshTrayTooltipPresentation();
             };
         }
 

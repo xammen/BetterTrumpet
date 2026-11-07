@@ -465,6 +465,72 @@ namespace EarTrumpet.Properties {
             }
         }
 
+        public static string SettingsTickSound {
+            get {
+                return ResourceManager.GetString("SettingsTickSound", resourceCulture);
+            }
+        }
+
+        public static string SettingsTickSoundDesc {
+            get {
+                return ResourceManager.GetString("SettingsTickSoundDesc", resourceCulture);
+            }
+        }
+
+        public static string SettingsTickSoundClassic {
+            get {
+                return ResourceManager.GetString("SettingsTickSoundClassic", resourceCulture);
+            }
+        }
+
+        public static string SettingsTickSoundCrystal {
+            get {
+                return ResourceManager.GetString("SettingsTickSoundCrystal", resourceCulture);
+            }
+        }
+
+        public static string SettingsTickSoundLow {
+            get {
+                return ResourceManager.GetString("SettingsTickSoundLow", resourceCulture);
+            }
+        }
+
+        public static string SettingsTickSoundMuffled {
+            get {
+                return ResourceManager.GetString("SettingsTickSoundMuffled", resourceCulture);
+            }
+        }
+
+        public static string SettingsTickSoundSharp {
+            get {
+                return ResourceManager.GetString("SettingsTickSoundSharp", resourceCulture);
+            }
+        }
+
+        public static string MediaPopupNoMedia {
+            get {
+                return ResourceManager.GetString("MediaPopupNoMedia", resourceCulture);
+            }
+        }
+
+        public static string MediaPopupMuteTooltip {
+            get {
+                return ResourceManager.GetString("MediaPopupMuteTooltip", resourceCulture);
+            }
+        }
+
+        public static string MediaPopupShuffleTooltip {
+            get {
+                return ResourceManager.GetString("MediaPopupShuffleTooltip", resourceCulture);
+            }
+        }
+
+        public static string MediaPopupRepeatTooltip {
+            get {
+                return ResourceManager.GetString("MediaPopupRepeatTooltip", resourceCulture);
+            }
+        }
+
         public static string QuickTrumpetSettingsPageText {
             get {
                 return ResourceManager.GetString("QuickTrumpetSettingsPageText", resourceCulture);

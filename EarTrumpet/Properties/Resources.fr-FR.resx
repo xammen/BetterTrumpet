@@ -2406,4 +2406,37 @@ Détails : {0}</value>
   <data name="WebSettingsRequiresModernIcon" xml:space="preserve">
     <value>Désactivez l'icône d'origine pour afficher le type de sortie.</value>
   </data>
+  <data name="MediaPopupNoMedia" xml:space="preserve">
+    <value>Aucun média en lecture</value>
+  </data>
+  <data name="MediaPopupMuteTooltip" xml:space="preserve">
+    <value>Couper/rétablir le son</value>
+  </data>
+  <data name="MediaPopupShuffleTooltip" xml:space="preserve">
+    <value>Lecture aléatoire</value>
+  </data>
+  <data name="MediaPopupRepeatTooltip" xml:space="preserve">
+    <value>Répéter</value>
+  </data>
+  <data name="SettingsTickSound" xml:space="preserve">
+    <value>Son du tick</value>
+  </data>
+  <data name="SettingsTickSoundDesc" xml:space="preserve">
+    <value>Joué une fois quand vous le choisissez, pour l'entendre.</value>
+  </data>
+  <data name="SettingsTickSoundClassic" xml:space="preserve">
+    <value>Classique</value>
+  </data>
+  <data name="SettingsTickSoundCrystal" xml:space="preserve">
+    <value>Cristal</value>
+  </data>
+  <data name="SettingsTickSoundLow" xml:space="preserve">
+    <value>Grave</value>
+  </data>
+  <data name="SettingsTickSoundMuffled" xml:space="preserve">
+    <value>Feutré</value>
+  </data>
+  <data name="SettingsTickSoundSharp" xml:space="preserve">
+    <value>Tic net</value>
+  </data>
 </root>

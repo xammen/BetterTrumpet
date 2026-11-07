@@ -98,6 +98,10 @@
     <Resource Include="Assets\Icon-Speaker-Light.ico" />
     <Resource Include="Assets\BetterTrumpet.ico" />
     <Resource Include="Assets\tick.wav" />
+    <Resource Include="Assets\tick-crystal.wav" />
+    <Resource Include="Assets\tick-low.wav" />
+    <Resource Include="Assets\tick-muffled.wav" />
+    <Resource Include="Assets\tick-sharp.wav" />
     <Resource Include="Assets\monkeylow.wav" />
     <Resource Include="Assets\monkeymid.wav" />
     <Resource Include="Assets\monkeyhigh.wav" />

@@ -2421,4 +2421,37 @@ Details: {0}</value>
   <data name="WebSettingsRequiresModernIcon" xml:space="preserve">
     <value>Turn off the original icon to show the device type.</value>
   </data>
+  <data name="MediaPopupNoMedia" xml:space="preserve">
+    <value>No media playing</value>
+  </data>
+  <data name="MediaPopupMuteTooltip" xml:space="preserve">
+    <value>Mute/unmute</value>
+  </data>
+  <data name="MediaPopupShuffleTooltip" xml:space="preserve">
+    <value>Shuffle</value>
+  </data>
+  <data name="MediaPopupRepeatTooltip" xml:space="preserve">
+    <value>Repeat</value>
+  </data>
+  <data name="SettingsTickSound" xml:space="preserve">
+    <value>Tick sound</value>
+  </data>
+  <data name="SettingsTickSoundDesc" xml:space="preserve">
+    <value>Plays once when you pick it, so you can hear it.</value>
+  </data>
+  <data name="SettingsTickSoundClassic" xml:space="preserve">
+    <value>Classic</value>
+  </data>
+  <data name="SettingsTickSoundCrystal" xml:space="preserve">
+    <value>Crystal</value>
+  </data>
+  <data name="SettingsTickSoundLow" xml:space="preserve">
+    <value>Low</value>
+  </data>
+  <data name="SettingsTickSoundMuffled" xml:space="preserve">
+    <value>Muffled</value>
+  </data>
+  <data name="SettingsTickSoundSharp" xml:space="preserve">
+    <value>Sharp</value>
+  </data>
 </root>

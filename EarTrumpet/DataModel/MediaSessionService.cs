@@ -44,6 +44,15 @@ namespace EarTrumpet.DataModel
         private bool _isMediaPlaying;
         private readonly Dispatcher _dispatcher;
         private LegacyMediaPlayerService _legacyService;
+        private string _lastTracedSessionId;
+
+        // The one session the popup shows and controls. Re-chosen on the UI thread whenever
+        // sessions or playback states change; events from other sessions are ignored, so a
+        // background tab can no longer swap the title, artwork or controls under the user.
+        private volatile GlobalSystemMediaTransportControlsSession _pinnedSession;
+
+        // Providers raise MediaPropertiesChanged several times per track (title, then artwork...).
+        private readonly DispatcherTimer _trackChangeDebounce;
 
         // Thumbnail cache — prevents redundant SMTC stream reads when multiple consumers
         // request the thumbnail on the same track (MediaPopup, AlbumArt theme, PreloadThumbnail).
@@ -98,6 +107,16 @@ namespace EarTrumpet.DataModel
         private MediaSessionService()
         {
             _dispatcher = Dispatcher.CurrentDispatcher;
+            _trackChangeDebounce = new DispatcherTimer(DispatcherPriority.Normal, _dispatcher)
+            {
+                Interval = TimeSpan.FromMilliseconds(150)
+            };
+            _trackChangeDebounce.Tick += (_, __) =>
+            {
+                _trackChangeDebounce.Stop();
+                InvalidateThumbnailCache();
+                MediaTrackChanged?.Invoke();
+            };
             Initialize();
             InitializeLegacyService();
         }
@@ -203,11 +222,12 @@ namespace EarTrumpet.DataModel
                         _sessionManager.CurrentSessionChanged += OnCurrentSessionChanged;
                         _sessionManager.SessionsChanged += OnSessionsChanged;
                         
-                        // Subscribe to existing sessions
-                        SubscribeToAllSessions();
-                        
-                        // Check initial state
-                        UpdatePlaybackState();
+                        // Completes on a background thread; session choice and its timer live on the UI thread.
+                        _dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            SubscribeToAllSessions();
+                            UpdatePlaybackState();
+                        }));
                         
                         _isInitialized = true;
                         Trace.WriteLine("MediaSessionService: Initialized successfully");
@@ -231,8 +251,6 @@ namespace EarTrumpet.DataModel
         private void OnCurrentSessionChanged(GlobalSystemMediaTransportControlsSessionManager sender, CurrentSessionChangedEventArgs args)
         {
             Trace.WriteLine("MediaSessionService: Current session changed");
-            // Invalidate thumbnail cache when session changes
-            InvalidateThumbnailCache();
             _dispatcher.BeginInvoke(new Action(() =>
             {
                 SubscribeToAllSessions();
@@ -297,6 +315,7 @@ namespace EarTrumpet.DataModel
 
         private void OnTimelinePropertiesChanged(GlobalSystemMediaTransportControlsSession sender, TimelinePropertiesChangedEventArgs args)
         {
+            if (!IsPinned(sender)) return;
             _dispatcher.BeginInvoke(new Action(() =>
             {
                 TimelineChanged?.Invoke();
@@ -305,19 +324,114 @@ namespace EarTrumpet.DataModel
 
         private void OnMediaPropertiesChanged(GlobalSystemMediaTransportControlsSession sender, MediaPropertiesChangedEventArgs args)
         {
+            if (!IsPinned(sender)) return;
+
             Trace.WriteLine("MediaSessionService: Media properties changed (track change)");
-            // Invalidate thumbnail cache so next request fetches fresh art
-            InvalidateThumbnailCache();
             _dispatcher.BeginInvoke(new Action(() =>
             {
-                MediaTrackChanged?.Invoke();
+                // Restart: one notification per burst, once the provider settled.
+                _trackChangeDebounce.Stop();
+                _trackChangeDebounce.Start();
             }));
+        }
+
+        private bool IsPinned(GlobalSystemMediaTransportControlsSession session) => SameSession(_pinnedSession, session);
+
+        // The projection may hand out a new wrapper for the same session, so fall back to the app id.
+        private static bool SameSession(GlobalSystemMediaTransportControlsSession a, GlobalSystemMediaTransportControlsSession b)
+        {
+            if (a == null || b == null) return false;
+            if (ReferenceEquals(a, b)) return true;
+            try
+            {
+                return string.Equals(a.SourceAppUserModelId, b.SourceAppUserModelId, StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private GlobalSystemMediaTransportControlsSession[] GetSessionsSnapshot()
+        {
+            try
+            {
+                var sessionList = _sessionManager?.GetSessions();
+                if (sessionList == null) return Array.Empty<GlobalSystemMediaTransportControlsSession>();
+
+                var sessions = new GlobalSystemMediaTransportControlsSession[sessionList.Count];
+                for (int i = 0; i < sessionList.Count; i++)
+                    sessions[i] = sessionList[i];
+                return sessions;
+            }
+            catch
+            {
+                return Array.Empty<GlobalSystemMediaTransportControlsSession>();
+            }
+        }
+
+        private static bool IsPlaying(GlobalSystemMediaTransportControlsSession session)
+        {
+            try
+            {
+                return session?.GetPlaybackInfo()?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Playing beats paused; among playing sessions the pinned one stays, then the one Windows
+        /// calls current. With nothing playing, the pinned session stays (so Play resumes it).
+        /// </summary>
+        private GlobalSystemMediaTransportControlsSession ChooseSession(GlobalSystemMediaTransportControlsSession[] sessions)
+        {
+            GlobalSystemMediaTransportControlsSession pinned = null;
+            foreach (var session in sessions)
+            {
+                if (SameSession(_pinnedSession, session)) { pinned = session; break; }
+            }
+
+            bool pinnedAlive = pinned != null;
+            if (pinnedAlive && IsPlaying(pinned)) return pinned;
+
+            GlobalSystemMediaTransportControlsSession current = null;
+            try { current = _sessionManager?.GetCurrentSession(); } catch { }
+            if (IsPlaying(current)) return current;
+
+            foreach (var session in sessions)
+            {
+                if (IsPlaying(session)) return session;
+            }
+
+            if (pinnedAlive) return pinned;
+            return current ?? (sessions.Length > 0 ? sessions[0] : null);
+        }
+
+        // UI thread only.
+        private void RefreshPinnedSession()
+        {
+            var chosen = ChooseSession(GetSessionsSnapshot());
+            bool same = SameSession(chosen, _pinnedSession) || (chosen == null && _pinnedSession == null);
+            _pinnedSession = chosen;
+            if (same) return;
+
+            TraceSelectedSession(chosen);
+
+            // Different app, different content: same path as a track change.
+            _trackChangeDebounce.Stop();
+            InvalidateThumbnailCache();
+            MediaTrackChanged?.Invoke();
         }
 
         private void UpdatePlaybackState()
         {
             try
             {
+                RefreshPinnedSession();
+
                 bool wasPlaying = _isMediaPlaying;
                 _isMediaPlaying = CheckIfAnyMediaPlaying();
 
@@ -340,34 +454,10 @@ namespace EarTrumpet.DataModel
 
         private bool CheckIfAnyMediaPlaying()
         {
-            try
+            foreach (var session in GetSessionsSnapshot())
             {
-                var sessionList = _sessionManager?.GetSessions();
-                if (sessionList == null) return false;
-
-                GlobalSystemMediaTransportControlsSession[] sessions;
-                try
-                {
-                    sessions = new GlobalSystemMediaTransportControlsSession[sessionList.Count];
-                    for (int i = 0; i < sessionList.Count; i++)
-                        sessions[i] = sessionList[i];
-                }
-                catch { return false; }
-
-                foreach (var session in sessions)
-                {
-                    try
-                    {
-                        var playbackInfo = session?.GetPlaybackInfo();
-                        if (playbackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
-                        {
-                            return true;
-                        }
-                    }
-                    catch { /* Session may have been disposed — skip silently */ }
-                }
+                if (IsPlaying(session)) return true;
             }
-            catch { /* WinRT COM corruption — skip */ }
 
             return false;
         }
@@ -381,78 +471,22 @@ namespace EarTrumpet.DataModel
         }
 
         /// <summary>
-        /// Gets the current media session (if any).
-        /// Prioritizes actively playing sessions over paused ones to avoid random selection.
+        /// The session the popup shows and controls (see <see cref="ChooseSession"/>). Before the
+        /// first refresh, or from a background thread racing it, falls back to choosing on the spot.
         /// </summary>
         private GlobalSystemMediaTransportControlsSession GetCurrentSession()
         {
-            try
+            return _pinnedSession ?? ChooseSession(GetSessionsSnapshot());
+        }
+
+        // Logged only when the choice changes; logging every lookup flooded the log (#69).
+        private void TraceSelectedSession(GlobalSystemMediaTransportControlsSession session)
+        {
+            var id = session?.SourceAppUserModelId;
+            if (!string.Equals(id, _lastTracedSessionId, StringComparison.Ordinal))
             {
-                // First, try to get the system's current session
-                var currentSession = _sessionManager?.GetCurrentSession();
-
-                // If current session is playing, use it
-                if (currentSession != null)
-                {
-                    try
-                    {
-                        var playbackInfo = currentSession.GetPlaybackInfo();
-                        if (playbackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
-                        {
-                            return currentSession;
-                        }
-                    }
-                    catch { /* Session may be invalid */ }
-                }
-
-                // Otherwise, search for any playing session (better than random paused session)
-                var sessionList = _sessionManager?.GetSessions();
-                if (sessionList != null && sessionList.Count > 0)
-                {
-                    GlobalSystemMediaTransportControlsSession[] sessions;
-                    try
-                    {
-                        sessions = new GlobalSystemMediaTransportControlsSession[sessionList.Count];
-                        for (int i = 0; i < sessionList.Count; i++)
-                            sessions[i] = sessionList[i];
-                    }
-                    catch { return currentSession; }
-
-                    // First pass: find any playing session
-                    foreach (var session in sessions)
-                    {
-                        try
-                        {
-                            var playbackInfo = session?.GetPlaybackInfo();
-                            if (playbackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
-                            {
-                                Trace.WriteLine($"MediaSessionService: Selected playing session - {session.SourceAppUserModelId}");
-                                return session;
-                            }
-                        }
-                        catch { /* Skip invalid session */ }
-                    }
-
-                    // Second pass: if no playing session, log all available sessions for debugging
-                    Trace.WriteLine($"MediaSessionService: No playing session found. Available sessions ({sessions.Length}):");
-                    foreach (var session in sessions)
-                    {
-                        try
-                        {
-                            var playbackInfo = session?.GetPlaybackInfo();
-                            Trace.WriteLine($"  - {session.SourceAppUserModelId}: {playbackInfo?.PlaybackStatus}");
-                        }
-                        catch { /* Skip */ }
-                    }
-                }
-
-                // Fallback to current session (may be paused)
-                return currentSession;
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine($"MediaSessionService: Error getting current session - {ex.Message}");
-                return null;
+                _lastTracedSessionId = id;
+                Trace.WriteLine($"MediaSessionService: Selected playing session - {id}");
             }
         }
 
@@ -585,16 +619,17 @@ namespace EarTrumpet.DataModel
 
                 GlobalSystemMediaTransportControlsSessionMediaProperties mediaProps = null;
                 var operation = session.TryGetMediaPropertiesAsync();
-                var waitHandle = new System.Threading.ManualResetEventSlim(false);
+                using var waitHandle = new System.Threading.ManualResetEventSlim(false);
                 operation.Completed = (info, status) =>
                 {
                     if (status == AsyncStatus.Completed)
                         mediaProps = info.GetResults();
-                    waitHandle.Set();
+                    SetQuietly(waitHandle);
                 };
 
-                // Wait briefly for result with proper signaling
-                waitHandle.Wait(TimeSpan.FromMilliseconds(100));
+                // Callers are background threads. 100 ms was often too short for Spotify and
+                // browsers, which made the popup show "No media playing" over a playing track.
+                waitHandle.Wait(TimeSpan.FromMilliseconds(750));
 
                 if (mediaProps != null)
                 {
@@ -651,6 +686,11 @@ namespace EarTrumpet.DataModel
         /// <summary>
         /// Core thumbnail fetching logic — expensive, only called when cache is dirty.
         /// </summary>
+        private static void SetQuietly(System.Threading.ManualResetEventSlim waitHandle)
+        {
+            try { waitHandle.Set(); } catch (ObjectDisposedException) { }
+        }
+
         private BitmapImage FetchThumbnailCore()
         {
             try
@@ -661,8 +701,8 @@ namespace EarTrumpet.DataModel
 
                 // Get media properties (timeout 1.5s — reduced from 2s)
                 var propsOp = session.TryGetMediaPropertiesAsync();
-                var propsWait = new System.Threading.ManualResetEventSlim(false);
-                propsOp.Completed = (_, __) => propsWait.Set();
+                using var propsWait = new System.Threading.ManualResetEventSlim(false);
+                propsOp.Completed = (_, __) => SetQuietly(propsWait);
                 if (propsOp.Status == AsyncStatus.Started)
                     propsWait.Wait(TimeSpan.FromMilliseconds(1500));
 
@@ -675,15 +715,15 @@ namespace EarTrumpet.DataModel
 
                 // Open the thumbnail stream (timeout 1.5s)
                 var streamOp = mediaProps.Thumbnail.OpenReadAsync();
-                var streamWait = new System.Threading.ManualResetEventSlim(false);
-                streamOp.Completed = (_, __) => streamWait.Set();
+                using var streamWait = new System.Threading.ManualResetEventSlim(false);
+                streamOp.Completed = (_, __) => SetQuietly(streamWait);
                 if (streamOp.Status == AsyncStatus.Started)
                     streamWait.Wait(TimeSpan.FromMilliseconds(1500));
 
                 if (streamOp.Status != AsyncStatus.Completed)
                     return GetLegacyPlayerIcon();
 
-                var stream = streamOp.GetResults();
+                using var stream = streamOp.GetResults();
                 if (stream == null || stream.Size == 0)
                     return GetLegacyPlayerIcon();
 
@@ -692,8 +732,8 @@ namespace EarTrumpet.DataModel
                 var buffer = new Windows.Storage.Streams.Buffer(size);
 
                 var readOp = stream.ReadAsync(buffer, size, InputStreamOptions.None);
-                var readWait = new System.Threading.ManualResetEventSlim(false);
-                readOp.Completed = (_, __) => readWait.Set();
+                using var readWait = new System.Threading.ManualResetEventSlim(false);
+                readOp.Completed = (_, __) => SetQuietly(readWait);
                 if (readOp.Status == AsyncStatus.Started)
                     readWait.Wait(TimeSpan.FromMilliseconds(1500));
 
@@ -705,16 +745,29 @@ namespace EarTrumpet.DataModel
                     return GetLegacyPlayerIcon();
 
                 var bytes = new byte[readBuffer.Length];
-                var dataReader = DataReader.FromBuffer(readBuffer);
+                using var dataReader = DataReader.FromBuffer(readBuffer);
                 dataReader.ReadBytes(bytes);
 
                 // Decode at reduced resolution — covers are displayed small, no need for full-res
                 using (var memStream = new MemoryStream(bytes))
                 {
+                    // Cap large covers at 300 px, but never upscale small ones: the popup shows
+                    // those through its low-resolution path, which upscaling made unreachable.
+                    int sourceWidth = 0;
+                    try
+                    {
+                        sourceWidth = BitmapDecoder.Create(memStream, BitmapCreateOptions.DelayCreation, BitmapCacheOption.None).Frames[0].PixelWidth;
+                    }
+                    catch { }
+                    memStream.Position = 0;
+
                     var bitmap = new BitmapImage();
                     bitmap.BeginInit();
                     bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.DecodePixelWidth = 300; // Limit decode size — saves CPU+memory
+                    if (sourceWidth == 0 || sourceWidth > 300)
+                    {
+                        bitmap.DecodePixelWidth = 300;
+                    }
                     bitmap.StreamSource = memStream;
                     bitmap.EndInit();
                     bitmap.Freeze();
@@ -780,7 +833,7 @@ namespace EarTrumpet.DataModel
                 if (string.IsNullOrEmpty(exePath) || !System.IO.File.Exists(exePath))
                     return null;
 
-                var icon = System.Drawing.Icon.ExtractAssociatedIcon(exePath);
+                using var icon = System.Drawing.Icon.ExtractAssociatedIcon(exePath);
                 if (icon != null)
                 {
                     using (var bmp = icon.ToBitmap())
@@ -830,8 +883,24 @@ namespace EarTrumpet.DataModel
                 var timeline = session.GetTimelineProperties();
                 if (timeline == null) return;
 
-                position = timeline.Position;
                 duration = timeline.EndTime - timeline.StartTime;
+                position = timeline.Position - timeline.StartTime;
+
+                // SMTC reports the position as of LastUpdatedTime, which providers refresh only
+                // every few seconds (sometimes much later). Bring it to now while playing.
+                var playback = session.GetPlaybackInfo();
+                if (playback?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing &&
+                    timeline.LastUpdatedTime > DateTimeOffset.MinValue)
+                {
+                    var elapsed = DateTimeOffset.Now - timeline.LastUpdatedTime;
+                    if (elapsed > TimeSpan.Zero)
+                    {
+                        position += TimeSpan.FromTicks((long)(elapsed.Ticks * (playback.PlaybackRate ?? 1.0)));
+                    }
+                }
+
+                if (position < TimeSpan.Zero) position = TimeSpan.Zero;
+                if (duration > TimeSpan.Zero && position > duration) position = duration;
             }
             catch (Exception ex)
             {
@@ -981,9 +1050,5 @@ namespace EarTrumpet.DataModel
             }
         }
 
-        /// <summary>
-        /// Check if legacy WMP is playing (for fallback)
-        /// </summary>
-        public bool IsLegacyMediaPlaying => _legacyService?.IsPlaying ?? false;
     }
 }

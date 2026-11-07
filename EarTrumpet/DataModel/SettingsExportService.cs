@@ -41,6 +41,7 @@ namespace EarTrumpet.DataModel
                 ["UseLogarithmicVolume"] = settings.UseLogarithmicVolume,
                 ["UseSmoothVolumeAnimation"] = settings.UseSmoothVolumeAnimation,
                 ["UseVolumeTickSound"] = settings.UseVolumeTickSound,
+                ["TickSound"] = (int)settings.TickSound,
                 ["MonkeyTickSoundUnlocked"] = settings.MonkeyTickSoundUnlocked,
                 ["UseMonkeyTickSound"] = settings.UseMonkeyTickSound,
                 ["VolumeAnimationSpeed"] = settings.VolumeAnimationSpeed,
@@ -225,6 +226,7 @@ namespace EarTrumpet.DataModel
             TrySet(data, "UseLogarithmicVolume", (bool v) => settings.UseLogarithmicVolume = v);
             TrySet(data, "UseSmoothVolumeAnimation", (bool v) => settings.UseSmoothVolumeAnimation = v);
             TrySet(data, "UseVolumeTickSound", (bool v) => settings.UseVolumeTickSound = v);
+            TrySet(data, "TickSound", (int v) => { if (Enum.IsDefined(typeof(TickSoundKind), v)) settings.TickSound = (TickSoundKind)v; });
             TrySet(data, "MonkeyTickSoundUnlocked", (bool v) => settings.MonkeyTickSoundUnlocked = v);
             TrySet(data, "UseMonkeyTickSound", (bool v) => settings.UseMonkeyTickSound = v);
             TrySet(data, "VolumeAnimationSpeed", (double v) => settings.VolumeAnimationSpeed = v);

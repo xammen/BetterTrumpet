@@ -109,11 +109,22 @@ namespace EarTrumpet.DataModel
         {
             try
             {
-                _playbackDeviceManager = WindowsAudioFactory.Create(AudioDeviceKind.Playback);
+                // Reuse the app's playback manager: a second one duplicated every device and
+                // session COM registration for the whole app lifetime.
+                _playbackDeviceManager = (System.Windows.Application.Current as App)?.AudioDeviceManager
+                    ?? WindowsAudioFactory.Create(AudioDeviceKind.Playback);
                 _isInitialized = true;
 
                 // Subscribe to device events to detect when audio sessions appear
                 _playbackDeviceManager.Loaded += OnDeviceManagerLoaded;
+
+                // Polling stops after a few empty polls; a session appearing re-arms it.
+                // Without this, detection ended for good about a minute after startup.
+                _playbackDeviceManager.Devices.CollectionChanged += OnDevicesChanged;
+                foreach (var device in _playbackDeviceManager.Devices.ToArray())
+                {
+                    device.Groups.CollectionChanged += OnSessionsChanged;
+                }
 
                 // Start with on-demand polling (only when sessions exist)
                 StartPollingIfNeeded();
@@ -123,6 +134,27 @@ namespace EarTrumpet.DataModel
             catch (Exception ex)
             {
                 Trace.WriteLine($"LegacyMediaPlayerService: Init failed - {ex.Message}");
+            }
+        }
+
+        private void OnDevicesChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (IAudioDevice device in e.OldItems) device.Groups.CollectionChanged -= OnSessionsChanged;
+            }
+            if (e.NewItems != null)
+            {
+                foreach (IAudioDevice device in e.NewItems) device.Groups.CollectionChanged += OnSessionsChanged;
+            }
+            StartPollingIfNeeded();
+        }
+
+        private void OnSessionsChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                StartPollingIfNeeded();
             }
         }
 

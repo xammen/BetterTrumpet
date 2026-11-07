@@ -37,8 +37,6 @@ namespace EarTrumpet.UI.Controls
         private double _lastSoundValue = -1;
         private DateTime _lastSoundTime = DateTime.MinValue;
         private const int SoundThrottleMs = 50; // Min time between sounds
-        private static System.Windows.Media.MediaPlayer _tickPlayer; // Static to reuse across sliders
-        private static string _tickPlayerResourcePath;
 
         public float PeakValue1
         {
@@ -1091,42 +1089,8 @@ namespace EarTrumpet.UI.Controls
                     return;
                 }
 
-                const string resourcePath = "Assets/tick.wav";
-
-                // Initialize or reload the shared player when the selected sound changes.
-                if (_tickPlayer == null || !string.Equals(_tickPlayerResourcePath, resourcePath, StringComparison.Ordinal))
-                {
-                    _tickPlayer?.Close();
-                    _tickPlayer = new System.Windows.Media.MediaPlayer();
-
-                    // MediaPlayer can't read from pack:// URIs directly, so we extract to a temp file
-                    var streamResourceInfo = Application.GetResourceStream(new Uri($"pack://application:,,,/{resourcePath}"));
-                    if (streamResourceInfo != null)
-                    {
-                        var tempFileName = "bettertrumpet_tick.wav";
-                        var tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), tempFileName);
-
-                        using (var fileStream = System.IO.File.Create(tempPath))
-                        {
-                            streamResourceInfo.Stream.CopyTo(fileStream);
-                        }
-
-                        _tickPlayer.Open(new Uri(tempPath, UriKind.Absolute));
-                        _tickPlayerResourcePath = resourcePath;
-                    }
-                }
-
-                // Set volume based on slider value (0-100 -> 0.0-1.0)
-                // Add a minimum volume of 0.1 so it's always audible even at low levels
-                if (_tickPlayer != null)
-                {
-                    var volumePercent = newValue / 100.0;
-                    _tickPlayer.Volume = Math.Max(0.1, volumePercent);
-
-                    // Reset to beginning and play
-                    _tickPlayer.Position = TimeSpan.Zero;
-                    _tickPlayer.Play();
-                }
+                // Played from a dedicated thread: the first tick no longer stalls the drag.
+                TickSoundPlayer.Play(newValue);
             }
             catch (Exception ex)
             {

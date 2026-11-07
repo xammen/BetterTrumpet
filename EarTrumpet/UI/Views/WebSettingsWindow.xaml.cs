@@ -394,6 +394,17 @@ namespace EarTrumpet.UI.Views
                 case "useVolumeTickSound":
                     App.Settings.UseVolumeTickSound = valueElement.GetBoolean();
                     break;
+                case "tickSoundIndex":
+                    {
+                        var kind = valueElement.GetInt32();
+                        if (Enum.IsDefined(typeof(TickSoundKind), kind))
+                        {
+                            App.Settings.TickSound = (TickSoundKind)kind;
+                            // Let the user hear what they picked.
+                            UI.Controls.TickSoundPlayer.Play(60, App.Settings.TickSound);
+                        }
+                    }
+                    break;
                 case "notifyOnDeviceChange":
                     App.Settings.NotifyOnDefaultDeviceChange = valueElement.GetBoolean();
                     break;
@@ -748,6 +759,10 @@ namespace EarTrumpet.UI.Views
                     ["useGlobalMouseWheelHook"] = R("SettingsUseGlobalMouseWheelHook"), ["useGlobalMouseWheelHookDescription"] = R("SettingsScrollWheelGlobalTip"),
                     ["volumeScaleTitle"] = R("SettingsVolumeScale"), ["volumeScaleDescription"] = R("SettingsVolumeScaleDesc"),
                     ["useLogarithmicVolume"] = R("SettingsUseLogarithmicVolume"), ["useVolumeTickSound"] = R("SettingsVolumeTickSound"),
+                    ["tickSound"] = R("SettingsTickSound"), ["tickSoundDescription"] = R("SettingsTickSoundDesc"),
+                    ["tickSound0"] = R("SettingsTickSoundClassic"), ["tickSound1"] = R("SettingsTickSoundCrystal"),
+                    ["tickSound2"] = R("SettingsTickSoundLow"), ["tickSound3"] = R("SettingsTickSoundMuffled"),
+                    ["tickSound4"] = R("SettingsTickSoundSharp"),
                     ["useVolumeTickSoundDescription"] = R("SettingsVolumeTickSoundTip"), ["shortcuts"] = R("ShortcutsPageText"),
                     ["deviceChangeTitle"] = R("SettingsDeviceChangeNotify"), ["deviceChangeDescription"] = R("SettingsDeviceChangeNotifyDesc"),
                     ["notifyOnDeviceChange"] = R("SettingsNotifyOnDeviceChange"),
@@ -873,6 +888,7 @@ namespace EarTrumpet.UI.Views
                     useGlobalMouseWheelHook = App.Settings.UseGlobalMouseWheelHook,
                     useLogarithmicVolume = App.Settings.UseLogarithmicVolume,
                     useVolumeTickSound = App.Settings.UseVolumeTickSound,
+                    tickSoundIndex = (int)App.Settings.TickSound,
                     notifyOnDeviceChange = App.Settings.NotifyOnDefaultDeviceChange,
                     showDeviceSwitchNotification = App.Settings.ShowDeviceSwitchNotification,
                     useFocusLostVolume = App.Settings.UseFocusLostVolume,

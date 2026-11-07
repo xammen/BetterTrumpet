@@ -9,6 +9,7 @@ export type SettingKey =
   | "useGlobalMouseWheelHook"
   | "useLogarithmicVolume"
   | "useVolumeTickSound"
+  | "tickSoundIndex"
   | "notifyOnDeviceChange"
   | "showDeviceSwitchNotification"
   | "useFocusLostVolume"

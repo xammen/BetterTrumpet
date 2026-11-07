@@ -41,6 +41,7 @@ namespace EarTrumpet.Interop
             SWP_NOMOVE = 0x0002,
             SWP_NOZORDER = 0x0004,
             SWP_NOACTIVATE = 0x0010,
+            SWP_NOOWNERZORDER = 0x0200,
         }
 
         [DllImport("user32.dll", PreserveSig = true)]

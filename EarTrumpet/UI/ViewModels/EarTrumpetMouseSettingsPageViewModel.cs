@@ -29,7 +29,33 @@ namespace EarTrumpet.UI.ViewModels
         public bool UseVolumeTickSound
         {
             get => _settings.UseVolumeTickSound;
-            set => _settings.UseVolumeTickSound = value;
+            set
+            {
+                _settings.UseVolumeTickSound = value;
+                RaisePropertyChanged(nameof(UseVolumeTickSound));
+            }
+        }
+
+        // Same order as TickSoundKind.
+        public string[] TickSoundOptions { get; } =
+        {
+            Properties.Resources.SettingsTickSoundClassic,
+            Properties.Resources.SettingsTickSoundCrystal,
+            Properties.Resources.SettingsTickSoundLow,
+            Properties.Resources.SettingsTickSoundMuffled,
+            Properties.Resources.SettingsTickSoundSharp,
+        };
+
+        public int TickSoundIndex
+        {
+            get => (int)_settings.TickSound;
+            set
+            {
+                if (value < 0 || value == (int)_settings.TickSound) return;
+                _settings.TickSound = (TickSoundKind)value;
+                RaisePropertyChanged(nameof(TickSoundIndex));
+                UI.Controls.TickSoundPlayer.Play(60, _settings.TickSound);
+            }
         }
 
         public bool NotifyOnDefaultDeviceChange

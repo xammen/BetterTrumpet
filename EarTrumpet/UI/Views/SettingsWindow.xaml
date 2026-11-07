@@ -370,6 +370,13 @@
                                   Content="{x:Static resx:Resources.SettingsVolumeTickSound}"
                                   IsChecked="{Binding UseVolumeTickSound, Mode=TwoWay}"
                                   ToolTip="{x:Static resx:Resources.SettingsVolumeTickSoundTip}" />
+                        <StackPanel Orientation="Horizontal" Margin="28,8,0,0" IsEnabled="{Binding UseVolumeTickSound}">
+                            <TextBlock Text="{x:Static resx:Resources.SettingsTickSound}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <ComboBox MinWidth="140" Height="30" VerticalContentAlignment="Center"
+                                      ItemsSource="{Binding TickSoundOptions}"
+                                      SelectedIndex="{Binding TickSoundIndex, Mode=TwoWay}"
+                                      ToolTip="{x:Static resx:Resources.SettingsTickSoundDesc}" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 

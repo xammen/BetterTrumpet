@@ -1,5 +1,7 @@
 using System;
+using System.Runtime.CompilerServices;
 using EarTrumpet.Extensions;
+using EarTrumpet.UI.Helpers;
 using EarTrumpet.UI.ViewModels;
 using System.Linq;
 using System.ComponentModel;
@@ -19,8 +21,14 @@ namespace EarTrumpet.UI.Views
         private const double EntranceSlideOffsetPx = 8;
         private const double HideSlideOffsetPx = -12;
 
+        // View models whose runtime entrance has already been handled by the flyout, so a row
+        // re-realized later (another container, a list rebuild) never grows in a second time.
+        private static readonly ConditionalWeakTable<IAppItemViewModel, object> _flyoutEntrancesHandled =
+            new ConditionalWeakTable<IAppItemViewModel, object>();
+
         private IAppItemViewModel App => DataContext as IAppItemViewModel;
         private IAppItemViewModel _subscribedApp;
+        private FlyoutWindow _entranceHost;
         private ListViewItem _container;
         private bool _lastMutedState;
         private bool _hideAnimationStarted;
@@ -50,6 +58,8 @@ namespace EarTrumpet.UI.Views
 
             Unloaded += (_, __) =>
             {
+                LeaveFlyoutEntrance();
+
                 if (_container != null)
                 {
                     _container.PreviewKeyDown -= OnPreviewKeyDown;
@@ -131,6 +141,7 @@ namespace EarTrumpet.UI.Views
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            LeaveFlyoutEntrance();
             ResetTransientVisualState();
 
             UnsubscribeFromAppEvents();
@@ -223,7 +234,29 @@ namespace EarTrumpet.UI.Views
 
         private void AnimateInIfNeeded()
         {
-            if (App?.AnimateOnLoad != true || !ShouldAnimateStateChange())
+            var app = App;
+            if (app?.AnimateOnLoad != true)
+            {
+                return;
+            }
+
+            // In the tray flyout the window owns the entrance: the row and the window edge grow
+            // together, and the row waits while a slider is being dragged.
+            if (Window.GetWindow(this) is FlyoutWindow flyout)
+            {
+                if (_flyoutEntrancesHandled.TryGetValue(app, out _))
+                {
+                    return;
+                }
+                _flyoutEntrancesHandled.AddOrUpdate(app, null);
+                if (flyout.TryAdmitEnteringRow(this, _container, ShouldAnimateStateChange()))
+                {
+                    _entranceHost = flyout;
+                }
+                return;
+            }
+
+            if (!ShouldAnimateStateChange())
             {
                 return;
             }
@@ -275,14 +308,65 @@ namespace EarTrumpet.UI.Views
             {
                 container.BeginAnimation(HeightProperty, null);
                 container.Height = double.NaN;
-
-                // The flyout sizes its Win32 window from a measured layout; the
-                // measure that ran while this row was still growing (0 → natural)
-                // left the window too short, so the list became scrollable until a
-                // reopen. Ask the flyout to re-size now that the row has settled.
-                (Window.GetWindow(this) as FlyoutWindow)?.RequestReposition();
             };
             container.BeginAnimation(HeightProperty, heightAnimation);
+        }
+
+        /// <summary>
+        /// Unloaded (session gone) or reused for another item: the flyout must stop counting this
+        /// row. Window.GetWindow is already null in Unloaded, hence the stored host.
+        /// </summary>
+        private void LeaveFlyoutEntrance()
+        {
+            var host = _entranceHost;
+            _entranceHost = null;
+            host?.RemoveEnteringRow(this);
+        }
+
+        /// <summary>Flyout row entrance: hidden while the container waits at height 0.</summary>
+        internal void PrepareEntrance()
+        {
+            BeginAnimation(OpacityProperty, null);
+            Opacity = 0;
+            RenderTransform = null;
+        }
+
+        /// <summary>
+        /// Flyout row entrance: the content fades in slightly behind the container growth and
+        /// rises a few DIPs with it. Base values are final; the clocks simply stop.
+        /// </summary>
+        internal void BeginEntranceReveal()
+        {
+            Opacity = 1;
+            BeginAnimation(OpacityProperty, FlyoutMotion.Create(0, 1, FlyoutMotion.RowContentFadeMs, FlyoutMotion.EaseOut, FlyoutMotion.RowContentDelayMs));
+
+            var rise = new TranslateTransform();
+            RenderTransform = rise;
+            var riseAnimation = FlyoutMotion.Create(FlyoutMotion.RowContentRiseDip, 0, FlyoutMotion.RowGrowMs, FlyoutMotion.Decelerate);
+            riseAnimation.Completed += (s, e) =>
+            {
+                if (ReferenceEquals(RenderTransform, rise))
+                {
+                    RenderTransform = null;
+                }
+            };
+            rise.BeginAnimation(TranslateTransform.YProperty, riseAnimation);
+        }
+
+        /// <summary>Flyout row entrance cancelled or skipped: content fully visible, in place.</summary>
+        internal void EndEntrance()
+        {
+            if (_hideAnimationStarted)
+            {
+                return;
+            }
+
+            BeginAnimation(OpacityProperty, null);
+            Opacity = 1;
+            if (RenderTransform is TranslateTransform)
+            {
+                RenderTransform = null;
+            }
         }
 
         private void BeginHideAnimation()

@@ -26,6 +26,16 @@ namespace EarTrumpet
         Wave = 4,      // Wavy: ≋≋≋≋⋯⋯⋯
     }
 
+    /// <summary>Sound played while a volume slider moves. Stored as its int value.</summary>
+    public enum TickSoundKind
+    {
+        Classic = 0,   // Assets/tick.wav
+        Crystal = 1,   // Assets/tick-crystal.wav
+        Low = 2,       // Assets/tick-low.wav
+        Muffled = 3,   // Assets/tick-muffled.wav
+        Sharp = 4,     // Assets/tick-sharp.wav
+    }
+
     public class AppSettings
     {
         public event EventHandler<bool> UseLegacyIconChanged;
@@ -1445,6 +1455,16 @@ namespace EarTrumpet
         {
             get => _settings.Get("UseVolumeTickSound", true);
             set => _settings.Set("UseVolumeTickSound", value);
+        }
+
+        public TickSoundKind TickSound
+        {
+            get
+            {
+                var val = _settings.Get("TickSound", 0);
+                return System.Enum.IsDefined(typeof(TickSoundKind), val) ? (TickSoundKind)val : TickSoundKind.Classic;
+            }
+            set => _settings.Set("TickSound", (int)value);
         }
 
         public bool MonkeyTickSoundUnlocked

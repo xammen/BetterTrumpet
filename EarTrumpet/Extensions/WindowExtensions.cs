@@ -9,9 +9,60 @@ namespace EarTrumpet.Extensions
 {
     public static class WindowExtensions
     {
+        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+
         public static void SetWindowPos(this Window window, double top, double left, double height, double width)
         {
             User32.SetWindowPos(window.GetHandle(), IntPtr.Zero, (int)left, (int)top, (int)width, (int)height, User32.WindowPosFlags.SWP_NOZORDER | User32.WindowPosFlags.SWP_NOACTIVATE);
+        }
+
+        /// <summary>
+        /// Moves the window to a position in physical pixels without resizing, re-ordering or
+        /// activating it. Cheap enough to run every frame: the flyout motion uses it to slide the
+        /// HWND itself, so the DWM acrylic backdrop travels with the surface.
+        /// </summary>
+        public static void MoveWindow(this Window window, int left, int top)
+        {
+            MoveWindow(window.GetHandle(), left, top);
+        }
+
+        internal static void MoveWindow(IntPtr handle, int left, int top)
+        {
+            User32.SetWindowPos(handle, IntPtr.Zero, left, top, 0, 0,
+                User32.WindowPosFlags.SWP_NOSIZE |
+                User32.WindowPosFlags.SWP_NOZORDER |
+                User32.WindowPosFlags.SWP_NOACTIVATE |
+                User32.WindowPosFlags.SWP_NOOWNERZORDER);
+        }
+
+        /// <summary>
+        /// Puts the window directly behind <paramref name="windowAbove"/> in the Z order without
+        /// moving, sizing or activating it. Activation is untouched, so keyboard focus stays.
+        /// </summary>
+        internal static void PlaceBelow(this Window window, IntPtr windowAbove)
+        {
+            if (windowAbove == IntPtr.Zero)
+            {
+                return;
+            }
+
+            User32.SetWindowPos(window.GetHandle(), windowAbove, 0, 0, 0, 0,
+                User32.WindowPosFlags.SWP_NOMOVE |
+                User32.WindowPosFlags.SWP_NOSIZE |
+                User32.WindowPosFlags.SWP_NOACTIVATE |
+                User32.WindowPosFlags.SWP_NOOWNERZORDER);
+        }
+
+        /// <summary>
+        /// Raises the window to the top of the topmost band without activating it.
+        /// </summary>
+        internal static void BringToTopOfTopmostBand(this Window window)
+        {
+            User32.SetWindowPos(window.GetHandle(), HWND_TOPMOST, 0, 0, 0, 0,
+                User32.WindowPosFlags.SWP_NOMOVE |
+                User32.WindowPosFlags.SWP_NOSIZE |
+                User32.WindowPosFlags.SWP_NOACTIVATE |
+                User32.WindowPosFlags.SWP_NOOWNERZORDER);
         }
 
         public static void RaiseWindow(this Window window)

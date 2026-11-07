@@ -22,22 +22,26 @@ namespace EarTrumpet.UI.Views
 
         private readonly AppSettings _settings;
         private readonly DispatcherTimer _hideTimer;
-        private readonly DispatcherTimer _marqueeTimer;
         private readonly DispatcherTimer _progressTimer;
         private readonly DispatcherTimer _mediaRefreshTimer;
         private readonly DispatcherTimer _delayedActionTimer;
+        private readonly DispatcherTimer _proximityTimer;
 
-        private double _marqueePosition;
+        private bool _marqueeRunning;
+        private int _marqueeGeneration;
         private double _cachedTextWidth;
         private bool _isShowing;
         private bool _isMouseOverPopup;
-        private bool _isMouseNearPopup; // Track if mouse is in extended hit area
+        private bool _coverIsStale;
         private bool _isExpanded;
         private double _collapsedTop;
+        private double _workAreaTop;
+        private double _geometryFromTop, _geometryToTop, _geometryFromHeight, _geometryToHeight;
+        private double _geometryCurrentTop, _geometryCurrentHeight;
+        private bool _geometryAnimating;
         private BitmapImage _cachedThumbnail;
         private Color _cachedDominantColor = Color.FromRgb(107, 77, 230);
         private string _cachedTitle;
-        private CancellationTokenSource _thumbnailCts;
         private CancellationTokenSource _trackChangeCts;
         private CancellationTokenSource _albumArtCts;
         private CancellationTokenSource _seekCts;
@@ -59,9 +63,16 @@ namespace EarTrumpet.UI.Views
         private bool _trackRefreshInProgress;
         private int _mediaInfoRefreshInProgress;
 
-        private const double CollapsedHeight = 185;
-        private const double ExpandedHeight = 405;
+        // The card fills the window: the acrylic backdrop covers the whole window rect, so any
+        // transparent margin around the card showed up as a blurred frame.
+        private const double CollapsedHeight = 169;
+        private const double ExpandedHeight = 389;
+        private const double IconGap = 13;
+        private const double WorkAreaInset = 18;
+        private const int HoverTolerancePx = 28;
         private const double ContainerWidth = 268;
+        private const double MarqueeSpeed = 20; // DIP per second, as before
+        private const int MarqueeFps = 30;
         private const byte MinimumPopupTintAlpha = 0xA8;
 
         public MediaPopupWindow(AppSettings settings)
@@ -87,14 +98,12 @@ namespace EarTrumpet.UI.Views
             _hideTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
             _hideTimer.Tick += HideTimer_Tick;
 
-            // Timer for marquee animation (20fps is sufficient for text scrolling)
-            _marqueeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
-            _marqueeTimer.Tick += MarqueeTimer_Tick;
-
             // Render locally between the less frequent timeline updates supplied by SMTC.
+            // 4 Hz stays under a pixel of bar travel for any real track, and each tick repaints
+            // the whole layered window.
             _progressTimer = new DispatcherTimer(DispatcherPriority.Render)
             {
-                Interval = TimeSpan.FromMilliseconds(100)
+                Interval = TimeSpan.FromMilliseconds(250)
             };
             _progressTimer.Tick += ProgressTimer_Tick;
 
@@ -106,8 +115,16 @@ namespace EarTrumpet.UI.Views
             _delayedActionTimer = new DispatcherTimer();
             _delayedActionTimer.Tick += DelayedActionTimer_Tick;
 
+            // Polls while the cursor sits in the tolerance zone around the popup.
+            _proximityTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+            _proximityTimer.Tick += (s, e) =>
+            {
+                _proximityTimer.Stop();
+                CheckMouseProximityAndStartHideTimer();
+            };
+
             // Track mouse enter/leave on popup itself
-            MouseEnter += (s, e) => { _isMouseOverPopup = true; _isMouseNearPopup = true; _hideTimer.Stop(); };
+            MouseEnter += (s, e) => { _isMouseOverPopup = true; _hideTimer.Stop(); _proximityTimer.Stop(); };
             MouseLeave += (s, e) =>
             {
                 _isMouseOverPopup = false;
@@ -133,9 +150,6 @@ namespace EarTrumpet.UI.Views
 
             // Cleanup on close
             Closed += OnWindowClosed;
-
-            // Pre-load thumbnail in background
-            PreloadThumbnail();
         }
 
         private void OnWindowClosed(object sender, EventArgs e)
@@ -148,14 +162,13 @@ namespace EarTrumpet.UI.Views
 
             // Stop all timers
             _hideTimer.Stop();
-            _marqueeTimer.Stop();
+            StopMarquee();
             _progressTimer.Stop();
             _mediaRefreshTimer.Stop();
             _delayedActionTimer.Stop();
+            _proximityTimer.Stop();
 
             // Cancel and dispose any pending operations
-            _thumbnailCts?.Cancel();
-            _thumbnailCts?.Dispose();
             _trackChangeCts?.Cancel();
             _trackChangeCts?.Dispose();
             _albumArtCts?.Cancel();
@@ -211,34 +224,6 @@ namespace EarTrumpet.UI.Views
             _delayedActionTimer.Start();
         }
 
-        private void PreloadThumbnail()
-        {
-            _thumbnailCts?.Cancel();
-            _thumbnailCts?.Dispose();
-            _thumbnailCts = new CancellationTokenSource();
-            var token = _thumbnailCts.Token;
-
-            Task.Run(() =>
-            {
-                try
-                {
-                    if (token.IsCancellationRequested) return;
-
-                    var thumbnail = MediaSessionService.Instance.GetCurrentThumbnail();
-                    if (thumbnail != null && !token.IsCancellationRequested)
-                    {
-                        var color = GetDominantColor(thumbnail);
-                        if (!token.IsCancellationRequested)
-                        {
-                            _cachedThumbnail = thumbnail;
-                            _cachedDominantColor = color;
-                        }
-                    }
-                }
-                catch (Exception ex) { Trace.WriteLine($"MediaPopupWindow: PreloadThumbnail failed - {ex.Message}"); }
-            }, token);
-        }
-
         private void OnMediaTrackChanged()
         {
             Dispatcher.BeginInvoke((Action)(() =>
@@ -253,8 +238,10 @@ namespace EarTrumpet.UI.Views
                 }
                 else
                 {
+                    // Fetched on the next show instead: preloading here decoded artwork for
+                    // every track and threw it away, since ShowPopup refetches anyway.
                     _cachedTitle = null;
-                    PreloadThumbnail();
+                    _coverIsStale = true;
                 }
             }));
         }
@@ -427,17 +414,17 @@ namespace EarTrumpet.UI.Views
                 {
                     var thumbnail = MediaSessionService.Instance.GetCurrentThumbnail();
                     if (albumToken.IsCancellationRequested) return;
+                    var color = thumbnail != null ? GetDominantColor(thumbnail) : default;
 
                     Dispatcher.BeginInvoke((Action)(() =>
                     {
                         try
                         {
+                            if (albumToken.IsCancellationRequested) return;
                             if (thumbnail != null)
                             {
                                 _cachedThumbnail = thumbnail;
                                 ApplyThumbnail(thumbnail);
-
-                                var color = GetDominantColor(thumbnail);
                                 _cachedDominantColor = color;
                                 UpdateColors(color);
                             }
@@ -476,11 +463,14 @@ namespace EarTrumpet.UI.Views
 
 
 
-        private Color GetDominantColor(BitmapImage bitmap)
+        private static Color GetDominantColor(BitmapImage bitmap)
         {
             try
             {
-                var resized = new TransformedBitmap(bitmap, new ScaleTransform(32.0 / bitmap.PixelWidth, 32.0 / bitmap.PixelHeight));
+                // Normalize to BGRA: grey, 24-bit and indexed covers used to be read as BGRA anyway.
+                var resized = new FormatConvertedBitmap(
+                    new TransformedBitmap(bitmap, new ScaleTransform(32.0 / bitmap.PixelWidth, 32.0 / bitmap.PixelHeight)),
+                    PixelFormats.Bgra32, null, 0);
                 var pixels = new byte[resized.PixelWidth * resized.PixelHeight * 4];
                 resized.CopyPixels(pixels, resized.PixelWidth * 4, 0);
 
@@ -665,8 +655,15 @@ namespace EarTrumpet.UI.Views
             // caches so a new hover cannot resurrect the previous track's content.
             _cachedTitle = null;
             _cachedThumbnail = null;
-            _thumbnailCts?.Cancel();
             MediaSessionService.Instance.InvalidateThumbnailCache();
+
+            // The track changed while hidden: never flash the previous cover.
+            if (_coverIsStale)
+            {
+                _coverIsStale = false;
+                ExpandedCoverImage.Source = null;
+                ExpandedCoverBlur.Source = null;
+            }
 
             UpdateAllContent();
 
@@ -698,15 +695,16 @@ namespace EarTrumpet.UI.Views
             var iconWidth = iconBounds.Width / dpiScale;
             var workAreaLeft = screen.WorkingArea.Left / dpiScale;
             var workAreaTop = screen.WorkingArea.Top / dpiScale;
+            _workAreaTop = workAreaTop;
             var workAreaRight = screen.WorkingArea.Right / dpiScale;
 
             Left = iconLeft + (iconWidth / 2) - (Width / 2);
-            Top = iconTop - Height - 5;
-            _collapsedTop = iconTop - CollapsedHeight - 5;
+            Top = iconTop - Height - IconGap;
+            _collapsedTop = iconTop - CollapsedHeight - IconGap;
 
-            if (Left < workAreaLeft) Left = workAreaLeft + 10;
-            if (Left + Width > workAreaRight) Left = workAreaRight - Width - 10;
-            if (Top < workAreaTop) Top = workAreaTop + 10;
+            if (Left < workAreaLeft) Left = workAreaLeft + WorkAreaInset;
+            if (Left + Width > workAreaRight) Left = workAreaRight - Width - WorkAreaInset;
+            if (Top < workAreaTop) Top = workAreaTop + WorkAreaInset;
 
             _isShowing = true;
             Show();
@@ -726,36 +724,30 @@ namespace EarTrumpet.UI.Views
 
         public void StartHideTimer()
         {
+            // The tray reports every mouse-leave, also while the popup is hidden.
+            if (!_isShowing) return;
             CheckMouseProximityAndStartHideTimer();
+        }
+
+        private bool IsCursorNearPopup()
+        {
+            var toleranceBounds = GetPopupBoundsInPhysicalPixels();
+            toleranceBounds.Inflate(HoverTolerancePx, HoverTolerancePx);
+            return toleranceBounds.Contains(System.Windows.Forms.Cursor.Position);
         }
 
         private void CheckMouseProximityAndStartHideTimer()
         {
-            if (!_isMouseOverPopup)
+            if (!_isShowing || _isMouseOverPopup) return;
+
+            if (IsCursorNearPopup())
             {
-                // Check if mouse is within tolerance zone (20px buffer around popup)
-                var mousePos = System.Windows.Forms.Cursor.Position;
-                var popupBounds = GetPopupBoundsInPhysicalPixels();
-                var toleranceBounds = popupBounds;
-                toleranceBounds.Inflate(20, 20); // 20px tolerance zone
-
-                _isMouseNearPopup = toleranceBounds.Contains(mousePos);
-
-                if (!_isMouseNearPopup)
-                {
-                    _hideTimer.Start();
-                }
-                else
-                {
-                    // Mouse is still near, check again soon
-                    var proximityCheckTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
-                    proximityCheckTimer.Tick += (s, e) =>
-                    {
-                        proximityCheckTimer.Stop();
-                        CheckMouseProximityAndStartHideTimer();
-                    };
-                    proximityCheckTimer.Start();
-                }
+                // Still near: check again soon instead of hiding.
+                _proximityTimer.Start();
+            }
+            else
+            {
+                _hideTimer.Start();
             }
         }
 
@@ -763,20 +755,17 @@ namespace EarTrumpet.UI.Views
         {
             _hideTimer.Stop();
 
-            // Double-check mouse position before hiding
-            var mousePos = System.Windows.Forms.Cursor.Position;
-            var popupBounds = GetPopupBoundsInPhysicalPixels();
-            var toleranceBounds = popupBounds;
-            toleranceBounds.Inflate(20, 20);
+            if (_isMouseOverPopup) return;
 
-            if (!_isMouseOverPopup && !toleranceBounds.Contains(mousePos))
+            if (IsCursorNearPopup())
             {
-                HidePopup();
+                // Back in the tolerance zone without entering the popup: keep watching, or the
+                // popup stayed open for good once the cursor left from there.
+                _proximityTimer.Start();
             }
             else
             {
-                // Mouse returned to proximity, don't hide yet
-                _isMouseNearPopup = toleranceBounds.Contains(mousePos);
+                HidePopup();
             }
         }
 
@@ -794,12 +783,19 @@ namespace EarTrumpet.UI.Views
         {
             if (!_isShowing) return;
 
-            _marqueeTimer.Stop();
+            StopMarquee();
             _progressTimer.Stop();
             _mediaRefreshTimer.Stop();
             _delayedActionTimer.Stop();
+            _proximityTimer.Stop();
+            _hideTimer.Stop();
 
             BeginAnimation(TopProperty, null);
+            // Land on the target so Top/Height describe the real window again.
+            if (_geometryAnimating)
+            {
+                SetPopupGeometry(_geometryToHeight, _geometryToTop);
+            }
 
             _slideOutStoryboard.Completed += OnSlideOutCompleted;
             _slideOutStoryboard.Begin(this);
@@ -833,11 +829,6 @@ namespace EarTrumpet.UI.Views
             }
         }
 
-        public void CancelHide()
-        {
-            _hideTimer.Stop();
-        }
-
         private void UpdateTitle()
         {
             // Show cached title immediately if available
@@ -860,14 +851,21 @@ namespace EarTrumpet.UI.Views
                 catch { }
             });
 
-            _marqueePosition = 0;
-            MarqueeText.SetValue(System.Windows.Controls.Canvas.LeftProperty, 0.0);
+            MarqueeHost.SetValue(System.Windows.Controls.Canvas.LeftProperty, 0.0);
             _cachedTextWidth = -1;
         }
 
         private void ApplyTitle(string title)
         {
-            string displayTitle = string.IsNullOrEmpty(title) ? "No media playing" : title;
+            // A slow SMTC read returns null; while something plays, keep what is shown rather
+            // than flashing the empty state (the refresh timer retries every second).
+            if (string.IsNullOrEmpty(title) && MediaSessionService.Instance.IsMediaPlaying &&
+                !string.IsNullOrEmpty(_cachedTitle))
+            {
+                return;
+            }
+
+            string displayTitle = string.IsNullOrEmpty(title) ? EarTrumpet.Properties.Resources.MediaPopupNoMedia : title;
             if (string.Equals(_cachedTitle, displayTitle, StringComparison.Ordinal) &&
                 string.Equals(MarqueeText.Text, displayTitle, StringComparison.Ordinal))
             {
@@ -876,14 +874,20 @@ namespace EarTrumpet.UI.Views
 
             _cachedTitle = displayTitle;
             MarqueeText.Text = displayTitle;
-            _marqueePosition = 0;
-            MarqueeText.SetValue(System.Windows.Controls.Canvas.LeftProperty, 0.0);
+            MarqueeHost.SetValue(System.Windows.Controls.Canvas.LeftProperty, 0.0);
             _cachedTextWidth = -1;
             StartMarqueeIfNeeded();
         }
 
         private void UpdatePlayPauseIcon()
         {
+            // Legacy players (no SMTC) are only detected, they cannot be controlled or seeked.
+            bool controllable = !MediaSessionService.Instance.IsUsingLegacyPlayer;
+            PlayPauseButton.IsEnabled = controllable;
+            PrevButton.IsEnabled = controllable;
+            NextButton.IsEnabled = controllable;
+            ProgressSlider.IsEnabled = controllable;
+
             bool isPlaying = MediaSessionService.Instance.IsMediaPlaying;
             PlayPauseIcon.Data = isPlaying ? PhosphorIconData.Pause : PhosphorIconData.Play;
             PlayPauseIcon.Margin = isPlaying ? new Thickness(0) : new Thickness(2, 0, 0, 0);
@@ -891,44 +895,65 @@ namespace EarTrumpet.UI.Views
 
         private void StartMarqueeIfNeeded()
         {
-            if (_cachedTextWidth < 0)
+            bool textChanged = _cachedTextWidth < 0;
+            if (textChanged)
             {
                 MarqueeText.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                 _cachedTextWidth = MarqueeText.DesiredSize.Width;
             }
 
-            if (_cachedTextWidth > ContainerWidth)
+            if (_cachedTextWidth <= ContainerWidth)
             {
-                _marqueePosition = 0;
-                // Playback/track events also land here while the popup is hidden; a 50 ms
-                // marquee on an invisible window would tick forever (GitHub #74).
-                // ShowPopup calls this again once _isShowing is set.
-                if (_isShowing)
-                {
-                    _marqueeTimer.Start();
-                }
-                else
-                {
-                    _marqueeTimer.Stop();
-                }
+                StopMarquee();
+                MarqueeHost.SetValue(System.Windows.Controls.Canvas.LeftProperty, (ContainerWidth - _cachedTextWidth) / 2);
+                return;
             }
-            else
+
+            MarqueeHost.SetValue(System.Windows.Controls.Canvas.LeftProperty, 0.0);
+
+            // Playback/track events also land here while the popup is hidden; an animation on an
+            // invisible window would keep WPF rendering forever (GitHub #74). ShowPopup calls this
+            // again once _isShowing is set.
+            if (!_isShowing)
             {
-                _marqueeTimer.Stop();
-                MarqueeText.SetValue(System.Windows.Controls.Canvas.LeftProperty, (ContainerWidth - _cachedTextWidth) / 2);
+                StopMarquee();
+            }
+            else if (!_marqueeRunning || textChanged)
+            {
+                BeginMarquee();
             }
         }
 
-        private void MarqueeTimer_Tick(object sender, EventArgs e)
+        // Scroll the title out to the left, then loop it in from the right edge.
+        private void BeginMarquee()
         {
-            _marqueePosition -= 1;
+            StopMarquee();
+            _marqueeRunning = true;
+            int generation = _marqueeGeneration;
+            double width = _cachedTextWidth;
 
-            if (_marqueePosition < -_cachedTextWidth)
+            var firstPass = new DoubleAnimation(0, -width, TimeSpan.FromSeconds(width / MarqueeSpeed));
+            Timeline.SetDesiredFrameRate(firstPass, MarqueeFps);
+            firstPass.Completed += (s, e) =>
             {
-                _marqueePosition = ContainerWidth;
-            }
+                if (generation != _marqueeGeneration) return;
 
-            MarqueeText.SetValue(System.Windows.Controls.Canvas.LeftProperty, _marqueePosition);
+                var loop = new DoubleAnimation(ContainerWidth, -width, TimeSpan.FromSeconds((ContainerWidth + width) / MarqueeSpeed))
+                {
+                    RepeatBehavior = RepeatBehavior.Forever
+                };
+                Timeline.SetDesiredFrameRate(loop, MarqueeFps);
+                MarqueeScroll.BeginAnimation(TranslateTransform.XProperty, loop);
+            };
+            MarqueeScroll.BeginAnimation(TranslateTransform.XProperty, firstPass);
+        }
+
+        private void StopMarquee()
+        {
+            _marqueeRunning = false;
+            _marqueeGeneration++;
+            MarqueeScroll.BeginAnimation(TranslateTransform.XProperty, null);
+            MarqueeScroll.X = 0;
         }
 
         private void ProgressSlider_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -1169,7 +1194,12 @@ namespace EarTrumpet.UI.Views
             ExpandedCover.Opacity = 0;
             ExpandedCover.Visibility = Visibility.Visible;
 
-            AnimatePopupGeometry(ExpandedHeight, _collapsedTop - (ExpandedHeight - CollapsedHeight), 240);
+            double expandedTop = _collapsedTop - (ExpandedHeight - CollapsedHeight);
+            if (expandedTop < _workAreaTop + WorkAreaInset)
+            {
+                expandedTop = _collapsedTop;
+            }
+            AnimatePopupGeometry(ExpandedHeight, expandedTop, 240);
 
             var coverTransforms = (TransformGroup)ExpandedCover.RenderTransform;
             var coverScale = (ScaleTransform)coverTransforms.Children[0];
@@ -1241,8 +1271,16 @@ namespace EarTrumpet.UI.Views
             };
         }
 
+        // Top and Height animated on separate clocks meant two SetWindowPos calls per frame, with
+        // the window visibly jittering between them. One progress value drives both instead.
+        private static readonly DependencyProperty GeometryProgressProperty = DependencyProperty.Register(
+            "GeometryProgress", typeof(double), typeof(MediaPopupWindow),
+            new PropertyMetadata(1.0, (d, e) => ((MediaPopupWindow)d).OnGeometryProgressChanged((double)e.NewValue)));
+
         private void SetPopupGeometry(double height, double top)
         {
+            _geometryAnimating = false;
+            BeginAnimation(GeometryProgressProperty, null);
             BeginAnimation(HeightProperty, null);
             BeginAnimation(TopProperty, null);
             Height = height;
@@ -1251,27 +1289,50 @@ namespace EarTrumpet.UI.Views
 
         private void AnimatePopupGeometry(double targetHeight, double targetTop, int durationMs)
         {
-            double startHeight = ActualHeight > 0 ? ActualHeight : Height;
-            double startTop = Top;
+            // Mid-animation the window is where the last frame put it, not at Top/Height.
+            _geometryFromHeight = _geometryAnimating ? _geometryCurrentHeight : (ActualHeight > 0 ? ActualHeight : Height);
+            _geometryFromTop = _geometryAnimating ? _geometryCurrentTop : Top;
+            _geometryCurrentHeight = _geometryFromHeight;
+            _geometryCurrentTop = _geometryFromTop;
+            _geometryAnimating = true;
+            _geometryToHeight = targetHeight;
+            _geometryToTop = targetTop;
 
-            SetPopupGeometry(targetHeight, targetTop);
-
-            var easing = new CubicEase { EasingMode = EasingMode.EaseOut };
-            BeginAnimation(HeightProperty, new DoubleAnimation(startHeight, targetHeight, TimeSpan.FromMilliseconds(durationMs))
+            var animation = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(durationMs))
             {
-                EasingFunction = easing,
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
                 FillBehavior = FillBehavior.Stop
-            }, HandoffBehavior.SnapshotAndReplace);
-            BeginAnimation(TopProperty, new DoubleAnimation(startTop, targetTop, TimeSpan.FromMilliseconds(durationMs))
+            };
+            animation.Completed += (s, e) =>
             {
-                EasingFunction = easing,
-                FillBehavior = FillBehavior.Stop
-            }, HandoffBehavior.SnapshotAndReplace);
+                // Stale if another expand/collapse started meanwhile.
+                if (_geometryToHeight == targetHeight && _geometryToTop == targetTop)
+                {
+                    SetPopupGeometry(targetHeight, targetTop);
+                }
+            };
+            BeginAnimation(GeometryProgressProperty, animation, HandoffBehavior.SnapshotAndReplace);
         }
 
-        private void RefreshProgressAfterLayout()
+        private void OnGeometryProgressChanged(double t)
         {
-            Dispatcher.BeginInvoke((Action)UpdateProgress, DispatcherPriority.Render);
+            var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero || !_isShowing) return;
+
+            if (!_geometryAnimating) return;
+
+            double top = _geometryFromTop + (_geometryToTop - _geometryFromTop) * t;
+            double height = _geometryFromHeight + (_geometryToHeight - _geometryFromHeight) * t;
+            _geometryCurrentTop = top;
+            _geometryCurrentHeight = height;
+            var dpiScale = Math.Max(1, WindowsTaskbar.Dpi / (double)96);
+
+            User32.SetWindowPos(hwnd, IntPtr.Zero,
+                (int)Math.Round(Left * dpiScale),
+                (int)Math.Round(top * dpiScale),
+                (int)Math.Round(Width * dpiScale),
+                (int)Math.Round(height * dpiScale),
+                User32.WindowPosFlags.SWP_NOZORDER | User32.WindowPosFlags.SWP_NOACTIVATE | User32.WindowPosFlags.SWP_NOOWNERZORDER);
         }
 
         private void SetExpandArrowState(bool expanded)
@@ -1490,13 +1551,18 @@ namespace EarTrumpet.UI.Views
 
                 if (string.IsNullOrWhiteSpace(sourceApp)) return null;
 
-                foreach (var device in collection.AllDevices)
+                // Exact matches first: the loose pass ("chrome" inside another app's id) used to
+                // win whenever its app happened to come first in device order.
+                foreach (bool strict in new[] { true, false })
                 {
-                    foreach (var app in device.Apps)
+                    foreach (var device in collection.AllDevices)
                     {
-                        if (DoesMediaSourceMatch(app, sourceApp))
+                        foreach (var app in device.Apps)
                         {
-                            return app;
+                            if (DoesMediaSourceMatch(app, sourceApp, strict))
+                            {
+                                return app;
+                            }
                         }
                     }
                 }
@@ -1506,22 +1572,25 @@ namespace EarTrumpet.UI.Views
             return null;
         }
 
-        private static bool DoesMediaSourceMatch(ViewModels.IAppItemViewModel app, string sourceApp)
+        private static bool DoesMediaSourceMatch(ViewModels.IAppItemViewModel app, string sourceApp, bool strict)
         {
+            string exeName = System.IO.Path.GetFileNameWithoutExtension(app.ExeName ?? string.Empty);
+            string sourceName = System.IO.Path.GetFileNameWithoutExtension(sourceApp);
+
+            if (strict)
+            {
+                return string.Equals(app.AppId, sourceApp, StringComparison.OrdinalIgnoreCase) ||
+                       (exeName.Length > 0 && string.Equals(exeName, sourceName, StringComparison.OrdinalIgnoreCase));
+            }
+
             if (!string.IsNullOrWhiteSpace(app.AppId) &&
-                (string.Equals(app.AppId, sourceApp, StringComparison.OrdinalIgnoreCase) ||
-                 sourceApp.IndexOf(app.AppId, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                (sourceApp.IndexOf(app.AppId, StringComparison.OrdinalIgnoreCase) >= 0 ||
                  app.AppId.IndexOf(sourceApp, StringComparison.OrdinalIgnoreCase) >= 0))
             {
                 return true;
             }
 
-            string exeName = System.IO.Path.GetFileNameWithoutExtension(app.ExeName ?? string.Empty);
-            if (exeName.Length < 3) return false;
-
-            string sourceName = System.IO.Path.GetFileNameWithoutExtension(sourceApp);
-            return string.Equals(exeName, sourceName, StringComparison.OrdinalIgnoreCase) ||
-                   sourceApp.IndexOf(exeName, StringComparison.OrdinalIgnoreCase) >= 0;
+            return exeName.Length >= 3 && sourceApp.IndexOf(exeName, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         public bool IsShowing => _isShowing;

@@ -73,8 +73,7 @@ namespace EarTrumpet.Extensions
         /// <summary>
         /// Enumerates every descendant of <paramref name="obj"/> of type T in visual
         /// (top-to-bottom) order. Does not recurse into a match's own subtree, so e.g.
-        /// AppItemView rows are returned as flat siblings, not nested. Used to drive the
-        /// staggered open animation across device/app rows.
+        /// AppItemView rows are returned as flat siblings, not nested.
         /// </summary>
         public static IEnumerable<T> FindVisualChildren<T>(this DependencyObject obj) where T : DependencyObject
         {
