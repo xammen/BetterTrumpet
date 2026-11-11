@@ -14,7 +14,7 @@ InstallModes:
 Installers:
   - Architecture: x86
     InstallerUrl: https://github.com/xammen/BetterTrumpet/releases/download/v3.5.1/BetterTrumpet-3.5.1-setup.exe
-    InstallerSha256: 346EDA7A0D5AD96A52F947B5BC1DD2FB091FAA8E42EB79AB28A8BEF07F7BAA63
+    InstallerSha256: 1AC17C887AEBA59BABF17034EECE1DA1EA17A3095C3F1C980C2FD300E13AAE74
     InstallerSwitches:
       Silent: /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
       SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART /SP-
