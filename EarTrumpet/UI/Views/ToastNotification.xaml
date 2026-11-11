@@ -19,7 +19,7 @@
             Margin="0"
             RenderTransformOrigin="0.5,1">
         <Border.Effect>
-            <DropShadowEffect Color="Black" Opacity="0.6" BlurRadius="32" ShadowDepth="8" Direction="270"/>
+            <DropShadowEffect Color="Black" Opacity="0.5" BlurRadius="18" ShadowDepth="4" Direction="270"/>
         </Border.Effect>
         <Border.RenderTransform>
             <TransformGroup>
@@ -41,14 +41,18 @@
                            VerticalAlignment="Center"
                            HorizontalAlignment="Center"/>
             </Border>
-            <TextBlock x:Name="MessageText"
-                       FontSize="13"
-                       FontWeight="Medium"
-                       Foreground="#E6FFFFFF"
-                       VerticalAlignment="Center"
-                       MaxWidth="280"
-                       TextWrapping="Wrap"
-                       LineHeight="18"/>
+            <StackPanel VerticalAlignment="Center" MaxWidth="300">
+                <TextBlock x:Name="TitleText"
+                           FontSize="12"
+                           Foreground="#99FFFFFF"
+                           TextTrimming="CharacterEllipsis"
+                           Margin="0,0,0,2"/>
+                <TextBlock x:Name="MessageText"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           Foreground="#F2FFFFFF"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
         </StackPanel>
     </Border>
 </Window>

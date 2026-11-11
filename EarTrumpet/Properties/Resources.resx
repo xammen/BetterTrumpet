@@ -1046,7 +1046,7 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
     <value>Eco Mode</value>
   </data>
   <data name="SettingsEcoModeDesc" xml:space="preserve">
-    <value>Lower refresh rates to save CPU/GPU, always or only on battery</value>
+    <value>Only matters while the mixer is open: peak meters run at 20 FPS and a few row animations are skipped. BetterTrumpet barely uses any CPU when the mixer is closed, so this is mostly useful on battery.</value>
   </data>
   <data name="SettingsEcoModeOverridden" xml:space="preserve">
     <value>Overridden by Eco Mode when active</value>
@@ -1197,7 +1197,7 @@ Open [https://eartrumpet.app/jmp/fixfonts] now?</value>
     <value>Always use Eco Mode (20 FPS)</value>
   </data>
   <data name="SettingsEcoModeEnableTip" xml:space="preserve">
-    <value>Reduces peak meter refresh rate to 20 FPS, significantly lowering CPU usage. Ideal for laptops or when running on battery power.</value>
+    <value>Peak meters refresh at 20 FPS while the mixer is open, which lowers CPU and GPU use during that time. No effect while the mixer is closed.</value>
   </data>
   <data name="SettingsAutoEcoMode" xml:space="preserve">
     <value>Auto-enable when on battery</value>
@@ -1785,6 +1785,9 @@ Details: {0}</value>
   <data name="OnboardingTelemetryReassurance" xml:space="preserve">
     <value>We understand. We never sell your data — crash reports only contain technical info (stack traces, OS version) to help us fix bugs and optimize performance.</value>
   </data>
+  <data name="UpdateTextInstalling" xml:space="preserve">
+    <value>Installing update...</value>
+  </data>
   <data name="UpdateTextDownloading" xml:space="preserve">
     <value>Downloading update...</value>
   </data>
@@ -2057,9 +2060,6 @@ Details: {0}</value>
   </data>
   <data name="DefaultDeviceChangedNotificationTitle" xml:space="preserve">
     <value>Playback device</value>
-  </data>
-  <data name="DefaultDeviceChangedNotificationFormat" xml:space="preserve">
-    <value>Now using {0}</value>
   </data>
   <data name="SettingsFocusLostVolume" xml:space="preserve">
     <value>Focus lost</value>

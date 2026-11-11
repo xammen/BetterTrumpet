@@ -1028,7 +1028,7 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Mode éco</value>
   </data>
   <data name="SettingsEcoModeDesc" xml:space="preserve">
-    <value>Réduire la fréquence de rafraîchissement pour économiser CPU/GPU, en permanence ou seulement sur batterie</value>
+    <value>N'agit que quand le mixeur est ouvert : vumètres à 20 FPS et quelques animations de lignes en moins. Mixeur fermé, BetterTrumpet ne consomme presque rien, donc c'est surtout utile sur batterie.</value>
   </data>
   <data name="SettingsEcoModeOverridden" xml:space="preserve">
     <value>Écrasé par le mode éco quand actif</value>
@@ -1134,7 +1134,7 @@ Voulez-vous ouvrir [https://eartrumpet.app/jmp/fixfonts] maintenant?</value>
     <value>Toujours utiliser le mode Éco (20 FPS)</value>
   </data>
   <data name="SettingsEcoModeEnableTip" xml:space="preserve">
-    <value>Réduit le taux de rafraîchissement à 20 FPS, diminuant significativement l'utilisation CPU. Idéal pour les portables ou sur batterie.</value>
+    <value>Les vumètres passent à 20 FPS tant que le mixeur est ouvert, ce qui réduit l'usage CPU et GPU pendant ce temps. Aucun effet mixeur fermé.</value>
   </data>
   <data name="SettingsAutoEcoMode" xml:space="preserve">
     <value>Activer auto. sur batterie</value>
@@ -1719,6 +1719,9 @@ Détails : {0}</value>
   <data name="OnboardingTelemetryReassurance" xml:space="preserve">
     <value>On comprend. Nous ne vendons aucune donnée — les rapports de crash contiennent uniquement des infos techniques (stack traces, version OS) pour corriger les bugs et optimiser les performances.</value>
   </data>
+  <data name="UpdateTextInstalling" xml:space="preserve">
+    <value>Installation de la mise à jour...</value>
+  </data>
   <data name="UpdateTextDownloading" xml:space="preserve">
     <value>Téléchargement en cours...</value>
   </data>
@@ -2033,9 +2036,6 @@ Détails : {0}</value>
   </data>
   <data name="DefaultDeviceChangedNotificationTitle" xml:space="preserve">
     <value>Périphérique de lecture</value>
-  </data>
-  <data name="DefaultDeviceChangedNotificationFormat" xml:space="preserve">
-    <value>Utilisation de {0}</value>
   </data>
   <data name="SettingsFocusLostVolume" xml:space="preserve">
     <value>Perte de focus</value>

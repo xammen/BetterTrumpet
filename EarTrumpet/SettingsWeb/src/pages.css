@@ -734,3 +734,26 @@
     backdrop-filter: none;
   }
 }
+
+/* --- Preset rows: the name keeps ~220px; the shortcut and Apply wrap below it when short on room --- */
+.bt-preset-header.bt-preset-header {
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+
+.bt-preset-header.bt-preset-header > :first-child {
+  flex: 1 1 220px;
+}
+
+.bt-preset-header .list-row-title {
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+
+.bt-preset-header.bt-preset-header > :nth-child(2) {
+  margin-left: auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 8px;
+  max-width: 100%;
+}

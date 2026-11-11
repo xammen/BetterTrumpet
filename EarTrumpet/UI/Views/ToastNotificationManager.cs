@@ -11,9 +11,9 @@ namespace EarTrumpet.UI.Views
         private const int ToastSpacing = 10;
         private const int BottomMargin = 20;
 
-        public static ToastNotification Show(string message, string icon = "\xE946", int durationMs = ToastNotification.DefaultDisplayDurationMs)
+        public static ToastNotification Show(string message, string icon = "\xE946", int durationMs = ToastNotification.DefaultDisplayDurationMs, string title = null)
         {
-            var toast = new ToastNotification(message, icon, durationMs);
+            var toast = new ToastNotification(message, icon, durationMs, title);
 
             // Register this toast
             _activeToasts.Add(toast);

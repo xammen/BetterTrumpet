@@ -423,17 +423,23 @@ namespace EarTrumpet.UI.ViewModels
                     device.UpdatePeakValueForeground();
                 }
             }
-            else
+            else if (System.Threading.Interlocked.Exchange(ref _peakUpdatePending, 1) == 0)
             {
+                // One pending update at most, queued no higher than input: a busy UI thread used
+                // to collect a backlog of these at Normal priority, ahead of mouse moves and
+                // rendering, so slider drags lagged and kept moving after release.
                 _currentDispatcher.InvokeAsync(() =>
                 {
+                    System.Threading.Volatile.Write(ref _peakUpdatePending, 0);
                     foreach (var device in AllDevices)
                     {
                         device.UpdatePeakValueForeground();
                     }
-                });
+                }, DispatcherPriority.Input);
             }
         }
+
+        private int _peakUpdatePending;
 
         public void MoveAppToDevice(IAppItemViewModel app, DeviceViewModel dev)
         {

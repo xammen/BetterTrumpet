@@ -101,6 +101,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
         private readonly IAudioMeterInformation _meter;
         private readonly Dispatcher _dispatcher;
         private readonly IAppInfo _appInfo;
+        private readonly Action<IAppInfo> _onAppStopped;
         private readonly AudioDeviceSessionChannelCollection _channels;
         private float _volume;
         private AudioSessionState _state;
@@ -129,7 +130,8 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
             _parent = new WeakReference<IAudioDevice>(parent);
 
             _appInfo = AppInformationFactory.CreateForProcess(ProcessId, trackProcess: true);
-            _appInfo.Stopped += _ => DisconnectSession();
+            _onAppStopped = _ => DisconnectSession();
+            _appInfo.Stopped += _onAppStopped;
 
             // NOTE: Ensure that the callbacks won't touch state that isn't initialized yet (i.e. _appInfo must be valid before the first callback)
             _session.RegisterAudioSessionNotification(this);
@@ -156,6 +158,10 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
 
         internal void Release()
         {
+            // ProcessWatcherService holds the app info for as long as the process lives (our own
+            // process: forever), so leaving this handler attached kept every released session alive.
+            _appInfo.Stopped -= _onAppStopped;
+
             if (_isRegistered)
             {
                 _isRegistered = false;

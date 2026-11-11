@@ -12,12 +12,14 @@ namespace EarTrumpet.UI.Views
         private DispatcherTimer _closeTimer;
         private readonly int _displayDurationMs;
 
-        public ToastNotification(string message, string icon = "\xE767", int durationMs = DefaultDisplayDurationMs)
+        public ToastNotification(string message, string icon = "\xE767", int durationMs = DefaultDisplayDurationMs, string title = null)
         {
             InitializeComponent();
 
             _displayDurationMs = durationMs > 0 ? durationMs : DefaultDisplayDurationMs;
 
+            TitleText.Text = title;
+            TitleText.Visibility = string.IsNullOrEmpty(title) ? Visibility.Collapsed : Visibility.Visible;
             MessageText.Text = message;
             IconText.Text = icon;
 
@@ -64,31 +66,31 @@ namespace EarTrumpet.UI.Views
             {
                 From = 0,
                 To = 1,
-                Duration = TimeSpan.FromMilliseconds(400),
+                Duration = TimeSpan.FromMilliseconds(120),
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
             };
 
             var slideUp = new DoubleAnimation
             {
-                From = 40,
+                From = 24,
                 To = 0,
-                Duration = TimeSpan.FromMilliseconds(500),
+                Duration = TimeSpan.FromMilliseconds(260),
                 EasingFunction = new ExponentialEase { EasingMode = EasingMode.EaseOut, Exponent = 6 }
             };
 
             var scaleX = new DoubleAnimation
             {
-                From = 0.92,
+                From = 0.96,
                 To = 1,
-                Duration = TimeSpan.FromMilliseconds(500),
+                Duration = TimeSpan.FromMilliseconds(260),
                 EasingFunction = new ExponentialEase { EasingMode = EasingMode.EaseOut, Exponent = 6 }
             };
 
             var scaleY = new DoubleAnimation
             {
-                From = 0.92,
+                From = 0.96,
                 To = 1,
-                Duration = TimeSpan.FromMilliseconds(500),
+                Duration = TimeSpan.FromMilliseconds(260),
                 EasingFunction = new ExponentialEase { EasingMode = EasingMode.EaseOut, Exponent = 6 }
             };
 

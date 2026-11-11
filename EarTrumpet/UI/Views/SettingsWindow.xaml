@@ -370,12 +370,57 @@
                                   Content="{x:Static resx:Resources.SettingsVolumeTickSound}"
                                   IsChecked="{Binding UseVolumeTickSound, Mode=TwoWay}"
                                   ToolTip="{x:Static resx:Resources.SettingsVolumeTickSoundTip}" />
-                        <StackPanel Orientation="Horizontal" Margin="28,8,0,0" IsEnabled="{Binding UseVolumeTickSound}">
-                            <TextBlock Text="{x:Static resx:Resources.SettingsTickSound}" VerticalAlignment="Center" Margin="0,0,10,0" />
-                            <ComboBox MinWidth="140" Height="30" VerticalContentAlignment="Center"
-                                      ItemsSource="{Binding TickSoundOptions}"
-                                      SelectedIndex="{Binding TickSoundIndex, Mode=TwoWay}"
-                                      ToolTip="{x:Static resx:Resources.SettingsTickSoundDesc}" />
+                        <StackPanel Margin="28,10,0,0" IsEnabled="{Binding UseVolumeTickSound}">
+                            <TextBlock Text="{x:Static resx:Resources.SettingsTickSound}" Margin="0,0,0,6" />
+                            <ListBox ItemsSource="{Binding TickSoundOptions}"
+                                     SelectedIndex="{Binding TickSoundIndex, Mode=TwoWay}"
+                                     ToolTip="{x:Static resx:Resources.SettingsTickSoundDesc}"
+                                     AutomationProperties.Name="{x:Static resx:Resources.SettingsTickSound}"
+                                     Background="Transparent" BorderThickness="0" Padding="0"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Margin" Value="0,0,6,6" />
+                                        <Setter Property="Padding" Value="12,5" />
+                                        <Setter Property="Cursor" Value="Hand" />
+                                        <Setter Property="FocusVisualStyle" Value="{StaticResource Windows10FocusVisualStyle}" />
+                                        <Setter Property="Theme:Brush.Foreground" Value="Theme=Text, HighContrast=Text" />
+                                        <Setter Property="Theme:Brush.Background" Value="Theme={Theme}ListLow, HighContrast=ButtonFace" />
+                                        <Setter Property="Theme:Brush.BorderBrush" Value="Theme={Theme}ListMedium, HighContrast=ControlText" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border x:Name="Root"
+                                                            Padding="{TemplateBinding Padding}"
+                                                            Theme:Brush.Background="{TemplateBinding Theme:Brush.Background}"
+                                                            Theme:Brush.BorderBrush="{TemplateBinding Theme:Brush.BorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="5">
+                                                        <ContentPresenter VerticalAlignment="Center" TextElement.FontSize="12" />
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Root" Property="Theme:Brush.Background" Value="Theme={Theme}ListMedium, HighContrast=Highlight" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="Root" Property="Theme:Brush.Background" Value="Theme=SystemAccent/0.18, HighContrast=Highlight" />
+                                                            <Setter TargetName="Root" Property="Theme:Brush.BorderBrush" Value="SystemAccent" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsEnabled" Value="False">
+                                                            <Setter TargetName="Root" Property="Opacity" Value="0.45" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                            </ListBox>
                         </StackPanel>
                     </StackPanel>
                 </Border>

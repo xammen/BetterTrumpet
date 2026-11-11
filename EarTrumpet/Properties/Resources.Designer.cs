@@ -3220,6 +3220,9 @@ namespace EarTrumpet.Properties {
         public static string OnboardingTelemetryReassurance {
             get { return ResourceManager.GetString("OnboardingTelemetryReassurance", resourceCulture); }
         }
+        public static string UpdateTextInstalling {
+            get { return ResourceManager.GetString("UpdateTextInstalling", resourceCulture); }
+        }
         public static string UpdateTextDownloading {
             get { return ResourceManager.GetString("UpdateTextDownloading", resourceCulture); }
         }
@@ -3498,9 +3501,6 @@ namespace EarTrumpet.Properties {
         }
         public static string DefaultDeviceChangedNotificationTitle {
             get { return ResourceManager.GetString("DefaultDeviceChangedNotificationTitle", resourceCulture); }
-        }
-        public static string DefaultDeviceChangedNotificationFormat {
-            get { return ResourceManager.GetString("DefaultDeviceChangedNotificationFormat", resourceCulture); }
         }
         public static string SettingsFocusLostVolume {
             get { return ResourceManager.GetString("SettingsFocusLostVolume", resourceCulture); }

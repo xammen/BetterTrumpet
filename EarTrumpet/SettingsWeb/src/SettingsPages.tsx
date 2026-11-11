@@ -716,7 +716,7 @@ function ProfilesPage({ payload, styles, action, setSetting }: PageProps) {
             const isOpen = expanded === key;
             return <motion.div className={styles.accItem} key={key} {...itemMotion(reduce)}>
               <div
-                className={mergeClasses(styles.accHeader, "acc-header-polished")}
+                className={mergeClasses(styles.accHeader, "acc-header-polished", "bt-preset-header")}
                 role="button"
                 tabIndex={0}
                 aria-expanded={isOpen}

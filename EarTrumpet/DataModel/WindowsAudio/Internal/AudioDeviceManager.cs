@@ -46,6 +46,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
 
         private IMMDeviceEnumerator _enumerator;
         private IAudioDevice _default;
+        private bool _isLoaded;
         private readonly Dispatcher _dispatcher;
         private readonly AudioDeviceKind _kind;
         private readonly AudioPolicyConfig _policyConfigService;
@@ -80,6 +81,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
                     _dispatcher.Invoke((Action)(() =>
                     {
                         QueryDefaultDevice();
+                        _isLoaded = true;
                         Loaded?.Invoke(this, null);
                     }));
                 }
@@ -112,17 +114,34 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
 
         private void QueryDefaultDevice()
         {
-            TraceLine("QueryDefaultDevice");
-            var currentDeviceId = _default?.Id;
+            var previous = _default;
             // The Windows Sound panel and tray volume flag the Console role as "the" default.
             // Third-party tools/drivers can move Console without Multimedia (or vice versa), so
             // reading Multimedia alone left BetterTrumpet pinned on a stale device (#71/#72).
-            _default = GetDefaultDevice(ERole.eConsole) ?? GetDefaultDevice(ERole.eMultimedia);
-            TraceLine($"QueryDefaultDevice roles console={GetDefaultDevice(ERole.eConsole)?.Id} multimedia={GetDefaultDevice(ERole.eMultimedia)?.Id} communications={GetDefaultDevice(ERole.eCommunications)?.Id}");
-            string newDeviceId = _default?.Id;
-            if (currentDeviceId != newDeviceId)
+            // Windows can announce a default before the endpoint reaches us as added; we then
+            // hold null and Add() queries again, rather than falling back to the Multimedia
+            // endpoint, which left the flyout on the wrong device for good.
+            var consoleId = GetDefaultDeviceId(ERole.eConsole);
+            var multimediaId = GetDefaultDeviceId(ERole.eMultimedia);
+            TryFind(consoleId ?? multimediaId, out _default);
+            TraceLine($"QueryDefaultDevice roles console={consoleId} multimedia={multimediaId} communications={GetDefaultDeviceId(ERole.eCommunications)} resolved={_default?.Id ?? "(not added yet)"}");
+
+            // Compare instances: a device removed and re-added keeps its id but is a new object.
+            if (!ReferenceEquals(previous, _default))
             {
                 DefaultChanged?.Invoke(this, _default);
+            }
+        }
+
+        private string GetDefaultDeviceId(ERole role)
+        {
+            try
+            {
+                return _enumerator.GetDefaultAudioEndpoint(Flow, role).GetId();
+            }
+            catch (Exception ex) when (ex.Is(HRESULT.ERROR_NOT_FOUND))
+            {
+                return null;
             }
         }
 
@@ -315,6 +334,10 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
             if (_deviceMap.TryAdd(device.Id, device))
             {
                 _devices.Add(device);
+                if (_isLoaded)
+                {
+                    QueryDefaultDevice();
+                }
             }
         }
 
@@ -325,6 +348,10 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
                 // Listeners detach from the device on this notification, then its callbacks go.
                 _devices.Remove(device);
                 (foundDevice as AudioDevice)?.Release();
+                if (_isLoaded && ReferenceEquals(_default, foundDevice))
+                {
+                    QueryDefaultDevice();
+                }
             }
         }
 

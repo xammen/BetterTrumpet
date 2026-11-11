@@ -122,8 +122,7 @@ namespace EarTrumpet.UI.Helpers
 
             // Use custom toast notification instead of native Windows notification
             // This allows proper stacking when multiple notifications appear quickly
-            var fullMessage = string.IsNullOrEmpty(title) ? message : $"{title}\n{message}";
-            EarTrumpet.UI.Views.ToastNotificationManager.Show(fullMessage, "\xE767", durationMs);
+            EarTrumpet.UI.Views.ToastNotificationManager.Show(message, "\xE767", durationMs, title);
         }
 
         public void ShowToast(string message, string icon = null)

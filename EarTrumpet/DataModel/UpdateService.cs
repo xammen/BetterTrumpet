@@ -127,6 +127,23 @@ namespace EarTrumpet.DataModel
             }
         }
 
+        private bool _isInstalling;
+        public bool IsInstalling
+        {
+            get => _isInstalling;
+            private set
+            {
+                if (_isInstalling != value)
+                {
+                    _isInstalling = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsInstalling)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpdateText)));
+                }
+            }
+        }
+
+        public bool IsBusy => IsDownloading || IsInstalling;
+
         private DateTime _lastCheckTime;
         public DateTime LastCheckTime
         {
@@ -153,6 +170,7 @@ namespace EarTrumpet.DataModel
         {
             get
             {
+                if (IsInstalling) return Resources.UpdateTextInstalling;
                 if (IsDownloading) return Resources.UpdateTextDownloading;
                 return IsUpdateAvailable ? string.Format(Resources.UpdateTextAvailable, LatestVersion) : Resources.UpdateTextUpToDate;
             }
@@ -344,7 +362,7 @@ namespace EarTrumpet.DataModel
         /// </summary>
         public async void DownloadAndInstallAsync()
         {
-            if (IsDownloading) return;
+            if (IsBusy) return;
 
             if (Storage.StorageFactory.IsPortableMode)
             {
@@ -395,7 +413,10 @@ namespace EarTrumpet.DataModel
                     UseShellExecute = true
                 });
 
-                // The installer's PrepareToInstall() will taskkill us
+                // The installer's PrepareToInstall() will taskkill us. If it never does
+                // (installer failed or was blocked), release the banner after a while.
+                IsInstalling = true;
+                _ = ResetInstallingAfterTimeoutAsync();
             }
             catch (Exception ex)
             {
@@ -412,6 +433,13 @@ namespace EarTrumpet.DataModel
             {
                 IsDownloading = false;
             }
+        }
+
+        private async Task ResetInstallingAfterTimeoutAsync()
+        {
+            await Task.Delay(TimeSpan.FromMinutes(2));
+            Trace.WriteLine("UpdateService: Installer did not replace this instance within 2 minutes");
+            IsInstalling = false;
         }
 
         /// <summary>
@@ -484,6 +512,7 @@ namespace EarTrumpet.DataModel
                 // The new exe waits for this process, mirrors itself over targetDir (keeping
                 // ./config) and relaunches; see PortableUpdateApplier.
                 Process.Start(PortableUpdateApplier.CreateStartInfo(Path.Combine(sourceDir, "BetterTrumpet.exe"), targetDir));
+                IsInstalling = true;
 
                 // Exit via the dispatcher so the app shuts down cleanly; the new exe
                 // waits for this process before touching the files.

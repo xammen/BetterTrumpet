@@ -53,6 +53,7 @@ namespace EarTrumpet.UI.ViewModels
             }
         }
         public string UpdateText => _updateService?.UpdateText ?? "";
+        public bool IsUpdateBusy => _updateService?.IsBusy ?? false;
 
         private DataModel.UpdateService _updateService;
         public void SetUpdateService(DataModel.UpdateService svc)
@@ -60,9 +61,18 @@ namespace EarTrumpet.UI.ViewModels
             _updateService = svc;
             svc.PropertyChanged += (_, args) =>
             {
-                if (args.PropertyName == nameof(DataModel.UpdateService.IsUpdateAvailable))
+                switch (args.PropertyName)
                 {
-                    _currentDispatcher.Invoke(() => IsUpdateAvailable = svc.IsUpdateAvailable);
+                    case nameof(DataModel.UpdateService.IsUpdateAvailable):
+                        _currentDispatcher.BeginInvoke(() => IsUpdateAvailable = svc.IsUpdateAvailable);
+                        break;
+                    case nameof(DataModel.UpdateService.UpdateText):
+                        _currentDispatcher.BeginInvoke(() =>
+                        {
+                            RaisePropertyChanged(nameof(UpdateText));
+                            RaisePropertyChanged(nameof(IsUpdateBusy));
+                        });
+                        break;
                 }
             };
             IsUpdateAvailable = svc.IsUpdateAvailable;
@@ -351,6 +361,10 @@ private readonly Action _returnFocusToTray;
                 {
                     // We found the device in VisibleDevices which was not in Devices.
                     // Thus: We are collapsed and can dump the single device in Devices:
+                    foreach (var shown in Devices)
+                    {
+                        shown.Apps.CollectionChanged -= Apps_CollectionChanged;
+                    }
                     Devices.Clear();
                     foundAllDevice.Apps.CollectionChanged += Apps_CollectionChanged;
                     Devices.Add(foundAllDevice);
