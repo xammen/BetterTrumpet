@@ -92,7 +92,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
             }
         }
 
-        private void CreateAndAddSession(IAudioSessionControl session)
+        private void CreateAndAddSession(IAudioSessionControl session, bool isNewStream = false)
         {
             try
             {
@@ -101,7 +101,12 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
                     throw new Exception("Device session parent is invalid but device is still notifying.");
                 }
 
-                var newSession = new AudioDeviceSession(parent, session, _dispatcher);
+                var newSession = new AudioDeviceSession(parent, session, _dispatcher, App.VolumeMemory);
+                if (isNewStream)
+                {
+                    newSession.RestoreRememberedVolume();
+                }
+
                 _dispatcher.BeginInvoke((Action)(() =>
                 {
                     if (_isReleased)
@@ -133,7 +138,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
                 return;
             }
 
-            CreateAndAddSession(NewSession);
+            CreateAndAddSession(NewSession, isNewStream: true);
         }
 
         private void AddSession(IAudioDeviceSession session)
