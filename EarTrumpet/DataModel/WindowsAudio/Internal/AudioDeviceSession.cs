@@ -135,7 +135,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
 
             _appInfo = AppInformationFactory.CreateForProcess(ProcessId, trackProcess: true);
             // Never remember microphone or system-sound levels as application playback preferences.
-            if (!IsSystemSoundsSession && parent.Parent?.Kind == AudioDeviceKind.Playback.ToString())
+            if (_volumeMemory != null && !IsSystemSoundsSession && parent.Parent?.Kind == AudioDeviceKind.Playback.ToString())
             {
                 _volumeMemoryKey = AppVolumeMemory.CreateKey(_appInfo.IsDesktopApp,
                     _appInfo.PackageInstallPath, _appInfo.SmallLogoPath, _appInfo.ExeName);
@@ -164,12 +164,20 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
                     SyncPersistedEndpoint(parent);
                 }
             }
+        }
 
-            // Restore every leaf stream before grouping/visibility filtering. A new stream can
-            // appear inside an existing app group without creating another UI app row.
-            if (State != SessionState.Expired && _volumeMemory != null &&
+        /// <summary>
+        /// Applies the app's remembered volume. Only for streams the app creates while we run:
+        /// sessions enumerated at startup already carry a volume the user may have set elsewhere.
+        /// Runs per leaf stream, before grouping/visibility filtering, so streams that join an
+        /// existing app group (or hidden apps) are covered too.
+        /// </summary>
+        internal void RestoreRememberedVolume()
+        {
+            if (_volumeMemoryKey != null && State != SessionState.Expired &&
                 _volumeMemory.TryRecall(_volumeMemoryKey, out var rememberedVolume))
             {
+                // Automatic context: no undo step, no re-save, mute state untouched.
                 SetVolumeScalar(rememberedVolume, AutomaticVolumeWriteContext.Id, updateMute: false);
             }
         }
@@ -278,10 +286,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
             if (_volume == value)
             {
                 // A deliberate write of the current value is still user intent.
-                if (eventContext == Guid.Empty)
-                {
-                    _volumeMemory?.Remember(_volumeMemoryKey, value);
-                }
+                RememberIfUserWrite(value, eventContext);
                 return;
             }
 
@@ -289,10 +294,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
             {
                 _simpleVolume.SetMasterVolume(value, ref eventContext);
                 _volume = value;
-                if (eventContext == Guid.Empty)
-                {
-                    _volumeMemory?.Remember(_volumeMemoryKey, value);
-                }
+                RememberIfUserWrite(value, eventContext);
             }
             catch (Exception ex) when (ex.Is(HRESULT.AUDCLNT_E_DEVICE_INVALIDATED))
             {
@@ -304,6 +306,14 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
                 SetMute(
                     App.Settings.UseLogarithmicVolume ? _volume <= (1 / 100f).ToLogVolume() : _volume.ToVolumeInt() == 0,
                     eventContext);
+            }
+        }
+
+        private void RememberIfUserWrite(float value, Guid eventContext)
+        {
+            if (_volumeMemoryKey != null && eventContext == Guid.Empty)
+            {
+                _volumeMemory.Remember(_volumeMemoryKey, value);
             }
         }
 

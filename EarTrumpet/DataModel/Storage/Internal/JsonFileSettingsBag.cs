@@ -95,9 +95,12 @@ namespace EarTrumpet.DataModel.Storage.Internal
                     // Store complex types as XML string (compat with Registry/WindowsStorage backends)
                     _data[key] = Serializer.ToString(key, value);
                 }
+
+                // Saved under the lock: Set can run on several threads, and an older snapshot
+                // must never be enumerated mid-mutation or land on disk after a newer one.
+                Save();
             }
 
-            Save();
             SettingChanged?.Invoke(this, key);
         }
 

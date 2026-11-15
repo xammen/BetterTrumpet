@@ -1,7 +1,7 @@
 using EarTrumpet.CLI;
 using EarTrumpet.DataModel;
-using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.DataModel.Storage;
+using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.Diagnosis;
 using EarTrumpet.Extensibility;
 using EarTrumpet.Extensibility.Hosting;
@@ -244,6 +244,7 @@ namespace EarTrumpet
 
             Settings = new AppSettings();
             VolumeMemory = new AppVolumeMemory(new SettingsAppVolumeStore(StorageFactory.GetSettings()));
+            Exit += (_, __) => VolumeMemory.Flush(); // Writes are debounced; don't lose the last adjustment.
             _errorReporter = new ErrorReporter(Settings);
             CrashHandler.Initialize();
 

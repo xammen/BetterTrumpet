@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 
 internal static class Program
 {
@@ -53,11 +54,13 @@ internal static class Program
             {
                 memory.Remember("app", value);
             }
+            memory.Flush();
             Equal(1, store.Writes);
             foreach (var value in new[] { "garbage", "NaN", "Infinity", "-0.1", "1.1" })
             {
                 store.ReplaceValues(value);
-                Check(!memory.TryRecall("app", out _));
+                // A fresh store reads the backend instead of its in-memory cache.
+                Check(!Memory(store).TryRecall("app", out _));
             }
         });
         Test("duplicate writes don't repeatedly flush settings", () =>
@@ -66,14 +69,55 @@ internal static class Program
             var memory = Memory(store);
             memory.Remember("app", 0.3f);
             memory.Remember("app", 0.3f);
+            memory.Flush();
+            memory.Flush();
             Equal(1, store.Writes);
             Equal(64 + "AppVolumeMemory:".Length, store.LastKey.Length);
+            // Moving away and back before the debounce elapses leaves nothing to persist.
+            memory.Remember("app", 0.5f);
+            memory.Remember("app", 0.3f);
+            memory.Flush();
+            Equal(1, store.Writes);
+        });
+        Test("a slider drag is coalesced into a single backend write", () =>
+        {
+            var store = new MemorySettings();
+            var memory = Memory(store);
+            for (var i = 1; i <= 100; i++)
+            {
+                memory.Remember("app", i / 100f);
+            }
+            Check(memory.TryRecall("app", out var live));
+            Equal(1f, live);
+            Equal(0, store.Writes);
+            memory.Flush();
+            Equal(1, store.Writes);
+            Check(Memory(store).TryRecall("app", out var persisted));
+            Equal(1f, persisted);
+        });
+        Test("debounced writes reach the backend without an explicit flush", () =>
+        {
+            var store = new MemorySettings();
+            var memory = new AppVolumeMemory(new SettingsAppVolumeStore(store, TimeSpan.FromMilliseconds(20)));
+            memory.Remember("app", 0.6f);
+            var deadline = DateTime.UtcNow.AddSeconds(5);
+            while (store.Writes == 0 && DateTime.UtcNow < deadline)
+            {
+                Thread.Sleep(10);
+            }
+            Equal(1, store.Writes);
+            GC.KeepAlive(memory); // An unreachable System.Threading.Timer may be collected before it fires.
         });
         Test("unavailable storage cannot break volume control", () =>
         {
-            var memory = Memory(new MemorySettings { Fail = true });
+            var store = new MemorySettings { Fail = true };
+            var memory = Memory(store);
             memory.Remember("app", 0.2f);
-            Check(!memory.TryRecall("app", out _));
+            memory.Flush();
+            // The preference still applies for the rest of this process.
+            Check(memory.TryRecall("app", out var recalled));
+            Equal(0.2f, recalled);
+            Check(!Memory(store).TryRecall("app", out _));
         });
         Test("portable restart recalls the last adjustment without culture/slider-scale loss", () =>
         {
@@ -87,11 +131,13 @@ internal static class Program
                 var memory = Memory(new JsonFileSettingsBag(path));
                 // Store the real Windows scalar (including logarithmic-scale values).
                 memory.Remember(key, 0.00012345678f);
+                memory.Flush();
                 // A fresh backend + service represents a BetterTrumpet restart or a new match.
                 var restarted = Memory(new JsonFileSettingsBag(path));
                 Check(restarted.TryRecall(key, out var recalled));
                 Equal(0.00012345678f, recalled);
                 restarted.Remember(key, 0.42f);
+                restarted.Flush();
                 Check(Memory(new JsonFileSettingsBag(path)).TryRecall(key, out recalled));
                 Equal(0.42f, recalled);
             }
@@ -105,7 +151,9 @@ internal static class Program
     }
 
     private static string Desktop(string path) => AppVolumeMemory.CreateKey(true, path, null, "game");
-    private static AppVolumeMemory Memory(ISettingsBag settings) => new AppVolumeMemory(new SettingsAppVolumeStore(settings));
+    // Automatic flushing disabled so write counts are deterministic.
+    private static AppVolumeMemory Memory(ISettingsBag settings) =>
+        new AppVolumeMemory(new SettingsAppVolumeStore(settings, Timeout.InfiniteTimeSpan));
     private static void Check(bool condition)
     {
         if (!condition) throw new Exception("Assertion failed");

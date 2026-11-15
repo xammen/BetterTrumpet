@@ -7,6 +7,9 @@ namespace EarTrumpet.Logic
     {
         bool TryRead(string appKey, out float volume);
         void Write(string appKey, float volume);
+
+        /// <summary>Persists any buffered writes. Called on shutdown.</summary>
+        void Flush();
     }
 
     /// <summary>
@@ -54,9 +57,8 @@ namespace EarTrumpet.Logic
                    _store.TryRead(appKey, out volume) && IsValid(volume);
         }
 
-        private static bool IsValid(float volume)
-        {
-            return !float.IsNaN(volume) && !float.IsInfinity(volume) && volume >= 0 && volume <= 1;
-        }
+        public void Flush() => _store.Flush();
+
+        private static bool IsValid(float volume) => volume >= 0 && volume <= 1; // NaN fails both comparisons.
     }
 }
