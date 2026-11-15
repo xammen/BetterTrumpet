@@ -1,6 +1,7 @@
 using EarTrumpet.CLI;
 using EarTrumpet.DataModel;
 using EarTrumpet.DataModel.WindowsAudio;
+using EarTrumpet.DataModel.Storage;
 using EarTrumpet.Diagnosis;
 using EarTrumpet.Extensibility;
 using EarTrumpet.Extensibility.Hosting;
@@ -64,6 +65,7 @@ namespace EarTrumpet
 
         public static AppSettings Settings { get; private set; }
         public static VolumeUndoService UndoService { get; } = new VolumeUndoService();
+        internal static AppVolumeMemory VolumeMemory { get; private set; }
 
         public void OpenMixerWindow()
         {
@@ -241,6 +243,7 @@ namespace EarTrumpet
             PackageName = PackageHelper.GetFamilyName(HasIdentity);
 
             Settings = new AppSettings();
+            VolumeMemory = new AppVolumeMemory(new SettingsAppVolumeStore(StorageFactory.GetSettings()));
             _errorReporter = new ErrorReporter(Settings);
             CrashHandler.Initialize();
 

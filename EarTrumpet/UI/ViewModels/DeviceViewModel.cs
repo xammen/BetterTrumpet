@@ -222,8 +222,10 @@ namespace EarTrumpet.UI.ViewModels
             {
                 if (app.DoesGroupWith(newSession))
                 {
-                    newSession.Volume = app.Volume;
-                    newSession.IsMuted = app.IsMuted;
+                    // Group reconciliation isn't a user adjustment (the source may be
+                    // temporarily attenuated), so don't replace the remembered volume.
+                    newSession.SetVolumeWithoutUndo(app.Volume);
+                    newSession.SetMuteWithoutUndo(app.IsMuted);
                     StopWatchingApp(app);
                     Apps.Remove(app);
                     break;

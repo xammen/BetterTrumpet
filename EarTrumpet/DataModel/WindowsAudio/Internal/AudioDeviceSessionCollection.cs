@@ -101,7 +101,7 @@ namespace EarTrumpet.DataModel.WindowsAudio.Internal
                     throw new Exception("Device session parent is invalid but device is still notifying.");
                 }
 
-                var newSession = new AudioDeviceSession(parent, session, _dispatcher);
+                var newSession = new AudioDeviceSession(parent, session, _dispatcher, App.VolumeMemory);
                 _dispatcher.BeginInvoke((Action)(() =>
                 {
                     if (_isReleased)

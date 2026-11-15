@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../EarTrumpet/Logic/AppVolumeMemory.cs" Link="AppVolumeMemory.cs" />
+    <Compile Include="../../EarTrumpet/DataModel/Storage/ISettingsBag.cs" Link="ISettingsBag.cs" />
+    <Compile Include="../../EarTrumpet/DataModel/Storage/SettingsAppVolumeStore.cs" Link="SettingsAppVolumeStore.cs" />
+    <Compile Include="../../EarTrumpet/DataModel/Storage/Internal/JsonFileSettingsBag.cs" Link="JsonFileSettingsBag.cs" />
+    <Compile Include="../../EarTrumpet/DataModel/Storage/Serializer.cs" Link="Serializer.cs" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+  </ItemGroup>
+</Project>
